@@ -56,14 +56,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.appBar,
-      // Set the scaffold background to appBar color
       body: Column(
         children: [
           SizedBox(
-            height: MediaQuery.of(context).padding.top +
-                80, // Status bar height + extra space
+            height: MediaQuery.of(context).padding.top + 80,
           ),
-          // Bottom section with white background and rounded corners
           Expanded(
             child: Container(
               decoration: const BoxDecoration(
@@ -75,6 +72,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
               child: Column(
                 children: [
+                  // PageView in its own Expanded widget
                   Expanded(
                     child: PageView.builder(
                       controller: _pageController,
@@ -85,27 +83,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         });
                       },
                       itemBuilder: (context, index) {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Expanded(
-                                child:
-                                    OnboardingPage(content: _contents[index])),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(
-                                _contents.length,
-                                (index) => buildDot(index),
-                              ),
-                            ),
-                            const SizedBox(height:70),
-                          ],
-                        );
+                        return OnboardingPage(content: _contents[index]);
                       },
                     ),
                   ),
+
+                  // Dots indicator outside PageView
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      _contents.length,
+                      (index) => buildDot(index),
+                    ),
+                  ),
+                  const SizedBox(height: 80),
+
+                  // Bottom navigation buttons
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 60), // Only vertical padding here
+                    padding: const EdgeInsets.symmetric(vertical: 30),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -113,9 +108,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 24),
                           child: TextButton(
                             onPressed: () {
-                              // Navigate to the home screen
                               Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(builder: (context) => const HomeScreen()),
+                                MaterialPageRoute(
+                                    builder: (context) => const HomeScreen()),
                               );
                             },
                             child: Text(
@@ -133,9 +128,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           child: ElevatedButton(
                             onPressed: () {
                               if (_currentPage == _contents.length - 1) {
-                                // Navigate to the home screen
                                 Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute(builder: (context) => HomeScreen()),
+                                  MaterialPageRoute(
+                                      builder: (context) => const HomeScreen()),
                                 );
                               } else {
                                 _pageController.nextPage(
@@ -163,7 +158,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ],
                     ),
                   ),
-
                 ],
               ),
             ),

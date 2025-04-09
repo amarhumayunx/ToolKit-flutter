@@ -4,6 +4,7 @@ import 'package:toolkit/screens/cv_maker_screens/cv_maker_screen.dart';
 import 'package:toolkit/screens/cv_maker_screens/personal_info_screen.dart';
 
 import 'package:toolkit/screens/home_screen.dart';
+import 'package:toolkit/widgets/cv_templates/template_1.dart';
 
 
 void main() {
@@ -15,6 +16,14 @@ void main() {
   );
   runApp(const MyApp());
 }
+// void main() {
+//   runApp(
+//     DevicePreview(
+//       enabled: true,
+//       builder: (context) => const MyApp(),
+//     ),
+//   );
+// }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);

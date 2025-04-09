@@ -55,17 +55,14 @@ class _ToolsListViewState extends State<ToolsListView> {
       'name': 'Compress Files',
     },
     {
-      'icon': 'assets/icons/cv_make_icon.svg',
-      'name': 'CV Maker',
+      'icon': 'assets/icons/merge_file_icon.svg',
+      'name': 'Merge Files',
     },
     {
       'icon': 'assets/icons/edit_file_icon.svg',
       'name': 'Edit File',
     },
-    {
-      'icon': 'assets/icons/merge_file_icon.svg',
-      'name': 'Merge Files',
-    },
+
     {
       'icon': 'assets/icons/split_file_icon.svg',
       'name': 'Split File',
