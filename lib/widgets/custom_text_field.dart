@@ -32,6 +32,13 @@ class CustomTextField extends StatelessWidget {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.30),
+                blurRadius: 2,
+                offset: const Offset(0, 0),
+              ),
+            ],
             color: AppColors.bgBoxColor,
             borderRadius: BorderRadius.circular(8),
           ),

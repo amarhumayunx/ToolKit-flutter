@@ -12,6 +12,6 @@ class AppColors {
   static const Color textColor = Color(0xFF009A99);
   static const Color bgBoxColor = Color(0xFFF2FAFA);
   static const Color lineBarColor = Color(0xFFE0FFFF);
-
+  static const Color Cv2PurpleColor =  Color(0xFF940FAB);
 
 }

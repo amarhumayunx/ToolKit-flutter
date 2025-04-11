@@ -5,6 +5,8 @@ import 'package:toolkit/screens/cv_maker_screens/personal_info_screen.dart';
 
 import 'package:toolkit/screens/home_screen.dart';
 import 'package:toolkit/widgets/cv_templates/template_1.dart';
+import 'package:toolkit/widgets/cv_templates/template_2.dart';
+import 'package:toolkit/widgets/cv_templates/template_3.dart';
 
 
 void main() {
@@ -38,7 +40,7 @@ class MyApp extends StatelessWidget {
         primaryColor: const Color(0xFF00BFA5),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: PersonalInfoScreen(),
+      home:Template3(),
     );
   }
 }

@@ -5,26 +5,25 @@ import '../../utils/app_colors.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/buttons/save_edit_delete_btns.dart';
 import '../../widgets/custom_appbar.dart';
-import '../../widgets/custom_text_field.dart';
 import '../../widgets/cv_progress_indicator.dart';
 
-import 'career_objectives_screen.dart';
+import 'education_details_screen.dart';
 
-class JobScreen extends StatefulWidget {
+class CareerObjectivesScreen extends StatefulWidget {
   final int currentStep;
   final bool isCompleted;
 
-  const JobScreen({
+  const CareerObjectivesScreen({
     super.key,
-    this.currentStep = 2,
+    this.currentStep = 3,
     this.isCompleted = false,
   });
 
   @override
-  State<JobScreen> createState() => _JobScreenState();
+  State<CareerObjectivesScreen> createState() => _CareerObjectivesScreenState();
 }
 
-class _JobScreenState extends State<JobScreen> {
+class _CareerObjectivesScreenState extends State<CareerObjectivesScreen> {
   final List<String> stepTitles = [
     'Personal Information',
     'Job',
@@ -38,52 +37,44 @@ class _JobScreenState extends State<JobScreen> {
     'Website and Social Links',
   ];
 
-  final TextEditingController _jobTitleController = TextEditingController();
-  final TextEditingController _jobSummaryController = TextEditingController();
+  final TextEditingController _objectiveController = TextEditingController();
 
-  bool hasJobDetail = false;
-  String savedJobTitle = '';
-  String savedJobSummary = '';
+  bool hasObjective = false;
+  String savedObjective = '';
 
   @override
   void dispose() {
-    _jobTitleController.dispose();
-    _jobSummaryController.dispose();
+    _objectiveController.dispose();
     super.dispose();
   }
 
-  void _saveJob() {
-    if (_jobTitleController.text.isEmpty ||
-        _jobSummaryController.text.isEmpty) {
+  void _saveObjective() {
+    if (_objectiveController.text.isEmpty) {
       // Show some validation message if needed
       return;
     }
 
     setState(() {
-      savedJobTitle = _jobTitleController.text;
-      savedJobSummary = _jobSummaryController.text;
-      hasJobDetail = true;
+      savedObjective = _objectiveController.text;
+      hasObjective = true;
 
-      // Clear form fields
-      _jobTitleController.clear();
-      _jobSummaryController.clear();
+      // Clear form field
+      _objectiveController.clear();
     });
   }
 
-  void _editJob() {
+  void _editObjective() {
     setState(() {
-      _jobTitleController.text = savedJobTitle;
-      _jobSummaryController.text = savedJobSummary;
-      hasJobDetail = false;
+      _objectiveController.text = savedObjective;
+      hasObjective = false;
     });
   }
 
-  void _deleteJob() {
+  void _deleteObjective() {
     setState(() {
-      // Clear saved job details
-      savedJobTitle = '';
-      savedJobSummary = '';
-      hasJobDetail = false;
+      // Clear saved career objective
+      savedObjective = '';
+      hasObjective = false;
     });
   }
 
@@ -92,7 +83,7 @@ class _JobScreenState extends State<JobScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(
-        title: 'Job Details',
+        title: 'Career Objectives',
         onBackPressed: () {
           Navigator.pop(context);
         },
@@ -113,8 +104,10 @@ class _JobScreenState extends State<JobScreen> {
 
                     const SizedBox(height: 30),
 
-                    // Show job form or saved job detail
-                    hasJobDetail ? _buildSavedJobDetail() : _buildJobForm(),
+                    // Show objective form or saved objective detail
+                    hasObjective
+                        ? _buildSavedObjective()
+                        : _buildObjectiveForm(),
                   ],
                 ),
               ),
@@ -124,35 +117,22 @@ class _JobScreenState extends State<JobScreen> {
           // Fixed position footer with Add button
           Padding(
             padding: const EdgeInsets.all(28.0),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.gradientStart,
-                    AppColors.gradientEnd,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: CustomGradientButton(
-                text: 'Add',
-                onPressed: () {
-                  if (!hasJobDetail) {
-                    // If no job saved, save current one
-                    _saveJob();
-                  }
+            child: CustomGradientButton(
+              text: 'Add',
+              onPressed: () {
+                if (!hasObjective) {
+                  // If no objective saved, save current one
+                  _saveObjective();
+                }
 
-                  // Navigate to the Career Objectives screen (next step)
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CareerObjectivesScreen(),
-                    ),
-                  );
-                },
-              ),
+                // Navigate to the Education Detail screen (next step)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EducationDetailScreen(),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -160,21 +140,20 @@ class _JobScreenState extends State<JobScreen> {
     );
   }
 
-  Widget _buildSavedJobDetail() {
+  Widget _buildSavedObjective() {
     // Using the new SavedDetailContainer widget
     return SavedDetailContainer(
-      title: savedJobTitle,
-      content: savedJobSummary,
-      onEdit: _editJob,
-      onDelete: _deleteJob,
+      title: 'Objective',
+      content: savedObjective,
+      onEdit: _editObjective,
+      onDelete: _deleteObjective,
     );
   }
 
-  Widget _buildJobForm() {
+  Widget _buildObjectiveForm() {
     return Container(
-      height: 422,
+      height: 431,
       decoration: BoxDecoration(
-
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
@@ -190,16 +169,9 @@ class _JobScreenState extends State<JobScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            CustomTextField(
-              label: 'Job Title',
-              hint: 'Your Job Title',
-              controller: _jobTitleController,
-            ),
-            const SizedBox(height: 16),
-
-            // Job summary field with expanded height
-            _buildJobSummaryField(),
-            const SizedBox(height: 20),
+            // Objective field with expanded height
+            _buildObjectiveField(),
+            const SizedBox(height: 32),
             const Divider(
               height: 1,
               thickness: 1,
@@ -208,20 +180,20 @@ class _JobScreenState extends State<JobScreen> {
             const SizedBox(height: 20),
 
             // Using the new SaveButton widget
-            SaveButton(onPressed: _saveJob),
+            SaveButton(onPressed: _saveObjective),
           ],
         ),
       ),
     );
   }
 
-  // Custom job summary field with larger height
-  Widget _buildJobSummaryField() {
+  // Custom objective field with larger height
+  Widget _buildObjectiveField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Job Summary',
+          'Career Objective',
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w400,
@@ -230,7 +202,7 @@ class _JobScreenState extends State<JobScreen> {
         ),
         const SizedBox(height: 8),
         Container(
-          height: 192,
+          height: 282,
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
@@ -243,10 +215,10 @@ class _JobScreenState extends State<JobScreen> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: TextFormField(
-            controller: _jobSummaryController,
-            maxLines: 5, // Increase the number of lines
+            controller: _objectiveController,
+            maxLines: 5,
             decoration: InputDecoration(
-              hintText: 'Type your job summary',
+              hintText: 'Type your career objectives',
               hintStyle: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.w300,

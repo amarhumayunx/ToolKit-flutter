@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:toolkit/widgets/cv_progress_indicator.dart';
 import '../../utils/app_colors.dart';
+
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/custom_text_field.dart';
@@ -83,7 +84,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.16),
-                      blurRadius: 2,
+                      blurRadius: 3,
                       offset: const Offset(0, 0),
                     )
                   ],
@@ -104,6 +105,13 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                     width: 96,
                                     height: 78,
                                     decoration: BoxDecoration(
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.16),
+                                          blurRadius: 2,
+                                          offset: const Offset(0, 0),
+                                        ),
+                                      ],
                                       color: AppColors.bgBoxColor,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
@@ -206,37 +214,20 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               const SizedBox(height: 110),
 
               // Add button
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.gradientStart,
-                        AppColors.gradientEnd,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+              CustomGradientButton(
+                text: 'Add',
+                onPressed: () {
+                  // Navigate to the Job screen (next step)
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => JobScreen(
+                        currentStep: 2,
+                        isCompleted: false,
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: CustomGradientButton(
-                    text: 'Add',
-                    onPressed: () {
-                      // Navigate to the Job screen (next step)
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => JobScreen(
-                            currentStep: 2,
-                            isCompleted: false,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
+                  );
+                },
               ),
             ],
           ),
