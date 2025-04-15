@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:provider/provider.dart';
+import '../../provider/template_provider.dart';
+import 'main_cv_screen.dart';
+import 'personal_info_screen.dart'; // Import the PersonalInfoScreen
 class CvMakerScreen extends StatefulWidget {
   const CvMakerScreen({super.key});
 
@@ -10,6 +13,31 @@ class CvMakerScreen extends StatefulWidget {
 }
 
 class _CvMakerScreenState extends State<CvMakerScreen> {
+  // Define template names for better reference
+  final List<String> templateNames = [
+    'Classic Professional',
+    'Modern Minimal',
+    'Creative Design',
+    'Executive Style'
+  ];
+
+  void _navigateToPersonalInfo(int templateId) {
+    // Update the provider with selected template
+    Provider.of<TemplateProvider>(context, listen: false)
+        .setTemplate(templateId, templateNames[templateId - 1]);
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MainCVScreen(
+
+          templateId: templateId,
+          templateName: templateNames[templateId - 1],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,15 +47,14 @@ class _CvMakerScreenState extends State<CvMakerScreen> {
         elevation: 0,
         leadingWidth: 40,
         leading: Padding(
-          padding: const EdgeInsets.only(left: 14,top: 20),
+          padding: const EdgeInsets.only(left: 14, top: 20),
           child: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-
         title: Padding(
-          padding: const EdgeInsets.only(left: 8,top: 20),
+          padding: const EdgeInsets.only(left: 8, top: 20),
           child: Text(
             'CV Maker',
             style: GoogleFonts.inter(
@@ -38,7 +65,6 @@ class _CvMakerScreenState extends State<CvMakerScreen> {
           ),
         ),
       ),
-
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -132,37 +158,45 @@ class _CvMakerScreenState extends State<CvMakerScreen> {
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 12,
                           childAspectRatio: 0.7,
                         ),
-                        itemCount: 2,
+                        itemCount: 4,
                         itemBuilder: (context, index) {
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: Colors.grey[100],
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.grey[300]!),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.asset(
-                                'assets/images/cv_template_${index + 1}.png',
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    color: Colors.grey[200],
-                                    child: Center(
-                                      child: Text(
-                                        'Template ${index + 1}',
-                                        style: TextStyle(color: Colors.grey[600]),
-                                      ),
-                                    ),
-                                  );
-                                },
+                          final templateId = index + 1;
+                          return GestureDetector(
+                            onTap: () => _navigateToPersonalInfo(templateId),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.grey[100],
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey[300]!),
                               ),
+                              child: Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: SvgPicture.asset(
+                                      'assets/images/templates/Template_$templateId.svg',
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Container(
+                                          color: Colors.grey[200],
+                                          child: const Center(
+                                            child: Icon(Icons.broken_image, color: Colors.grey),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+
+                                ],
+                              ),
+
                             ),
                           );
                         },
@@ -171,12 +205,10 @@ class _CvMakerScreenState extends State<CvMakerScreen> {
                   ),
                 ),
               )
-
             ],
           ),
         ),
       ),
-
     );
   }
 }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../models/website_model.dart';
 import '../../utils/app_colors.dart';
 
 class Template2 extends StatefulWidget {
-  const Template2({super.key});
+  final List<Website> websites;
+  const Template2({Key? key, this.websites = const []});
 
   @override
   State<Template2> createState() => _Template2State();

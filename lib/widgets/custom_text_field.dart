@@ -7,12 +7,13 @@ class CustomTextField extends StatelessWidget {
   final String hint;
   final TextEditingController? controller;
   final TextInputType keyboardType;
-
+  final Function(String)? onChanged;
   const CustomTextField({
     Key? key,
     required this.label,
     required this.hint,
     this.controller,
+    this.onChanged,
     this.keyboardType = TextInputType.text,
   }) : super(key: key);
 
@@ -43,6 +44,7 @@ class CustomTextField extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: TextFormField(
+            onChanged: onChanged,
             controller: controller,
             keyboardType: keyboardType,
             decoration: InputDecoration(

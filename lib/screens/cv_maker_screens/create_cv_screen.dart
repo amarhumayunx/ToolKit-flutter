@@ -42,7 +42,8 @@ class CreateCvScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const CvMakerScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const CvMakerScreen()),
                   );
                 },
                 child: Container(
@@ -80,8 +81,7 @@ class CreateCvScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-              )
-,
+              ),
 
               const SizedBox(height: 30),
 

@@ -2,41 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../utils/app_colors.dart';
-import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/buttons/save_edit_delete_btns.dart';
-import '../../widgets/custom_appbar.dart';
 import '../../widgets/custom_text_field.dart';
-import '../../widgets/cv_progress_indicator.dart';
 
-import 'career_objectives_screen.dart';
 
-class JobScreen extends StatefulWidget {
-  final int currentStep;
-  final bool isCompleted;
+class JobPage extends StatefulWidget {
 
-  const JobScreen({
+
+  const JobPage({
     super.key,
-    this.currentStep = 2,
-    this.isCompleted = false,
+
   });
 
   @override
-  State<JobScreen> createState() => _JobScreenState();
+  State<JobPage> createState() => _JobPageState();
 }
 
-class _JobScreenState extends State<JobScreen> {
-  final List<String> stepTitles = [
-    'Personal Information',
-    'Job',
-    'Career Objectives',
-    'Education Detail',
-    'Work Experience',
-    'Projects',
-    'Certification and Training',
-    'Hobbies and Interests',
-    'Languages',
-    'Website and Social Links',
-  ];
+class _JobPageState extends State<JobPage> {
+
 
   final TextEditingController _jobTitleController = TextEditingController();
   final TextEditingController _jobSummaryController = TextEditingController();
@@ -89,73 +72,23 @@ class _JobScreenState extends State<JobScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: CustomAppBar(
-        title: 'Job Details',
-        onBackPressed: () {
-          Navigator.pop(context);
-        },
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(28.0),
+    return  Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 26.0),
+      child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 10),
-
-                    // Use the reusable CVProgressIndicator widget
-                    CVProgressIndicator(currentStep: widget.currentStep),
-
-                    const SizedBox(height: 30),
-
+                    SizedBox(height: 10,),
                     // Show job form or saved job detail
                     hasJobDetail ? _buildSavedJobDetail() : _buildJobForm(),
                   ],
                 ),
               ),
             ),
-          ),
-
-          // Fixed position footer with Add button
-          Padding(
-            padding: const EdgeInsets.all(28.0),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.gradientStart,
-                    AppColors.gradientEnd,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: CustomGradientButton(
-                text: 'Add',
-                onPressed: () {
-                  if (!hasJobDetail) {
-                    // If no job saved, save current one
-                    _saveJob();
-                  }
-
-                  // Navigate to the Career Objectives screen (next step)
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CareerObjectivesScreen(),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
+          ],
       ),
     );
   }
@@ -174,7 +107,6 @@ class _JobScreenState extends State<JobScreen> {
     return Container(
       height: 422,
       decoration: BoxDecoration(
-
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [

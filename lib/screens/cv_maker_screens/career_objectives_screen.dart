@@ -1,46 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart'; // Import provider
 
 import '../../utils/app_colors.dart';
-import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/buttons/save_edit_delete_btns.dart';
-import '../../widgets/custom_appbar.dart';
-import '../../widgets/cv_progress_indicator.dart';
+import '../../provider/user_provider.dart'; // Import UserProvider
 
-import 'education_details_screen.dart';
-
-class CareerObjectivesScreen extends StatefulWidget {
-  final int currentStep;
-  final bool isCompleted;
-
-  const CareerObjectivesScreen({
+class CareerObjectivesPage extends StatefulWidget {
+  const CareerObjectivesPage({
     super.key,
-    this.currentStep = 3,
-    this.isCompleted = false,
   });
 
   @override
-  State<CareerObjectivesScreen> createState() => _CareerObjectivesScreenState();
+  State<CareerObjectivesPage> createState() => _CareerObjectivesPageState();
 }
 
-class _CareerObjectivesScreenState extends State<CareerObjectivesScreen> {
-  final List<String> stepTitles = [
-    'Personal Information',
-    'Job',
-    'Career Objectives',
-    'Education Detail',
-    'Work Experience',
-    'Projects',
-    'Certification and Training',
-    'Hobbies and Interests',
-    'Languages',
-    'Website and Social Links',
-  ];
-
+class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
   final TextEditingController _objectiveController = TextEditingController();
 
   bool hasObjective = false;
   String savedObjective = '';
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if objective already exists in provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (userProvider.userData.careerObjective != null &&
+          userProvider.userData.careerObjective!.isNotEmpty) {
+        setState(() {
+          savedObjective = userProvider.userData.careerObjective!;
+          hasObjective = true;
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -54,9 +49,15 @@ class _CareerObjectivesScreenState extends State<CareerObjectivesScreen> {
       return;
     }
 
+    // Get user provider
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     setState(() {
       savedObjective = _objectiveController.text;
       hasObjective = true;
+
+      // Update provider with new objective
+      userProvider.updateCareerObjective(savedObjective);
 
       // Clear form field
       _objectiveController.clear();
@@ -71,10 +72,16 @@ class _CareerObjectivesScreenState extends State<CareerObjectivesScreen> {
   }
 
   void _deleteObjective() {
+    // Get user provider
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     setState(() {
       // Clear saved career objective
       savedObjective = '';
       hasObjective = false;
+
+      // Update provider with empty objective
+      userProvider.updateCareerObjective('');
     });
   }
 
@@ -82,27 +89,16 @@ class _CareerObjectivesScreenState extends State<CareerObjectivesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(
-        title: 'Career Objectives',
-        onBackPressed: () {
-          Navigator.pop(context);
-        },
-      ),
       body: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(28.0),
+                padding: const EdgeInsets.symmetric(horizontal: 26.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: 10),
-
-                    // Use the reusable CVProgressIndicator widget
-                    CVProgressIndicator(currentStep: widget.currentStep),
-
-                    const SizedBox(height: 30),
 
                     // Show objective form or saved objective detail
                     hasObjective
@@ -111,28 +107,6 @@ class _CareerObjectivesScreenState extends State<CareerObjectivesScreen> {
                   ],
                 ),
               ),
-            ),
-          ),
-
-          // Fixed position footer with Add button
-          Padding(
-            padding: const EdgeInsets.all(28.0),
-            child: CustomGradientButton(
-              text: 'Add',
-              onPressed: () {
-                if (!hasObjective) {
-                  // If no objective saved, save current one
-                  _saveObjective();
-                }
-
-                // Navigate to the Education Detail screen (next step)
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EducationDetailScreen(),
-                  ),
-                );
-              },
             ),
           ),
         ],

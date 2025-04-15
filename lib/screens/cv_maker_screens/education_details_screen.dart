@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:toolkit/screens/cv_maker_screens/work_experience_screen.dart';
 
 import '../../models/education_item_model.dart';
 import '../../utils/app_colors.dart';
+import '../../widgets/buttons/add_another_button.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/buttons/save_edit_delete_btns.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/cv_progress_indicator.dart';
 
-class EducationDetailScreen extends StatefulWidget {
-  final int currentStep;
-  final bool isCompleted;
+class EducationDetailPage extends StatefulWidget {
 
-  const EducationDetailScreen({
+
+  const EducationDetailPage({
     super.key,
-    this.currentStep = 4,
-    this.isCompleted = false,
+
   });
 
   @override
-  State<EducationDetailScreen> createState() => _EducationDetailScreenState();
+  State<EducationDetailPage> createState() => _EducationDetailPageState();
 }
 
-class _EducationDetailScreenState extends State<EducationDetailScreen> {
+class _EducationDetailPageState extends State<EducationDetailPage> {
   final TextEditingController _degreeController = TextEditingController();
   final TextEditingController _instituteController = TextEditingController();
   final TextEditingController _startDateController = TextEditingController();
@@ -138,29 +138,17 @@ class _EducationDetailScreenState extends State<EducationDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: CustomAppBar(
-        title: 'Education Detail',
-        onBackPressed: () {
-          Navigator.pop(context);
-        },
-      ),
-      body: Column(
+    return Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(28.0),
+                padding: const EdgeInsets.symmetric(horizontal: 26.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 10),
 
-                    // Progress indicator
-                    CVProgressIndicator(currentStep: widget.currentStep),
-
-                    const SizedBox(height: 30),
 
                     // Form is shown only when showForm is true
                     if (showForm) _buildEducationForm(),
@@ -174,35 +162,15 @@ class _EducationDetailScreenState extends State<EducationDetailScreen> {
 
                     // Add another education button (only shown when form is not visible)
                     if (hasEducation && !showForm)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: Center(
-                          child: Container(
-                            height: 48,
-                            width: 278,
-                            decoration: BoxDecoration(
-                              color: AppColors.bgBoxColor,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: TextButton.icon(
-                              onPressed: _toggleForm,
-                              icon: const Icon(
-                                Icons.add_circle_outline,
-                                color: Colors.black,
-                                size: 16,
-                              ),
-                              label: Text(
-                                'Add another Education',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
+                    // Replace your existing "Add another education" button code with this:
+                      if (hasEducation && !showForm)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          child: AddAnotherButton(
+                            text: 'Add another Education',
+                            onPressed: _toggleForm,
                           ),
                         ),
-                      ),
 
                     // Show form by default if no education items yet and form is not already shown
                     if (!hasEducation && !showForm) _buildEducationForm(),
@@ -212,55 +180,9 @@ class _EducationDetailScreenState extends State<EducationDetailScreen> {
             ),
           ),
 
-          // Fixed position footer with Next button
-          Padding(
-            padding: const EdgeInsets.all(28.0),
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.gradientStart,
-                      AppColors.gradientEnd,
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
 
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: CustomGradientButton(
-                  text: 'Add',
-                  onPressed: () {
-                    if (showForm) {
-                      if (_degreeController.text.isNotEmpty ||
-                          _instituteController.text.isNotEmpty) {
-                        _saveEducation();
-                      }
-                    } else if (hasEducation) {
-                      // Navigate to the Work Experience screen (next step)
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => WorkExperienceScreen(),
-                        ),
-                      );
-                    } else {
-                      // Show the form if there are no education items yet
-                      setState(() {
-                        showForm = true;
-                      });
-                    }
-                  },
-                ),
-              ),
-            ),
-          ),
         ],
-      ),
-    );
+      );
   }
 
   Widget _buildSavedEducation(EducationItem item, int index) {
@@ -602,17 +524,6 @@ class _EducationDetailScreenState extends State<EducationDetailScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-
-// Placeholder for the next screen in the sequence
-class WorkExperienceScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Work Experience')),
-      body: Center(child: Text('Work Experience Screen')),
     );
   }
 }
