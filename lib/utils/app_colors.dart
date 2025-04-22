@@ -9,9 +9,16 @@ class AppColors {
   static const Color gradientStart = Color(0xFF216870);
   static const Color gradientEnd = Color(0xFF0CC5C0);
   static const Color white = Colors.white;
+  static const Color black = Colors.black;
   static const Color textColor = Color(0xFF009A99);
   static const Color bgBoxColor = Color(0xFFF2FAFA);
   static const Color lineBarColor = Color(0xFFE0FFFF);
   static const Color Cv2PurpleColor =  Color(0xFF940FAB);
-
+  static const Color CustomBackArrow =  Color(0xFF20A7A6);
+  static const Color fieldHintColor =  Color(0xFFB9BDC0);
+  static const Color dividerColor =  Color(0xFFEDF2F3);
+  static const Color saveDateColor =  Color(0xFF9C9CA0);
 }
+
+
+

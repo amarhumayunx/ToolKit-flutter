@@ -1,13 +1,34 @@
+// Keep or add the standard import for typed data
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'dart:io';
+import 'package:flutter/rendering.dart';
+import 'dart:ui' as ui;
 
+import '../../models/language_model.dart';
+import '../../models/skills_model.dart';
 import '../../models/user_model_1.dart';
 import '../../models/website_model.dart';
+import '../../provider/certification_provider.dart';
+import '../../provider/education_provider.dart';
+import '../../provider/language_provider.dart';
+import '../../provider/saved_cv_provider.dart';
+import '../../provider/skills_provider.dart';
 import '../../provider/user_provider.dart';
+import '../../provider/work_experience_provider.dart';
+import '../../screens/cv_maker_screens/cv_maker_screen.dart';
 import '../../utils/app_colors.dart';
+import '../buttons/save_edit_delete_btns.dart';
+import '../buttons/template_action_btn.dart';
 import '../custom_appbar.dart';
 
+import 'package:uuid/uuid.dart';
 class Template1 extends StatefulWidget {
   final List<Website> websites;
 
@@ -18,10 +39,518 @@ class Template1 extends StatefulWidget {
 }
 
 class _Template1State extends State<Template1> {
+  // Current page being displayed
+  int _currentPage = 1;
+  int _totalPages = 1;
+
+  // Store all content sections in a flattened list for better pagination
+  List<Widget> _allContentWidgets = [];
+
+  // Heights for each widget to estimate pagination
+  final Map<Key, double> _widgetHeights = {};
+  final double _pageContentHeight = 462; // Max height minus padding
+
+  // Keys for each page container to capture as images
+  List<GlobalKey> _pageKeys = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Build content sections when dependencies change
+    _buildAllContent();
+    _calculateTotalPages();
+    _initializePageKeys();
+  }
+
+  void _initializePageKeys() {
+    _pageKeys = List.generate(_totalPages, (index) => GlobalKey());
+  }
+
+  void _buildAllContent() {
+    final userData = Provider.of<UserProvider>(context).userData;
+    final workExperienceProvider = Provider.of<WorkExperienceProvider>(context);
+    final workExperienceItems = workExperienceProvider.workExperienceItems;
+    final educationProvider = Provider.of<EducationProvider>(context);
+    final educationItems = educationProvider.educationItems;
+    final certificationProvider = Provider.of<CertificationProvider>(context);
+    final certificationItems = certificationProvider.certificationItems;
+    final skillsProvider = Provider.of<SkillsProvider>(context);
+    final skillItems = skillsProvider.skillItems;
+    final languageProvider = Provider.of<LanguageProvider>(context);
+    final languageItems = languageProvider.languages;
+
+    _allContentWidgets = [];
+
+    // Add header with a key for height calculation - always on first page
+    final headerKey = GlobalKey();
+    _allContentWidgets.add(KeyedSubtree(
+      key: headerKey,
+      child: _buildHeader(userData),
+    ));
+
+    // Objective section with key
+    if (userData.careerObjective != null &&
+        userData.careerObjective!.isNotEmpty) {
+      final objTitleKey = GlobalKey();
+      final objContentKey = GlobalKey();
+
+      _allContentWidgets.add(KeyedSubtree(
+        key: objTitleKey,
+        child: _buildSectionWithDivider('Objective'),
+      ));
+      _allContentWidgets.add(const SizedBox(height: 4));
+      _allContentWidgets.add(KeyedSubtree(
+        key: objContentKey,
+        child: _buildObjectiveContent(userData),
+      ));
+      _allContentWidgets.add(const SizedBox(height: 6));
+    }
+
+    // Work Experience section with keys
+    if (workExperienceItems.isNotEmpty) {
+      final expTitleKey = GlobalKey();
+      _allContentWidgets.add(KeyedSubtree(
+        key: expTitleKey,
+        child: _buildSectionWithDivider('EXPERIENCES'),
+      ));
+      _allContentWidgets.add(const SizedBox(height: 4));
+
+      // Each work experience item gets its own key
+      for (int i = 0; i < workExperienceItems.length; i++) {
+        final expItemKey = GlobalKey();
+        final item = workExperienceItems[i];
+
+        String dateRange = item.isCurrent
+            ? "${item.startDate} - Present"
+            : "${item.startDate} - ${item.endDate}";
+
+        _allContentWidgets.add(KeyedSubtree(
+          key: expItemKey,
+          child: _buildExperienceItem(
+            item.position,
+            item.company,
+            item.description,
+            dateRange,
+            bulletPoints: item.projects.isNotEmpty ? item.projects : null,
+          ),
+        ));
+
+        // Add spacing between items but not after the last one
+        if (i < workExperienceItems.length - 1) {
+          _allContentWidgets.add(const SizedBox(height: 4));
+        }
+      }
+
+      _allContentWidgets.add(const SizedBox(height: 6));
+    }
+
+    // Education section with keys
+    if (educationItems.isNotEmpty) {
+      final eduTitleKey = GlobalKey();
+      _allContentWidgets.add(KeyedSubtree(
+        key: eduTitleKey,
+        child: _buildSectionWithDivider('EDUCATION'),
+      ));
+      _allContentWidgets.add(const SizedBox(height: 4));
+
+      // Each education item gets its own key
+      for (int i = 0; i < educationItems.length; i++) {
+        final eduItemKey = GlobalKey();
+        final item = educationItems[i];
+
+        String dateRange = item.isCompleted
+            ? "${item.startDate} - Present"
+            : "${item.startDate} - ${item.endDate}";
+
+        _allContentWidgets.add(KeyedSubtree(
+          key: eduItemKey,
+          child: _buildEducationItem(
+            item.degree,
+            item.institute,
+            dateRange,
+            description: item.description,
+          ),
+        ));
+
+        // Add spacing between items but not after the last one
+        if (i < educationItems.length - 1) {
+          _allContentWidgets.add(const SizedBox(height: 4));
+        }
+      }
+
+      _allContentWidgets.add(const SizedBox(height: 6));
+    }
+
+    // Certifications section with keys
+    if (certificationItems.isNotEmpty) {
+      final certTitleKey = GlobalKey();
+      _allContentWidgets.add(KeyedSubtree(
+        key: certTitleKey,
+        child: _buildSectionWithDivider('CERTIFICATIONS'),
+      ));
+      _allContentWidgets.add(const SizedBox(height: 4));
+
+      // Each certification item gets its own key
+      for (int i = 0; i < certificationItems.length; i++) {
+        final certItemKey = GlobalKey();
+        final item = certificationItems[i];
+
+        String dateRange = item.isCompleted
+            ? "${item.startDate} - Present"
+            : "${item.startDate} - ${item.endDate}";
+
+        _allContentWidgets.add(KeyedSubtree(
+          key: certItemKey,
+          child: _buildCertificationItem(
+            item.certificationName,
+            item.description,
+            dateRange,
+          ),
+        ));
+
+        // Add spacing between items but not after the last one
+        if (i < certificationItems.length - 1) {
+          _allContentWidgets.add(const SizedBox(height: 4));
+        }
+      }
+
+      _allContentWidgets.add(const SizedBox(height: 6));
+    }
+
+    // Skills section with key
+    if (skillItems.isNotEmpty) {
+      final skillsTitleKey = GlobalKey();
+      final skillsContentKey = GlobalKey();
+
+      _allContentWidgets.add(KeyedSubtree(
+        key: skillsTitleKey,
+        child: _buildSectionWithDivider('Skills'),
+      ));
+      _allContentWidgets.add(const SizedBox(height: 4));
+      _allContentWidgets.add(KeyedSubtree(
+        key: skillsContentKey,
+        child: _buildSkillsList(skillItems),
+      ));
+      _allContentWidgets.add(const SizedBox(height: 6));
+    }
+
+    // Languages section with key
+    if (languageItems.isNotEmpty) {
+      final langTitleKey = GlobalKey();
+      final langContentKey = GlobalKey();
+
+      _allContentWidgets.add(KeyedSubtree(
+        key: langTitleKey,
+        child: _buildSectionWithDivider('LANGUAGES'),
+      ));
+      _allContentWidgets.add(const SizedBox(height: 4));
+      _allContentWidgets.add(KeyedSubtree(
+        key: langContentKey,
+        child: _buildLanguagesList(languageItems),
+      ));
+      _allContentWidgets.add(const SizedBox(height: 6));
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Schedule a post-frame callback to measure actual widget heights
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _measureActualWidgetHeights();
+    });
+  }
+
+  void _measureActualWidgetHeights() {
+    // Clear previous measurements
+    _widgetHeights.clear();
+
+    // Measure each widget with a key
+    for (var widget in _allContentWidgets) {
+      if (widget is KeyedSubtree && widget.key != null) {
+        final RenderBox? renderBox = (widget.key as GlobalKey)
+            .currentContext
+            ?.findRenderObject() as RenderBox?;
+        if (renderBox != null && renderBox.hasSize) {
+          _widgetHeights[widget.key!] = renderBox.size.height;
+        }
+      }
+    }
+
+    // Recalculate pagination with actual measurements
+    _calculateTotalPages();
+    setState(() {});
+  }
+
+  void _calculateTotalPages() {
+    double totalHeight = 0;
+
+    for (var widget in _allContentWidgets) {
+      if (widget is KeyedSubtree && widget.key != null) {
+        totalHeight += _widgetHeights[widget.key!] ?? 0;
+      } else if (widget is SizedBox) {
+        totalHeight += widget.height ?? 0;
+      }
+    }
+
+    // Calculate pages based on actual total height
+    _totalPages = (totalHeight / _pageContentHeight).ceil();
+    if (_totalPages < 1) _totalPages = 1;
+
+    // Reset current page if it's now out of range
+    if (_currentPage > _totalPages) {
+      _currentPage = 1;
+    }
+
+    // Re-initialize page keys if the number of pages changed
+    if (_pageKeys.length != _totalPages) {
+      _initializePageKeys();
+    }
+  }
+  Future<void> _saveCv(BuildContext context) async {
+    try {
+      final userData = Provider.of<UserProvider>(context, listen: false).userData;
+
+      Provider.of<EducationProvider>(context, listen: false).clearEducationItems();
+      Provider.of<WorkExperienceProvider>(context, listen: false).clearWorkExperienceItems();
+      Provider.of<CertificationProvider>(context, listen: false).clearCertificationItems();
+      Provider.of<SkillsProvider>(context, listen: false).clearSkillItems();
+      Provider.of<LanguageProvider>(context, listen: false).clearLanguages();
+      final fileName = '${userData.fullName?.replaceAll(' ', '_') ?? 'cv'}_resume.pdf';
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 20),
+                  Text('Saving CV...', style: GoogleFonts.inter()),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+
+      // Create a PDF document
+      final pdf = pw.Document();
+
+      // Convert each page to an image and add to PDF
+      List<Uint8List> pageImages = [];
+      for (int i = 0; i < _pageKeys.length; i++) {
+        final imageBytes = await _capturePageAsImage(_pageKeys[i]);
+        if (imageBytes != null) {
+          pageImages.add(imageBytes);
+          final image = pw.MemoryImage(imageBytes);
+
+          pdf.addPage(
+            pw.Page(
+              pageFormat: PdfPageFormat.a4,
+              build: (pw.Context context) {
+                return pw.Center(
+                  child: pw.Image(image),
+                );
+              },
+            ),
+          );
+        }
+      }
+
+      // Use the first page image as thumbnail
+      Uint8List? thumbnailBytes = pageImages.isNotEmpty ? pageImages[0] : null;
+
+      // Save the PDF
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath = '${directory.path}/$fileName';
+      final file = File(filePath);
+      await file.writeAsBytes(await pdf.save());
+
+      // Save CV to provider
+      final savedCVProvider = Provider.of<SavedCVProvider>(context, listen: false);
+      await savedCVProvider.addSavedCV(fileName, filePath, thumbnailBytes);
+
+      // Clear user data fields after saving
+      Provider.of<UserProvider>(context, listen: false).clearUserData();
+
+      // Close the loading dialog
+      Navigator.of(context).pop();
+
+      // Show success dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('CV Saved', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            content: Text('Your CV has been saved successfully.', style: GoogleFonts.inter()),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // This will dismiss the alert dialog
+                  Navigator.pushReplacement( // Navigate back to CV maker screen
+                    context,
+                    MaterialPageRoute(builder: (context) => const CvMakerScreen()),
+                  );
+                },
+                child: Text('OK', style: GoogleFonts.inter()),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      // Close the loading dialog if it's open
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      // Show error dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            content: Text('Failed to save CV: ${e.toString()}', style: GoogleFonts.inter()),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK', style: GoogleFonts.inter()),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+// Also update the export function
+  Future<void> _exportToPdf() async {
+    try {
+      final userData = Provider.of<UserProvider>(context, listen: false).userData;
+      Provider.of<WorkExperienceProvider>(context, listen: false).clearWorkExperienceItems();
+      Provider.of<EducationProvider>(context, listen: false).clearEducationItems();
+      Provider.of<SkillsProvider>(context, listen: false).clearSkillItems();
+      Provider.of<LanguageProvider>(context, listen: false).clearLanguages();
+      final fileName = '${userData.fullName?.replaceAll(' ', '_') ?? 'cv'}_resume.pdf';
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 20),
+                  Text('Generating PDF...', style: GoogleFonts.inter()),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+
+      // Create a PDF document
+      final pdf = pw.Document();
+
+      // Convert each page to an image and add to PDF
+      for (int i = 0; i < _pageKeys.length; i++) {
+        final imageBytes = await _capturePageAsImage(_pageKeys[i]);
+        if (imageBytes != null) {
+          final image = pw.MemoryImage(imageBytes);
+
+          pdf.addPage(
+            pw.Page(
+              pageFormat: PdfPageFormat.a4,
+              build: (pw.Context context) {
+                return pw.Center(
+                  child: pw.Image(image),
+                );
+              },
+            ),
+          );
+        }
+      }
+
+      // Save the PDF
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath = '${directory.path}/$fileName';
+      final file = File(filePath);
+      await file.writeAsBytes(await pdf.save());
+
+      // Clear user data fields after exporting
+      Provider.of<UserProvider>(context, listen: false).clearUserData();
+
+      // Close the loading dialog
+      Navigator.pop(context);
+
+      // Show success dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('PDF Created', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            content: Text('Your CV has been exported as a PDF.', style: GoogleFonts.inter()),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  // Navigate back to form screen after exporting
+                  Navigator.pop(context);
+                },
+                child: Text('Close', style: GoogleFonts.inter()),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  OpenFile.open(filePath);
+                  // After opening the file, navigate back to form
+                  Navigator.pop(context);
+                },
+                child: Text('Open PDF', style: GoogleFonts.inter(color: AppColors.primary)),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      // Close the loading dialog if it's open
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      // Show error dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            content: Text('Failed to export PDF: ${e.toString()}', style: GoogleFonts.inter()),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK', style: GoogleFonts.inter()),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
   @override
   Widget build(BuildContext context) {
-    final userData = Provider.of<UserProvider>(context).userData;
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(
@@ -30,13 +559,15 @@ class _Template1State extends State<Template1> {
           Navigator.pop(context);
         },
         actions: [
+          // Update the TextButton in the Custom App Bar in the build method:
           TextButton(
             onPressed: () {
-              // Save functionality would go here
+              // Save functionality
+              _saveCv(context);
             },
             child: Text(
               'Save',
-              style: TextStyle(
+              style: GoogleFonts.inter(
                 color: AppColors.primary,
                 fontSize: 16,
               ),
@@ -44,117 +575,185 @@ class _Template1State extends State<Template1> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 60),
-              child: Container(
-                constraints:
-                const BoxConstraints(maxWidth: 340, maxHeight: 482),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.3),
-                      spreadRadius: 2,
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(10),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header section with name and title - using userData
-                    _buildHeader(userData),
-                    const SizedBox(height: 10),
-
-                    // Profile section with objective from provider
-                    _buildSectionWithDivider('Objective'),
-                    const SizedBox(height: 4),
-                    _buildObjectiveContent(userData),
-                    const SizedBox(height: 6),
-
-                    // Experiences section
-                    _buildSectionWithDivider('EXPERIENCES'),
-                    const SizedBox(height: 4),
-                    _buildExperienceItem(
-                      'POSITION',
-                      'Company Name',
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                      'MM / YY - MM / YY',
-                      bulletPoints: ['Project 1', 'Project 2', 'Another'],
-                    ),
-                    const SizedBox(height: 4),
-
-                    _buildExperienceItem(
-                      'POSITION',
-                      'Company Name',
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                      'MM / YY - MM / YY',
-                    ),
-                    const SizedBox(height: 4),
-
-                    _buildExperienceItem(
-                      'POSITION',
-                      'Company Name',
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                      'MM / YY - MM / YY',
-                    ),
-                    const SizedBox(height: 6),
-
-                    // Education section
-                    _buildSectionWithDivider('EDUCATION'),
-                    const SizedBox(height: 4),
-                    _buildEducationItem('DEGREE / DIPLOMA NAME',
-                        'University Name', '20XX - 20XX'),
-                    const SizedBox(height: 4),
-                    _buildEducationItem('DEGREE / DIPLOMA NAME',
-                        'University Name', '20XX - 20XX'),
-                    const SizedBox(height: 4),
-
-                    // Certifications section
-                    _buildSectionWithDivider('CERTIFICATIONS'),
-                    const SizedBox(height: 4),
-                    _buildCertificationItem(
-                      'CERTIFICATION NAME',
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                      'MM / YY - MM / YY',
-                    ),
-                    const SizedBox(height: 6),
-
-                    // Hobbies section
-                    _buildSectionWithDivider('HOBBIES'),
-                    const SizedBox(height: 4),
-                    _buildHobbiesList(
-                        ['Photography', 'Hiking', 'Reading', 'Playing Piano']),
-                    const SizedBox(height: 6),
-
-                    // Languages section
-                    _buildSectionWithDivider('LANGUAGES'),
-                    const SizedBox(height: 4),
-                    _buildLanguagesList(['English', 'Other']),
-                    const SizedBox(height: 6),
-                  ],
+                    children: [
+                      SizedBox(height: 80),
+                      // Build all pages instead of just the current one
+                      for (int i = 1; i <= _totalPages; i++) ...[
+                        RepaintBoundary(
+                          key: _pageKeys[i-1], // Use the corresponding page key
+                          child: _buildPage(i),
+                        ),
+                        // Add spacing between pages
+                        if (i < _totalPages) const SizedBox(height: 30),
+                      ]
+                    ]
                 ),
               ),
             ),
-          ),
-        ],
+            _buildTemplateButtons(),
+          ],
+        ),
       ),
     );
   }
 
-  // Updated to use userData and display website link
+  Widget _buildPage(int pageIndex) {
+    // Get content for this page
+    List<Widget> contentForPage = _getContentForPage(pageIndex);
+
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 340, minWidth: 340, minHeight: 482, maxHeight: 482),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 2,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(10),
+      child: SingleChildScrollView(
+        physics: NeverScrollableScrollPhysics(), // Prevent scrolling within the page
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min, // Important to prevent overflow
+          children: [
+            // Show page number at the top right if not the first page
+            if (pageIndex > 1) ...[
+              Align(
+                alignment: Alignment.topRight,
+                child: Text(
+                  'Page $pageIndex',
+                  style: GoogleFonts.poppins(
+                    fontSize: 8,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+            ],
+
+            // Content for this page
+            ...contentForPage,
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _getContentForPage(int pageIndex) {
+    if (_allContentWidgets.isEmpty) return [];
+
+    // Calculate which widgets should be on this page based on actual heights
+    double currentHeight = 0;
+    int startIndex = 0;
+    int endIndex = 0;
+
+    // First, find the start index for the current page
+    if (pageIndex == 1) {
+      startIndex = 0; // First page always starts at the beginning
+    } else {
+      // For subsequent pages, calculate where the previous page ended
+      int currentPage = 1;
+      double pageHeight = 0;
+
+      for (int i = 0; i < _allContentWidgets.length; i++) {
+        Widget widget = _allContentWidgets[i];
+        double widgetHeight = 0;
+
+        if (widget is KeyedSubtree && widget.key != null) {
+          widgetHeight = _widgetHeights[widget.key!] ?? 0;
+        } else if (widget is SizedBox) {
+          widgetHeight = widget.height ?? 0;
+        }
+
+        // If adding this widget would exceed the page height,
+        // move to the next page
+        if (pageHeight + widgetHeight > _pageContentHeight) {
+          currentPage++;
+          pageHeight = widgetHeight; // Start the new page with this widget
+        } else {
+          pageHeight += widgetHeight;
+        }
+
+        // If we've reached the requested page, this is our start index
+        if (currentPage == pageIndex) {
+          startIndex = i;
+          break;
+        }
+      }
+    }
+
+    // Now find the end index for the content that fits on this page
+    currentHeight = 0;
+    bool pageHasContent = false;
+
+    for (int i = startIndex; i < _allContentWidgets.length; i++) {
+      Widget widget = _allContentWidgets[i];
+      double widgetHeight = 0;
+
+      if (widget is KeyedSubtree && widget.key != null) {
+        widgetHeight = _widgetHeights[widget.key!] ?? 0;
+      } else if (widget is SizedBox) {
+        widgetHeight = widget.height ?? 0;
+      }
+
+      // If adding this widget would exceed the page height,
+      // this is our end index
+      if (currentHeight + widgetHeight > _pageContentHeight && pageHasContent) {
+        endIndex = i;
+        break;
+      } else {
+        currentHeight += widgetHeight;
+        pageHasContent = true;
+        endIndex = i + 1; // Include this widget
+      }
+    }
+
+    // Return the widgets for this page
+    if (startIndex < _allContentWidgets.length) {
+      return _allContentWidgets.sublist(startIndex, endIndex);
+    } else {
+      return [];
+    }
+  }
+
+  // PDF Export Functionality
+
+
+  Future<Uint8List?> _capturePageAsImage(GlobalKey key) async {
+    try {
+      final RenderRepaintBoundary boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData != null) {
+        return byteData.buffer.asUint8List();
+      }
+      return null;
+    } catch (e) {
+      print('Error capturing page as image: $e');
+      return null;
+    }
+  }
+
+  // Widget building methods remain the same
   Widget _buildHeader(UserModel userData) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          userData.fullName ?? 'Your Name', // Display user's name or default
+          userData.fullName ?? '',
           style: GoogleFonts.inriaSerif(
             fontSize: 14,
             fontWeight: FontWeight.bold,
@@ -162,97 +761,77 @@ class _Template1State extends State<Template1> {
         ),
         const SizedBox(height: 2),
         Text(
-          userData.designation ?? 'Your Designation',
-          // Display user's designation or default
+          userData.designation ?? '',
           style: GoogleFonts.inriaSerif(
             fontSize: 10,
             color: Colors.black87,
           ),
         ),
         const SizedBox(height: 6),
-        // Modified Row layout with better spacing and user data
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+
+        // Modified contact info layout to wrap properly
+        Wrap(
+          spacing: 12, // Space between items on same line
+          runSpacing: 4, // Space between lines
           children: [
-            // First child: Phone and Email row
-            Row(
-              children: [
-                // Phone
-                const Icon(Icons.phone, size: 10),
-                const SizedBox(width: 4),
-                Flexible(
-                  child: Text(
-                    userData.phoneNumber ?? '+XX XXXXXXXXX',
+            // Phone number
+            if (userData.phoneNumber != null && userData.phoneNumber!.isNotEmpty)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.phone, size: 10),
+                  const SizedBox(width: 4),
+                  Text(
+                    userData.phoneNumber!,
                     style: GoogleFonts.inriaSerif(
                       fontSize: 8,
                       color: Colors.grey.shade700,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
+                ],
+              ),
 
-                const SizedBox(width: 30),
-
-                // Email
-                Expanded(
-                  child: Row(
-                    children: [
-                      const Icon(Icons.email, size: 10),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          userData.email ?? 'Email',
-                          style: GoogleFonts.inriaSerif(
-                            fontSize: 8,
-                            color: Colors.grey.shade700,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+            // Email
+            if (userData.email != null && userData.email!.isNotEmpty)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.email, size: 10),
+                  const SizedBox(width: 4),
+                  Text(
+                    userData.email!,
+                    style: GoogleFonts.inriaSerif(
+                      fontSize: 8,
+                      color: Colors.grey.shade700,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
 
-            const SizedBox(height: 4), // Space between first and second row
-
-            Row(
-              children: [
-                Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start, // Optional: aligns top if text wraps
-                    children: [
-                      const Icon(Icons.link, size: 10),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          userData.websiteUrl != null && userData.websiteUrl!.isNotEmpty
-                              ? userData.websiteUrl!
-                              : 'linkurl',
-                          style: GoogleFonts.inriaSerif(
-                            fontSize: 8,
-                            color: Colors.grey.shade700,
-                          ),
-                          softWrap: true,
-                          maxLines: 3,
-
-                        ),
-                      ),
-                    ],
+            // Website
+            if (userData.websiteUrl != null && userData.websiteUrl!.isNotEmpty)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.link, size: 10),
+                  const SizedBox(width: 4),
+                  Text(
+                    userData.websiteUrl!,
+                    style: GoogleFonts.inriaSerif(
+                      fontSize: 8,
+                      color: Colors.grey.shade700,
+                    ),
                   ),
-                ),
-              ],
-            ),
-
+                ],
+              ),
           ],
         ),
-
+        // Add spacing before the first section (Objective)
+        const SizedBox(height: 10),
       ],
     );
   }
 
-  // Rest of the methods remain the same
   Widget _buildSectionWithDivider(String title) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,11 +851,9 @@ class _Template1State extends State<Template1> {
     );
   }
 
-  // Updated to use userData for objective
   Widget _buildObjectiveContent(UserModel userData) {
     return Text(
-      userData.careerObjective ??
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam pharetra in viverra at laoreet.',
+      userData.careerObjective ?? '',
       style: GoogleFonts.inter(
         fontSize: 6,
         color: Colors.grey.shade800,
@@ -287,7 +864,6 @@ class _Template1State extends State<Template1> {
   Widget _buildExperienceItem(
       String title, String company, String description, String dateRange,
       {List<String>? bulletPoints}) {
-    // Existing implementation
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -321,15 +897,17 @@ class _Template1State extends State<Template1> {
             fontStyle: FontStyle.italic,
           ),
         ),
-        const SizedBox(height: 2),
-        Text(
-          description,
-          style: GoogleFonts.inter(
-            fontSize: 6,
-            color: Colors.grey.shade800,
+        if (description.isNotEmpty) ...[
+          const SizedBox(height: 2),
+          Text(
+            description,
+            style: GoogleFonts.inter(
+              fontSize: 6,
+              color: Colors.grey.shade800,
+            ),
           ),
-        ),
-        if (bulletPoints != null) ...[
+        ],
+        if (bulletPoints != null && bulletPoints.isNotEmpty) ...[
           const SizedBox(height: 2),
           ...bulletPoints
               .map(
@@ -352,53 +930,67 @@ class _Template1State extends State<Template1> {
             ),
           )
               .toList(),
-        ],
+        ]
       ],
     );
   }
 
-  Widget _buildEducationItem(String degree, String university, String years) {
-    // Existing implementation
-    return Row(
+  Widget _buildEducationItem(String degree, String university, String years,
+      {String? description}) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                degree,
-                style: GoogleFonts.poppins(
-                  fontSize: 7,
-                  fontWeight: FontWeight.w600,
-                ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    degree,
+                    style: GoogleFonts.poppins(
+                      fontSize: 7,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    university,
+                    style: GoogleFonts.poppins(
+                      fontSize: 6,
+                      color: Colors.grey.shade700,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 2),
-              Text(
-                university,
-                style: GoogleFonts.poppins(
-                  fontSize: 6,
-                  color: Colors.grey.shade700,
-                  fontStyle: FontStyle.italic,
-                ),
+            ),
+            Text(
+              years,
+              style: GoogleFonts.poppins(
+                fontSize: 6,
+                color: Colors.grey.shade600,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        Text(
-          years,
-          style: GoogleFonts.poppins(
-            fontSize: 6,
-            color: Colors.grey.shade600,
+        if (description != null && description.isNotEmpty) ...[
+          const SizedBox(height: 2),
+          Text(
+            description,
+            style: GoogleFonts.inter(
+              fontSize: 6,
+              color: Colors.grey.shade800,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }
 
   Widget _buildCertificationItem(
       String title, String description, String dateRange) {
-    // Existing implementation
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -423,70 +1015,85 @@ class _Template1State extends State<Template1> {
             ),
           ],
         ),
-        const SizedBox(height: 2),
-        Text(
-          description,
-          style: GoogleFonts.inter(
-            fontSize: 6,
-            color: Colors.grey.shade800,
+        if (description.isNotEmpty) ...[
+          const SizedBox(height: 2),
+          Text(
+            description,
+            style: GoogleFonts.inter(
+              fontSize: 6,
+              color: Colors.grey.shade800,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }
 
-  Widget _buildHobbiesList(List<String> hobbies) {
-    // Existing implementation
+  Widget _buildSkillsList(List<Skill> skills) {
     return Wrap(
-      spacing: 8,
-      runSpacing: 4,
-      children: hobbies.map((hobby) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: Colors.grey.shade300, width: 0.5),
+      spacing: 8.0,
+      runSpacing: 4.0,
+      children: skills
+          .map((skill) => Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '• ',
+            style: GoogleFonts.inter(
+              fontSize: 6,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          child: Text(
-            hobby,
+          Text(
+            skill.name,
             style: GoogleFonts.poppins(
               fontSize: 6,
               color: Colors.grey.shade800,
             ),
           ),
-        );
-      }).toList(),
+        ],
+      ))
+          .toList(),
     );
   }
 
-  Widget _buildLanguagesList(List<String> languages) {
-    // Existing implementation
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildLanguagesList(List<Language> languages) {
+    return Wrap(
+      spacing: 8.0,
+      runSpacing: 4.0,
       children: languages
-          .map((language) => Padding(
-        padding: const EdgeInsets.only(bottom: 2),
-        child: Row(
-          children: [
-            Text(
-              '• ',
-              style: GoogleFonts.inter(
-                fontSize: 6,
-                fontWeight: FontWeight.bold,
-              ),
+          .map((language) => Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '• ',
+            style: GoogleFonts.inter(
+              fontSize: 6,
+              fontWeight: FontWeight.bold,
             ),
-            Text(
-              language,
-              style: GoogleFonts.poppins(
-                fontSize: 6,
-                color: Colors.grey.shade800,
-              ),
+          ),
+          Text(
+            language.name,
+            style: GoogleFonts.poppins(
+              fontSize: 6,
+              color: Colors.grey.shade800,
             ),
-          ],
-        ),
+          ),
+        ],
       ))
           .toList(),
+    );
+  }
+  Widget _buildTemplateButtons() {
+    return TemplateActionButtons(
+      onChangeTemplate: () {
+        // Handle template change
+      },
+      onExport: () {
+        _exportToPdf();
+      },
     );
   }
 }

@@ -48,7 +48,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           centerTitle: centerTitle,
           leading: onBackPressed != null
               ? IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+            icon: const Icon(Icons.arrow_back, color: AppColors.CustomBackArrow),
             onPressed: onBackPressed,
           )
               : null,

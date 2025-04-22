@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../provider/template_provider.dart';
 import 'main_cv_screen.dart';
-import 'personal_info_screen.dart'; // Import the PersonalInfoScreen
 class CvMakerScreen extends StatefulWidget {
   const CvMakerScreen({super.key});
 

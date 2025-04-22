@@ -40,14 +40,7 @@ class ScannerButton extends StatelessWidget {
                   AppColors.gradientEnd,
                 ],
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF00B4BE).withOpacity(0.2),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+
             ),
             child: Center(
               child: SvgPicture.asset(

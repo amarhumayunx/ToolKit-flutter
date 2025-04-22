@@ -88,7 +88,7 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: Column(
         children: [
           Expanded(
@@ -126,9 +126,9 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
 
   Widget _buildObjectiveForm() {
     return Container(
-      height: 431,
+      height: 432,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -139,7 +139,7 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(left: 18,right: 18,top: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -149,7 +149,7 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
             const Divider(
               height: 1,
               thickness: 1,
-              color: Color(0xFFE0E0E0),
+              color: AppColors.dividerColor,
             ),
             const SizedBox(height: 20),
 
@@ -167,16 +167,16 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Career Objective',
+          'Career Objective / Profile Summary',
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w400,
-            color: Colors.black,
+            color: AppColors.black,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Container(
-          height: 282,
+          height: 284,
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
@@ -190,13 +190,13 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
           ),
           child: TextFormField(
             controller: _objectiveController,
-            maxLines: 5,
+            maxLines: 12,
             decoration: InputDecoration(
-              hintText: 'Type your career objectives',
+              hintText: 'Type your career objectives / Profile Summary',
               hintStyle: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.w300,
-                color: Colors.grey,
+                color: AppColors.fieldHintColor,
               ),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(

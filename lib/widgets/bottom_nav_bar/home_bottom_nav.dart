@@ -23,7 +23,7 @@ class HomeBottomNavBar extends StatelessWidget {
       children: [
         // Bottom Navigation Container
         Container(
-          height: 80,
+          height: 74,
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: const BorderRadius.only(

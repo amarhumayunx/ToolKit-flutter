@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:toolkit/screens/cv_maker_screens/work_experience_screen.dart';
-
+import 'package:provider/provider.dart';
 import '../../models/education_item_model.dart';
+import '../../provider/education_provider.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/buttons/add_another_button.dart';
-import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/buttons/save_edit_delete_btns.dart';
-import '../../widgets/custom_appbar.dart';
 import '../../widgets/custom_text_field.dart';
-import '../../widgets/cv_progress_indicator.dart';
 
 class EducationDetailPage extends StatefulWidget {
-
-
   const EducationDetailPage({
     super.key,
-
   });
 
   @override
@@ -31,9 +25,8 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
   final TextEditingController _descriptionController = TextEditingController();
 
   bool isCompleted = false;
-  bool hasEducation = false;
   bool showForm = false;
-  List<EducationItem> educationItems = [];
+  int? editingIndex;
 
   @override
   void dispose() {
@@ -45,8 +38,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
     super.dispose();
   }
 
-  void _selectDate(
-      BuildContext context, TextEditingController controller) async {
+  void _selectDate(BuildContext context, TextEditingController controller) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -55,10 +47,10 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
     );
 
     if (picked != null) {
-      // Format date as MM/YYYY
+      // Format date as DD/MM/YY to match the UI design
       setState(() {
         controller.text =
-            "${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+        "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString().substring(2)}";
       });
     }
   }
@@ -69,33 +61,28 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
       return;
     }
 
-    setState(() {
-      educationItems.add(
-        EducationItem(
-          degree: _degreeController.text,
-          institute: _instituteController.text,
-          startDate: _startDateController.text,
-          endDate: isCompleted ? '' : _endDateController.text,
-          description: _descriptionController.text,
-          isCompleted: isCompleted,
-        ),
-      );
+    final educationProvider = Provider.of<EducationProvider>(context, listen: false);
+    final newEducation = EducationItem(
+      degree: _degreeController.text,
+      institute: _instituteController.text,
+      startDate: _startDateController.text,
+      endDate: isCompleted ? '' : _endDateController.text,
+      description: _descriptionController.text,
+      isCompleted: isCompleted,
+    );
 
-      hasEducation = true;
-      showForm = false;
+    if (editingIndex != null) {
+      educationProvider.updateEducationItem(editingIndex!, newEducation);
+    } else {
+      educationProvider.addEducationItem(newEducation);
+    }
 
-      // Clear form fields
-      _degreeController.clear();
-      _instituteController.clear();
-      _startDateController.clear();
-      _endDateController.clear();
-      _descriptionController.clear();
-      isCompleted = false;
-    });
+    _clearForm();  // This already sets showForm to false
   }
 
   void _editEducation(int index) {
-    final item = educationItems[index];
+    final educationProvider = Provider.of<EducationProvider>(context, listen: false);
+    final item = educationProvider.educationItems[index];
 
     setState(() {
       _degreeController.text = item.degree;
@@ -105,91 +92,96 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
       _descriptionController.text = item.description;
       isCompleted = item.isCompleted;
       showForm = true;
-
-      // Remove the item from the list
-      educationItems.removeAt(index);
+      editingIndex = index;
     });
   }
 
   void _deleteEducation(int index) {
-    setState(() {
-      educationItems.removeAt(index);
-      if (educationItems.isEmpty) {
-        hasEducation = false;
-      }
-    });
+    final educationProvider = Provider.of<EducationProvider>(context, listen: false);
+    educationProvider.deleteEducationItem(index);
   }
 
   void _toggleForm() {
     setState(() {
-      showForm = !showForm;
-
-      // Clear form fields when showing the form
-      if (showForm) {
-        _degreeController.clear();
-        _instituteController.clear();
-        _startDateController.clear();
-        _endDateController.clear();
-        _descriptionController.clear();
-        isCompleted = false;
-      }
+      // Always set showForm to true when adding a new education
+      showForm = true;
+      // Reset editingIndex to indicate we're adding a new item, not editing
+      editingIndex = null;
+      // Clear form fields when opening form for new entry
+      _clearFormFields();
     });
+  }
+
+  void _clearForm() {
+    setState(() {
+      _clearFormFields();
+      isCompleted = false;
+      editingIndex = null;
+      showForm = false;
+    });
+  }
+
+  // New method to clear only form fields without changing other state variables
+  void _clearFormFields() {
+    _degreeController.clear();
+    _instituteController.clear();
+    _startDateController.clear();
+    _endDateController.clear();
+    _descriptionController.clear();
+    isCompleted = false;
   }
 
   @override
   Widget build(BuildContext context) {
+    final educationProvider = Provider.of<EducationProvider>(context);
+    final educationItems = educationProvider.educationItems;
+    final hasEducation = educationItems.isNotEmpty;
+
     return Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 26.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 10),
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 26.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10),
 
+                  // Show form when showForm is true OR when there are no education items yet
+                  if (showForm || !hasEducation)
+                    _buildEducationForm(),
 
-                    // Form is shown only when showForm is true
-                    if (showForm) _buildEducationForm(),
+                  // If form is shown, we don't display the saved items
+                  if (!showForm && hasEducation) ...[
+                    // Display saved education items when there are items and form is not showing
+                    for (int i = 0; i < educationItems.length; i++)
+                      _buildSavedEducation(educationItems[i], i),
+                    const SizedBox(height: 16),
 
-                    // Display saved education items only when form is not shown
-                    if (hasEducation && !showForm) ...[
-                      for (int i = 0; i < educationItems.length; i++)
-                        _buildSavedEducation(educationItems[i], i),
-                      const SizedBox(height: 16),
-                    ],
-
-                    // Add another education button (only shown when form is not visible)
-                    if (hasEducation && !showForm)
-                    // Replace your existing "Add another education" button code with this:
-                      if (hasEducation && !showForm)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          child: AddAnotherButton(
-                            text: 'Add another Education',
-                            onPressed: _toggleForm,
-                          ),
-                        ),
-
-                    // Show form by default if no education items yet and form is not already shown
-                    if (!hasEducation && !showForm) _buildEducationForm(),
+                    // Add another education button (only shown when there are existing items AND form is hidden)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: AddAnotherButton(
+                        text: 'Add another Education',
+                        onPressed: _toggleForm,
+                      ),
+                    ),
                   ],
-                ),
+                ],
               ),
             ),
           ),
-
-
-        ],
-      );
+        ),
+      ],
+    );
   }
 
   Widget _buildSavedEducation(EducationItem item, int index) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -204,62 +196,38 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Educational Detail ${index + 1}',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   item.degree,
                   style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.black
                   ),
                 ),
+                const SizedBox(height: 4),
                 Text(
                   item.isCompleted
-                      ? item.startDate
-                      : "${item.startDate} - ${item.endDate}",
+                      ? item.startDate + " - Present"
+                      : item.startDate + " - " + item.endDate,
                   style: GoogleFonts.inter(
-                    fontSize: 10,
-                    color: Colors.grey,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.saveDateColor,
                   ),
                 ),
               ],
             ),
-            Text(
-              item.institute,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-            ),
-            if (item.description.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(
-                item.description,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
             const SizedBox(height: 10),
             const Divider(
               height: 9,
               thickness: 1,
-              color: Color(0xFFE0E0E0),
+              color: AppColors.dividerColor,
             ),
             const SizedBox(height: 8),
-            // Replace with EditDeleteActionRow
             EditDeleteActionRow(
               onEdit: () => _editEducation(index),
               onDelete: () => _deleteEducation(index),
@@ -273,7 +241,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
   Widget _buildEducationForm() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -284,7 +252,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(14.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -317,7 +285,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
-                          color: Colors.black,
+                          color: AppColors.black,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -339,19 +307,17 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                             controller: _startDateController,
                             enabled: false,
                             decoration: InputDecoration(
-                              hintText: 'MM/YYYY',
+                              hintText: '00/00/00',
                               hintStyle: GoogleFonts.inter(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w300,
-                                color: Colors.grey,
+                                color: AppColors.fieldHintColor,
                               ),
                               border: InputBorder.none,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                                 vertical: 12,
                               ),
-                              suffixIcon:
-                                  const Icon(Icons.calendar_today, size: 16),
                             ),
                           ),
                         ),
@@ -359,7 +325,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 20),
                 // End date - only show if not completed
                 if (!isCompleted)
                   Expanded(
@@ -371,7 +337,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                           style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
-                            color: Colors.black,
+                            color: AppColors.black,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -393,19 +359,17 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                               controller: _endDateController,
                               enabled: false,
                               decoration: InputDecoration(
-                                hintText: 'MM/YYYY',
+                                hintText: '00/00/00',
                                 hintStyle: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w300,
-                                  color: Colors.grey,
+                                  color: AppColors.fieldHintColor,
                                 ),
                                 border: InputBorder.none,
                                 contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 16,
                                   vertical: 12,
                                 ),
-                                suffixIcon:
-                                    const Icon(Icons.calendar_today, size: 16),
                               ),
                             ),
                           ),
@@ -427,9 +391,12 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                   height: 24,
                   child: Checkbox(
                     value: isCompleted,
-                    activeColor: AppColors.gradientStart,
+                    activeColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
+                    ),
+                    side: const BorderSide(
+                      color: AppColors.fieldHintColor,
                     ),
                     onChanged: (value) {
                       setState(() {
@@ -438,12 +405,13 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                     },
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 4),
                 Text(
-                  'Completed',
+                  'Continued',
                   style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.fieldHintColor
                   ),
                 ),
               ],
@@ -461,7 +429,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
-                        color: Colors.black,
+                        color: AppColors.black,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -469,15 +437,15 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                       '( Optional )',
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        fontWeight: FontWeight.w300,
-                        color: Colors.grey,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.fieldHintColor,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Container(
-                  height: 120,
+                  height: 148,
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
@@ -493,11 +461,11 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                     controller: _descriptionController,
                     maxLines: 5,
                     decoration: InputDecoration(
-                      hintText: 'Anything',
+                      hintText: 'e.g cgpa/grade',
                       hintStyle: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w300,
-                        color: Colors.grey,
+                        color: AppColors.fieldHintColor,
                       ),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(
@@ -513,11 +481,10 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
             const Divider(
               height: 1,
               thickness: 1,
-              color: Color(0xFFE0E0E0),
+              color: AppColors.dividerColor,
             ),
             const SizedBox(height: 20),
 
-            // Replace with SaveButton
             SaveButton(
               onPressed: _saveEducation,
             ),

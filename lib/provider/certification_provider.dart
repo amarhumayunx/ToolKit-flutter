@@ -1,0 +1,32 @@
+import 'package:flutter/material.dart';
+import '../models/certification_model.dart';
+
+class CertificationProvider extends ChangeNotifier {
+  List<CertificationItem> _certificationItems = [];
+
+  List<CertificationItem> get certificationItems => _certificationItems;
+
+  void addCertificationItem(CertificationItem item) {
+    _certificationItems.add(item);
+    notifyListeners();
+  }
+
+  void updateCertificationItem(int index, CertificationItem item) {
+    if (index >= 0 && index < _certificationItems.length) {
+      _certificationItems[index] = item;
+      notifyListeners();
+    }
+  }
+
+  void removeCertificationItem(int index) {
+    if (index >= 0 && index < _certificationItems.length) {
+      _certificationItems.removeAt(index);
+      notifyListeners();
+    }
+  }
+
+  void clearCertificationItems() {
+    _certificationItems.clear();
+    notifyListeners();
+  }
+}

@@ -42,8 +42,8 @@ class SaveButton extends StatelessWidget {
           child: ElevatedButton(
             onPressed: onPressed,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE5F4F9),
-              foregroundColor: Colors.black,
+              backgroundColor: AppColors.bgBoxColor,
+              foregroundColor: AppColors.black,
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -106,7 +106,7 @@ class ActionButton extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: Colors.black,
+            color: AppColors.black,
           ),
         ),
       ),

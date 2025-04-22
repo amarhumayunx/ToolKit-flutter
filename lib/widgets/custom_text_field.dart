@@ -8,6 +8,9 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController? controller;
   final TextInputType keyboardType;
   final Function(String)? onChanged;
+  final String? Function(String?)? validator;
+  final bool isRequired;
+
   const CustomTextField({
     Key? key,
     required this.label,
@@ -15,6 +18,8 @@ class CustomTextField extends StatelessWidget {
     this.controller,
     this.onChanged,
     this.keyboardType = TextInputType.text,
+    this.validator,
+    this.isRequired = false,
   }) : super(key: key);
 
   @override
@@ -22,13 +27,18 @@ class CustomTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: Colors.black,
-          ),
+        Row(
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: AppColors.black,
+              ),
+            ),
+
+          ],
         ),
         const SizedBox(height: 8),
         Container(
@@ -47,17 +57,23 @@ class CustomTextField extends StatelessWidget {
             onChanged: onChanged,
             controller: controller,
             keyboardType: keyboardType,
+            validator: validator,
+            textCapitalization: TextCapitalization.sentences, // Add this line
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.w300,
-                color: Colors.grey,
+                color: AppColors.fieldHintColor,
               ),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 12,
+              ),
+              errorStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.red,
               ),
             ),
           ),

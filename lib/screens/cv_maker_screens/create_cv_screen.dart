@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'dart:io';
+import 'package:open_file/open_file.dart';
+
+import '../../models/saved_cv.dart';
+import '../../provider/saved_cv_provider.dart';
 import '../../utils/app_colors.dart';
 import 'cv_maker_screen.dart';
 
-class CreateCvScreen extends StatelessWidget {
+class CreateCvScreen extends StatefulWidget {
   const CreateCvScreen({super.key});
 
+  @override
+  State<CreateCvScreen> createState() => _CreateCvScreenState();
+}
+
+class _CreateCvScreenState extends State<CreateCvScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,47 +96,107 @@ class CreateCvScreen extends StatelessWidget {
 
               const SizedBox(height: 30),
 
-              // Previously Created Resumes Container - Updated to match Figma design
-              Container(
-                width: double.infinity,
-                height: 270,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 22),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Previously Created Resumes Title - Now inside the container
-                    Text(
-                      'Previously created Resume',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+              // Previously Created Resumes Container
+              Consumer<SavedCVProvider>(
+                builder: (context, savedCVProvider, child) {
+                  final savedCVs = savedCVProvider.savedCVs;
+
+                  if (savedCVs.isEmpty) {
+                    return Container(
+                      width: double.infinity,
+                      height: 270,
+
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Previously created Resume',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 80),
+                          Center(
+                            child: Text(
+                              'No saved resumes yet',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
 
-                    const SizedBox(height: 16),
-
-                    // Resume previews row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildResumePreview('23/02/25 | 6:05pm | 3.4 MB'),
-                        _buildResumePreview('23/02/25 | 6:05pm | 3.4 MB'),
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 22),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
                       ],
                     ),
-                  ],
-                ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Previously Created Resumes Title
+                        Text(
+                          'Previously created Resume',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Resume previews
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight: MediaQuery.of(context).size.height * 0.5,
+                          ),
+                          child: GridView.builder(
+                            shrinkWrap: true,
+                            physics: savedCVs.length > 2 ? const ScrollPhysics() : const NeverScrollableScrollPhysics(),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 12,
+                              childAspectRatio: 0.7,
+                            ),
+                            itemCount: savedCVs.length,
+                            itemBuilder: (context, index) {
+                              return _buildResumePreview(
+                                savedCVs[index],
+                                onTap: () => _openCvFile(savedCVs[index].filePath),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -134,85 +205,64 @@ class CreateCvScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildResumePreview(String details) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Resume document preview
-        Container(
-          width: 130,
-          height: 162,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.grey.shade200),
+  Widget _buildResumePreview(SavedCV cv, {required Function() onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Resume document preview
+          Container(
+            width: 130,
+            height: 162,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: AppColors.dividerColor),
+
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(14.0),
+              child: cv.thumbnailBytes != null
+                  ? ClipRRect(
+
+                child: Image.memory(
+                  cv.thumbnailBytes!,
+                  width: 130,
+                  height: 162,
+                  fit: BoxFit.cover,
+                ),
+              )
+                  : Container(),
+            ), // Empty container when no thumbnail
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              'assets/resume_preview.png',
-              width: 130,
-              height: 162,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: Colors.white,
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      // Resume document mock content
-                      const SizedBox(height: 10),
-                      Container(
-                          width: 120, height: 1, color: Colors.grey.shade300),
-                      const SizedBox(height: 3),
-                      Container(
-                          width: 120, height: 1, color: Colors.grey.shade300),
-                      const SizedBox(height: 3),
-                      Container(
-                          width: 120, height: 1, color: Colors.grey.shade300),
-                      const SizedBox(height: 3),
-                      Container(
-                          width: 120, height: 1, color: Colors.grey.shade300),
-                      const SizedBox(height: 8),
-
-                      Container(
-                          width: 120, height: 1, color: Colors.grey.shade300),
-                      const SizedBox(height: 3),
-                      Container(
-                          width: 120, height: 1, color: Colors.grey.shade300),
-                      const SizedBox(height: 3),
-                      Container(
-                          width: 120, height: 1, color: Colors.grey.shade300),
-                      const SizedBox(height: 8),
-
-                      Container(
-                          width: 120, height: 1, color: Colors.grey.shade300),
-                      const SizedBox(height: 3),
-                      Container(
-                          width: 120, height: 1, color: Colors.grey.shade300),
-                      const SizedBox(height: 3),
-                      Container(
-                          width: 120, height: 1, color: Colors.grey.shade300),
-                      const SizedBox(height: 3),
-                      Container(
-                          width: 120, height: 1, color: Colors.grey.shade300),
-                    ],
-                  ),
-                );
-              },
+          const SizedBox(height: 8),
+          // Date and size details
+          Text(
+            '${cv.dateTime} | ${cv.fileSize}',
+            style: GoogleFonts.inter(
+              fontSize: 8,
+              color: Color(0xFFAAAAAE),
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        // Date and size details
-        Text(
-          details,
-          style: GoogleFonts.inter(
-            fontSize: 10,
-            color: Colors.grey.shade700,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
+  }
+
+  void _openCvFile(String filePath) async {
+    try {
+      final file = File(filePath);
+      if (await file.exists()) {
+        await OpenFile.open(filePath);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('File not found')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error opening file: $e')),
+      );
+    }
   }
 }

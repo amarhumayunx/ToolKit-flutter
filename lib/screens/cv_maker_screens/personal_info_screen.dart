@@ -11,13 +11,11 @@ import '../../utils/app_colors.dart';
 import '../../widgets/custom_text_field.dart';
 
 class PersonalInfoPage extends StatefulWidget {
-
   final int templateId;
   final String templateName;
 
   const PersonalInfoPage({
     Key? key,
-
     required this.templateId,
     required this.templateName,
   }) : super(key: key);
@@ -40,21 +38,57 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
     super.initState();
     // Initialize controllers with existing data if available
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final userData = userProvider.userData;
+      _loadUserData();
+    });
+  }
 
-      if (userData.fullName != null) _nameController.text = userData.fullName!;
-      if (userData.designation != null)
-        _designationController.text = userData.designation!;
-      if (userData.email != null) _emailController.text = userData.email!;
-      if (userData.phoneNumber != null)
-        _phoneController.text = userData.phoneNumber!;
+  void _loadUserData() {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userData = userProvider.userData;
 
-      if (userData.profileImagePath != null) {
+    // Only set text if there's data to prevent nulls
+    if (userData.fullName != null && userData.fullName!.isNotEmpty) {
+      _nameController.text = userData.fullName!;
+    }
+    if (userData.designation != null && userData.designation!.isNotEmpty) {
+      _designationController.text = userData.designation!;
+    }
+    if (userData.email != null && userData.email!.isNotEmpty) {
+      _emailController.text = userData.email!;
+    }
+    if (userData.phoneNumber != null && userData.phoneNumber!.isNotEmpty) {
+      _phoneController.text = userData.phoneNumber!;
+    }
+
+    if (userData.profileImagePath != null) {
+      final file = File(userData.profileImagePath!);
+      if (file.existsSync()) {
         setState(() {
-          _imageFile = File(userData.profileImagePath!);
+          _imageFile = file;
         });
       }
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Listen for changes in the user provider that might require UI updates
+    final userData = Provider.of<UserProvider>(context).userData;
+
+    // Clear text fields if user data is cleared
+    if (userData.fullName == null && _nameController.text.isNotEmpty) {
+      _clearFields();
+    }
+  }
+
+  void _clearFields() {
+    setState(() {
+      _nameController.clear();
+      _designationController.clear();
+      _emailController.clear();
+      _phoneController.clear();
+      _imageFile = null;
     });
   }
 
@@ -90,8 +124,72 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 10,),
-            // Main container for all form fields
+            const SizedBox(height: 10),
+
+            // Combined container when image is uploaded, separate containers when no image
+            _imageFile == null
+                ? Column(
+              children: [
+                // Image container (only shown when no image)
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.16),
+                        blurRadius: 3,
+                        offset: const Offset(0, 0),
+                      )
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: _pickImage,
+                        child: Row(
+                          children: [
+                            // Empty photo upload container
+                            Container(
+                              width: 96,
+                              height: 78,
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.16),
+                                    blurRadius: 2,
+                                    offset: const Offset(0, 0),
+                                  ),
+                                ],
+                                color: AppColors.bgBoxColor,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(Icons.add,
+                                  color: AppColors.primary, size: 22),
+                            ),
+                            const SizedBox(width: 26),
+                            Text(
+                              'Click here to upload your photo',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Form fields container
+                _buildFormFieldsContainer(),
+              ],
+            )
+                : // Single combined container when image exists
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -107,137 +205,60 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Photo upload section
-                    GestureDetector(
-                      onTap: _pickImage,
-                      child: _imageFile == null
-                          ? Row(
-                              children: [
-                                // Empty photo upload container
-                                Container(
-                                  width: 96,
-                                  height: 78,
-                                  decoration: BoxDecoration(
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.16),
-                                        blurRadius: 2,
-                                        offset: const Offset(0, 0),
-                                      ),
-                                    ],
-                                    color: AppColors.bgBoxColor,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Icon(Icons.add,
-                                      color: AppColors.primary, size: 20),
+                    // Image section
+                    Center(
+                      child: GestureDetector(
+                        onTap: _pickImage,
+                        child: Stack(
+                          children: [
+                            // Profile image
+                            Container(
+                              width: 98,
+                              height: 98,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                  image: FileImage(_imageFile!),
+                                  fit: BoxFit.cover,
                                 ),
-                                const SizedBox(width: 20),
-                                Text(
-                                  'Click here to upload your photo',
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.grey.shade800,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Stack(
-                              children: [
-                                // Profile image
-                                Container(
-                                  width: 98,
-                                  height: 98,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                      image: FileImage(_imageFile!),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                // Edit icon overlay
-                                Positioned(
-                                  bottom: 6,
-                                  right: 8,
-                                  child: Container(
-                                    width: 20,
-                                    height: 20,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary,
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.1),
-                                          blurRadius: 2,
-                                          offset: const Offset(0, 1),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Center(
-                                      child: SvgPicture.asset(
-                                        'assets/icons/edit_profile_icon.svg',
-                                        width: 10,
-                                        height: 10,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
+                            // Edit icon overlay
+                            Positioned(
+                              bottom: 6,
+                              right: 8,
+                              child: Container(
+                                width: 20,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 2,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: SvgPicture.asset(
+                                    'assets/icons/edit_profile_icon.svg',
+                                    width: 10,
+                                    height: 10,
+                                    color: AppColors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-
                     const SizedBox(height: 20),
-
-                    // Modified to use controllers
-                    CustomTextField(
-                      label: 'Full Name',
-                      hint: 'Your Name',
-                      controller: _nameController,
-                      onChanged: (value) {
-                        Provider.of<UserProvider>(context, listen: false)
-                            .updateUserData(fullName: value);
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-                    CustomTextField(
-                      label: 'Designation',
-                      hint: 'Your Designation',
-                      controller: _designationController,
-                      onChanged: (value) {
-                        Provider.of<UserProvider>(context, listen: false)
-                            .updateUserData(designation: value);
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    CustomTextField(
-                      label: 'Email',
-                      hint: 'Your Mail',
-                      keyboardType: TextInputType.emailAddress,
-                      controller: _emailController,
-                      onChanged: (value) {
-                        Provider.of<UserProvider>(context, listen: false)
-                            .updateUserData(email: value);
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    CustomTextField(
-                      label: 'Phone Number',
-                      hint: 'Your Number',
-                      keyboardType: TextInputType.phone,
-                      controller: _phoneController,
-                      onChanged: (value) {
-                        Provider.of<UserProvider>(context, listen: false)
-                            .updateUserData(phoneNumber: value);
-                      },
-                    ),
+                    // Form fields
+                    ..._buildFormFields(),
                   ],
                 ),
               ),
@@ -246,5 +267,73 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildFormFieldsContainer() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.16),
+            blurRadius: 3,
+            offset: const Offset(0, 0),
+          )
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: _buildFormFields(),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildFormFields() {
+    return [
+      CustomTextField(
+        label: 'Full Name',
+        hint: 'Your Name',
+        controller: _nameController,
+        onChanged: (value) {
+          Provider.of<UserProvider>(context, listen: false)
+              .updateUserData(fullName: value);
+        },
+      ),
+      const SizedBox(height: 16),
+      CustomTextField(
+        label: 'Designation',
+        hint: 'Your Designation',
+        controller: _designationController,
+        onChanged: (value) {
+          Provider.of<UserProvider>(context, listen: false)
+              .updateUserData(designation: value);
+        },
+      ),
+      const SizedBox(height: 16),
+      CustomTextField(
+        label: 'Email',
+        hint: 'Your Mail',
+        keyboardType: TextInputType.emailAddress,
+        controller: _emailController,
+        onChanged: (value) {
+          Provider.of<UserProvider>(context, listen: false)
+              .updateUserData(email: value);
+        },
+      ),
+      const SizedBox(height: 16),
+      CustomTextField(
+        label: 'Phone Number',
+        hint: 'Your Number',
+        keyboardType: TextInputType.phone,
+        controller: _phoneController,
+        onChanged: (value) {
+          Provider.of<UserProvider>(context, listen: false)
+              .updateUserData(phoneNumber: value);
+        },
+      ),
+    ];
   }
 }
