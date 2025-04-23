@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import '../screens/ocr_view.dart';
 import 'tool_item.dart';
 
 class ToolsListView extends StatefulWidget {
   const ToolsListView({Key? key}) : super(key: key);
 
   @override
-  State<ToolsListView> createState() => _ToolsListViewState();
+  State createState() => _ToolsListViewState();
 }
 
 class _ToolsListViewState extends State<ToolsListView> {
@@ -32,9 +33,6 @@ class _ToolsListViewState extends State<ToolsListView> {
       final double maxScrollExtent = _scrollController.position.maxScrollExtent;
 
       // Calculate which page we're on based on scroll position
-      // This is a simple calculation that divides the current scroll position
-      // by the total scrollable area to get a percentage, and then multiplies
-      // by the number of pages (total items / items per page)
       final int page = (offset / maxScrollExtent * ((tools.length / _itemsPerPage).ceil() - 1)).round();
 
       if (page != _currentPage) {
@@ -42,6 +40,53 @@ class _ToolsListViewState extends State<ToolsListView> {
           _currentPage = page;
         });
       }
+    }
+  }
+
+  // Navigate to the appropriate page based on tool name
+  void _navigateToToolPage(BuildContext context, String toolName) {
+    switch (toolName) {
+      case 'OCR':
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => OcrScreen(),
+        ));
+        break;
+      case 'Compress Files':
+        // Navigator.of(context).push(MaterialPageRoute(
+        //   builder: (context) => const CompressFilesPage(),
+        // ));
+        break;
+      case 'Merge Files':
+        // Navigator.of(context).push(MaterialPageRoute(
+        //   builder: (context) => const MergeFilesPage(),
+        // ));
+        break;
+      case 'Edit File':
+        // Navigator.of(context).push(MaterialPageRoute(
+        //   builder: (context) => const EditFilePage(),
+        // ));
+        break;
+      case 'Split File':
+        // Navigator.of(context).push(MaterialPageRoute(
+        //   builder: (context) => const SplitFilePage(),
+        // ));
+        break;
+      case 'Rearrange File':
+        // Navigator.of(context).push(MaterialPageRoute(
+        //   builder: (context) => const RearrangeFilePage(),
+        // ));
+        break;
+      case 'File Transfer':
+        // Navigator.of(context).push(MaterialPageRoute(
+        //   // builder: (context) => const FileTransferPage(),
+        // )
+        // );
+        break;
+      default:
+      // Handle unknown tool
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Tool $toolName is not implemented yet')),
+        );
     }
   }
 
@@ -62,7 +107,6 @@ class _ToolsListViewState extends State<ToolsListView> {
       'icon': 'assets/icons/edit_file_icon.svg',
       'name': 'Edit File',
     },
-
     {
       'icon': 'assets/icons/split_file_icon.svg',
       'name': 'Split File',
@@ -97,7 +141,8 @@ class _ToolsListViewState extends State<ToolsListView> {
                   icon: tools[index]['icon'] as String,
                   name: tools[index]['name'] as String,
                   onTap: () {
-                    // Handle tool tap
+                    // Navigate to the appropriate tool page
+                    _navigateToToolPage(context, tools[index]['name'] as String);
                   },
                 ),
               );
@@ -130,3 +175,31 @@ class _ToolsListViewState extends State<ToolsListView> {
     );
   }
 }
+
+// You'll need to create these pages
+class OcrPage extends StatelessWidget {
+  const OcrPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('OCR')),
+      body: const Center(child: Text('OCR Tool Page')),
+    );
+  }
+}
+
+class CompressFilesPage extends StatelessWidget {
+  const CompressFilesPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Compress Files')),
+      body: const Center(child: Text('Compress Files Tool Page')),
+    );
+  }
+}
+
+// Add similar class definitions for other tools:
+// MergeFilesPage, EditFilePage, SplitFilePage, RearrangeFilePage, FileTransferPage
