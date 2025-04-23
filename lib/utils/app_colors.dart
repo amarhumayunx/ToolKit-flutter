@@ -18,7 +18,13 @@ class AppColors {
   static const Color fieldHintColor =  Color(0xFFB9BDC0);
   static const Color dividerColor =  Color(0xFFEDF2F3);
   static const Color saveDateColor =  Color(0xFF9C9CA0);
+  static const Color t3DividerColor =  Color(0xFFF0DBCC);
+  static const Color t3LeftColumn =  Color(0xFFF2E8E1);
+  static const Color t3Primary =  Color(0xFFC06829);
+  static const Color t3SubHeading =  Color(0xFF505062);
 }
+
+
 
 
 

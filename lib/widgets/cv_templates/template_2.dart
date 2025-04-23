@@ -235,9 +235,8 @@ class _Template2State extends State<Template2> {
                   Text(
                     userData.designation,
                     style: GoogleFonts.poly(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.saveDateColor,
+                      fontSize: 8,
+                      color: const Color(0xFFA3A3A3),
                       letterSpacing: 1,
                     ),
                   ),
@@ -300,25 +299,12 @@ class _Template2State extends State<Template2> {
                     item.institute != null ||
                     item.startDate != null ||
                     item.endDate != null) {
-
-                  // Create the appropriate date format based on isCompleted
-                  String dateText = '';
-                  if (item.startDate != null && item.startDate!.isNotEmpty) {
-                    dateText = item.startDate!;
-
-                    if (item.isCompleted) {
-                      dateText += ' - Continued';  // Show "Present" for continued items
-                    } else if (item.endDate != null && item.endDate!.isNotEmpty) {
-                      dateText += ' - ${item.endDate}';  // Show end date if not continued
-                    }
-                  }
-
                   return Column(
                     children: [
                       _buildEducationItem(
                         item.degree?.toUpperCase() ?? '',
                         item.institute ?? '',
-                        dateText,
+                        '${item.startDate ?? ''} ${item.endDate != null && item.endDate!.isNotEmpty ? '- ${item.endDate}' : ''}',
                         item.description ?? '',
                       ),
                       const SizedBox(height: 8),
@@ -469,7 +455,7 @@ class _Template2State extends State<Template2> {
           title,
           style: GoogleFonts.poppins(
             fontSize: 10,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
             color: color,
             letterSpacing: 1,
           ),
@@ -505,7 +491,7 @@ class _Template2State extends State<Template2> {
   }
 
   Widget _buildEducationItem(
-      String degree, String institution, String yearsText, String description) {
+      String degree, String major, String institution, String years) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -518,7 +504,14 @@ class _Template2State extends State<Template2> {
               color: Colors.grey.shade800,
             ),
           ),
-
+        if (major.isNotEmpty)
+          Text(
+            major,
+            style: GoogleFonts.poppins(
+              fontSize: 6,
+              color: Colors.grey.shade700,
+            ),
+          ),
         if (institution.isNotEmpty)
           Text(
             institution,
@@ -528,9 +521,9 @@ class _Template2State extends State<Template2> {
               color: Colors.grey.shade700,
             ),
           ),
-        if (yearsText.trim().isNotEmpty)
+        if (years.trim().isNotEmpty)
           Text(
-            yearsText,
+            years,
             style: GoogleFonts.poppins(
               fontSize: 6,
               color: Colors.grey.shade600,

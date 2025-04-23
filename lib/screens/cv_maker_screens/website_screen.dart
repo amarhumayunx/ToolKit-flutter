@@ -4,12 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/website_model.dart';
 import '../../provider/user_provider.dart';
-import '../../provider/template_provider.dart';
 import '../../utils/app_colors.dart';
-import '../../widgets/cv_templates/template_1.dart';
-import '../../widgets/cv_templates/template_2.dart';
-import '../../widgets/cv_templates/template_3.dart';
-import '../../widgets/cv_templates/template4.dart';
 
 class WebsitePage extends StatefulWidget {
   const WebsitePage({
@@ -24,7 +19,32 @@ class _WebsitePageState extends State<WebsitePage> {
   final TextEditingController _linkController = TextEditingController();
   final FocusNode _linkFocusNode = FocusNode();
   List<Website> links = [];
+  @override
+  void initState() {
+    super.initState();
+    // Load existing websites when the page initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadExistingWebsites();
+    });
+  }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
+    // Load the websites from provider
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (links.isEmpty && userProvider.websites.isNotEmpty) {
+      setState(() {
+        links = List<Website>.from(userProvider.websites);
+      });
+    }
+  }
+  void _loadExistingWebsites() {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    setState(() {
+      links = userProvider.websites;
+    });
+  }
   @override
   void dispose() {
     _linkController.dispose();
@@ -36,14 +56,12 @@ class _WebsitePageState extends State<WebsitePage> {
     if (_linkController.text.trim().isNotEmpty) {
       setState(() {
         links.add(Website(
-          name: 'Website',  // Using default name since we're not collecting it separately
+          name: 'Website',
           url: _linkController.text.trim(),
         ));
 
-        // Update the UserProvider with the latest URL
-        // Note: This will only store the most recent URL as per your UserProvider implementation
-        Provider.of<UserProvider>(context, listen: false)
-            .updateWebsite(_linkController.text.trim());
+        // Update the UserProvider with the full list of websites
+        Provider.of<UserProvider>(context, listen: false).updateWebsites(links);
 
         _linkController.clear();
         _linkFocusNode.requestFocus();
@@ -55,46 +73,13 @@ class _WebsitePageState extends State<WebsitePage> {
     setState(() {
       links.removeAt(index);
 
-      // Update UserProvider - if we removed all links or the main one
+      // Update UserProvider with the updated list
       if (links.isEmpty) {
-        Provider.of<UserProvider>(context, listen: false).updateWebsite(null);
+        Provider.of<UserProvider>(context, listen: false).updateWebsites([]);
       } else {
-        // If there are still links, update with the first one
-        Provider.of<UserProvider>(context, listen: false).updateWebsite(links[0].url);
+        Provider.of<UserProvider>(context, listen: false).updateWebsites(links);
       }
     });
-  }
-
-  // Navigate to appropriate template based on selected template ID
-  void _navigateToTemplate(BuildContext context) {
-    final templateProvider = Provider.of<TemplateProvider>(context, listen: false);
-    final templateId = templateProvider.selectedTemplateId;
-
-    Widget templateScreen;
-
-    switch (templateId) {
-      case 1:
-        templateScreen = Template1(websites: links);
-        break;
-      case 2:
-        templateScreen = Template2(websites: links);
-        break;
-      case 3:
-        templateScreen = Template3();
-        break;
-      case 4:
-        templateScreen = Template4(websites: links);
-        break;
-      default:
-        templateScreen = Template1(websites: links);
-    }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => templateScreen,
-      ),
-    );
   }
 
   @override
@@ -271,26 +256,26 @@ class _WebsitePageState extends State<WebsitePage> {
             const SizedBox(height: 16),
             links.isEmpty
                 ? Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
-                child: Text(
-                  'No links added yet',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w300,
-                    color: Colors.grey,
-                  ),
-                ),
-              ),
-            )
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20.0),
+                      child: Text(
+                        'No links added yet',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w300,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  )
                 : Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: List.generate(
-                links.length,
-                    (index) => _buildLinkTag(links[index], index),
-              ),
-            ),
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: List.generate(
+                      links.length,
+                      (index) => _buildLinkTag(links[index], index),
+                    ),
+                  ),
           ],
         ),
       ),

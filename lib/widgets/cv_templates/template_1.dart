@@ -1,6 +1,7 @@
 // Keep or add the standard import for typed data
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:pdf/pdf.dart';
@@ -29,6 +30,7 @@ import '../buttons/template_action_btn.dart';
 import '../custom_appbar.dart';
 
 import 'package:uuid/uuid.dart';
+
 class Template1 extends StatefulWidget {
   final List<Website> websites;
 
@@ -307,16 +309,22 @@ class _Template1State extends State<Template1> {
       _initializePageKeys();
     }
   }
+
   Future<void> _saveCv(BuildContext context) async {
     try {
-      final userData = Provider.of<UserProvider>(context, listen: false).userData;
+      final userData =
+          Provider.of<UserProvider>(context, listen: false).userData;
 
-      Provider.of<EducationProvider>(context, listen: false).clearEducationItems();
-      Provider.of<WorkExperienceProvider>(context, listen: false).clearWorkExperienceItems();
-      Provider.of<CertificationProvider>(context, listen: false).clearCertificationItems();
+      Provider.of<EducationProvider>(context, listen: false)
+          .clearEducationItems();
+      Provider.of<WorkExperienceProvider>(context, listen: false)
+          .clearWorkExperienceItems();
+      Provider.of<CertificationProvider>(context, listen: false)
+          .clearCertificationItems();
       Provider.of<SkillsProvider>(context, listen: false).clearSkillItems();
       Provider.of<LanguageProvider>(context, listen: false).clearLanguages();
-      final fileName = '${userData.fullName?.replaceAll(' ', '_') ?? 'cv'}_resume.pdf';
+      final fileName =
+          '${userData.fullName?.replaceAll(' ', '_') ?? 'cv'}_resume.pdf';
 
       showDialog(
         context: context,
@@ -372,7 +380,8 @@ class _Template1State extends State<Template1> {
       await file.writeAsBytes(await pdf.save());
 
       // Save CV to provider
-      final savedCVProvider = Provider.of<SavedCVProvider>(context, listen: false);
+      final savedCVProvider =
+          Provider.of<SavedCVProvider>(context, listen: false);
       await savedCVProvider.addSavedCV(fileName, filePath, thumbnailBytes);
 
       // Clear user data fields after saving
@@ -386,15 +395,19 @@ class _Template1State extends State<Template1> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('CV Saved', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-            content: Text('Your CV has been saved successfully.', style: GoogleFonts.inter()),
+            title: Text('CV Saved',
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            content: Text('Your CV has been saved successfully.',
+                style: GoogleFonts.inter()),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context); // This will dismiss the alert dialog
-                  Navigator.pushReplacement( // Navigate back to CV maker screen
+                  Navigator.pushReplacement(
+                    // Navigate back to CV maker screen
                     context,
-                    MaterialPageRoute(builder: (context) => const CvMakerScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const CvMakerScreen()),
                   );
                 },
                 child: Text('OK', style: GoogleFonts.inter()),
@@ -414,8 +427,10 @@ class _Template1State extends State<Template1> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Error', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-            content: Text('Failed to save CV: ${e.toString()}', style: GoogleFonts.inter()),
+            title: Text('Error',
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            content: Text('Failed to save CV: ${e.toString()}',
+                style: GoogleFonts.inter()),
             actions: [
               TextButton(
                 onPressed: () {
@@ -433,12 +448,16 @@ class _Template1State extends State<Template1> {
 // Also update the export function
   Future<void> _exportToPdf() async {
     try {
-      final userData = Provider.of<UserProvider>(context, listen: false).userData;
-      Provider.of<WorkExperienceProvider>(context, listen: false).clearWorkExperienceItems();
-      Provider.of<EducationProvider>(context, listen: false).clearEducationItems();
+      final userData =
+          Provider.of<UserProvider>(context, listen: false).userData;
+      Provider.of<WorkExperienceProvider>(context, listen: false)
+          .clearWorkExperienceItems();
+      Provider.of<EducationProvider>(context, listen: false)
+          .clearEducationItems();
       Provider.of<SkillsProvider>(context, listen: false).clearSkillItems();
       Provider.of<LanguageProvider>(context, listen: false).clearLanguages();
-      final fileName = '${userData.fullName?.replaceAll(' ', '_') ?? 'cv'}_resume.pdf';
+      final fileName =
+          '${userData.fullName?.replaceAll(' ', '_') ?? 'cv'}_resume.pdf';
 
       showDialog(
         context: context,
@@ -499,8 +518,10 @@ class _Template1State extends State<Template1> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('PDF Created', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-            content: Text('Your CV has been exported as a PDF.', style: GoogleFonts.inter()),
+            title: Text('PDF Created',
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            content: Text('Your CV has been exported as a PDF.',
+                style: GoogleFonts.inter()),
             actions: [
               TextButton(
                 onPressed: () {
@@ -517,7 +538,8 @@ class _Template1State extends State<Template1> {
                   // After opening the file, navigate back to form
                   Navigator.pop(context);
                 },
-                child: Text('Open PDF', style: GoogleFonts.inter(color: AppColors.primary)),
+                child: Text('Open PDF',
+                    style: GoogleFonts.inter(color: AppColors.primary)),
               ),
             ],
           );
@@ -534,8 +556,10 @@ class _Template1State extends State<Template1> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Error', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-            content: Text('Failed to export PDF: ${e.toString()}', style: GoogleFonts.inter()),
+            title: Text('Error',
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            content: Text('Failed to export PDF: ${e.toString()}',
+                style: GoogleFonts.inter()),
             actions: [
               TextButton(
                 onPressed: () {
@@ -549,10 +573,11 @@ class _Template1State extends State<Template1> {
       );
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: CustomAppBar(
         title: 'CV',
         onBackPressed: () {
@@ -581,20 +606,19 @@ class _Template1State extends State<Template1> {
             Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                    children: [
-                      SizedBox(height: 80),
-                      // Build all pages instead of just the current one
-                      for (int i = 1; i <= _totalPages; i++) ...[
-                        RepaintBoundary(
-                          key: _pageKeys[i-1], // Use the corresponding page key
-                          child: _buildPage(i),
-                        ),
-                        // Add spacing between pages
-                        if (i < _totalPages) const SizedBox(height: 30),
-                      ]
-                    ]
-                ),
+                child: Column(children: [
+                  SizedBox(height: 80),
+                  // Build all pages instead of just the current one
+                  for (int i = 1; i <= _totalPages; i++) ...[
+                    RepaintBoundary(
+                      key: _pageKeys[i - 1],
+                      // Use the corresponding page key
+                      child: _buildPage(i),
+                    ),
+                    // Add spacing between pages
+                    if (i < _totalPages) const SizedBox(height: 30),
+                  ]
+                ]),
               ),
             ),
             _buildTemplateButtons(),
@@ -609,9 +633,10 @@ class _Template1State extends State<Template1> {
     List<Widget> contentForPage = _getContentForPage(pageIndex);
 
     return Container(
-      constraints: const BoxConstraints(maxWidth: 340, minWidth: 340, minHeight: 482, maxHeight: 482),
+      constraints: const BoxConstraints(
+          maxWidth: 340, minWidth: 340, minHeight: 482, maxHeight: 482),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
@@ -624,7 +649,8 @@ class _Template1State extends State<Template1> {
       ),
       padding: const EdgeInsets.all(10),
       child: SingleChildScrollView(
-        physics: NeverScrollableScrollPhysics(), // Prevent scrolling within the page
+        physics: NeverScrollableScrollPhysics(),
+        // Prevent scrolling within the page
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min, // Important to prevent overflow
@@ -731,12 +757,13 @@ class _Template1State extends State<Template1> {
 
   // PDF Export Functionality
 
-
   Future<Uint8List?> _capturePageAsImage(GlobalKey key) async {
     try {
-      final RenderRepaintBoundary boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final RenderRepaintBoundary boundary =
+          key.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData != null) {
         return byteData.buffer.asUint8List();
       }
@@ -749,6 +776,9 @@ class _Template1State extends State<Template1> {
 
   // Widget building methods remain the same
   Widget _buildHeader(UserModel userData) {
+    // Get all websites from the UserProvider
+    final websites = Provider.of<UserProvider>(context).websites;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -764,7 +794,7 @@ class _Template1State extends State<Template1> {
           userData.designation ?? '',
           style: GoogleFonts.inriaSerif(
             fontSize: 10,
-            color: Colors.black87,
+            color: AppColors.black,
           ),
         ),
         const SizedBox(height: 6),
@@ -775,11 +805,16 @@ class _Template1State extends State<Template1> {
           runSpacing: 4, // Space between lines
           children: [
             // Phone number
-            if (userData.phoneNumber != null && userData.phoneNumber!.isNotEmpty)
+            if (userData.phoneNumber != null &&
+                userData.phoneNumber!.isNotEmpty)
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.phone, size: 10),
+                  SvgPicture.asset(
+                    'assets/icons/contact_icon.svg',
+                    width: 6,
+                    height: 6,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     userData.phoneNumber!,
@@ -796,7 +831,11 @@ class _Template1State extends State<Template1> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.email, size: 10),
+                  SvgPicture.asset(
+                    'assets/icons/email_icon.svg',
+                    width: 6,
+                    height: 6,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     userData.email!,
@@ -808,12 +847,18 @@ class _Template1State extends State<Template1> {
                 ],
               ),
 
-            // Website
-            if (userData.websiteUrl != null && userData.websiteUrl!.isNotEmpty)
+            // Website URL from UserModel (if present)
+                    if (userData.websiteUrl != null &&
+    userData.websiteUrl!.isNotEmpty &&
+    !websites.any((website) => website.url == userData.websiteUrl))
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.link, size: 10),
+                  SvgPicture.asset(
+                    'assets/icons/url_icon.svg',
+                    width: 6,
+                    height: 6,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     userData.websiteUrl!,
@@ -824,6 +869,28 @@ class _Template1State extends State<Template1> {
                   ),
                 ],
               ),
+
+            // All additional websites from provider
+            ...websites.map((website) =>
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SvgPicture.asset(
+                      'assets/icons/url_icon.svg',
+                      width: 6,
+                      height: 6,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      website.url,
+                      style: GoogleFonts.inriaSerif(
+                        fontSize: 8,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ],
+                )
+            ).toList(),
           ],
         ),
         // Add spacing before the first section (Objective)
@@ -912,23 +979,23 @@ class _Template1State extends State<Template1> {
           ...bulletPoints
               .map(
                 (point) => Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('• ',
-                    style: GoogleFonts.inter(
-                        fontWeight: FontWeight.bold, fontSize: 6)),
-                Expanded(
-                  child: Text(
-                    point,
-                    style: GoogleFonts.inter(
-                      fontSize: 6,
-                      color: Colors.grey.shade800,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('• ',
+                        style: GoogleFonts.inter(
+                            fontWeight: FontWeight.bold, fontSize: 6)),
+                    Expanded(
+                      child: Text(
+                        point,
+                        style: GoogleFonts.inter(
+                          fontSize: 6,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          )
+              )
               .toList(),
         ]
       ],
@@ -1035,25 +1102,25 @@ class _Template1State extends State<Template1> {
       runSpacing: 4.0,
       children: skills
           .map((skill) => Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '• ',
-            style: GoogleFonts.inter(
-              fontSize: 6,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            skill.name,
-            style: GoogleFonts.poppins(
-              fontSize: 6,
-              color: Colors.grey.shade800,
-            ),
-          ),
-        ],
-      ))
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '• ',
+                    style: GoogleFonts.inter(
+                      fontSize: 6,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    skill.name,
+                    style: GoogleFonts.poppins(
+                      fontSize: 6,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                ],
+              ))
           .toList(),
     );
   }
@@ -1064,28 +1131,29 @@ class _Template1State extends State<Template1> {
       runSpacing: 4.0,
       children: languages
           .map((language) => Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '• ',
-            style: GoogleFonts.inter(
-              fontSize: 6,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            language.name,
-            style: GoogleFonts.poppins(
-              fontSize: 6,
-              color: Colors.grey.shade800,
-            ),
-          ),
-        ],
-      ))
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '• ',
+                    style: GoogleFonts.inter(
+                      fontSize: 6,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    language.name,
+                    style: GoogleFonts.poppins(
+                      fontSize: 6,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                ],
+              ))
           .toList(),
     );
   }
+
   Widget _buildTemplateButtons() {
     return TemplateActionButtons(
       onChangeTemplate: () {

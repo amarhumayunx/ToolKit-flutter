@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-
 import '../models/user_model_1.dart';
+import '../models/website_model.dart';
 
 class UserProvider extends ChangeNotifier {
-  // Remove the asterisks - this is not valid Dart syntax
   final UserModel _userData = UserModel();
+  List<Website> _websites = [];
 
   UserModel get userData => _userData;
+  List<Website> get websites => _websites;
 
   void updateUserData({
     String? fullName,
@@ -27,18 +28,25 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Dedicated method for updating career objective
   void updateCareerObjective(String objective) {
     _userData.careerObjective = objective;
     notifyListeners();
   }
 
-  // Update website information - use _userData consistently
+  // Update method to store multiple websites
   void updateWebsite(String? url) {
-    _userData.websiteUrl = url;
+    _userData.websiteUrl = url; // Keep for backward compatibility
     notifyListeners();
   }
-  // Clear all user data fields
+
+  // Add a new method to handle multiple websites
+  void updateWebsites(List<Website> websites) {
+    _websites = websites;
+    // Also update the single websiteUrl for backward compatibility
+    _userData.websiteUrl = websites.isNotEmpty ? websites[0].url : null;
+    notifyListeners();
+  }
+
   void clearUserData() {
     _userData.fullName = null;
     _userData.designation = null;
@@ -46,8 +54,7 @@ class UserProvider extends ChangeNotifier {
     _userData.phoneNumber = null;
     _userData.careerObjective = null;
     _userData.websiteUrl = null;
-    // Note: You might want to keep the profile image path or clear it as needed
-    // _userData.profileImagePath = null;
+    _websites = [];
     notifyListeners();
   }
 }

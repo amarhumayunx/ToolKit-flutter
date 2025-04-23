@@ -53,15 +53,15 @@ class _CertificationPageState extends State<CertificationPage> {
   }
 
   void _saveCertification() {
-    if (_certificationNameController.text.isEmpty ||
-        _organizationNameController.text.isEmpty ||
-        _dateController.text.isEmpty) {
-      // Show validation message if needed
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please fill all required fields'))
-      );
-      return;
-    }
+    // if (_certificationNameController.text.isEmpty ||
+    //     _organizationNameController.text.isEmpty ||
+    //     _dateController.text.isEmpty) {
+    //   // Show validation message if needed
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(content: Text('Please fill all required fields'))
+    //   );
+    //   return;
+    // }
 
     final certificationProvider = Provider.of<CertificationProvider>(context, listen: false);
 
