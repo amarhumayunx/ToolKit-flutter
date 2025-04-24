@@ -10,6 +10,7 @@ import 'package:toolkit/provider/template_provider.dart';
 import 'package:toolkit/provider/user_provider.dart';
 import 'package:toolkit/provider/work_experience_provider.dart';
 import 'package:toolkit/screens/home_screen.dart';
+import 'package:toolkit/widgets/cv_templates/template4.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,7 +49,7 @@ class MyApp extends StatelessWidget {
         primaryColor: const Color(0xFF00BFA5),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home:HomeScreen(),
+      home:Template4 (),
     );
   }
 }
