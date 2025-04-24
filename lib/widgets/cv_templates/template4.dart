@@ -2,15 +2,29 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:open_file/open_file.dart';
+import 'package:provider/provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'dart:ui' as ui;
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'dart:io';
 import 'package:flutter/rendering.dart';
+import 'dart:ui' as ui;
+import 'dart:math' as math;
 
+import '../../models/education_item_model.dart';
+import '../../models/language_model.dart';
+import '../../models/skills_model.dart';
+import '../../models/user_model_1.dart';
 import '../../models/website_model.dart';
+import '../../provider/certification_provider.dart';
+import '../../provider/education_provider.dart';
+import '../../provider/language_provider.dart';
+import '../../provider/saved_cv_provider.dart';
+import '../../provider/skills_provider.dart';
+import '../../provider/user_provider.dart';
+import '../../provider/work_experience_provider.dart';
+import '../../screens/cv_maker_screens/cv_maker_screen.dart';
 import '../../utils/app_colors.dart';
 import '../buttons/template_action_btn.dart';
 import '../custom_appbar.dart';
@@ -27,208 +41,195 @@ class Template4 extends StatefulWidget {
 class _Template4State extends State<Template4> {
   int _currentPage = 1;
   int _totalPages = 1;
-  final List<List<Widget>> _pageContent = [];
+  final List<List<Widget>> _mainColumnContent = [];
+  final List<List<Widget>> _sideColumnContent = [];
   final double _pageContentHeight = 482.0;
   List<GlobalKey> _pageKeys = [];
   bool _contentMeasured = false;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_contentMeasured) {
+      setState(() {
+        _contentMeasured = false;
+      });
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _distributeContent();
     });
   }
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.websites.isNotEmpty) {
+        Provider.of<UserProvider>(context, listen: false).updateWebsites(widget.websites);
+      }
+    });
+  }
+
   void _distributeContent() {
-    // Hardcoded dummy data
-    final userData = {
-      'fullName': 'SOPHIA WILLIAMS',
-      'designation': 'Product Designer',
-      'careerObjective':
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam pharetra in ipsum quis lacus. Donec hendrerit ipsum eget est tempor, quis tempus duis elementum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam pharetra in ipsum quis lacus. Donec hendrerit ipsum eget est tempor, quis tempus.',
-      'phoneNumber': '+1 123 4567890',
-      'email': 'sophia@example.com',
-      'profileImagePath': null, // We'll use a placeholder
-    };
+    final userData = Provider.of<UserProvider>(context, listen: false).userData;
+    final workExperienceProvider = Provider.of<WorkExperienceProvider>(context, listen: false);
+    final workExperienceItems = workExperienceProvider.workExperienceItems;
+    final educationProvider = Provider.of<EducationProvider>(context, listen: false);
+    final educationItems = educationProvider.educationItems;
+    final certificationProvider = Provider.of<CertificationProvider>(context, listen: false);
+    final certificationItems = certificationProvider.certificationItems;
+    final skillItems = Provider.of<SkillsProvider>(context, listen: false).skillItems;
+    final languageItems = Provider.of<LanguageProvider>(context, listen: false).languages;
 
-    final workExperienceItems = [
-      {
-        'position': 'JOB TITLE / POSITION',
-        'company': 'Company / MM / YY - MM / YY',
-        'description':
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc ut diam sem nec risus egestas accumsan, in arcu nunc.',
-        'projects': ['React.js', 'Vue.js', 'Angular'],
-        'startDate': 'Jan 2022',
-        'endDate': 'Present',
-        'isCurrent': true,
-      },
-      {
-        'position': 'JOB TITLE / POSITION',
-        'company': 'Company / MM / YY - MM / YY',
-        'description':
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc ut diam sem nec risus egestas accumsan, in arcu nunc.',
-        'projects': ['React.js', 'Vue.js', 'Angular'],
-        'startDate': 'Jan 2020',
-        'endDate': 'Dec 2021',
-        'isCurrent': false,
-      },
-    ];
+    // Clear previous content
+    _mainColumnContent.clear();
+    _sideColumnContent.clear();
 
-    final educationItems = [
-      {
-        'degree': 'DEGREE / DIPLOMA NAME',
-        'institute': 'Institution Name',
-        'description': '',
-        'startDate': '2017',
-        'endDate': '2021',
-        'isCompleted': true,
-      },
-      {
-        'degree': 'DEGREE / DIPLOMA NAME',
-        'institute': 'Institution Name',
-        'description': '',
-        'startDate': '2013',
-        'endDate': '2017',
-        'isCompleted': true,
-      },
-    ];
+    // Initialize first pages for both columns
+    _mainColumnContent.add([]);
+    _sideColumnContent.add([]);
 
-    final certificationItems = [
-      {
-        'certificationName': 'CERTIFICATION NAME',
-        'description':
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc ut diam sem nec risus egestas accumsan, in arcu nunc.',
-        'startDate': 'MM / YY - MM / YY',
-        'isCompleted': true,
-      },
-    ];
+    // Current heights for both columns
+    double currentMainHeight = 0;
+    double currentSideHeight = 0;
 
-    final skillItems = [
-      'HTML5',
-      'CSS3',
-      'JavaScript (ES6+)',
-      'React.js',
-      'Vue.js',
-      'Angular',
-      'Tailwind CSS',
-      'Node.js',
-      'Material UI',
-    ];
+    // Max available height after accounting for header
+    double maxAvailableHeight = _pageContentHeight - 130;
 
-    final languageItems = [
-      'Urdu',
-      'English',
-    ];
-
-    _pageContent.clear();
-    List<Widget> currentPageWidgets = [];
-    double currentPageHeight = 0;
-    double maxPageHeight = _pageContentHeight - 40;
-
-    void addWidgetToPage(Widget widget, double estimatedHeight) {
-      if (currentPageHeight + estimatedHeight > maxPageHeight &&
-          currentPageWidgets.isNotEmpty) {
-        _pageContent.add([...currentPageWidgets]);
-        currentPageWidgets = [];
-        currentPageHeight = 0;
+    // Helper function to add content to main column
+    void addMainContent(Widget widget, double estimatedHeight) {
+      // Check if we need to add a new page
+      if (currentMainHeight + estimatedHeight > maxAvailableHeight) {
+        _mainColumnContent.add([]);
+        currentMainHeight = 0;
       }
 
-      currentPageWidgets.add(widget);
-      currentPageHeight += estimatedHeight;
+      _mainColumnContent.last.add(widget);
+      currentMainHeight += estimatedHeight;
     }
 
-    // Profile section
-    final profileSection = _buildProfileSection(userData);
-    addWidgetToPage(profileSection, 80);
-
-    addWidgetToPage(const SizedBox(height: 10), 10);
-
-    // Work Experience section
-    final workSectionTitle = Column(
-      children: [
-        _buildSectionTitle('WORK EXPERIENCE'),
-      ],
-    );
-    addWidgetToPage(workSectionTitle, 28);
-    addWidgetToPage(const SizedBox(height: 8), 8);
-
-    for (int i = 0; i < workExperienceItems.length; i++) {
-      final item = workExperienceItems[i];
-      String dateRange = item['isCurrent'] == true
-          ? "${item['startDate']} - Present"
-          : "${item['startDate']} - ${item['endDate']}";
-
-      double itemHeight = 60;
-      if (item['description'].toString().isNotEmpty) {
-        itemHeight += (item['description'].toString().length / 50) * 10;
-      }
-      if ((item['projects'] as List).isNotEmpty) {
-        itemHeight += (item['projects'] as List).length * 10;
+    // Helper function to add content to side column
+    void addSideContent(Widget widget, double estimatedHeight) {
+      // Check if we need to add a new page
+      if (currentSideHeight + estimatedHeight > maxAvailableHeight) {
+        _sideColumnContent.add([]);
+        currentSideHeight = 0;
       }
 
-      final experienceItem = _buildExperienceItem(
-        item['position'].toString(),
-        item['company'].toString(),
-        item['description'].toString(),
-        dateRange,
-        bulletPoints: (item['projects'] as List).cast<String>(),
-      );
-
-      addWidgetToPage(experienceItem, itemHeight);
-
-      if (i < workExperienceItems.length - 1) {
-        addWidgetToPage(const SizedBox(height: 15), 15);
-      }
+      _sideColumnContent.last.add(widget);
+      currentSideHeight += estimatedHeight;
     }
-    addWidgetToPage(_buildGreyDivider(), 8);
 
-    // Certifications section
-    final certSectionTitle = _buildSectionTitle('CERTIFICATIONS');
-    addWidgetToPage(certSectionTitle, 20);
-    addWidgetToPage(const SizedBox(height: 8), 8);
+    // Add profile section to main column if there's content
+    if (userData.careerObjective != null && userData.careerObjective!.isNotEmpty) {
+      addMainContent(_buildProfileSection(userData), 80);
+      addMainContent(const SizedBox(height: 10), 10);
+    }
 
-    for (int i = 0; i < certificationItems.length; i++) {
-      final item = certificationItems[i];
-      final certItem = _buildCertificationItem(
-        item['certificationName'].toString(),
-        item['description'].toString(),
-        item['startDate'].toString(),
-      );
+    // Add work experience section to main column if there are items
+    if (workExperienceItems.isNotEmpty) {
+      addMainContent(_buildSectionTitle('WORK EXPERIENCE'), 20);
+      addMainContent(const SizedBox(height: 8), 8);
 
-      addWidgetToPage(certItem, 50);
+      for (var item in workExperienceItems) {
+        String dateRange = item.isCurrent
+            ? "${item.startDate} - Present"
+            : "${item.startDate} - ${item.endDate}";
 
-      if (i < certificationItems.length - 1) {
-        addWidgetToPage(const SizedBox(height: 10), 10);
+        // Estimate height based on content
+        double itemHeight = 40; // Base height
+        if (item.description.isNotEmpty) {
+          itemHeight += 20; // Add space for description
+        }
+        if (item.projects.isNotEmpty) {
+          itemHeight += item.projects.length * 10; // Add space for each project
+        }
+
+        addMainContent(
+          _buildExperienceItem(
+            item.position,
+            item.company,
+            item.description,
+            dateRange,
+            bulletPoints: item.projects.isNotEmpty ? item.projects : null,
+          ),
+          itemHeight,
+        );
+
+        addMainContent(const SizedBox(height: 15), 10);
       }
     }
 
-    // Add remaining widgets to last page
-    if (currentPageWidgets.isNotEmpty) {
-      _pageContent.add([...currentPageWidgets]);
+    // Add certifications section to main column if there are items
+    if (certificationItems.isNotEmpty) {
+      addMainContent(_buildSectionTitle('CERTIFICATIONS'), 20);
+      addMainContent(const SizedBox(height: 8), 8);
+
+      for (var item in certificationItems) {
+        String dateRange = item.isCompleted ? "${item.startDate}" : "${item.startDate}";
+
+        addMainContent(
+          _buildCertificationItem(
+            item.certificationName,
+            item.description,
+            dateRange,
+          ),
+          50,
+        );
+        addMainContent(const SizedBox(height: 10), 10);
+      }
     }
 
-    // If no content was added (empty CV), add an empty page
-    if (_pageContent.isEmpty) {
-      _pageContent.add([Container()]);
+    // Add contact section to side column if there's content
+    bool hasContactInfo = userData.phoneNumber != null && userData.phoneNumber!.isNotEmpty ||
+        userData.email != null && userData.email!.isNotEmpty ||
+        widget.websites.isNotEmpty;
+
+    if (hasContactInfo) {
+      addSideContent(_buildContactSection(userData), 60);
+      addSideContent(const SizedBox(height: 16), 16);
+      addSideContent(_buildSidebarDivider(), 1);
+      addSideContent(const SizedBox(height: 16), 16);
     }
 
-    _totalPages = _pageContent.length;
+    // Add education section to side column if there are items
+    if (educationItems.isNotEmpty) {
+      addSideContent(_buildEducationSection(educationItems), 120);
+      addSideContent(const SizedBox(height: 16), 16);
+      addSideContent(_buildSidebarDivider(), 1);
+      addSideContent(const SizedBox(height: 16), 16);
+    }
+
+    // Add skills section to side column if there are items
+    if (skillItems.isNotEmpty) {
+      addSideContent(_buildSkillsSection(skillItems), 60);
+      addSideContent(const SizedBox(height: 16), 16);
+      addSideContent(_buildSidebarDivider(), 1);
+      addSideContent(const SizedBox(height: 16), 16);
+    }
+
+    // Add languages section to side column if there are items
+    if (languageItems.isNotEmpty) {
+      addSideContent(_buildLanguagesSection(languageItems), 30);
+    }
+
+    // Calculate total pages needed
+    _totalPages = math.max(_mainColumnContent.length, _sideColumnContent.length);
+
+    // Ensure both columns have the same number of pages by adding empty pages if needed
+    while (_mainColumnContent.length < _totalPages) {
+      _mainColumnContent.add([]);
+    }
+    while (_sideColumnContent.length < _totalPages) {
+      _sideColumnContent.add([]);
+    }
+
     _pageKeys = List.generate(_totalPages, (index) => GlobalKey());
 
     setState(() {
       _contentMeasured = true;
     });
-  }
-
-  Widget _buildLeftDivider() {
-    return Expanded(
-      flex: 3,
-      child: Container(
-        height: 1,
-        color: const Color(0xFFA81919),
-      ),
-    );
   }
 
   Widget _buildGreyDivider() {
@@ -239,9 +240,113 @@ class _Template4State extends State<Template4> {
     );
   }
 
+  Future<void> _saveCv(BuildContext context) async {
+    try {
+      final userData = Provider.of<UserProvider>(context, listen: false).userData;
+      final fileName = '${userData.fullName?.replaceAll(' ', '_') ?? 'cv'}_resume.pdf';
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 20),
+                  Text('Saving CV...', style: GoogleFonts.inter()),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+
+      final pdf = pw.Document();
+      List<Uint8List> pageImages = [];
+
+      for (int i = 0; i < _pageKeys.length; i++) {
+        final imageBytes = await _capturePageAsImage(_pageKeys[i]);
+        if (imageBytes != null) {
+          pageImages.add(imageBytes);
+          final image = pw.MemoryImage(imageBytes);
+          pdf.addPage(
+            pw.Page(
+              pageFormat: PdfPageFormat.a4,
+              build: (pw.Context context) {
+                return pw.Center(
+                  child: pw.Image(image),
+                );
+              },
+            ),
+          );
+        }
+      }
+
+      Uint8List? thumbnailBytes = pageImages.isNotEmpty ? pageImages[0] : null;
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath = '${directory.path}/$fileName';
+      final file = File(filePath);
+      await file.writeAsBytes(await pdf.save());
+
+      final savedCVProvider = Provider.of<SavedCVProvider>(context, listen: false);
+      await savedCVProvider.addSavedCV(fileName, filePath, thumbnailBytes);
+
+      Provider.of<UserProvider>(context, listen: false).clearUserData();
+      Navigator.of(context).pop();
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('CV Saved',
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            content: Text('Your CV has been saved successfully.',
+                style: GoogleFonts.inter()),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CvMakerScreen()),
+                  );
+                },
+                child: Text('OK', style: GoogleFonts.inter()),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      if (Navigator.canPop(context)) Navigator.pop(context);
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error',
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            content: Text('Failed to save CV: ${e.toString()}',
+                style: GoogleFonts.inter()),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('OK', style: GoogleFonts.inter()),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
   Future<void> _exportToPdf() async {
     try {
-      final fileName = 'sophia_williams_resume.pdf';
+      final userData = Provider.of<UserProvider>(context, listen: false).userData;
+      final fileName = '${userData.fullName?.replaceAll(' ', '_') ?? 'cv'}_resume.pdf';
 
       showDialog(
         context: context,
@@ -286,6 +391,7 @@ class _Template4State extends State<Template4> {
       final file = File(filePath);
       await file.writeAsBytes(await pdf.save());
 
+      Provider.of<UserProvider>(context, listen: false).clearUserData();
       Navigator.pop(context);
 
       showDialog(
@@ -311,7 +417,7 @@ class _Template4State extends State<Template4> {
                   Navigator.pop(context);
                 },
                 child: Text('Open PDF',
-                    style: GoogleFonts.inter(color: Colors.red)),
+                    style: GoogleFonts.inter(color: AppColors.primary)),
               ),
             ],
           );
@@ -342,12 +448,12 @@ class _Template4State extends State<Template4> {
   Future<Uint8List?> _capturePageAsImage(GlobalKey key) async {
     try {
       RenderRepaintBoundary? boundary =
-          key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) return null;
 
       final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
       final ByteData? byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
+      await image.toByteData(format: ui.ImageByteFormat.png);
       return byteData?.buffer.asUint8List();
     } catch (e) {
       print('Error capturing page as image: $e');
@@ -364,9 +470,7 @@ class _Template4State extends State<Template4> {
         onBackPressed: () => Navigator.pop(context),
         actions: [
           TextButton(
-            onPressed: () {
-              // Implementation for save function would go here
-            },
+            onPressed: () => _saveCv(context),
             child: Text(
               'Save',
               style: GoogleFonts.inter(
@@ -410,9 +514,15 @@ class _Template4State extends State<Template4> {
   }
 
   Widget _buildPage(int pageIndex) {
-    // Get content for this page
-    List<Widget> pageContent =
-        pageIndex <= _pageContent.length ? _pageContent[pageIndex - 1] : [];
+    // Get content for this page (0-based index)
+    List<Widget> mainContent = pageIndex <= _mainColumnContent.length
+        ? _mainColumnContent[pageIndex - 1]
+        : [];
+    List<Widget> sideContent = pageIndex <= _sideColumnContent.length
+        ? _sideColumnContent[pageIndex - 1]
+        : [];
+
+    final userData = Provider.of<UserProvider>(context, listen: false).userData;
 
     return Container(
       constraints: const BoxConstraints(
@@ -426,20 +536,19 @@ class _Template4State extends State<Template4> {
             spreadRadius: 2,
             blurRadius: 8,
             offset: const Offset(0, 2),
-          ),
+          )
         ],
       ),
       child: Column(
         children: [
           // Header section is always on first page
-          if (pageIndex == 1) _buildHeader(),
+          if (pageIndex == 1) _buildHeader(userData),
 
-          // Main content with left and right columns
           Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Right column (now on left) - Profile, Experience, Certifications
+                // Main column (left)
                 Expanded(
                   flex: 3,
                   child: Container(
@@ -448,13 +557,13 @@ class _Template4State extends State<Template4> {
                       physics: const NeverScrollableScrollPhysics(),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: pageContent,
+                        children: mainContent,
                       ),
                     ),
                   ),
                 ),
 
-                // Left column (now on right) - Contact, Education, Skills, Languages
+                // Side column (right)
                 Container(
                   width: 130,
                   color: Colors.grey.shade100,
@@ -463,24 +572,7 @@ class _Template4State extends State<Template4> {
                     physics: const NeverScrollableScrollPhysics(),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Left sidebar content is only shown on first page
-                        if (pageIndex == 1) ...[
-                          _buildContactSection(),
-                          const SizedBox(height: 16),
-                          _buildSidebarDivider(), // Added sidebar divider
-                          const SizedBox(height: 16),
-                          _buildEducationSection(),
-                          const SizedBox(height: 16),
-                          _buildSidebarDivider(), // Added sidebar divider
-                          const SizedBox(height: 16),
-                          _buildSkillsSection(),
-                          const SizedBox(height: 16),
-                          _buildSidebarDivider(), // Added sidebar divider
-                          const SizedBox(height: 16),
-                          _buildLanguagesSection(),
-                        ],
-                      ],
+                      children: sideContent,
                     ),
                   ),
                 ),
@@ -492,7 +584,6 @@ class _Template4State extends State<Template4> {
     );
   }
 
-  // Updated sidebar divider with red color
   Widget _buildSidebarDivider() {
     return Container(
       height: 1,
@@ -500,7 +591,7 @@ class _Template4State extends State<Template4> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(UserModel userData) {
     return Stack(
       children: [
         // Make the SVG fill the entire width
@@ -525,7 +616,16 @@ class _Template4State extends State<Template4> {
                     width: 3,
                   ),
                 ),
-                child: Icon(
+                child: userData.profileImagePath != null
+                    ? ClipOval(
+                  child: Image.file(
+                    File(userData.profileImagePath!),
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                  ),
+                )
+                    : Icon(
                   Icons.person,
                   size: 30,
                   color: Colors.grey.shade400,
@@ -538,22 +638,25 @@ class _Template4State extends State<Template4> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'SOPHIA WILLIAMS',
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                    if (userData.fullName != null && userData.fullName!.isNotEmpty)
+                      Text(
+                        userData.fullName!.toUpperCase(),
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Product Designer',
-                      style: GoogleFonts.poppins(
-                        fontSize: 10,
-                        color: Colors.white,
+                    if (userData.designation != null && userData.designation!.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        userData.designation!,
+                        style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
@@ -564,7 +667,19 @@ class _Template4State extends State<Template4> {
     );
   }
 
-  Widget _buildContactSection() {
+  Widget _buildContactSection(UserModel userData) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final List<Website> websites = userProvider.websites;
+
+    bool hasPhone = userData.phoneNumber != null && userData.phoneNumber!.isNotEmpty;
+    bool hasEmail = userData.email != null && userData.email!.isNotEmpty;
+    bool hasWebsites = websites.isNotEmpty;
+
+    // Only show section if there's at least one contact info
+    if (!hasPhone && !hasEmail && !hasWebsites) {
+      return const SizedBox.shrink();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -577,64 +692,71 @@ class _Template4State extends State<Template4> {
           ),
         ),
         const SizedBox(height: 6),
-        Row(
-          children: [
-            Icon(
-              Icons.phone,
-              size: 6,
-              color: const Color(0xFFA81919),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              '+1 123 4567890',
-              style: GoogleFonts.poppins(
-                fontSize: 6,
-                color: Colors.black,
+        if (hasPhone)
+          Row(
+            children: [
+              Icon(
+                Icons.phone,
+                size: 6,
+                color: const Color(0xFFA81919),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            Icon(
-              Icons.email,
-              size: 6,
-              color: const Color(0xFFA81919),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              'sophia@example.com',
-              style: GoogleFonts.poppins(
-                fontSize: 6,
-                color: Colors.black,
+              const SizedBox(width: 4),
+              Text(
+                userData.phoneNumber!,
+                style: GoogleFonts.poppins(
+                  fontSize: 6,
+                  color: Colors.black,
+                ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            Icon(
-              Icons.link,
-              size: 6,
-              color: const Color(0xFFA81919),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              'LinkedIn Address',
-              style: GoogleFonts.poppins(
-                fontSize: 6,
-                color: Colors.black,
+            ],
+          ),
+        if (hasEmail) ...[
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(
+                Icons.email,
+                size: 6,
+                color: const Color(0xFFA81919),
               ),
+              const SizedBox(width: 4),
+              Text(
+                userData.email!,
+                style: GoogleFonts.poppins(
+                  fontSize: 6,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+        ],
+        if (hasWebsites) ...[
+          for (Website website in websites) ...[
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(
+                  Icons.link,
+                  size: 6,
+                  color: const Color(0xFFA81919),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  website.url,
+                  style: GoogleFonts.poppins(
+                    fontSize: 6,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ]
+        ],
       ],
     );
   }
 
-  Widget _buildEducationSection() {
+  Widget _buildEducationSection(List<EducationItem> educationItems) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -647,11 +769,12 @@ class _Template4State extends State<Template4> {
           ),
         ),
         const SizedBox(height: 6),
-        Column(
+        ...educationItems
+            .map((item) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'DEGREE / DIPLOMA NAME',
+              item.degree ?? '',
               style: GoogleFonts.poppins(
                 fontSize: 7,
                 fontWeight: FontWeight.w500,
@@ -666,7 +789,7 @@ class _Template4State extends State<Template4> {
               ),
             ),
             Text(
-              'Institution Name',
+              item.institute ?? '',
               style: GoogleFonts.poppins(
                 fontSize: 6,
                 color: Colors.black,
@@ -674,55 +797,21 @@ class _Template4State extends State<Template4> {
               ),
             ),
             Text(
-              '2017 - 2021',
+              '${item.startDate} - ${item.isCompleted ? item.endDate : "Present"}',
               style: GoogleFonts.poppins(
                 fontSize: 6,
                 color: Colors.black,
               ),
             ),
+            if (item != educationItems.last) const SizedBox(height: 8),
           ],
-        ),
-        const SizedBox(height: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'DEGREE / DIPLOMA NAME',
-              style: GoogleFonts.poppins(
-                fontSize: 7,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFFA81919),
-              ),
-            ),
-            Text(
-              'Major | Grade',
-              style: GoogleFonts.poppins(
-                fontSize: 6,
-                color: Colors.black,
-              ),
-            ),
-            Text(
-              'Institution Name',
-              style: GoogleFonts.poppins(
-                fontSize: 6,
-                color: Colors.black,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-            Text(
-              '2013 - 2017',
-              style: GoogleFonts.poppins(
-                fontSize: 6,
-                color: Colors.black,
-              ),
-            ),
-          ],
-        ),
+        ))
+            .toList(),
       ],
     );
   }
 
-  Widget _buildSkillsSection() {
+  Widget _buildSkillsSection(List<Skill> skills) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -735,15 +824,7 @@ class _Template4State extends State<Template4> {
           ),
         ),
         const SizedBox(height: 6),
-        _buildSkillItem('HTML5'),
-        _buildSkillItem('CSS3'),
-        _buildSkillItem('JavaScript (ES6+)'),
-        _buildSkillItem('React.js'),
-        _buildSkillItem('Vue.js'),
-        _buildSkillItem('Angular'),
-        _buildSkillItem('Tailwind CSS'),
-        _buildSkillItem('Node.js'),
-        _buildSkillItem('Material UI'),
+        ...skills.map((skill) => _buildSkillItem(skill.name)).toList(),
       ],
     );
   }
@@ -761,11 +842,13 @@ class _Template4State extends State<Template4> {
               color: const Color(0xFFA81919),
             ),
           ),
-          Text(
-            skill,
-            style: GoogleFonts.poppins(
-              fontSize: 6,
-              color: Colors.black,
+          Expanded(
+            child: Text(
+              skill,
+              style: GoogleFonts.poppins(
+                fontSize: 6,
+                color: Colors.black,
+              ),
             ),
           ),
         ],
@@ -773,7 +856,7 @@ class _Template4State extends State<Template4> {
     );
   }
 
-  Widget _buildLanguagesSection() {
+  Widget _buildLanguagesSection(List<Language> languages) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -786,13 +869,12 @@ class _Template4State extends State<Template4> {
           ),
         ),
         const SizedBox(height: 6),
-        _buildSkillItem('Urdu'),
-        _buildSkillItem('English'),
+        ...languages.map((language) => _buildSkillItem(language.name)).toList(),
       ],
     );
   }
 
-  Widget _buildProfileSection(Map<String, dynamic> userData) {
+  Widget _buildProfileSection(UserModel userData) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -806,7 +888,7 @@ class _Template4State extends State<Template4> {
         ),
         const SizedBox(height: 6),
         Text(
-          userData['careerObjective'] ?? '',
+          userData.careerObjective ?? '',
           style: GoogleFonts.inter(
             fontSize: 6,
             color: Colors.black,
@@ -885,26 +967,26 @@ class _Template4State extends State<Template4> {
           ...bulletPoints
               .map(
                 (point) => Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('• ',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 6,
-                          color: const Color(0xFFA81919),
-                        )),
-                    Expanded(
-                      child: Text(
-                        point,
-                        style: GoogleFonts.inter(
-                          fontSize: 6,
-                          color: Colors.black,
-                        ),
-                      ),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('• ',
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 6,
+                      color: const Color(0xFFA81919),
+                    )),
+                Expanded(
+                  child: Text(
+                    point,
+                    style: GoogleFonts.inter(
+                      fontSize: 6,
+                      color: Colors.black,
                     ),
-                  ],
+                  ),
                 ),
-              )
+              ],
+            ),
+          )
               .toList(),
         ]
       ],

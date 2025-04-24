@@ -36,7 +36,6 @@ void main() {
   );
 }
 
-
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -49,7 +48,7 @@ class MyApp extends StatelessWidget {
         primaryColor: const Color(0xFF00BFA5),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home:Template4 (),
+      home: HomeScreen(),
     );
   }
 }
