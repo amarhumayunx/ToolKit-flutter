@@ -18,8 +18,10 @@ class CertificationPage extends StatefulWidget {
 }
 
 class _CertificationPageState extends State<CertificationPage> {
-  final TextEditingController _certificationNameController = TextEditingController();
-  final TextEditingController _organizationNameController = TextEditingController();
+  final TextEditingController _certificationNameController =
+      TextEditingController();
+  final TextEditingController _organizationNameController =
+      TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
@@ -36,7 +38,8 @@ class _CertificationPageState extends State<CertificationPage> {
     super.dispose();
   }
 
-  void _selectDate(BuildContext context, TextEditingController controller) async {
+  void _selectDate(
+      BuildContext context, TextEditingController controller) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -47,29 +50,21 @@ class _CertificationPageState extends State<CertificationPage> {
       setState(() {
         // Format date as DD/MM/YYYY to include the day
         controller.text =
-        "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+            "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
       });
     }
   }
 
   void _saveCertification() {
-    // if (_certificationNameController.text.isEmpty ||
-    //     _organizationNameController.text.isEmpty ||
-    //     _dateController.text.isEmpty) {
-    //   // Show validation message if needed
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(content: Text('Please fill all required fields'))
-    //   );
-    //   return;
-    // }
-
-    final certificationProvider = Provider.of<CertificationProvider>(context, listen: false);
+    final certificationProvider =
+        Provider.of<CertificationProvider>(context, listen: false);
 
     final newItem = CertificationItem(
       certificationName: _certificationNameController.text,
       organizationName: _organizationNameController.text,
       startDate: _dateController.text,
-      endDate: "", // Empty string as we're removing end date
+      endDate: "",
+      // Empty string as we're removing end date
       isCompleted: false,
       description: _descriptionController.text,
     );
@@ -94,7 +89,8 @@ class _CertificationPageState extends State<CertificationPage> {
   }
 
   void _editCertification(int index) {
-    final certificationProvider = Provider.of<CertificationProvider>(context, listen: false);
+    final certificationProvider =
+        Provider.of<CertificationProvider>(context, listen: false);
     final item = certificationProvider.certificationItems[index];
 
     setState(() {
@@ -108,7 +104,8 @@ class _CertificationPageState extends State<CertificationPage> {
   }
 
   void _deleteCertification(int index) {
-    final certificationProvider = Provider.of<CertificationProvider>(context, listen: false);
+    final certificationProvider =
+        Provider.of<CertificationProvider>(context, listen: false);
     certificationProvider.removeCertificationItem(index);
 
     setState(() {
@@ -210,17 +207,17 @@ class _CertificationPageState extends State<CertificationPage> {
                   style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.black
-                  ),
+                      color: AppColors.black),
                 ),
-                SizedBox(height: 4,),
+                SizedBox(
+                  height: 4,
+                ),
                 Text(
                   item.startDate,
                   style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
-                      color: AppColors.saveDateColor
-                  ),
+                      color: AppColors.saveDateColor),
                 ),
               ],
             ),
@@ -291,6 +288,7 @@ class _CertificationPageState extends State<CertificationPage> {
                 GestureDetector(
                   onTap: () => _selectDate(context, _dateController),
                   child: Container(
+                    width: 148,
                     decoration: BoxDecoration(
                       boxShadow: [
                         BoxShadow(
@@ -367,14 +365,19 @@ class _CertificationPageState extends State<CertificationPage> {
                   child: TextFormField(
                     controller: _descriptionController,
                     maxLines: 7,
+                    maxLength: 150,
                     decoration: InputDecoration(
                       hintText: 'Add more details about this certification',
                       hintStyle: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w300,
-                       color: AppColors.fieldHintColor,
+                        color: AppColors.fieldHintColor,
                       ),
                       border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      counterText: '',
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 12,

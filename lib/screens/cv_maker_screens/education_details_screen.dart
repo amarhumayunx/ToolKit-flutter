@@ -8,6 +8,8 @@ import '../../widgets/buttons/add_another_button.dart';
 import '../../widgets/buttons/save_edit_delete_btns.dart';
 import '../../widgets/custom_text_field.dart';
 
+import '../../widgets/date_picker_field.dart';
+
 class EducationDetailPage extends StatefulWidget {
   const EducationDetailPage({
     super.key,
@@ -27,6 +29,9 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
   bool isCompleted = false;
   bool showForm = false;
   int? editingIndex;
+  DateTime? startDate;
+  DateTime? endDate;
+  String? dateError;
 
   @override
   void dispose() {
@@ -38,30 +43,63 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
     super.dispose();
   }
 
-  void _selectDate(BuildContext context, TextEditingController controller) async {
+  void _selectDate(BuildContext context, TextEditingController controller,
+      bool isStartDate) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: isStartDate ? DateTime.now() : (startDate ?? DateTime.now()),
       firstDate: DateTime(1950),
       lastDate: DateTime(2100),
     );
 
     if (picked != null) {
+      if (isStartDate) {
+        startDate = picked;
+        // If end date exists and is before new start date, clear it
+        if (endDate != null && endDate!.isBefore(picked)) {
+          endDate = null;
+          _endDateController.clear();
+          setState(() {
+            dateError = null;
+          });
+        }
+      } else {
+        endDate = picked;
+        // Validate that end date is after start date
+        if (startDate != null && picked.isBefore(startDate!)) {
+          setState(() {
+            dateError = 'End date must be after start date';
+          });
+          return;
+        } else {
+          setState(() {
+            dateError = null;
+          });
+        }
+      }
+
       // Format date as DD/MM/YY to match the UI design
       setState(() {
         controller.text =
-        "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString().substring(2)}";
+            "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString().substring(2)}";
       });
     }
   }
 
   void _saveEducation() {
-    if (_degreeController.text.isEmpty || _instituteController.text.isEmpty) {
-      // Show validation message if needed
+    // Validate end date is after start date if both exist
+    if (!isCompleted &&
+        startDate != null &&
+        endDate != null &&
+        endDate!.isBefore(startDate!)) {
+      setState(() {
+        dateError = 'End date must be after start date';
+      });
       return;
     }
 
-    final educationProvider = Provider.of<EducationProvider>(context, listen: false);
+    final educationProvider =
+        Provider.of<EducationProvider>(context, listen: false);
     final newEducation = EducationItem(
       degree: _degreeController.text,
       institute: _instituteController.text,
@@ -77,12 +115,34 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
       educationProvider.addEducationItem(newEducation);
     }
 
-    _clearForm();  // This already sets showForm to false
+    _clearForm();
   }
 
   void _editEducation(int index) {
-    final educationProvider = Provider.of<EducationProvider>(context, listen: false);
+    final educationProvider =
+        Provider.of<EducationProvider>(context, listen: false);
     final item = educationProvider.educationItems[index];
+
+    // Parse the dates when editing
+    final startDateParts = item.startDate.split('/');
+    if (startDateParts.length == 3) {
+      startDate = DateTime(
+        int.parse('20${startDateParts[2]}'), // Assuming 20XX format for years
+        int.parse(startDateParts[1]),
+        int.parse(startDateParts[0]),
+      );
+    }
+
+    if (item.endDate.isNotEmpty) {
+      final endDateParts = item.endDate.split('/');
+      if (endDateParts.length == 3) {
+        endDate = DateTime(
+          int.parse('20${endDateParts[2]}'), // Assuming 20XX format for years
+          int.parse(endDateParts[1]),
+          int.parse(endDateParts[0]),
+        );
+      }
+    }
 
     setState(() {
       _degreeController.text = item.degree;
@@ -93,21 +153,20 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
       isCompleted = item.isCompleted;
       showForm = true;
       editingIndex = index;
+      dateError = null;
     });
   }
 
   void _deleteEducation(int index) {
-    final educationProvider = Provider.of<EducationProvider>(context, listen: false);
+    final educationProvider =
+        Provider.of<EducationProvider>(context, listen: false);
     educationProvider.deleteEducationItem(index);
   }
 
   void _toggleForm() {
     setState(() {
-      // Always set showForm to true when adding a new education
       showForm = true;
-      // Reset editingIndex to indicate we're adding a new item, not editing
       editingIndex = null;
-      // Clear form fields when opening form for new entry
       _clearFormFields();
     });
   }
@@ -121,7 +180,6 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
     });
   }
 
-  // New method to clear only form fields without changing other state variables
   void _clearFormFields() {
     _degreeController.clear();
     _instituteController.clear();
@@ -129,6 +187,9 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
     _endDateController.clear();
     _descriptionController.clear();
     isCompleted = false;
+    startDate = null;
+    endDate = null;
+    dateError = null;
   }
 
   @override
@@ -136,6 +197,8 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
     final educationProvider = Provider.of<EducationProvider>(context);
     final educationItems = educationProvider.educationItems;
     final hasEducation = educationItems.isNotEmpty;
+    final canAddMoreEducation =
+        educationItems.length < 2; // Only allow up to 2 education entries
 
     return Column(
       children: [
@@ -149,8 +212,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                   const SizedBox(height: 10),
 
                   // Show form when showForm is true OR when there are no education items yet
-                  if (showForm || !hasEducation)
-                    _buildEducationForm(),
+                  if (showForm || !hasEducation) _buildEducationForm(),
 
                   // If form is shown, we don't display the saved items
                   if (!showForm && hasEducation) ...[
@@ -159,14 +221,15 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                       _buildSavedEducation(educationItems[i], i),
                     const SizedBox(height: 16),
 
-                    // Add another education button (only shown when there are existing items AND form is hidden)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: AddAnotherButton(
-                        text: 'Add another Education',
-                        onPressed: _toggleForm,
+                    // Add another education button (only shown when there are existing items AND form is hidden AND we haven't reached the limit)
+                    if (canAddMoreEducation)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: AddAnotherButton(
+                          text: 'Add another Education',
+                          onPressed: _toggleForm,
+                        ),
                       ),
-                    ),
                   ],
                 ],
               ),
@@ -196,7 +259,6 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -205,8 +267,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                   style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.black
-                  ),
+                      color: AppColors.black),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -277,104 +338,23 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
               children: [
                 // Start date
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Start date',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      GestureDetector(
-                        onTap: () => _selectDate(context, _startDateController),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.30),
-                                blurRadius: 2,
-                                offset: const Offset(0, 0),
-                              ),
-                            ],
-                            color: AppColors.bgBoxColor,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: TextFormField(
-                            controller: _startDateController,
-                            enabled: false,
-                            decoration: InputDecoration(
-                              hintText: '00/00/00',
-                              hintStyle: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w300,
-                                color: AppColors.fieldHintColor,
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                  child: DateField(
+                    label: 'Start date',
+                    controller: _startDateController,
+                    onTap: () =>
+                        _selectDate(context, _startDateController, true),
                   ),
                 ),
                 const SizedBox(width: 20),
                 // End date - only show if not completed
                 if (!isCompleted)
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'End Date',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.black,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        GestureDetector(
-                          onTap: () => _selectDate(context, _endDateController),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.30),
-                                  blurRadius: 2,
-                                  offset: const Offset(0, 0),
-                                ),
-                              ],
-                              color: AppColors.bgBoxColor,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: TextFormField(
-                              controller: _endDateController,
-                              enabled: false,
-                              decoration: InputDecoration(
-                                hintText: '00/00/00',
-                                hintStyle: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w300,
-                                  color: AppColors.fieldHintColor,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: DateField(
+                      label: 'End Date',
+                      controller: _endDateController,
+                      onTap: () =>
+                          _selectDate(context, _endDateController, false),
+                      errorText: dateError,
                     ),
                   ),
                 // Add a placeholder widget when completed is checked
@@ -401,6 +381,12 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                     onChanged: (value) {
                       setState(() {
                         isCompleted = value ?? false;
+                        if (isCompleted) {
+                          // Clear end date when marking as completed
+                          _endDateController.clear();
+                          endDate = null;
+                          dateError = null;
+                        }
                       });
                     },
                   ),
@@ -411,8 +397,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                   style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
-                      color: AppColors.fieldHintColor
-                  ),
+                      color: AppColors.fieldHintColor),
                 ),
               ],
             ),
@@ -445,7 +430,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                 ),
                 const SizedBox(height: 8),
                 Container(
-                  height: 148,
+                  height: 100,
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
@@ -460,6 +445,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                   child: TextFormField(
                     controller: _descriptionController,
                     maxLines: 5,
+                    maxLength: 100,
                     decoration: InputDecoration(
                       hintText: 'e.g cgpa/grade',
                       hintStyle: GoogleFonts.inter(
@@ -468,6 +454,10 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                         color: AppColors.fieldHintColor,
                       ),
                       border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      counterText: '',
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 12,

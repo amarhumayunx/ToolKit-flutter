@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../../screens/scanner_screens/scanner_screen.dart';
 import '../../utils/app_colors.dart';
 
 class ScannerButton extends StatelessWidget {
@@ -20,7 +21,7 @@ class ScannerButton extends StatelessWidget {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withOpacity(0.04),
               blurRadius: 8,
               offset: Offset(0, -4),
             ),
@@ -43,13 +44,20 @@ class ScannerButton extends StatelessWidget {
 
             ),
             child: Center(
-              child: SvgPicture.asset(
-                'assets/icons/scan_icon.svg',
-                width: 30,
-                height: 30,
-                colorFilter: const ColorFilter.mode(
-                  Colors.white,
-                  BlendMode.srcIn,
+              child: GestureDetector(
+                onTap: (){
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const ScannerScreen()),
+                  );
+                },
+                child: SvgPicture.asset(
+                  'assets/icons/scan_icon.svg',
+                  width: 30,
+                  height: 30,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
             ),

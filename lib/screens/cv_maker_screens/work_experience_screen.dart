@@ -3,11 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/work_experience_model.dart';
 import '../../provider/work_experience_provider.dart';
-
 import '../../utils/app_colors.dart';
 import '../../widgets/buttons/add_another_button.dart';
 import '../../widgets/buttons/save_edit_delete_btns.dart';
 import '../../widgets/custom_text_field.dart';
+import '../../widgets/date_picker_field.dart';
 
 class WorkExperiencePage extends StatefulWidget {
   const WorkExperiencePage({
@@ -29,6 +29,9 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
   bool isCurrent = false;
   bool showForm = false;
   List<String> projectsList = [];
+  DateTime? startDate;
+  DateTime? endDate;
+  String? dateError;
 
   @override
   void dispose() {
@@ -41,16 +44,40 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
     super.dispose();
   }
 
-
-  void _selectDate(BuildContext context, TextEditingController controller) async {
+  void _selectDate(BuildContext context, TextEditingController controller, bool isStartDate) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: isStartDate ? DateTime.now() : (startDate ?? DateTime.now()),
       firstDate: DateTime(1950),
       lastDate: DateTime(2100),
     );
 
     if (picked != null) {
+      if (isStartDate) {
+        startDate = picked;
+        // If end date exists and is before new start date, clear it
+        if (endDate != null && endDate!.isBefore(picked)) {
+          endDate = null;
+          _endDateController.clear();
+          setState(() {
+            dateError = null;
+          });
+        }
+      } else {
+        endDate = picked;
+        // Validate that end date is after start date
+        if (startDate != null && picked.isBefore(startDate!)) {
+          setState(() {
+            dateError = 'End date must be after start date';
+          });
+          return;
+        } else {
+          setState(() {
+            dateError = null;
+          });
+        }
+      }
+
       // Format date as DD/MM/YY to match the UI design
       setState(() {
         controller.text =
@@ -79,8 +106,20 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
       return;
     }
 
-    final provider =
-        Provider.of<WorkExperienceProvider>(context, listen: false);
+    // Additional validation for dates
+    if (!isCurrent && (_startDateController.text.isEmpty || _endDateController.text.isEmpty)) {
+      return;
+    }
+
+    // Validate end date is after start date if both exist
+    if (!isCurrent && startDate != null && endDate != null && endDate!.isBefore(startDate!)) {
+      setState(() {
+        dateError = 'End date must be after start date';
+      });
+      return;
+    }
+
+    final provider = Provider.of<WorkExperienceProvider>(context, listen: false);
 
     provider.addWorkExperience(
       WorkExperienceItem(
@@ -104,13 +143,36 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
       _descriptionController.clear();
       projectsList = [];
       isCurrent = false;
+      startDate = null;
+      endDate = null;
+      dateError = null;
     });
   }
 
   void _editWorkExperience(BuildContext context, int index) {
-    final provider =
-        Provider.of<WorkExperienceProvider>(context, listen: false);
+    final provider = Provider.of<WorkExperienceProvider>(context, listen: false);
     final item = provider.workExperienceItems[index];
+
+    // Parse the dates when editing
+    final startDateParts = item.startDate.split('/');
+    if (startDateParts.length == 3) {
+      startDate = DateTime(
+        int.parse('20${startDateParts[2]}'), // Assuming 20XX format for years
+        int.parse(startDateParts[1]),
+        int.parse(startDateParts[0]),
+      );
+    }
+
+    if (!item.isCurrent && item.endDate != 'Present') {
+      final endDateParts = item.endDate.split('/');
+      if (endDateParts.length == 3) {
+        endDate = DateTime(
+          int.parse('20${endDateParts[2]}'), // Assuming 20XX format for years
+          int.parse(endDateParts[1]),
+          int.parse(endDateParts[0]),
+        );
+      }
+    }
 
     setState(() {
       _positionController.text = item.position;
@@ -121,14 +183,14 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
       _descriptionController.text = item.description;
       isCurrent = item.isCurrent;
       showForm = true;
+      dateError = null;
     });
 
     provider.deleteWorkExperience(index);
   }
 
   void _deleteWorkExperience(BuildContext context, int index) {
-    final provider =
-        Provider.of<WorkExperienceProvider>(context, listen: false);
+    final provider = Provider.of<WorkExperienceProvider>(context, listen: false);
     provider.deleteWorkExperience(index);
   }
 
@@ -145,6 +207,9 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
         _descriptionController.clear();
         projectsList = [];
         isCurrent = false;
+        startDate = null;
+        endDate = null;
+        dateError = null;
       }
     });
   }
@@ -161,7 +226,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 26,right: 26,bottom: 8),
+                  padding: const EdgeInsets.only(left: 26, right: 26, bottom: 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -226,9 +291,9 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
             Text(
               item.position,
               style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.black
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.black
               ),
             ),
             const SizedBox(height: 4),
@@ -244,7 +309,6 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                 color: AppColors.saveDateColor,
               ),
             ),
-
 
             const SizedBox(height: 10),
             const Divider(
@@ -304,104 +368,21 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
               children: [
                 // Start date
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Start date',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      GestureDetector(
-                        onTap: () => _selectDate(context, _startDateController),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.30),
-                                blurRadius: 2,
-                                offset: const Offset(0, 0),
-                              ),
-                            ],
-                            color: AppColors.bgBoxColor,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: TextFormField(
-                            controller: _startDateController,
-                            enabled: false,
-                            decoration: InputDecoration(
-                              hintText: '00/00/00',
-                              hintStyle: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w300,
-                                color: AppColors.fieldHintColor,
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                  child: DateField(
+                    label: 'Start date',
+                    controller: _startDateController,
+                    onTap: () => _selectDate(context, _startDateController, true),
                   ),
                 ),
                 const SizedBox(width: 20),
                 // End date - only show if not current job
                 if (!isCurrent)
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'End Date',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.black,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        GestureDetector(
-                          onTap: () => _selectDate(context, _endDateController),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.30),
-                                  blurRadius: 2,
-                                  offset: const Offset(0, 0),
-                                ),
-                              ],
-                              color: AppColors.bgBoxColor,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: TextFormField(
-                              controller: _endDateController,
-                              enabled: false,
-                              decoration: InputDecoration(
-                                hintText: '00/00/00',
-                                hintStyle: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w300,
-                                  color: AppColors.fieldHintColor,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: DateField(
+                      label: 'End Date',
+                      controller: _endDateController,
+                      onTap: () => _selectDate(context, _endDateController, false),
+                      errorText: dateError,
                     ),
                   ),
                 // Add a placeholder widget when 'Current' is checked
@@ -423,11 +404,17 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     side: const BorderSide(
-                      color: AppColors.fieldHintColor, // Outline color
+                      color: AppColors.fieldHintColor,
                     ),
                     onChanged: (value) {
                       setState(() {
                         isCurrent = value ?? false;
+                        if (isCurrent) {
+                          // Clear end date when marking as current
+                          _endDateController.clear();
+                          endDate = null;
+                          dateError = null;
+                        }
                       });
                     },
                   ),
@@ -458,7 +445,6 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                         color: AppColors.black,
                       ),
                     ),
-
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -529,7 +515,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                   const SizedBox(height: 12),
                   Container(
                     decoration: BoxDecoration(
-                      color: Color(0xFFF7F7F7),
+                      color: const Color(0xFFF7F7F7),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Colors.grey[200]!),
                     ),
@@ -549,17 +535,15 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                                 "• ",
                                 style: GoogleFonts.urbanist(
                                   fontSize: 14,
-
-                                  color: Color(0xFFB5B5B8),
+                                  color: const Color(0xFFB5B5B8),
                                 ),
                               ),
-
                               Expanded(
                                 child: Text(
                                   projectsList[index],
                                   style: GoogleFonts.urbanist(
                                     fontSize: 12,
-                                    color: Color(0xFFB5B5B8),
+                                    color: const Color(0xFFB5B5B8),
                                   ),
                                 ),
                               ),
@@ -624,6 +608,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                   child: TextFormField(
                     controller: _descriptionController,
                     maxLines: 5,
+                    maxLength: 150,
                     decoration: InputDecoration(
                       hintText: 'Your responsibilities and achievements',
                       hintStyle: GoogleFonts.inter(
@@ -632,6 +617,10 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                         color: AppColors.fieldHintColor,
                       ),
                       border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      counterText: '',
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 12,

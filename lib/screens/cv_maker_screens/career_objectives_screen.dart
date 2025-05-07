@@ -126,7 +126,7 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
 
   Widget _buildObjectiveForm() {
     return Container(
-      height: 432,
+      height: 332,
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
@@ -176,7 +176,7 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
         ),
         const SizedBox(height: 10),
         Container(
-          height: 284,
+          height: 180,
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
@@ -190,7 +190,8 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
           ),
           child: TextFormField(
             controller: _objectiveController,
-            maxLines: 12,
+            maxLines: 8,
+             maxLength: 200,
             decoration: InputDecoration(
               hintText: 'Type your career objectives / Profile Summary',
               hintStyle: GoogleFonts.inter(
@@ -199,6 +200,10 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
                 color: AppColors.fieldHintColor,
               ),
               border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              disabledBorder: InputBorder.none,
+              counterText: '',
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 12,

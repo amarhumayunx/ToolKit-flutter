@@ -1,10 +1,75 @@
+// main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:ui';
+import 'package:dotted_border/dotted_border.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
-class ConvertImgMainScreen extends StatelessWidget {
+import 'format_selection_screen.dart';
+
+import '../../utils/app_colors.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Image Converter',
+      theme: ThemeData(
+        primaryColor: const Color(0xFF00BCD4),
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          elevation: 0,
+        ),
+      ),
+      home: const ConvertImgMainScreen(),
+    );
+  }
+}
+
+class ConvertImgMainScreen extends StatefulWidget {
   const ConvertImgMainScreen({super.key});
+
+  @override
+  State<ConvertImgMainScreen> createState() => _ConvertImgMainScreenState();
+}
+
+class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
+  File? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? pickedFile =
+          await _picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+        });
+
+        // Navigate to format selection screen
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  SelectFormatScreen(selectedImage: _selectedImage!),
+            ));
+      }
+    } catch (e) {
+      // Handle any errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error selecting image: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,248 +90,135 @@ class ConvertImgMainScreen extends StatelessWidget {
             fontSize: 18,
           ),
         ),
-        centerTitle: true,
-        actions: [
-          // Status bar elements (time, signal, battery)
-        ],
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 20),
-              // Convert Image illustration
-              Center(
-                child: SvgPicture.asset(
-                  'assets/images/convert_image.svg',
-                  height: 176,
-                  width: 186,
-                ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20),
+            // Convert Image illustration
+            Center(
+              child: SvgPicture.asset(
+                'assets/images/convert_image.svg',
+                height: 176,
+                width: 186,
               ),
-              const SizedBox(height: 30),
-              // Format info card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Convert Image Format',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Easily convert images to various formats while maintaining quality, resolution and clarity.',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
+            ),
+            const SizedBox(height: 30),
+            // Format info card
+            Container(
+              width: 336,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.16),
+                    blurRadius: 4,
+                    offset: const Offset(0, 0),
+                  ),
+                ],
               ),
-              const SizedBox(height: 24),
-              // Select File button
-              Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Select File',
+                    'Convert Image Format',
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  // File selection area with dotted border
-                  DottedBorderContainer(
-                    color: Color(0xFF00BCD4),
-                    strokeWidth: 1.5,
-                    dashPattern: [5, 4],
-                    borderRadius: 8,
-                    child: Container(
-                      width: double.infinity,
-                      height: 128,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Color(0xFF00BCD4).withOpacity(0.05),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Easily convert images to various formats while maintaining quality, resolution and clarity.',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Select File section
+            Container(
+              width: 336,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.16),
+                    blurRadius: 4,
+                    offset: const Offset(0, 0),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start, // Add this line
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16, top: 16),
+                    // Add padding for better spacing
+                    child: Text(
+                      'Select File',
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/upload_file_icon.svg',
-                            height: 28,
-                            width: 36,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: GestureDetector(
+                      onTap: _pickImage,
+                      child: DottedBorder(
+                        color: AppColors.primary,
+                        strokeWidth: 1.5,
+                        dashPattern: const [5, 4],
+                        borderType: BorderType.RRect,
+                        radius: const Radius.circular(8),
+                        child: Container(
+                          width: 304,
+                          height: 128,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: const Color(0xFF00BCD4).withOpacity(0.05),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Drag & Drop or click to \nchoose file',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.inter(
-                              color: Colors.grey,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w400,
-                            ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SvgPicture.asset(
+                                'assets/icons/upload_file_icon.svg',
+                                height: 28,
+                                width: 36,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Click to choose file',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.inter(
+                                  color: Colors.grey,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 40),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Dotted border container widget
-class DottedBorderContainer extends StatelessWidget {
-  final Widget child;
-  final Color color;
-  final double strokeWidth;
-  final List<double> dashPattern;
-  final double borderRadius;
-
-  const DottedBorderContainer({
-    Key? key,
-    required this.child,
-    required this.color,
-    required this.strokeWidth,
-    required this.dashPattern,
-    required this.borderRadius,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        child,
-        Positioned.fill(
-          child: CustomPaint(
-            painter: _DottedBorderPainter(
-              color: color,
-              strokeWidth: strokeWidth,
-              dashPattern: dashPattern,
-              borderRadius: borderRadius,
             ),
-          ),
+            const SizedBox(height: 40),
+          ],
         ),
-      ],
-    );
-  }
-}
-
-// Custom painter for dotted border
-class _DottedBorderPainter extends CustomPainter {
-  final Color color;
-  final double strokeWidth;
-  final List<double> dashPattern;
-  final double borderRadius;
-
-  _DottedBorderPainter({
-    required this.color,
-    required this.strokeWidth,
-    required this.dashPattern,
-    required this.borderRadius,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Rect.fromLTWH(
-      strokeWidth / 2,
-      strokeWidth / 2,
-      size.width - strokeWidth,
-      size.height - strokeWidth,
-    );
-
-    final rrect = RRect.fromRectAndRadius(
-      rect,
-      Radius.circular(borderRadius),
-    );
-
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke;
-
-    // Create a dash effect
-    final Path path = Path()..addRRect(rrect);
-
-    // Draw using dash pattern
-    canvas.drawPath(
-      dashPath(
-        path,
-        dashArray: CircularIntervalList<double>(dashPattern),
       ),
-      paint,
     );
-  }
-
-  Path dashPath(
-    Path path, {
-    required CircularIntervalList<double> dashArray,
-  }) {
-    final dashPath = Path();
-    final dashOffset = dashArray.next;
-
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      var draw = true;
-
-      while (distance < metric.length) {
-        final len = dashArray.next;
-        if (draw) {
-          dashPath.addPath(
-            metric.extractPath(distance, distance + len),
-            Offset.zero,
-          );
-        }
-        distance += len;
-        draw = !draw;
-      }
-    }
-
-    return dashPath;
-  }
-
-  @override
-  bool shouldRepaint(_DottedBorderPainter oldDelegate) => true;
-}
-
-// Helps cycle through a list repeatedly
-class CircularIntervalList<T> {
-  final List<T> _values;
-  int _index = 0;
-
-  CircularIntervalList(this._values);
-
-  T get next {
-    if (_index >= _values.length) {
-      _index = 0;
-    }
-    return _values[_index++];
   }
 }

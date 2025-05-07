@@ -197,9 +197,8 @@ class _Template1State extends State<Template1> {
         final certItemKey = GlobalKey();
         final item = certificationItems[i];
 
-        String dateRange = item.isCompleted
-            ? "${item.startDate} - Present"
-            : "${item.startDate} - ${item.endDate}";
+        String dateRange =
+             "${item.startDate}";
 
         _allContentWidgets.add(KeyedSubtree(
           key: certItemKey,
@@ -1097,62 +1096,64 @@ class _Template1State extends State<Template1> {
   }
 
   Widget _buildSkillsList(List<Skill> skills) {
-    return Wrap(
-      spacing: 8.0,
-      runSpacing: 4.0,
-      children: skills
-          .map((skill) => Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '• ',
-                    style: GoogleFonts.inter(
-                      fontSize: 6,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    skill.name,
-                    style: GoogleFonts.poppins(
-                      fontSize: 6,
-                      color: Colors.grey.shade800,
-                    ),
-                  ),
-                ],
-              ))
-          .toList(),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: skills.map((skill) {
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '• ',
+              style: GoogleFonts.inter(
+                fontSize: 6,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Expanded(
+              child: Text(
+                skill.name,
+                style: GoogleFonts.poppins(
+                  fontSize: 6,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+            ),
+          ],
+        );
+      }).toList(),
     );
   }
 
+
   Widget _buildLanguagesList(List<Language> languages) {
-    return Wrap(
-      spacing: 8.0,
-      runSpacing: 4.0,
-      children: languages
-          .map((language) => Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '• ',
-                    style: GoogleFonts.inter(
-                      fontSize: 6,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    language.name,
-                    style: GoogleFonts.poppins(
-                      fontSize: 6,
-                      color: Colors.grey.shade800,
-                    ),
-                  ),
-                ],
-              ))
-          .toList(),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: languages.map((language) {
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '• ',
+              style: GoogleFonts.inter(
+                fontSize: 6,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Expanded(
+              child: Text(
+                language.name,
+                style: GoogleFonts.poppins(
+                  fontSize: 6,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+            ),
+          ],
+        );
+      }).toList(),
     );
   }
+
 
   Widget _buildTemplateButtons() {
     return TemplateActionButtons(

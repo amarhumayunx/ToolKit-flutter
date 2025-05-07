@@ -18,34 +18,27 @@ class RecentsView extends StatelessWidget {
           time: '6:05pm',
           size: '3.4 MB',
         ),
-        const SizedBox(height: 14),
-        _buildRecentDocumentItem(
-          context,
-          documentName: 'Document',
-          date: 'Mar 23',
-          time: '6:05pm',
-          size: '3.4 MB',
-        ),
       ],
     );
   }
 
   Widget _buildRecentDocumentItem(
-      BuildContext context, {
-        required String documentName,
-        required String date,
-        required String time,
-        required String size,
-      }) {
+    BuildContext context, {
+    required String documentName,
+    required String date,
+    required String time,
+    required String size,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
+
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            offset: const Offset(0, 1),
+            color: Colors.black.withOpacity(0.16),
+            blurRadius: 4,
+            offset: const Offset(0, 0),
           ),
         ],
       ),
@@ -71,7 +64,6 @@ class RecentsView extends StatelessWidget {
                 ),
               ),
             ),
-
 
             // Vertical Divider (full height)
             Container(
@@ -122,7 +114,4 @@ class RecentsView extends StatelessWidget {
       ),
     );
   }
-
-
-
 }

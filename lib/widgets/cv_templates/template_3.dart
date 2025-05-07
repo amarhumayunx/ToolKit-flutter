@@ -10,7 +10,7 @@ import 'package:open_file/open_file.dart';
 import 'dart:io';
 import 'package:flutter/rendering.dart';
 import 'dart:ui' as ui;
-
+import 'dart:math' as math;
 import '../../models/user_model_1.dart';
 import '../../models/website_model.dart';
 import '../../provider/certification_provider.dart';
@@ -37,7 +37,8 @@ class Template3 extends StatefulWidget {
 class _Template3State extends State<Template3> {
   int _currentPage = 1;
   int _totalPages = 1;
-  final List<List<Widget>> _pageContent = [];
+  final List<List<Widget>> _rightColumnContent = [];
+  final List<List<Widget>> _leftColumnContent = [];
   final double _pageContentHeight = 482.0; // Adjusted for Template3 layout
   List<GlobalKey> _pageKeys = [];
   bool _contentMeasured = false;
@@ -60,7 +61,8 @@ class _Template3State extends State<Template3> {
   void initState() {
     super.initState();
     if (widget.websites.isNotEmpty) {
-      Provider.of<UserProvider>(context, listen: false).updateWebsites(widget.websites);
+      Provider.of<UserProvider>(context, listen: false)
+          .updateWebsites(widget.websites);
     }
   }
 
@@ -75,51 +77,179 @@ class _Template3State extends State<Template3> {
   void _distributeContent() {
     final userData = Provider.of<UserProvider>(context, listen: false).userData;
     final workExperienceProvider =
-        Provider.of<WorkExperienceProvider>(context, listen: false);
+    Provider.of<WorkExperienceProvider>(context, listen: false);
     final workExperienceItems = workExperienceProvider.workExperienceItems;
     final educationProvider =
-        Provider.of<EducationProvider>(context, listen: false);
+    Provider.of<EducationProvider>(context, listen: false);
     final educationItems = educationProvider.educationItems;
     final certificationProvider =
-        Provider.of<CertificationProvider>(context, listen: false);
+    Provider.of<CertificationProvider>(context, listen: false);
     final certificationItems = certificationProvider.certificationItems;
     final skillItems =
         Provider.of<SkillsProvider>(context, listen: false).skillItems;
     final languageItems =
         Provider.of<LanguageProvider>(context, listen: false).languages;
 
-    _pageContent.clear();
-    List<Widget> currentPageWidgets = [];
-    double currentPageHeight = 0;
+    _rightColumnContent.clear();
+    _leftColumnContent.clear();
+
     double maxPageHeight = _pageContentHeight - 40;
 
-    void addWidgetToPage(Widget widget, double estimatedHeight) {
-      if (currentPageHeight + estimatedHeight > maxPageHeight &&
-          currentPageWidgets.isNotEmpty) {
-        _pageContent.add([...currentPageWidgets]);
-        currentPageWidgets = [];
-        currentPageHeight = 0;
+    // Distribute left column content (Contact, Education, Skills, Languages)
+    List<Widget> currentLeftColumnWidgets = [];
+    double currentLeftColumnHeight = 0;
+
+    void addWidgetToLeftColumn(Widget widget, double estimatedHeight) {
+      // If adding this widget would exceed page height and we already have content,
+      // create a new page
+      if (currentLeftColumnHeight + estimatedHeight > maxPageHeight &&
+          currentLeftColumnWidgets.isNotEmpty) {
+        _leftColumnContent.add([...currentLeftColumnWidgets]);
+        currentLeftColumnWidgets = [];
+        currentLeftColumnHeight = 0;
       }
 
-      currentPageWidgets.add(widget);
-      currentPageHeight += estimatedHeight;
+      currentLeftColumnWidgets.add(widget);
+      currentLeftColumnHeight += estimatedHeight;
     }
 
-    // Profile section - only show if there's content
+    // Contact Section
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final List<Website> websites = userProvider.websites;
+    bool hasPhone =
+        userData.phoneNumber != null && userData.phoneNumber!.isNotEmpty;
+    bool hasEmail = userData.email != null && userData.email!.isNotEmpty;
+    bool hasWebsites = websites.isNotEmpty;
+
+    if (hasPhone || hasEmail || hasWebsites) {
+      final contactSection = _buildContactSection(userData);
+      addWidgetToLeftColumn(
+          contactSection, 50 + (websites.length * 10)); // Estimated height
+      addWidgetToLeftColumn(const SizedBox(height: 6), 16);
+    }
+
+    // Education Section
+    if (educationItems.isNotEmpty) {
+      final educationSection = _buildEducationSection();
+      // Estimate height more accurately based on content
+      double estimatedHeight = 30; // Base height for section header
+      for (var item in educationItems) {
+        // Basic height for degree, institute, date
+        double itemHeight = 30;
+
+        // Add height for description if present
+        if (item.description != null && item.description!.isNotEmpty) {
+          // Roughly estimate 5 points per line of text
+          itemHeight += (item.description!.length / 30) * 5;
+        }
+
+        estimatedHeight += itemHeight;
+      }
+
+      // Check if adding this section would exceed page height
+      if (currentLeftColumnHeight + estimatedHeight > maxPageHeight &&
+          currentLeftColumnWidgets.isNotEmpty) {
+        // Start a new page
+        _leftColumnContent.add([...currentLeftColumnWidgets]);
+        currentLeftColumnWidgets = [];
+        currentLeftColumnHeight = 0;
+
+        // Add education section to new page
+        addWidgetToLeftColumn(educationSection, estimatedHeight);
+      } else {
+        // Add to current page
+        addWidgetToLeftColumn(educationSection, estimatedHeight);
+      }
+
+      addWidgetToLeftColumn(const SizedBox(height: 6), 16);
+    }
+
+    // Skills Section
+    if (skillItems.isNotEmpty) {
+      final skillsSection = _buildSkillsSection();
+      double estimatedHeight = 30 + (skillItems.length * 8);
+
+      // Check if adding this section would exceed page height
+      if (currentLeftColumnHeight + estimatedHeight > maxPageHeight &&
+          currentLeftColumnWidgets.isNotEmpty) {
+        // Start a new page
+        _leftColumnContent.add([...currentLeftColumnWidgets]);
+        currentLeftColumnWidgets = [];
+        currentLeftColumnHeight = 0;
+
+        // Add skills section to new page
+        addWidgetToLeftColumn(skillsSection, estimatedHeight);
+      } else {
+        // Add to current page
+        addWidgetToLeftColumn(skillsSection, estimatedHeight);
+
+      }
+
+      addWidgetToLeftColumn(const SizedBox(height: 6), 16);
+    }
+
+    // Languages Section
+    if (languageItems.isNotEmpty) {
+      final languagesSection = _buildLanguagesSection();
+      double estimatedHeight = 30 + (languageItems.length * 8);
+
+      // Check if adding this section would exceed page height
+      if (currentLeftColumnHeight + estimatedHeight > maxPageHeight &&
+          currentLeftColumnWidgets.isNotEmpty) {
+        // Start a new page
+        _leftColumnContent.add([...currentLeftColumnWidgets]);
+        currentLeftColumnWidgets = [];
+        currentLeftColumnHeight = 0;
+
+        // Add languages section to new page
+        addWidgetToLeftColumn(languagesSection, estimatedHeight);
+      } else {
+        // Add to current page
+        addWidgetToLeftColumn(languagesSection, estimatedHeight);
+      }
+    }
+
+    // Add remaining left column widgets
+    if (currentLeftColumnWidgets.isNotEmpty) {
+      _leftColumnContent.add([...currentLeftColumnWidgets]);
+    }
+
+    // Make sure we have at least one page in left column
+    if (_leftColumnContent.isEmpty) {
+      _leftColumnContent.add([Container()]);
+    }
+
+    // Distribute right column content (Profile, Experience, Certifications)
+    List<Widget> currentRightColumnWidgets = [];
+    double currentRightColumnHeight = 0;
+
+    void addWidgetToRightColumn(Widget widget, double estimatedHeight) {
+      if (currentRightColumnHeight + estimatedHeight > maxPageHeight &&
+          currentRightColumnWidgets.isNotEmpty) {
+        _rightColumnContent.add([...currentRightColumnWidgets]);
+        currentRightColumnWidgets = [];
+        currentRightColumnHeight = 0;
+      }
+
+      currentRightColumnWidgets.add(widget);
+      currentRightColumnHeight += estimatedHeight;
+    }
+
+    // Profile section
     if (userData.careerObjective != null &&
         userData.careerObjective!.isNotEmpty) {
       final profileSection = _buildProfileSection(userData);
-      addWidgetToPage(profileSection, 30);
-      addWidgetToPage(const SizedBox(height: 6), 6);
-      addWidgetToPage(_buildDivider(), 2);
-      addWidgetToPage(const SizedBox(height: 6), 6);
+      addWidgetToRightColumn(profileSection, 30);
+      addWidgetToRightColumn(const SizedBox(height: 8), 6);
+      addWidgetToRightColumn(_buildDivider(), 2);
+      addWidgetToRightColumn(const SizedBox(height: 4), 6);
     }
 
-    // Work Experience section - only show if there are items
+    // Work Experience section
     if (workExperienceItems.isNotEmpty) {
       final sectionTitle = _buildSectionTitle('WORK EXPERIENCE');
-      addWidgetToPage(sectionTitle, 20);
-      addWidgetToPage(const SizedBox(height: 4), 4);
+      addWidgetToRightColumn(sectionTitle, 20);
+      addWidgetToRightColumn(const SizedBox(height: 2), 4);
 
       for (int i = 0; i < workExperienceItems.length; i++) {
         final item = workExperienceItems[i];
@@ -143,27 +273,27 @@ class _Template3State extends State<Template3> {
           bulletPoints: item.projects.isNotEmpty ? item.projects : null,
         );
 
-        addWidgetToPage(experienceItem, itemHeight);
+        addWidgetToRightColumn(experienceItem, itemHeight);
 
         if (i < workExperienceItems.length - 1) {
-          addWidgetToPage(const SizedBox(height: 4), 4);
+          addWidgetToRightColumn(const SizedBox(height: 2), 4);
         }
       }
-      addWidgetToPage(const SizedBox(height: 6), 6);
-      addWidgetToPage(_buildDivider(), 2);
-      addWidgetToPage(const SizedBox(height: 6), 6);
+      addWidgetToRightColumn(const SizedBox(height: 4), 6);
+      addWidgetToRightColumn(_buildDivider(), 2);
+      addWidgetToRightColumn(const SizedBox(height: 4), 6);
     }
 
-    // Certifications section - only show if there are items
+    // Certifications section
     if (certificationItems.isNotEmpty) {
       final sectionTitle = _buildSectionTitle('CERTIFICATIONS');
-      addWidgetToPage(sectionTitle, 20);
-      addWidgetToPage(const SizedBox(height: 4), 4);
+      addWidgetToRightColumn(sectionTitle, 20);
+      addWidgetToRightColumn(const SizedBox(height: 2), 4);
 
       for (int i = 0; i < certificationItems.length; i++) {
         final item = certificationItems[i];
         String dateRange =
-            item.isCompleted ? "${item.startDate} " : "${item.startDate} ";
+        item.isCompleted ? "${item.startDate} " : "${item.startDate} ";
 
         double itemHeight = 30;
         if (item.description.isNotEmpty) {
@@ -176,26 +306,37 @@ class _Template3State extends State<Template3> {
           dateRange,
         );
 
-        addWidgetToPage(certItem, itemHeight);
+        addWidgetToRightColumn(certItem, itemHeight);
 
         if (i < certificationItems.length - 1) {
-          addWidgetToPage(const SizedBox(height: 4), 4);
+          addWidgetToRightColumn(const SizedBox(height: 2), 4);
         }
       }
-
     }
 
-    // Add remaining widgets to last page
-    if (currentPageWidgets.isNotEmpty) {
-      _pageContent.add([...currentPageWidgets]);
+    // Add remaining right column widgets
+    if (currentRightColumnWidgets.isNotEmpty) {
+      _rightColumnContent.add([...currentRightColumnWidgets]);
     }
 
-    // If no content was added (empty CV), add an empty page
-    if (_pageContent.isEmpty) {
-      _pageContent.add([Container()]);
+    // Make sure we have at least one page in right column
+    if (_rightColumnContent.isEmpty) {
+      _rightColumnContent.add([Container()]);
     }
 
-    _totalPages = _pageContent.length;
+    // Calculate total pages needed
+    _totalPages =
+        math.max(_leftColumnContent.length, _rightColumnContent.length);
+
+    // Ensure both columns have the same number of pages
+    while (_leftColumnContent.length < _totalPages) {
+      _leftColumnContent.add([Container()]);
+    }
+
+    while (_rightColumnContent.length < _totalPages) {
+      _rightColumnContent.add([Container()]);
+    }
+
     _pageKeys = List.generate(_totalPages, (index) => GlobalKey());
 
     setState(() {
@@ -209,12 +350,14 @@ class _Template3State extends State<Template3> {
       color: AppColors.t3DividerColor,
     );
   }
+
   Widget _buildBlackDivider() {
     return Container(
       height: 0.4,
       color: AppColors.black,
     );
   }
+
   Future<void> _saveCv(BuildContext context) async {
     try {
       final userData =
@@ -233,7 +376,7 @@ class _Template3State extends State<Template3> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const CircularProgressIndicator(),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   Text('Saving CV...', style: GoogleFonts.inter()),
                 ],
               ),
@@ -340,7 +483,7 @@ class _Template3State extends State<Template3> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const CircularProgressIndicator(),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   Text('Generating PDF...', style: GoogleFonts.inter()),
                 ],
               ),
@@ -495,9 +638,16 @@ class _Template3State extends State<Template3> {
   }
 
   Widget _buildPage(int pageIndex) {
+    // Use 0-based index for array access
+    int arrayIndex = pageIndex - 1;
+
     // Get content for this page
-    List<Widget> pageContent =
-        pageIndex <= _pageContent.length ? _pageContent[pageIndex - 1] : [];
+    List<Widget> leftContent = arrayIndex < _leftColumnContent.length
+        ? _leftColumnContent[arrayIndex]
+        : [];
+    List<Widget> rightContent = arrayIndex < _rightColumnContent.length
+        ? _rightColumnContent[arrayIndex]
+        : [];
 
     return Container(
       constraints: const BoxConstraints(
@@ -518,7 +668,8 @@ class _Template3State extends State<Template3> {
         children: [
           // Header section is always on first page
           if (pageIndex == 1)
-            _buildHeader(Provider.of<UserProvider>(context).userData),
+            _buildHeader(
+                Provider.of<UserProvider>(context, listen: false).userData),
 
           // Main content with left and right columns
           Expanded(
@@ -534,19 +685,7 @@ class _Template3State extends State<Template3> {
                     physics: const NeverScrollableScrollPhysics(),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Left sidebar content is only shown on first page
-                        if (pageIndex == 1) ...[
-                          _buildContactSection(
-                              Provider.of<UserProvider>(context).userData),
-                          const SizedBox(height: 16),
-                          _buildEducationSection(),
-                          const SizedBox(height: 16),
-                          _buildSkillsSection(),
-                          const SizedBox(height: 16),
-                          _buildLanguagesSection(),
-                        ],
-                      ],
+                      children: leftContent,
                     ),
                   ),
                 ),
@@ -559,7 +698,7 @@ class _Template3State extends State<Template3> {
                       physics: const NeverScrollableScrollPhysics(),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: pageContent,
+                        children: rightContent,
                       ),
                     ),
                   ),
@@ -567,8 +706,6 @@ class _Template3State extends State<Template3> {
               ],
             ),
           ),
-
-          // Add page number indicator
         ],
       ),
     );
@@ -596,7 +733,7 @@ class _Template3State extends State<Template3> {
                   Text(
                     userData.fullName!.split(' ').first.toUpperCase(),
                     style: GoogleFonts.inriaSerif(
-                      fontSize: 14,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: AppColors.white,
                     ),
@@ -606,12 +743,12 @@ class _Template3State extends State<Template3> {
                   Text(
                     userData.fullName!.split(' ').last.toUpperCase(),
                     style: GoogleFonts.inriaSerif(
-                      fontSize: 14,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: AppColors.white,
                     ),
                   ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 if (userData.designation != null &&
                     userData.designation!.isNotEmpty)
                   Text(
@@ -658,10 +795,11 @@ class _Template3State extends State<Template3> {
   }
 
   Widget _buildContactSection(UserModel userData) {
-    final userProvider = Provider.of<UserProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     final List<Website> websites = userProvider.websites;
 
-    bool hasPhone = userData.phoneNumber != null && userData.phoneNumber!.isNotEmpty;
+    bool hasPhone =
+        userData.phoneNumber != null && userData.phoneNumber!.isNotEmpty;
     bool hasEmail = userData.email != null && userData.email!.isNotEmpty;
     bool hasWebsites = websites.isNotEmpty;
 
@@ -681,9 +819,10 @@ class _Template3State extends State<Template3> {
             color: AppColors.t3Primary,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         if (hasPhone)
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SvgPicture.asset(
                 'assets/icons/contact_icon.svg',
@@ -691,18 +830,23 @@ class _Template3State extends State<Template3> {
                 height: 6,
               ),
               const SizedBox(width: 4),
-              Text(
-                userData.phoneNumber!,
-                style: GoogleFonts.poppins(
-                  fontSize: 6,
-                  color: AppColors.black,
+              Expanded(
+                child: Text(
+                  userData.phoneNumber!,
+                  style: GoogleFonts.poppins(
+                    fontSize: 6,
+                    color: AppColors.black,
+                  ),
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
                 ),
               ),
             ],
           ),
         if (hasEmail) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SvgPicture.asset(
                 'assets/icons/email_icon.svg',
@@ -710,11 +854,15 @@ class _Template3State extends State<Template3> {
                 height: 6,
               ),
               const SizedBox(width: 4),
-              Text(
-                userData.email!,
-                style: GoogleFonts.poppins(
-                  fontSize: 6,
-                  color: AppColors.black,
+              Expanded(
+                child: Text(
+                  userData.email!,
+                  style: GoogleFonts.poppins(
+                    fontSize: 6,
+                    color: AppColors.black,
+                  ),
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
                 ),
               ),
             ],
@@ -722,8 +870,9 @@ class _Template3State extends State<Template3> {
         ],
         if (hasWebsites) ...[
           for (Website website in websites) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SvgPicture.asset(
                   'assets/icons/url_icon.svg',
@@ -731,26 +880,29 @@ class _Template3State extends State<Template3> {
                   height: 6,
                 ),
                 const SizedBox(width: 4),
-                Text(
-                  website.url,
-                  style: GoogleFonts.poppins(
-                    fontSize: 6,
-                    color: AppColors.black,
+                Expanded(
+                  child: Text(
+                    website.url,
+                    style: GoogleFonts.poppins(
+                      fontSize: 6,
+                      color: AppColors.black,
+                    ),
+                    softWrap: true,
+                    overflow: TextOverflow.visible,
                   ),
                 ),
               ],
             ),
           ]
         ],
-        const SizedBox(height: 10),
+        const SizedBox(height: 4),
         _buildBlackDivider(),
       ],
     );
   }
-
   Widget _buildEducationSection() {
     final educationItems =
-        Provider.of<EducationProvider>(context).educationItems;
+        Provider.of<EducationProvider>(context, listen: false).educationItems;
 
     // Only show section if there are education items
     if (educationItems.isEmpty) {
@@ -768,7 +920,7 @@ class _Template3State extends State<Template3> {
             color: AppColors.t3Primary,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         ...educationItems.map((item) {
           String dateRange = item.isCompleted
               ? "${item.startDate} - Present"
@@ -779,10 +931,9 @@ class _Template3State extends State<Template3> {
               Text(
                 item.degree ?? '',
                 style: GoogleFonts.poppins(
-                  fontSize: 8,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.t3SubHeading
-                ),
+                    fontSize: 8,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.t3SubHeading),
               ),
               Text(
                 item.institute ?? '',
@@ -809,18 +960,19 @@ class _Template3State extends State<Template3> {
                   ),
                 ),
               ],
-              if (item != educationItems.last) const SizedBox(height: 8),
+              if (item != educationItems.last) const SizedBox(height: 4),
             ],
           );
         }).toList(),
-        const SizedBox(height: 10),
+        const SizedBox(height: 4),
         _buildBlackDivider(),
       ],
     );
   }
 
   Widget _buildSkillsSection() {
-    final skillItems = Provider.of<SkillsProvider>(context).skillItems;
+    final skillItems =
+        Provider.of<SkillsProvider>(context, listen: false).skillItems;
 
     // Only show section if there are skills
     if (skillItems.isEmpty) {
@@ -838,9 +990,9 @@ class _Template3State extends State<Template3> {
             color: AppColors.t3Primary,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         ...skillItems.map((skill) => _buildSkillItem(skill.name)).toList(),
-        const SizedBox(height: 10),
+        const SizedBox(height: 6),
         _buildBlackDivider(),
       ],
     );
@@ -871,7 +1023,8 @@ class _Template3State extends State<Template3> {
   }
 
   Widget _buildLanguagesSection() {
-    final languageItems = Provider.of<LanguageProvider>(context).languages;
+    final languageItems =
+        Provider.of<LanguageProvider>(context, listen: false).languages;
 
     // Only show section if there are languages
     if (languageItems.isEmpty) {
@@ -889,7 +1042,7 @@ class _Template3State extends State<Template3> {
             color: AppColors.t3Primary,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         ...languageItems
             .map((language) => _buildSkillItem(language.name))
             .toList(),
@@ -909,7 +1062,7 @@ class _Template3State extends State<Template3> {
             color: AppColors.t3Primary,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         Text(
           userData.careerObjective ?? '',
           style: GoogleFonts.inter(
@@ -951,10 +1104,9 @@ class _Template3State extends State<Template3> {
               child: Text(
                 title,
                 style: GoogleFonts.poppins(
-                  fontSize: 7,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.t3Primary
-                ),
+                    fontSize: 7,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.t3Primary),
               ),
             ),
             Text(
@@ -972,17 +1124,13 @@ class _Template3State extends State<Template3> {
           style: GoogleFonts.poppins(
             fontSize: 7,
             color: AppColors.t3SubHeading,
-
           ),
         ),
         if (description.isNotEmpty) ...[
           const SizedBox(height: 2),
           Text(
             description,
-            style: GoogleFonts.inter(
-              fontSize: 6,
-              color: AppColors.black
-            ),
+            style: GoogleFonts.inter(fontSize: 6, color: AppColors.black),
           ),
         ],
         if (bulletPoints != null && bulletPoints.isNotEmpty) ...[
@@ -1025,10 +1173,9 @@ class _Template3State extends State<Template3> {
               child: Text(
                 title,
                 style: GoogleFonts.poppins(
-                  fontSize: 7,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.t3SubHeading
-                ),
+                    fontSize: 7,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.t3SubHeading),
               ),
             ),
             Text(

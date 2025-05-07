@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../screens/settings_screen.dart';
 
 class HomeAppBar extends StatelessWidget {
   const HomeAppBar({super.key});
@@ -20,10 +21,20 @@ class HomeAppBar extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          SvgPicture.asset(
-            'assets/icons/settings_icon.svg',
-            height: 30,
-            width: 30,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+            },
+            child: SvgPicture.asset(
+              'assets/icons/settings_icon.svg',
+              height: 30,
+              width: 30,
+            ),
           ),
         ],
       ),

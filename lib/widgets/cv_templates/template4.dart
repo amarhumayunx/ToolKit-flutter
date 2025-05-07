@@ -11,8 +11,6 @@ import 'dart:io';
 import 'package:flutter/rendering.dart';
 import 'dart:ui' as ui;
 import 'dart:math' as math;
-
-import '../../models/education_item_model.dart';
 import '../../models/language_model.dart';
 import '../../models/skills_model.dart';
 import '../../models/user_model_1.dart';
@@ -39,7 +37,6 @@ class Template4 extends StatefulWidget {
 }
 
 class _Template4State extends State<Template4> {
-  int _currentPage = 1;
   int _totalPages = 1;
   final List<List<Widget>> _mainColumnContent = [];
   final List<List<Widget>> _sideColumnContent = [];
@@ -66,163 +63,284 @@ class _Template4State extends State<Template4> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.websites.isNotEmpty) {
-        Provider.of<UserProvider>(context, listen: false).updateWebsites(widget.websites);
+        Provider.of<UserProvider>(context, listen: false)
+            .updateWebsites(widget.websites);
       }
     });
   }
 
+  double _estimateTextHeight(String text, TextStyle style, double width) {
+    final double charHeight = style.fontSize! * 1.2;
+    final double charWidth = style.fontSize! * 0.6;
+    final int charsPerLine = (width / charWidth).floor();
+    final int lines = (text.length / charsPerLine).ceil();
+    return lines * charHeight;
+  }
+
   void _distributeContent() {
     final userData = Provider.of<UserProvider>(context, listen: false).userData;
-    final workExperienceProvider = Provider.of<WorkExperienceProvider>(context, listen: false);
+    final workExperienceProvider =
+        Provider.of<WorkExperienceProvider>(context, listen: false);
     final workExperienceItems = workExperienceProvider.workExperienceItems;
-    final educationProvider = Provider.of<EducationProvider>(context, listen: false);
+    final educationProvider =
+        Provider.of<EducationProvider>(context, listen: false);
     final educationItems = educationProvider.educationItems;
-    final certificationProvider = Provider.of<CertificationProvider>(context, listen: false);
+    final certificationProvider =
+        Provider.of<CertificationProvider>(context, listen: false);
     final certificationItems = certificationProvider.certificationItems;
-    final skillItems = Provider.of<SkillsProvider>(context, listen: false).skillItems;
-    final languageItems = Provider.of<LanguageProvider>(context, listen: false).languages;
+    final skillItems =
+        Provider.of<SkillsProvider>(context, listen: false).skillItems;
+    final languageItems =
+        Provider.of<LanguageProvider>(context, listen: false).languages;
 
     // Clear previous content
     _mainColumnContent.clear();
     _sideColumnContent.clear();
 
-    // Initialize first pages for both columns
-    _mainColumnContent.add([]);
-    _sideColumnContent.add([]);
+    double maxPageHeight = _pageContentHeight - 40;
 
-    // Current heights for both columns
-    double currentMainHeight = 0;
-    double currentSideHeight = 0;
+    // Distribute main column content (Profile, Experience, Certifications)
+    List<Widget> currentMainColumnWidgets = [];
+    double currentMainColumnHeight = 0;
 
-    // Max available height after accounting for header
-    double maxAvailableHeight = _pageContentHeight - 130;
-
-    // Helper function to add content to main column
-    void addMainContent(Widget widget, double estimatedHeight) {
-      // Check if we need to add a new page
-      if (currentMainHeight + estimatedHeight > maxAvailableHeight) {
-        _mainColumnContent.add([]);
-        currentMainHeight = 0;
+    void addWidgetToMainColumn(Widget widget, double estimatedHeight) {
+      if (currentMainColumnHeight + estimatedHeight > maxPageHeight &&
+          currentMainColumnWidgets.isNotEmpty) {
+        _mainColumnContent.add([...currentMainColumnWidgets]);
+        currentMainColumnWidgets = [];
+        currentMainColumnHeight = 0;
       }
 
-      _mainColumnContent.last.add(widget);
-      currentMainHeight += estimatedHeight;
+      currentMainColumnWidgets.add(widget);
+      currentMainColumnHeight += estimatedHeight;
     }
 
-    // Helper function to add content to side column
-    void addSideContent(Widget widget, double estimatedHeight) {
-      // Check if we need to add a new page
-      if (currentSideHeight + estimatedHeight > maxAvailableHeight) {
-        _sideColumnContent.add([]);
-        currentSideHeight = 0;
-      }
-
-      _sideColumnContent.last.add(widget);
-      currentSideHeight += estimatedHeight;
+    // Profile section
+    if (userData.careerObjective != null &&
+        userData.careerObjective!.isNotEmpty) {
+      final profileSection = _buildProfileSection(userData);
+      addWidgetToMainColumn(profileSection, 30);
+      addWidgetToMainColumn(const SizedBox(height: 0), 6);
+      addWidgetToMainColumn(_buildGreyDivider(), 2);
+      addWidgetToMainColumn(const SizedBox(height: 0), 6);
     }
 
-    // Add profile section to main column if there's content
-    if (userData.careerObjective != null && userData.careerObjective!.isNotEmpty) {
-      addMainContent(_buildProfileSection(userData), 80);
-      addMainContent(const SizedBox(height: 10), 10);
-    }
-
-    // Add work experience section to main column if there are items
+    // Work Experience section
     if (workExperienceItems.isNotEmpty) {
-      addMainContent(_buildSectionTitle('WORK EXPERIENCE'), 20);
-      addMainContent(const SizedBox(height: 8), 8);
+      final sectionTitle = _buildSectionTitle('WORK EXPERIENCE');
+      addWidgetToMainColumn(sectionTitle, 20);
+      addWidgetToMainColumn(const SizedBox(height: 2), 4);
 
-      for (var item in workExperienceItems) {
+      for (int i = 0; i < workExperienceItems.length; i++) {
+        final item = workExperienceItems[i];
         String dateRange = item.isCurrent
             ? "${item.startDate} - Present"
             : "${item.startDate} - ${item.endDate}";
 
-        // Estimate height based on content
-        double itemHeight = 40; // Base height
+        double itemHeight = 40;
         if (item.description.isNotEmpty) {
-          itemHeight += 20; // Add space for description
+          itemHeight += 15 + (item.description.length / 50) * 5;
         }
         if (item.projects.isNotEmpty) {
-          itemHeight += item.projects.length * 10; // Add space for each project
+          itemHeight += item.projects.length * 10;
         }
 
-        addMainContent(
-          _buildExperienceItem(
-            item.position,
-            item.company,
-            item.description,
-            dateRange,
-            bulletPoints: item.projects.isNotEmpty ? item.projects : null,
-          ),
-          itemHeight,
+        final experienceItem = _buildExperienceItem(
+          item.position,
+          item.company,
+          item.description,
+          dateRange,
+          bulletPoints: item.projects.isNotEmpty ? item.projects : null,
         );
 
-        addMainContent(const SizedBox(height: 15), 10);
+        addWidgetToMainColumn(experienceItem, itemHeight);
+
+        if (i < workExperienceItems.length - 1) {
+          addWidgetToMainColumn(const SizedBox(height: 2), 4);
+        }
       }
+      addWidgetToMainColumn(const SizedBox(height: 4), 6);
+      addWidgetToMainColumn(_buildGreyDivider(), 2);
+      addWidgetToMainColumn(const SizedBox(height: 4), 6);
     }
 
-    // Add certifications section to main column if there are items
+    // Certifications section
     if (certificationItems.isNotEmpty) {
-      addMainContent(_buildSectionTitle('CERTIFICATIONS'), 20);
-      addMainContent(const SizedBox(height: 8), 8);
+      final sectionTitle = _buildSectionTitle('CERTIFICATIONS');
+      addWidgetToMainColumn(sectionTitle, 60);
+      addWidgetToMainColumn(const SizedBox(height: 2), 4);
 
-      for (var item in certificationItems) {
-        String dateRange = item.isCompleted ? "${item.startDate}" : "${item.startDate}";
+      for (int i = 0; i < certificationItems.length; i++) {
+        final item = certificationItems[i];
+        String dateRange =
+            item.isCompleted ? "${item.startDate} " : "${item.startDate} ";
 
-        addMainContent(
-          _buildCertificationItem(
-            item.certificationName,
-            item.description,
-            dateRange,
-          ),
-          50,
+        double itemHeight = 30;
+        if (item.description.isNotEmpty) {
+          itemHeight += 10 + (item.description.length / 50) * 5;
+        }
+
+        final certItem = _buildCertificationItem(
+          item.certificationName,
+          item.description,
+          dateRange,
         );
-        addMainContent(const SizedBox(height: 10), 10);
+
+        addWidgetToMainColumn(certItem, itemHeight);
+
+        if (i < certificationItems.length - 1) {
+          addWidgetToMainColumn(const SizedBox(height: 2), 4);
+        }
       }
     }
 
-    // Add contact section to side column if there's content
-    bool hasContactInfo = userData.phoneNumber != null && userData.phoneNumber!.isNotEmpty ||
-        userData.email != null && userData.email!.isNotEmpty ||
-        widget.websites.isNotEmpty;
-
-    if (hasContactInfo) {
-      addSideContent(_buildContactSection(userData), 60);
-      addSideContent(const SizedBox(height: 16), 16);
-      addSideContent(_buildSidebarDivider(), 1);
-      addSideContent(const SizedBox(height: 16), 16);
+    // Add remaining main column widgets
+    if (currentMainColumnWidgets.isNotEmpty) {
+      _mainColumnContent.add([...currentMainColumnWidgets]);
     }
 
-    // Add education section to side column if there are items
+    // Make sure we have at least one page in main column
+    if (_mainColumnContent.isEmpty) {
+      _mainColumnContent.add([Container()]);
+    }
+
+    // Distribute side column content (Contact, Education, Skills, Languages)
+    List<Widget> currentSideColumnWidgets = [];
+    double currentSideColumnHeight = 0;
+
+    void addWidgetToSideColumn(Widget widget, double estimatedHeight) {
+      if (currentSideColumnHeight + estimatedHeight > maxPageHeight &&
+          currentSideColumnWidgets.isNotEmpty) {
+        _sideColumnContent.add([...currentSideColumnWidgets]);
+        currentSideColumnWidgets = [];
+        currentSideColumnHeight = 0;
+      }
+
+      currentSideColumnWidgets.add(widget);
+      currentSideColumnHeight += estimatedHeight;
+    }
+
+    // Contact Section
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final List<Website> websites = userProvider.websites;
+    bool hasPhone =
+        userData.phoneNumber != null && userData.phoneNumber!.isNotEmpty;
+    bool hasEmail = userData.email != null && userData.email!.isNotEmpty;
+    bool hasWebsites = websites.isNotEmpty;
+
+    if (hasPhone || hasEmail || hasWebsites) {
+      final contactSection = _buildContactSection(userData);
+      addWidgetToSideColumn(
+          contactSection, 50 + (websites.length * 10)); // Estimated height
+      addWidgetToSideColumn(const SizedBox(height: 6), 16);
+      addWidgetToSideColumn(_buildSidebarDivider(), 1);
+      addWidgetToSideColumn(const SizedBox(height: 4), 16);
+    }
+
+    // Education Section
     if (educationItems.isNotEmpty) {
-      addSideContent(_buildEducationSection(educationItems), 120);
-      addSideContent(const SizedBox(height: 16), 16);
-      addSideContent(_buildSidebarDivider(), 1);
-      addSideContent(const SizedBox(height: 16), 16);
+      final educationSection = _buildEducationSection();
+      // Estimate height more accurately based on content
+      double estimatedHeight = 30; // Base height for section header
+      for (var item in educationItems) {
+        // Basic height for degree, institute, date
+        double itemHeight = 30;
+
+        // Add height for description if present
+        if (item.description != null && item.description!.isNotEmpty) {
+          // Roughly estimate 5 points per line of text
+          itemHeight += (item.description!.length / 30) * 5;
+        }
+
+        estimatedHeight += itemHeight;
+      }
+
+      // Check if adding this section would exceed page height
+      if (currentSideColumnHeight + estimatedHeight > maxPageHeight &&
+          currentSideColumnWidgets.isNotEmpty) {
+        // Start a new page
+        _sideColumnContent.add([...currentSideColumnWidgets]);
+        currentSideColumnWidgets = [];
+        currentSideColumnHeight = 0;
+
+        // Add education section to new page
+        addWidgetToSideColumn(educationSection, estimatedHeight);
+      } else {
+        // Add to current page
+        addWidgetToSideColumn(educationSection, estimatedHeight);
+      }
+
+      addWidgetToSideColumn(const SizedBox(height: 6), 16);
+      addWidgetToSideColumn(_buildSidebarDivider(), 1);
+      addWidgetToSideColumn(const SizedBox(height: 4), 16);
     }
 
-    // Add skills section to side column if there are items
+    // Skills Section
     if (skillItems.isNotEmpty) {
-      addSideContent(_buildSkillsSection(skillItems), 60);
-      addSideContent(const SizedBox(height: 16), 16);
-      addSideContent(_buildSidebarDivider(), 1);
-      addSideContent(const SizedBox(height: 16), 16);
+      final skillsSection = _buildSkillsSection(skillItems);
+      double estimatedHeight = 30 + (skillItems.length * 8);
+
+      // Check if adding this section would exceed page height
+      if (currentSideColumnHeight + estimatedHeight > maxPageHeight &&
+          currentSideColumnWidgets.isNotEmpty) {
+        // Start a new page
+        _sideColumnContent.add([...currentSideColumnWidgets]);
+        currentSideColumnWidgets = [];
+        currentSideColumnHeight = 0;
+
+        // Add skills section to new page
+        addWidgetToSideColumn(skillsSection, estimatedHeight);
+      } else {
+        // Add to current page
+        addWidgetToSideColumn(skillsSection, estimatedHeight);
+      }
+
+      addWidgetToSideColumn(const SizedBox(height: 6), 16);
+      addWidgetToSideColumn(_buildSidebarDivider(), 1);
+      addWidgetToSideColumn(const SizedBox(height: 4), 16);
     }
 
-    // Add languages section to side column if there are items
+    // Languages Section
     if (languageItems.isNotEmpty) {
-      addSideContent(_buildLanguagesSection(languageItems), 30);
+      final languagesSection = _buildLanguagesSection(languageItems);
+      double estimatedHeight = 30 + (languageItems.length * 8);
+
+      // Check if adding this section would exceed page height
+      if (currentSideColumnHeight + estimatedHeight > maxPageHeight &&
+          currentSideColumnWidgets.isNotEmpty) {
+        // Start a new page
+        _sideColumnContent.add([...currentSideColumnWidgets]);
+        currentSideColumnWidgets = [];
+        currentSideColumnHeight = 0;
+
+        // Add languages section to new page
+        addWidgetToSideColumn(languagesSection, estimatedHeight);
+      } else {
+        // Add to current page
+        addWidgetToSideColumn(languagesSection, estimatedHeight);
+      }
+    }
+
+    // Add remaining side column widgets
+    if (currentSideColumnWidgets.isNotEmpty) {
+      _sideColumnContent.add([...currentSideColumnWidgets]);
+    }
+
+    // Make sure we have at least one page in side column
+    if (_sideColumnContent.isEmpty) {
+      _sideColumnContent.add([Container()]);
     }
 
     // Calculate total pages needed
-    _totalPages = math.max(_mainColumnContent.length, _sideColumnContent.length);
+    _totalPages =
+        math.max(_mainColumnContent.length, _sideColumnContent.length);
 
-    // Ensure both columns have the same number of pages by adding empty pages if needed
+    // Ensure both columns have the same number of pages
     while (_mainColumnContent.length < _totalPages) {
-      _mainColumnContent.add([]);
+      _mainColumnContent.add([Container()]);
     }
     while (_sideColumnContent.length < _totalPages) {
-      _sideColumnContent.add([]);
+      _sideColumnContent.add([Container()]);
     }
 
     _pageKeys = List.generate(_totalPages, (index) => GlobalKey());
@@ -234,7 +352,7 @@ class _Template4State extends State<Template4> {
 
   Widget _buildGreyDivider() {
     return Container(
-      height: 1,
+      height: 0.5,
       color: Colors.grey.shade300,
       margin: const EdgeInsets.symmetric(vertical: 8),
     );
@@ -242,8 +360,10 @@ class _Template4State extends State<Template4> {
 
   Future<void> _saveCv(BuildContext context) async {
     try {
-      final userData = Provider.of<UserProvider>(context, listen: false).userData;
-      final fileName = '${userData.fullName?.replaceAll(' ', '_') ?? 'cv'}_resume.pdf';
+      final userData =
+          Provider.of<UserProvider>(context, listen: false).userData;
+      final fileName =
+          '${userData.fullName?.replaceAll(' ', '_') ?? 'cv'}_resume.pdf';
 
       showDialog(
         context: context,
@@ -292,7 +412,8 @@ class _Template4State extends State<Template4> {
       final file = File(filePath);
       await file.writeAsBytes(await pdf.save());
 
-      final savedCVProvider = Provider.of<SavedCVProvider>(context, listen: false);
+      final savedCVProvider =
+          Provider.of<SavedCVProvider>(context, listen: false);
       await savedCVProvider.addSavedCV(fileName, filePath, thumbnailBytes);
 
       Provider.of<UserProvider>(context, listen: false).clearUserData();
@@ -312,7 +433,8 @@ class _Template4State extends State<Template4> {
                   Navigator.pop(context);
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const CvMakerScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const CvMakerScreen()),
                   );
                 },
                 child: Text('OK', style: GoogleFonts.inter()),
@@ -345,8 +467,10 @@ class _Template4State extends State<Template4> {
 
   Future<void> _exportToPdf() async {
     try {
-      final userData = Provider.of<UserProvider>(context, listen: false).userData;
-      final fileName = '${userData.fullName?.replaceAll(' ', '_') ?? 'cv'}_resume.pdf';
+      final userData =
+          Provider.of<UserProvider>(context, listen: false).userData;
+      final fileName =
+          '${userData.fullName?.replaceAll(' ', '_') ?? 'cv'}_resume.pdf';
 
       showDialog(
         context: context,
@@ -448,12 +572,12 @@ class _Template4State extends State<Template4> {
   Future<Uint8List?> _capturePageAsImage(GlobalKey key) async {
     try {
       RenderRepaintBoundary? boundary =
-      key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+          key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) return null;
 
       final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
       final ByteData? byteData =
-      await image.toByteData(format: ui.ImageByteFormat.png);
+          await image.toByteData(format: ui.ImageByteFormat.png);
       return byteData?.buffer.asUint8List();
     } catch (e) {
       print('Error capturing page as image: $e');
@@ -566,7 +690,7 @@ class _Template4State extends State<Template4> {
                 // Side column (right)
                 Container(
                   width: 130,
-                  color: Colors.grey.shade100,
+                  color: Color(0xFFE0DCD7),
                   padding: const EdgeInsets.all(10),
                   child: SingleChildScrollView(
                     physics: const NeverScrollableScrollPhysics(),
@@ -586,7 +710,7 @@ class _Template4State extends State<Template4> {
 
   Widget _buildSidebarDivider() {
     return Container(
-      height: 1,
+      height: 0.5,
       color: const Color(0xFFA81919),
     );
   }
@@ -618,18 +742,18 @@ class _Template4State extends State<Template4> {
                 ),
                 child: userData.profileImagePath != null
                     ? ClipOval(
-                  child: Image.file(
-                    File(userData.profileImagePath!),
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
-                  ),
-                )
+                        child: Image.file(
+                          File(userData.profileImagePath!),
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                        ),
+                      )
                     : Icon(
-                  Icons.person,
-                  size: 30,
-                  color: Colors.grey.shade400,
-                ),
+                        Icons.person,
+                        size: 30,
+                        color: Colors.grey.shade400,
+                      ),
               ),
               const SizedBox(width: 15),
 
@@ -638,16 +762,18 @@ class _Template4State extends State<Template4> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (userData.fullName != null && userData.fullName!.isNotEmpty)
+                    if (userData.fullName != null &&
+                        userData.fullName!.isNotEmpty)
                       Text(
                         userData.fullName!.toUpperCase(),
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
-                    if (userData.designation != null && userData.designation!.isNotEmpty) ...[
+                    if (userData.designation != null &&
+                        userData.designation!.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(
                         userData.designation!,
@@ -671,7 +797,8 @@ class _Template4State extends State<Template4> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final List<Website> websites = userProvider.websites;
 
-    bool hasPhone = userData.phoneNumber != null && userData.phoneNumber!.isNotEmpty;
+    bool hasPhone =
+        userData.phoneNumber != null && userData.phoneNumber!.isNotEmpty;
     bool hasEmail = userData.email != null && userData.email!.isNotEmpty;
     bool hasWebsites = websites.isNotEmpty;
 
@@ -686,14 +813,15 @@ class _Template4State extends State<Template4> {
         Text(
           'CONTACT',
           style: GoogleFonts.poppins(
-            fontSize: 8,
+            fontSize: 7,
             fontWeight: FontWeight.w600,
             color: const Color(0xFFA81919),
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         if (hasPhone)
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(
                 Icons.phone,
@@ -701,11 +829,15 @@ class _Template4State extends State<Template4> {
                 color: const Color(0xFFA81919),
               ),
               const SizedBox(width: 4),
-              Text(
-                userData.phoneNumber!,
-                style: GoogleFonts.poppins(
-                  fontSize: 6,
-                  color: Colors.black,
+              Expanded(
+                child: Text(
+                  userData.phoneNumber!,
+                  style: GoogleFonts.poppins(
+                    fontSize: 6,
+                    color: Colors.black,
+                  ),
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
                 ),
               ),
             ],
@@ -713,6 +845,7 @@ class _Template4State extends State<Template4> {
         if (hasEmail) ...[
           const SizedBox(height: 4),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(
                 Icons.email,
@@ -720,11 +853,15 @@ class _Template4State extends State<Template4> {
                 color: const Color(0xFFA81919),
               ),
               const SizedBox(width: 4),
-              Text(
-                userData.email!,
-                style: GoogleFonts.poppins(
-                  fontSize: 6,
-                  color: Colors.black,
+              Expanded(
+                child: Text(
+                  userData.email!,
+                  style: GoogleFonts.poppins(
+                    fontSize: 6,
+                    color: Colors.black,
+                  ),
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
                 ),
               ),
             ],
@@ -734,6 +871,7 @@ class _Template4State extends State<Template4> {
           for (Website website in websites) ...[
             const SizedBox(height: 4),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(
                   Icons.link,
@@ -741,11 +879,15 @@ class _Template4State extends State<Template4> {
                   color: const Color(0xFFA81919),
                 ),
                 const SizedBox(width: 4),
-                Text(
-                  website.url,
-                  style: GoogleFonts.poppins(
-                    fontSize: 6,
-                    color: Colors.black,
+                Expanded(
+                  child: Text(
+                    website.url,
+                    style: GoogleFonts.poppins(
+                      fontSize: 6,
+                      color: Colors.black,
+                    ),
+                    softWrap: true,
+                    overflow: TextOverflow.visible,
                   ),
                 ),
               ],
@@ -756,57 +898,71 @@ class _Template4State extends State<Template4> {
     );
   }
 
-  Widget _buildEducationSection(List<EducationItem> educationItems) {
+  Widget _buildEducationSection() {
+    final educationItems =
+        Provider.of<EducationProvider>(context, listen: false).educationItems;
+
+    // Only show section if there are education items
+    if (educationItems.isEmpty) {
+      return SizedBox.shrink();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'EDUCATION',
           style: GoogleFonts.poppins(
-            fontSize: 8,
+            fontSize: 7,
             fontWeight: FontWeight.w600,
             color: const Color(0xFFA81919),
           ),
         ),
-        const SizedBox(height: 6),
-        ...educationItems
-            .map((item) => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              item.degree ?? '',
-              style: GoogleFonts.poppins(
-                fontSize: 7,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFFA81919),
+        const SizedBox(height: 4),
+        ...educationItems.map((item) {
+          String dateRange = item.isCompleted
+              ? "${item.startDate} - Present"
+              : "${item.startDate} - ${item.endDate}";
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.degree ?? '',
+                style: GoogleFonts.poppins(
+                    fontSize: 8,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.t3SubHeading),
               ),
-            ),
-            Text(
-              'Major | Grade',
-              style: GoogleFonts.poppins(
-                fontSize: 6,
-                color: Colors.black,
+              Text(
+                item.institute ?? '',
+                style: GoogleFonts.poppins(
+                  fontSize: 6,
+                  color: AppColors.black,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
-            ),
-            Text(
-              item.institute ?? '',
-              style: GoogleFonts.poppins(
-                fontSize: 6,
-                color: Colors.black,
-                fontStyle: FontStyle.italic,
+              Text(
+                dateRange,
+                style: GoogleFonts.poppins(
+                  fontSize: 6,
+                  color: AppColors.black,
+                ),
               ),
-            ),
-            Text(
-              '${item.startDate} - ${item.isCompleted ? item.endDate : "Present"}',
-              style: GoogleFonts.poppins(
-                fontSize: 6,
-                color: Colors.black,
-              ),
-            ),
-            if (item != educationItems.last) const SizedBox(height: 8),
-          ],
-        ))
-            .toList(),
+              if (item.description != null && item.description!.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(
+                  item.description!,
+                  style: GoogleFonts.poppins(
+                    fontSize: 6,
+                    color: AppColors.black,
+                  ),
+                ),
+              ],
+              if (item != educationItems.last) const SizedBox(height: 4),
+            ],
+          );
+        }).toList(),
+        const SizedBox(height: 4),
       ],
     );
   }
@@ -816,14 +972,14 @@ class _Template4State extends State<Template4> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'SKILLS & INTERESTS',
+          'SKILLS',
           style: GoogleFonts.poppins(
-            fontSize: 8,
+            fontSize: 7,
             fontWeight: FontWeight.w600,
             color: const Color(0xFFA81919),
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         ...skills.map((skill) => _buildSkillItem(skill.name)).toList(),
       ],
     );
@@ -863,12 +1019,12 @@ class _Template4State extends State<Template4> {
         Text(
           'LANGUAGES',
           style: GoogleFonts.poppins(
-            fontSize: 8,
+            fontSize: 7,
             fontWeight: FontWeight.w600,
             color: const Color(0xFFA81919),
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         ...languages.map((language) => _buildSkillItem(language.name)).toList(),
       ],
     );
@@ -886,7 +1042,7 @@ class _Template4State extends State<Template4> {
             color: const Color(0xFFA81919),
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         Text(
           userData.careerObjective ?? '',
           style: GoogleFonts.inter(
@@ -894,7 +1050,7 @@ class _Template4State extends State<Template4> {
             color: Colors.black,
           ),
         ),
-        _buildGreyDivider(), // Add grey divider after profile section
+        // Add grey divider after profile section
       ],
     );
   }
@@ -906,7 +1062,7 @@ class _Template4State extends State<Template4> {
         Text(
           title,
           style: GoogleFonts.poppins(
-            fontSize: 8,
+            fontSize: 7,
             fontWeight: FontWeight.w600,
             color: const Color(0xFFA81919),
           ),
@@ -918,6 +1074,11 @@ class _Template4State extends State<Template4> {
   Widget _buildExperienceItem(
       String title, String company, String description, String dateRange,
       {List<String>? bulletPoints}) {
+    // Parse the dateRange to handle ongoing positions
+    final dates = dateRange.split(' - ');
+    final startDate = dates.isNotEmpty ? dates[0] : '';
+    final endDate = dates.length > 1 ? dates[1] : 'Present';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -925,13 +1086,24 @@ class _Template4State extends State<Template4> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
-              child: Text(
-                title,
-                style: GoogleFonts.poppins(
-                  fontSize: 7,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFFA81919),
-                ),
+              child: Row(
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.poppins(
+                      fontSize: 6,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFFA81919),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              '$startDate - $endDate',
+              style: GoogleFonts.poppins(
+                fontSize: 6,
+                color: Colors.black54,
               ),
             ),
           ],
@@ -940,7 +1112,7 @@ class _Template4State extends State<Template4> {
         Text(
           company,
           style: GoogleFonts.poppins(
-            fontSize: 7,
+            fontSize: 6,
             color: Colors.black87,
           ),
         ),
@@ -967,26 +1139,26 @@ class _Template4State extends State<Template4> {
           ...bulletPoints
               .map(
                 (point) => Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('• ',
-                    style: GoogleFonts.inter(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 6,
-                      color: const Color(0xFFA81919),
-                    )),
-                Expanded(
-                  child: Text(
-                    point,
-                    style: GoogleFonts.inter(
-                      fontSize: 6,
-                      color: Colors.black,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('• ',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 6,
+                          color: const Color(0xFFA81919),
+                        )),
+                    Expanded(
+                      child: Text(
+                        point,
+                        style: GoogleFonts.inter(
+                          fontSize: 6,
+                          color: Colors.black,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          )
+              )
               .toList(),
         ]
       ],
