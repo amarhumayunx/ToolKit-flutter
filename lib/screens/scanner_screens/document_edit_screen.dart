@@ -1,3 +1,4 @@
+import 'package:crop_image/crop_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,11 +6,12 @@ import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
+import 'package:toolkit/screens/scanner_screens/result_screen.dart';
+import '../../services/word_images_service.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/batch_app_bar.dart';
 import '../../widgets/scanner_widgets/document_preview.dart';
 import 'package:provider/provider.dart';
-
 import '../../widgets/scanner_widgets/filter_selector.dart';
 
 // Filter provider to manage filter state
@@ -115,7 +117,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     // Initialize animation controller with fixed duration
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000), // Exactly 2 seconds
+      duration: const Duration(milliseconds: 1000), // Exactly 2 seconds
     );
 
     _animation = Tween<double>(begin: 0, end: 1).animate(_animationController)
@@ -140,6 +142,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     _animationController.dispose();
     super.dispose();
   }
+
   Future<void> _cropImage() async {
     if (_processedImage == null) return;
 
@@ -152,24 +155,34 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
         sourcePath: _processedImage!.path,
         compressFormat: ImageCompressFormat.jpg,
         compressQuality: 90,
+        maxWidth: 3000,
+        maxHeight: 3000,
         uiSettings: [
-        AndroidUiSettings(
-        toolbarTitle: 'Crop Document',
-        toolbarColor: AppColors.primary,
-        toolbarWidgetColor: Colors.white,
-        initAspectRatio: CropAspectRatioPreset.original,
-        lockAspectRatio: false,
-        hideBottomControls: false,
-        backgroundColor: Colors.black,
-        activeControlsWidgetColor: AppColors.primary,
-        dimmedLayerColor: Colors.black.withOpacity(0.8),),
-        IOSUiSettings(
-          title: 'Crop Document',
-          aspectRatioLockEnabled: false,
-          resetAspectRatioEnabled: true,
-          aspectRatioPickerButtonHidden: true,
-
-        ),
+          AndroidUiSettings(
+            toolbarTitle: 'Crop Document',
+            toolbarWidgetColor: AppColors.black,
+            initAspectRatio: CropAspectRatioPreset.original,
+            lockAspectRatio: false,
+            hideBottomControls: false,
+            backgroundColor: Colors.white,
+            activeControlsWidgetColor: AppColors.primary,
+            dimmedLayerColor: AppColors.scannerBackground,
+            cropFrameColor: AppColors.primary,
+            cropFrameStrokeWidth: 4,
+            showCropGrid: false,
+          ),
+          IOSUiSettings(
+            title: 'Crop Document',
+            aspectRatioLockEnabled: false,
+            resetAspectRatioEnabled: true,
+            aspectRatioPickerButtonHidden: true,
+            doneButtonTitle: 'Done',
+            cancelButtonTitle: 'Cancel',
+            rotateButtonsHidden: false,
+            rotateClockwiseButtonHidden: false,
+            hidesNavigationBar: false,
+            minimumAspectRatio: 0.5,
+          ),
         ],
       );
 
@@ -207,6 +220,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
       }
     }
   }
+
   Future<void> _preGenerateFilterPreviews() async {
     for (String filter in _filterOptions) {
       File preview = await _generateFilterPreview(filter);
@@ -420,48 +434,61 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     Navigator.pop(context, null); // Return null to indicate retake
   }
 
-  void _goToPreviousImage() {
-    if (!widget.isBatchMode || _currentIndex <= 0) return;
-
-    setState(() {
-      _currentIndex--;
-      _processedImage = widget.batchImages![_currentIndex];
-      _editHistory = [_processedImage!];
-      _currentHistoryIndex = 0;
-      _rotationAngle = 0;
-      _hasChanges = false;
-
-      // Reset filter provider
-      _filterProvider.setFilter('Original');
-      _filterProvider.clearCache();
-    });
-
-    // Generate new previews for this image
-    _preGenerateFilterPreviews();
-  }
-
-
-
   void _toggleFilterView() {
     setState(() {
       _isFiltering = !_isFiltering;
     });
   }
 
-  void _handleSave() {
+  // Update the _handleSave method in DocumentEditScreen
+  void _handleSave() async {
     if (_isFiltering) {
-      // If in filter mode, save the filter and exit filter mode
       setState(() {
         _isFiltering = false;
       });
     } else {
-      // Otherwise, save the document
-      _saveDocument();
-    }
-  }
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
 
-  void _closeDocument() {
-    Navigator.pop(context);
+      try {
+        // Get all images to include in the document
+        List<File> imagesToSave = [];
+        if (widget.isBatchMode && widget.batchImages != null) {
+          imagesToSave = widget.batchImages!;
+        } else if (_processedImage != null) {
+          imagesToSave = [_processedImage!];
+        }
+
+        // Create Word document
+        final wordFile =
+        await WordImagesService.createWordDocument(imagesToSave);
+
+        // Navigate to result screen
+        if (mounted) {
+          Navigator.pop(context); // Close loading dialog
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ResultScreen(wordDocument: wordFile),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          Navigator.pop(context); // Close loading dialog
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to create document: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 
   Future<File> _generateFilterPreview(String filterName) async {
@@ -511,7 +538,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     return ChangeNotifierProvider.value(
       value: _filterProvider,
       child: Scaffold(
-        backgroundColor: const Color(0xFFEEECEC),
+        backgroundColor: AppColors.scannerBackground,
         appBar: BatchAppBar(
           onNextPressed: _handleSave,
           onBackPressed: () {
@@ -523,6 +550,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
               Navigator.pop(context);
             }
           },
+          actionText: 'Done',
         ),
         body: Column(
           children: [

@@ -1,10 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:open_file/open_file.dart';
 import 'package:toolkit/widgets/custom_appbar.dart';
-import '../../utils/app_colors.dart';
-import '../../widgets/buttons/gradient_btn.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../services/word_document_service.dart';
+import '../../widgets/buttons/save_document_btn.dart';
+import '../../widgets/tools/animated_loaded_container.dart';
+import '../../widgets/tools/document_container.dart';
 
 class ExtractedTextScreen extends StatefulWidget {
   final String extractedText;
@@ -20,8 +26,11 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
   final TextEditingController _textController = TextEditingController();
   bool _isLoading = true;
   bool _animationCompleted = false;
+  bool _isSaving = false;
+  String? _savedFilePath;
   late AnimationController _animationController;
   late Animation<double> _progressAnimation;
+  final WordDocumentService _wordDocumentService = WordDocumentService();
 
   @override
   void initState() {
@@ -41,15 +50,21 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
 
     _animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        setState(() {
-          _isLoading = false;
-          _animationCompleted = true;
-          _textController.text = widget.extractedText;
-        });
+        _handleLoadingComplete();
       }
     });
 
     _animationController.forward();
+  }
+
+  Future<void> _handleLoadingComplete() async {
+    setState(() {
+      _isLoading = false;
+      _animationCompleted = true;
+      _textController.text = widget.extractedText;
+    });
+
+    await _saveAsWord();
   }
 
   @override
@@ -57,6 +72,56 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
     _textController.dispose();
     _animationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _saveAsWord() async {
+    try {
+      setState(() {
+        _isSaving = true;
+      });
+
+      final filePath =
+      await _wordDocumentService.createWordDocument(_textController.text);
+
+      setState(() {
+        _isSaving = false;
+        _savedFilePath = filePath;
+      });
+    } catch (e) {
+      setState(() {
+        _isSaving = false;
+      });
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error saving file: $e')));
+    }
+  }
+
+  void _handleFileRenamed(String newFilePath) {
+    setState(() {
+      _savedFilePath = newFilePath;
+    });
+  }
+
+  void _handleFileDeleted() {
+    Navigator.of(context).pop();
+  }
+
+  Future<void> _openDocument() async {
+    if (_savedFilePath == null) return;
+
+    try {
+      final result = await OpenFile.open(_savedFilePath!);
+      if (result.type != ResultType.done) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open file: ${result.message}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error opening file: $e')),
+      );
+    }
   }
 
   @override
@@ -68,124 +133,70 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
         children: [
           SingleChildScrollView(
             padding: const EdgeInsets.all(20.0),
-            child: Column(
-              children: [
-                const SizedBox(height: 40),
-                if (_isLoading || _animationCompleted) _buildLoadingContainer(),
-                const SizedBox(height: 30),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Extracted Text File:',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.16),
-                        blurRadius: 4,
-                        offset: const Offset(0, 0),
+            child: Padding(
+              padding: const EdgeInsets.all(14.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  if (_isLoading || _animationCompleted)
+                    _buildLoadingContainer(),
+                  const SizedBox(height: 36),
+                  if (!_isLoading) ...[
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Extracted Text File:',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ],
-                  ),
-                  child: IntrinsicHeight(
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            width: 50,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Center(
-                              child: SvgPicture.asset(
-                                'assets/icons/document_icon.svg',
-                                width: 20,
-                                height: 20,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: 1,
-                          color: Colors.grey.shade300,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'documentName',
-                                style: GoogleFonts.inter(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'date time size',
-                                style: GoogleFonts.inter(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.asset(
-                            'assets/icons/more_icon.svg',
-                            height: 16,
-                            width: 16,
-                          ),
-                        )
-                      ],
                     ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                if (!_isLoading)
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: MediaQuery.of(context).size.height * 0.4,
+                    const SizedBox(height: 10),
+                    if (_savedFilePath != null)
+                      DocumentContainer(
+                        filePath: _savedFilePath!,
+                        onTap: _openDocument,
+                        onDelete: _handleFileDeleted,
+                        onFileRenamed: _handleFileRenamed,
+                      ),
+                    const SizedBox(height: 20),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Extracted Text:',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
-                    child: Column(
-                      children: [
-                        _buildTextContainer(),
-                        const SizedBox(height: 60), // Add space for the button
-                      ],
+                    const SizedBox(height: 10),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: MediaQuery.of(context).size.height * 0.4,
+                      ),
+                      child: Column(
+                        children: [
+                          _buildTextContainer(),
+                          const SizedBox(height: 60),
+                        ],
+                      ),
                     ),
-                  ),
-                // Add extra padding at the bottom to prevent content from being hidden behind the button
-                SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
-              ],
+                  ],
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
+                ],
+              ),
             ),
           ),
-          // Positioned button at the bottom
-          if (!_isLoading)
+          if (!_isLoading && _savedFilePath != null)
             Positioned(
               left: 20,
               right: 20,
               bottom: MediaQuery.of(context).padding.bottom + 20,
-              child: CustomGradientButton(
-                onPressed: () {},
-                text: 'Save',
+              child: SaveDocumentButton(
+                documentFile: File(_savedFilePath!),
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
               ),
             ),
         ],
@@ -198,7 +209,6 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       constraints: BoxConstraints(
-        // Add constraints
         maxHeight: MediaQuery.of(context).size.height * 0.5,
       ),
       decoration: BoxDecoration(
@@ -212,115 +222,24 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min, // Add this
-        children: [
-          const Text(
-            'Extracted Text:',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Flexible(
-            // Replace Expanded with Flexible
-            child: TextField(
-              controller: _textController,
-              maxLines: null,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Extracted text will appear here...',
-                hintStyle: GoogleFonts.inter(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
-                border: InputBorder.none,
-              ),
-            ),
-          ),
-        ],
+      child: TextField(
+        controller: _textController,
+        maxLines: null,
+        style: GoogleFonts.inter(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+        ),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+        ),
       ),
     );
   }
 
   Widget _buildLoadingContainer() {
-    final percentage = (_progressAnimation.value * 100).toInt();
-    return Container(
-      width: 262,
-      height: 248,
-      // Fixed height for the animation container
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.16),
-            blurRadius: 4,
-            offset: const Offset(0, 0),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            height: 150,
-            width: 150,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  height: 150,
-                  width: 150,
-                  child: CircularProgressIndicator(
-                    value: _progressAnimation.value,
-                    strokeWidth: 8,
-                    backgroundColor: Colors.grey.withOpacity(0.2),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColors.primary,
-                    ),
-                  ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '$percentage%',
-                      style: GoogleFonts.inter(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    Text(
-                      'Completed',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            _animationCompleted ? '' : 'Please Wait!',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: _animationCompleted ? Colors.green : Colors.black,
-            ),
-          ),
-        ],
-      ),
+    return AnimatedLoadingContainer(
+      animationController: _animationController,
+      animationCompleted: _animationCompleted,
     );
   }
 }

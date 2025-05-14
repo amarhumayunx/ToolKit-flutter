@@ -121,6 +121,7 @@ class _BatchResultScreenState extends State<BatchResultScreen> {
       appBar: BatchAppBar(
         onNextPressed: _navigateToEditScreen,
         onBackPressed: () => Navigator.pop(context),
+
       ),
       body: Column(
         children: [

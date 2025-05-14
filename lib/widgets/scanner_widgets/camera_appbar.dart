@@ -8,6 +8,7 @@ import '../../../utils/app_colors.dart';
 class CameraAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool isFlashOn;
   final bool isGridVisible;
+  final bool showGridIcon; // Add this new parameter
   final VoidCallback onClosePressed;
   final VoidCallback onFlashPressed;
   final VoidCallback onGridPressed;
@@ -16,6 +17,7 @@ class CameraAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     required this.isFlashOn,
     required this.isGridVisible,
+    required this.showGridIcon, // Add to constructor
     required this.onClosePressed,
     required this.onFlashPressed,
     required this.onGridPressed,
@@ -30,14 +32,7 @@ class CameraAppBar extends StatelessWidget implements PreferredSizeWidget {
         icon: const Icon(Icons.close, color: AppColors.primary),
         onPressed: onClosePressed,
       ),
-      title: Text(
-        'File Name',
-        style: GoogleFonts.inter(
-          color: Colors.black,
-          fontWeight: FontWeight.w500,
-          fontSize: 14,
-        ),
-      ),
+
       actions: [
         IconButton(
           icon: SvgPicture.asset(
@@ -49,18 +44,19 @@ class CameraAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           onPressed: onFlashPressed,
         ),
-        Padding(
-          padding: const EdgeInsets.only(right: 10),
-          child: IconButton(
-            icon: SvgPicture.asset(
-              'assets/icons/grid_icon.svg',
-              color: isGridVisible ? AppColors.primary : Colors.grey,
-              width: 24,
-              height: 24,
+        if (showGridIcon) // Only show grid icon if showGridIcon is true
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: IconButton(
+              icon: SvgPicture.asset(
+                'assets/icons/grid_icon.svg',
+                color: isGridVisible ? AppColors.primary : Colors.grey,
+                width: 24,
+                height: 24,
+              ),
+              onPressed: onGridPressed,
             ),
-            onPressed: onGridPressed,
           ),
-        ),
       ],
     );
   }

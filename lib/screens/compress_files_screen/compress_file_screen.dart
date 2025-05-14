@@ -4,10 +4,10 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../widgets/buttons/gradient_btn.dart';
-import '../../widgets/custom_appbar.dart';
+import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/dotted_file_drop.dart';
+import '../../widgets/tools/file_selection_container.dart';
 import '../../widgets/tools/info_card.dart';
-import '../../widgets/tools/ocr_file_selection.dart';
 import '../../widgets/tools/tools_app_bar.dart';
 import 'compress_file_result_screen.dart';
 
@@ -121,13 +121,8 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Center(
-                    child: SvgPicture.asset(
-                      'assets/images/compress_file_image.svg',
-                      height: 176,
-                      width: 186,
-                    ),
-                  ),
+                  CustomSvgImage(
+                      imagePath: 'assets/images/compress_file_image.svg'),
                   const SizedBox(height: 30),
                   InfoCard(
                     title: 'Reduce file size',
@@ -136,46 +131,13 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                   ),
                   const SizedBox(height: 24),
                   // Combined container with shadow
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.10),
-                          blurRadius: 10,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        // File selection section
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 14, top: 14),
-                            child: Text(
-                              'Select Files',
-                              style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Dotted file drop zone
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: DottedFileDropZone(
-                            selectedImages: _selectedFiles,
-                            onTap: _pickFiles,
-                            onRemoveImage: _removeFile,
-                            emptyStateText: 'Click to browse files',
-                          ),
-                        ),
-                      ],
-                    ),
+                  FileSelectionContainer(
+                    title: 'Select Files',
+                    emptyStateText: 'Click to browse files',
+                    selectedFiles: _selectedFiles,
+                    onTap: _pickFiles,
+                    onRemoveFile: _removeFile,
+                    isMultipleSelection: true,
                   ),
                 ],
               ),
@@ -184,12 +146,10 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
           Padding(
             padding:
                 const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
-            child: _isCompressing
-                ? const CircularProgressIndicator()
-                : CustomGradientButton(
-                    text: 'Compress',
-                    onPressed: _compressFiles,
-                  ),
+            child: CustomGradientButton(
+              text: 'Compress',
+              onPressed: _compressFiles,
+            ),
           ),
         ],
       ),

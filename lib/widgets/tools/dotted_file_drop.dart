@@ -12,13 +12,14 @@ class DottedFileDropZone extends StatelessWidget {
   final VoidCallback onTap;
   final Function(int) onRemoveImage;
   final String emptyStateText;
-
+  final bool isMultipleSelection;
   const DottedFileDropZone({
     super.key,
     required this.selectedImages,
     required this.onTap,
     required this.onRemoveImage,
     this.emptyStateText = 'Click to choose files',
+    this.isMultipleSelection = true,
   });
 
   @override
@@ -72,12 +73,12 @@ class DottedFileDropZone extends StatelessWidget {
                             child: Container(
                               padding: const EdgeInsets.all(2),
                               decoration: const BoxDecoration(
-                                color: Colors.white,
+                                color: AppColors.white,
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
                                 Icons.close,
-                                size: 16,
+                                size: 12,
                                 color: Colors.grey,
                               ),
                             ),

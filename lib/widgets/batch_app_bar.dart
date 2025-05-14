@@ -6,11 +6,13 @@ import '../utils/app_colors.dart';
 class BatchAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onNextPressed;
   final VoidCallback onBackPressed;
+  final String actionText; // New parameter for customizable action text
 
   const BatchAppBar({
     Key? key,
     required this.onNextPressed,
     required this.onBackPressed,
+    this.actionText = 'Next', // Default value is 'Next'
   }) : super(key: key);
 
   @override
@@ -31,14 +33,6 @@ class BatchAppBar extends StatelessWidget implements PreferredSizeWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        title: Text(
-          'Add File Name',
-          style: GoogleFonts.inter(
-            color: Colors.black,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: AppColors.primary),
           onPressed: onBackPressed,
@@ -49,7 +43,7 @@ class BatchAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: TextButton(
               onPressed: onNextPressed,
               child: Text(
-                'Done',
+                actionText, // Use the actionText parameter here
                 style: GoogleFonts.inter(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w500,

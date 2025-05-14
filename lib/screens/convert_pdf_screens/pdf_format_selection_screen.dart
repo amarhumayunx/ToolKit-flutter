@@ -1,45 +1,123 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:toolkit/widgets/custom_appbar.dart';
 import 'dart:io';
-
 import '../../utils/app_colors.dart';
 import '../../widgets/buttons/gradient_btn.dart';
-import 'save_screen.dart';
+import '../../widgets/custom_appbar.dart';
+import '../../services/pdf_to_word_service.dart';
+import './pdf_save_screen.dart'; // Import the new screen
 
-class SelectFormatScreen extends StatefulWidget {
-  final File selectedImage;
+class PdfFormatSelectionScreen extends StatefulWidget {
+  final File selectedPdf;
 
-  const SelectFormatScreen({super.key, required this.selectedImage});
+  const PdfFormatSelectionScreen({super.key, required this.selectedPdf});
 
   @override
-  State<SelectFormatScreen> createState() => _SelectFormatScreenState();
+  State<PdfFormatSelectionScreen> createState() =>
+      _PdfFormatSelectionScreenState();
 }
 
-class _SelectFormatScreenState extends State<SelectFormatScreen> {
+class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
   String? selectedFormat;
+  bool _isConverting = false;
+  File? _convertedFile;
 
-  String get fileName => widget.selectedImage.path.split('/').last;
+  String get fileName => widget.selectedPdf.path.split('/').last;
 
   String get fileSize =>
-      (widget.selectedImage.lengthSync() / (1024 * 1024)).toStringAsFixed(2);
+      (widget.selectedPdf.lengthSync() / (1024 * 1024)).toStringAsFixed(2);
 
   String get formattedDate {
-    final modifiedDate = widget.selectedImage.lastModifiedSync();
+    final modifiedDate = widget.selectedPdf.lastModifiedSync();
     return '${modifiedDate.day}/${modifiedDate.month}/${modifiedDate.year.toString().substring(2)}';
   }
 
   String get formattedTime {
-    final modifiedDate = widget.selectedImage.lastModifiedSync();
+    final modifiedDate = widget.selectedPdf.lastModifiedSync();
     return '${modifiedDate.hour}:${modifiedDate.minute.toString().padLeft(2, '0')}${modifiedDate.hour < 12 ? 'am' : 'pm'}';
+  }
+
+  Future<void> _convertFile() async {
+    if (selectedFormat == null) return;
+
+    setState(() {
+      _isConverting = true;
+      _convertedFile = null;
+    });
+
+    try {
+      final service = PdfToWordService();
+
+      switch (selectedFormat) {
+        case 'Word':
+          _convertedFile = await service.convertPdfToWord(widget.selectedPdf);
+          break;
+        case 'Excel':
+          throw UnimplementedError('Excel conversion not implemented');
+        case 'PowerPoint':
+          throw UnimplementedError('PowerPoint conversion not implemented');
+        case 'Jpg':
+          throw UnimplementedError('JPG conversion not implemented');
+        default:
+          throw Exception('Unsupported format');
+      }
+
+      if (!mounted) return;
+
+      // Navigate to PdfSaveScreen instead of showing dialog
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PdfSaveScreen(
+            selectedPdf: widget.selectedPdf,
+            convertedFile: _convertedFile!,
+            selectedFormat: selectedFormat!,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorDialog(e.toString());
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isConverting = false;
+        });
+      }
+    }
+  }
+
+  void _showErrorDialog(String error) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Conversion Failed',
+          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          error,
+          style: GoogleFonts.inter(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'OK',
+              style: GoogleFonts.inter(color: AppColors.primary),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(title: 'Convert Image'),
+      appBar: CustomAppBar(title: 'Convert PDF'),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -76,9 +154,13 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
                         height: 60,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(4),
-                          image: DecorationImage(
-                            image: FileImage(widget.selectedImage),
-                            fit: BoxFit.cover,
+                          color: Colors.grey.shade200,
+                        ),
+                        child: Center(
+                          child: SvgPicture.asset(
+                            'assets/icons/convert_pdf.svg',
+                            width: 30,
+                            height: 30,
                           ),
                         ),
                       ),
@@ -144,35 +226,17 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
                 _buildFormatOption(
                     'PowerPoint', 'assets/icons/powerpoint_icon.svg'),
                 _buildFormatOption(
-                  'PDF',
-                  'assets/icons/convert_pdf.svg',
-                ),
+                    'Jpg', 'assets/icons/convert_img_icon.svg'),
               ],
             ),
             const Spacer(),
             Padding(
               padding: const EdgeInsets.only(bottom: 20),
               child: CustomGradientButton(
-                text: 'Convert',
-                onPressed: () {
-                  if (selectedFormat != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SaveScreen(
-                          selectedImage: widget.selectedImage,
-                          selectedFormat: selectedFormat!,
-                        ),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please select a format first'),
-                      ),
-                    );
-                  }
-                },
+                text: _isConverting ? 'Converting...' : 'Convert',
+                onPressed: _isConverting || selectedFormat == null
+                    ? null
+                    : _convertFile,
               ),
             ),
           ],
@@ -184,7 +248,10 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
   Widget _buildFormatOption(String label, String iconPath) {
     final isSelected = selectedFormat == label;
     return GestureDetector(
-      onTap: () => setState(() => selectedFormat = label),
+      onTap: () => setState(() {
+        selectedFormat = label;
+        _convertedFile = null;
+      }),
       child: Column(
         children: [
           Container(
@@ -192,7 +259,7 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
             height: 78,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.white,
+              color: Colors.white,
               border: isSelected
                   ? Border.all(color: AppColors.primary, width: 2)
                   : null,

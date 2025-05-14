@@ -3,11 +3,11 @@ import 'package:camera/camera.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
-import 'package:image/image.dart' as image;
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:permission_handler/permission_handler.dart';
-import 'package:image_picker/image_picker.dart';
+import '../../services/document_scanner_service.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/scanner_widgets/batch_scan.dart';
 import '../../widgets/scanner_widgets/camera_appbar.dart';
@@ -52,7 +52,7 @@ class _ScannerScreenState extends State<ScannerScreen>
   bool _isGridVisible = true;
   final ImagePicker _imagePicker = ImagePicker();
 
-  // Document type crop dimensions
+  // Document type crop dimensions - used for frame visualization only
   static const double businessCardCropWidth = 324;
   static const double businessCardCropHeight = 194;
 
@@ -70,8 +70,6 @@ class _ScannerScreenState extends State<ScannerScreen>
 
   // ID Card scanning state
   List<File> _idCardImages = [];
-
-  Rect? _currentCropRect;
 
   @override
   void initState() {
@@ -260,52 +258,119 @@ class _ScannerScreenState extends State<ScannerScreen>
     }
   }
 
+// In your _ScannerScreenState class, modify the _captureImage method:
   Future<void> _captureImage() async {
     if (_controller == null || !_controller!.value.isInitialized) {
       return;
     }
 
     try {
-      if (_selectedScanType == 'Id Card') {
-        await _captureIdCardImage();
-        return;
-      }
-
       final XFile photo = await _controller!.takePicture();
       final directory = await getApplicationDocumentsDirectory();
       final String fileName = path.basename(photo.path);
-      final File savedImage =
-          await File(photo.path).copy('${directory.path}/$fileName');
+      final File originalImage = File(photo.path);
 
-      File finalImage = savedImage;
+      // Get screen dimensions
+      final screenWidth = MediaQuery.of(context).size.width;
+      final screenHeight =
+          MediaQuery.of(context).size.height - _bottomContainerHeight;
 
-      // If in document mode with crop rect, crop the image
-      if (_currentCropRect != null &&
-          (_selectedScanType == 'Business Card' ||
-              _selectedScanType == 'Passport' ||
-              _selectedScanType == 'Legal' ||
-              _selectedScanType == 'Letter' ||
-              _selectedScanType == 'Id Card')) {
-        finalImage = await _cropImageToRect(savedImage, _currentCropRect!);
-      }
+      // Handle different document types
+      if (_selectedScanType == 'Business Card' ||
+          _selectedScanType == 'Passport' ||
+          _selectedScanType == 'Legal' ||
+          _selectedScanType == 'Letter' ||
+          _selectedScanType == 'Id Card') {
+        double frameWidth, frameHeight;
 
-      setState(() {
-        _recentImages.insert(0, finalImage);
-      });
+        switch (_selectedScanType) {
+          case 'Business Card':
+            frameWidth = businessCardCropWidth;
+            frameHeight = businessCardCropHeight;
+            break;
+          case 'Passport':
+            frameWidth = passportCropWidth;
+            frameHeight = passportCropHeight;
+            break;
+          case 'Legal':
+            frameWidth = legalCropWidth;
+            frameHeight = legalCropHeight;
+            break;
+          case 'Letter':
+            frameWidth = letterCropWidth;
+            frameHeight = letterCropHeight;
+            break;
+          case 'Id Card':
+            frameWidth = idCardCropWidth;
+            frameHeight = idCardCropHeight;
+            break;
+          default:
+            frameWidth = 0;
+            frameHeight = 0;
+        }
 
-      if (_selectedScanType == 'Batch') {
+        // Capture within frame
+        final File? framedImage = await FrameCaptureService.captureWithinFrame(
+          originalImage: originalImage,
+          frameWidth: frameWidth,
+          frameHeight: frameHeight,
+          screenWidth: screenWidth,
+          screenHeight: screenHeight,
+        );
+
+        if (framedImage == null) {
+          throw Exception('Failed to capture within frame');
+        }
+
+        // Enhance the document image
+        final File? enhancedImage =
+            await FrameCaptureService.enhanceDocumentImage(framedImage);
+        final File savedImage = enhancedImage ?? framedImage;
+
+        // Save to permanent storage
+        final File permanentFile =
+            await savedImage.copy('${directory.path}/$fileName');
+
         setState(() {
-          _batchImages.add(finalImage);
+          _recentImages.insert(0, permanentFile);
+        });
+
+        if (_selectedScanType == 'Id Card') {
+          setState(() {
+            _idCardImages.add(permanentFile);
+          });
+          _navigateToIdCardPreviewScreen();
+        } else {
+          setState(() {
+            _imageFile = permanentFile;
+          });
+          _navigateToPreviewScreen(permanentFile);
+        }
+      } else if (_selectedScanType == 'Batch') {
+        final File savedImage =
+            await originalImage.copy('${directory.path}/$fileName');
+        setState(() {
+          _batchImages.add(savedImage);
           _isBatchModeActive = true;
+          _recentImages.insert(0, savedImage);
         });
       } else {
+        final File savedImage =
+            await originalImage.copy('${directory.path}/$fileName');
         setState(() {
-          _imageFile = finalImage;
+          _imageFile = savedImage;
+          _recentImages.insert(0, savedImage);
         });
-        _navigateToPreviewScreen(finalImage);
+        _navigateToPreviewScreen(savedImage);
       }
     } catch (e) {
       print('Error capturing image: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to capture image: ${e.toString()}'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
   }
 
@@ -321,121 +386,15 @@ class _ScannerScreenState extends State<ScannerScreen>
       final File savedImage =
           await File(photo.path).copy('${directory.path}/$fileName');
 
-      File finalImage = savedImage;
-
-      if (_currentCropRect != null) {
-        finalImage = await _cropImageToRect(savedImage, _currentCropRect!);
-      }
-
       setState(() {
-        _idCardImages.add(finalImage);
-        _recentImages.insert(0, finalImage);
+        _idCardImages.add(savedImage);
+        _recentImages.insert(0, savedImage);
       });
 
       _navigateToIdCardPreviewScreen();
     } catch (e) {
       print('Error capturing ID card image: $e');
     }
-  }
-
-  Future<File> _cropImageToRect(File originalImage, Rect cropRect) async {
-    final bytes = await originalImage.readAsBytes();
-    final decodedImage = await decodeImageFromList(bytes);
-
-    // Get the correct preview dimensions
-    final previewWidth = MediaQuery.of(context).size.width;
-    final previewHeight = _getPreviewHeight();
-    final previewTopOffset = _getPreviewTopOffset();
-
-    // Calculate aspect ratios
-    final previewAspect = previewWidth / previewHeight;
-    final imageAspect = decodedImage.width / decodedImage.height;
-
-    // Calculate effective preview size (accounting for letterboxing)
-    double effectivePreviewWidth, effectivePreviewHeight;
-    double offsetX = 0, offsetY = 0;
-
-    if (previewAspect > imageAspect) {
-      // Letterbox on sides
-      effectivePreviewHeight = previewHeight;
-      effectivePreviewWidth = previewHeight * imageAspect;
-      offsetX = (previewWidth - effectivePreviewWidth) / 2;
-    } else {
-      // Letterbox on top/bottom
-      effectivePreviewWidth = previewWidth;
-      effectivePreviewHeight = previewWidth / imageAspect;
-      offsetY = (previewHeight - effectivePreviewHeight) / 2;
-    }
-
-    // Adjust crop rect coordinates to account for:
-    // 1. Letterboxing (offsetX/Y)
-    // 2. App bar (previewTopOffset)
-    final adjustedCropRect = Rect.fromLTWH(
-      cropRect.left - offsetX,
-      cropRect.top - offsetY - previewTopOffset,
-      cropRect.width,
-      cropRect.height,
-    );
-
-    // Calculate scale factors
-    final scaleX = decodedImage.width / effectivePreviewWidth;
-    final scaleY = decodedImage.height / effectivePreviewHeight;
-
-    // Calculate final crop coordinates
-    final actualLeft = (adjustedCropRect.left * scaleX).round();
-    final actualTop = (adjustedCropRect.top * scaleY).round();
-    final actualWidth = (adjustedCropRect.width * scaleX).round();
-    final actualHeight = (adjustedCropRect.height * scaleY).round();
-
-    // Clamp values to image bounds
-    final adjustedLeft = actualLeft.clamp(0, decodedImage.width);
-    final adjustedTop = actualTop.clamp(0, decodedImage.height);
-    final adjustedWidth =
-        actualWidth.clamp(1, decodedImage.width - adjustedLeft);
-    final adjustedHeight =
-        actualHeight.clamp(1, decodedImage.height - adjustedTop);
-
-    debugPrint(
-        'Adjusted crop rect: $adjustedLeft,$adjustedTop $adjustedWidth×$adjustedHeight');
-
-    return await _cropImage(
-      originalImage,
-      adjustedLeft,
-      adjustedTop,
-      adjustedWidth,
-      adjustedHeight,
-    );
-  }
-
-  Future<File> _cropImage(
-    File imageFile,
-    int x,
-    int y,
-    int width,
-    int height,
-  ) async {
-    final image.Image? originalImage =
-        image.decodeImage(await imageFile.readAsBytes());
-
-    if (originalImage == null) {
-      throw Exception('Failed to decode image');
-    }
-
-    final image.Image croppedImage = image.copyCrop(
-      originalImage,
-      x: x,
-      y: y,
-      width: width,
-      height: height,
-    );
-
-    final directory = await getApplicationDocumentsDirectory();
-    final String croppedFileName = 'cropped_${path.basename(imageFile.path)}';
-    final File croppedFile = File('${directory.path}/$croppedFileName');
-
-    await croppedFile.writeAsBytes(image.encodeJpg(croppedImage));
-
-    return croppedFile;
   }
 
   double _getPreviewTopOffset() {
@@ -460,7 +419,7 @@ class _ScannerScreenState extends State<ScannerScreen>
           isLegal: _selectedScanType == 'Legal',
           isLetter: _selectedScanType == 'Letter',
           isIdCard: _selectedScanType == 'Id Card',
-          cropRect: _currentCropRect,
+          cropRect: null, // Removed cropRect passing
         ),
       ),
     );
@@ -476,7 +435,7 @@ class _ScannerScreenState extends State<ScannerScreen>
           imageFile: _idCardImages[0],
           isBatchMode: false,
           isIdCard: true,
-          cropRect: _currentCropRect,
+          cropRect: null, // Removed cropRect passing
         ),
       ),
     );
@@ -633,6 +592,9 @@ class _ScannerScreenState extends State<ScannerScreen>
       appBar: CameraAppBar(
         isFlashOn: _isFlashOn,
         isGridVisible: _isGridVisible,
+        showGridIcon:
+            _selectedScanType == 'Single' || _selectedScanType == 'Batch',
+        // Only show for Single and Batch
         onClosePressed: () => Navigator.pop(context),
         onFlashPressed: _toggleFlash,
         onGridPressed: _toggleGrid,
@@ -647,27 +609,34 @@ class _ScannerScreenState extends State<ScannerScreen>
 
             double cropWidth;
             double cropHeight;
+            String documentType = 'single';
 
+            // Set frame dimensions based on document type (for visual guidance only)
             switch (_selectedScanType) {
               case 'Business Card':
                 cropWidth = businessCardCropWidth;
                 cropHeight = businessCardCropHeight;
+                documentType = 'business_card';
                 break;
               case 'Passport':
                 cropWidth = passportCropWidth;
                 cropHeight = passportCropHeight;
+                documentType = 'passport';
                 break;
               case 'Legal':
                 cropWidth = legalCropWidth;
                 cropHeight = legalCropHeight;
+                documentType = 'legal';
                 break;
               case 'Letter':
                 cropWidth = letterCropWidth;
                 cropHeight = letterCropHeight;
+                documentType = 'letter';
                 break;
               case 'Id Card':
                 cropWidth = idCardCropWidth;
                 cropHeight = idCardCropHeight;
+                documentType = 'id_card';
                 break;
               default:
                 cropWidth = 0;
@@ -678,62 +647,29 @@ class _ScannerScreenState extends State<ScannerScreen>
             final left = (screenWidth - cropWidth) / 2;
             final top = (screenHeight - cropHeight) / 2;
 
-            _currentCropRect = Rect.fromLTWH(
-              left,
-              top,
-              cropWidth,
-              cropHeight,
-            );
-
             return Stack(
               children: [
-                // Camera preview
-                SizedBox(
-                  width: double.infinity,
-                  height: double.infinity,
+                // Camera preview - with adjusted height to end at bottom container
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: _bottomContainerHeight - 20,
                   child: CameraPreview(_controller!),
                 ),
 
                 // Show the appropriate scan type overlay
-                if (_selectedScanType == 'Business Card')
+                if (_selectedScanType == 'Business Card' ||
+                    _selectedScanType == 'Passport' ||
+                    _selectedScanType == 'Legal' ||
+                    _selectedScanType == 'Letter' ||
+                    _selectedScanType == 'Id Card')
                   DocumentCropFrame(
-                    width: businessCardCropWidth,
-                    height: businessCardCropHeight,
+                    width: cropWidth,
+                    height: cropHeight,
                     left: left,
                     top: top,
-                    documentType: 'business_card',
-                  )
-                else if (_selectedScanType == 'Passport')
-                  DocumentCropFrame(
-                    width: passportCropWidth,
-                    height: passportCropHeight,
-                    left: left,
-                    top: top,
-                    documentType: 'passport',
-                  )
-                else if (_selectedScanType == 'Legal')
-                  DocumentCropFrame(
-                    width: legalCropWidth,
-                    height: legalCropHeight,
-                    left: left,
-                    top: top,
-                    documentType: 'legal',
-                  )
-                else if (_selectedScanType == 'Letter')
-                  DocumentCropFrame(
-                    width: letterCropWidth,
-                    height: letterCropHeight,
-                    left: left,
-                    top: top,
-                    documentType: 'letter',
-                  )
-                else if (_selectedScanType == 'Id Card')
-                  DocumentCropFrame(
-                    width: idCardCropWidth,
-                    height: idCardCropHeight,
-                    left: left,
-                    top: top,
-                    documentType: 'id_card',
+                    documentType: documentType,
                   )
                 else if (_selectedScanType == 'Batch')
                   BatchScan(
@@ -762,13 +698,12 @@ class _ScannerScreenState extends State<ScannerScreen>
                         topLeft: Radius.circular(20),
                         topRight: Radius.circular(20),
                       ),
-                      border: Border(
-                        top: BorderSide(
-                          color: AppColors.primary,
-                          width: 1.0,
-                        ),
+                      border: Border.all(
+                        color: AppColors.primary,
+                        width: 1.0,
                       ),
                     ),
+                    clipBehavior: Clip.antiAlias,
                     child: Column(
                       children: [
                         // Scan types
@@ -838,71 +773,76 @@ class _ScannerScreenState extends State<ScannerScreen>
                                   ),
                                 ),
                               ),
-                              // Show recent image thumbnail or placeholder if none available
-                              GestureDetector(
-                                onTap: _isBatchModeActive
-                                    ? _completeBatchCapture
-                                    : _viewRecentImage,
-                                child: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: AppColors.primary.withOpacity(0.3),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: _isBatchModeActive
-                                      ? Stack(
-                                          fit: StackFit.expand,
-                                          children: [
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(7),
-                                              child: Image.file(
-                                                _batchImages.last,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                            Positioned(
-                                              top: 0,
-                                              right: 0,
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.all(2),
-                                                decoration: const BoxDecoration(
-                                                  color: AppColors.primary,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: Text(
-                                                  '${_batchImages.length}',
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.bold,
+
+                              (_isBatchModeActive && _batchImages.isNotEmpty) ||
+                                      _recentImages.isNotEmpty
+                                  ? GestureDetector(
+                                      onTap: _isBatchModeActive
+                                          ? _completeBatchCapture
+                                          : _viewRecentImage,
+                                      child: Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: AppColors.primary
+                                                .withOpacity(0.3),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: _isBatchModeActive
+                                            ? Stack(
+                                                fit: StackFit.expand,
+                                                children: [
+                                                  ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            7),
+                                                    child: Image.file(
+                                                      _batchImages.last,
+                                                      fit: BoxFit.cover,
+                                                    ),
                                                   ),
+                                                  Positioned(
+                                                    top: 0,
+                                                    right: 0,
+                                                    child: Container(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              2),
+                                                      decoration:
+                                                          const BoxDecoration(
+                                                        color:
+                                                            AppColors.primary,
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                      child: Text(
+                                                        '${_batchImages.length}',
+                                                        style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 10,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              )
+                                            : ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(7),
+                                                child: Image.file(
+                                                  _recentImages[0],
+                                                  fit: BoxFit.cover,
                                                 ),
                                               ),
-                                            ),
-                                          ],
-                                        )
-                                      : (_recentImages.isNotEmpty
-                                          ? ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(7),
-                                              child: Image.file(
-                                                _recentImages[0],
-                                                fit: BoxFit.cover,
-                                              ),
-                                            )
-                                          : const Icon(
-                                              Icons.image,
-                                              color: AppColors.primary,
-                                              size: 24,
-                                            )),
-                                ),
-                              ),
+                                      ),
+                                    )
+                                  : SizedBox(width: 40, height: 40),
+                              // Maintain layout spacing
                             ],
                           ),
                         ),

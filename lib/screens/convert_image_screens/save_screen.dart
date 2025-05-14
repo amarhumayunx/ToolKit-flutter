@@ -3,13 +3,18 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'dart:async';
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../../services/word_img_service.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/buttons/gradient_btn.dart';
+import '../../widgets/custom_appbar.dart';
+import '../../widgets/tools/animated_loaded_container.dart';
+import '../../widgets/tools/document_container.dart';
+import '../../widgets/buttons/save_document_btn.dart';
 
 class SaveScreen extends StatefulWidget {
   final File selectedImage;
@@ -25,42 +30,68 @@ class SaveScreen extends StatefulWidget {
   State<SaveScreen> createState() => _SaveScreenState();
 }
 
-class _SaveScreenState extends State<SaveScreen> {
-  bool isConverting = true;
-  bool isCompleted = false;
-  double conversionProgress = 0.0;
-  Timer? _timer;
+class _SaveScreenState extends State<SaveScreen>
+    with SingleTickerProviderStateMixin {
+  bool _animationCompleted = false;
+  late AnimationController _animationController;
+  late Animation<double> _progressAnimation;
   File? convertedFile;
   String currentFileName = '';
 
   @override
   void initState() {
     super.initState();
-    // Set initial file name
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    );
+    _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+    _progressAnimation.addListener(() => setState(() {}));
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _handleLoadingComplete();
+      }
+    });
+
     final originalName =
         widget.selectedImage.path.split('/').last.split('.').first;
     currentFileName = originalName;
-    // Actually convert the file
+
     _convertFile();
+    _animationController.forward();
+  }
+
+  Future<void> _handleLoadingComplete() async {
+    setState(() {
+      _animationCompleted = true;
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<void> _convertFile() async {
-    // Start showing progress
-    _startProgressAnimation();
-
     try {
-      if (widget.selectedFormat == 'PDF') {
-        // Create a PDF document
+      if (widget.selectedFormat == 'Word') {
+        final wordService = WordImageService();
+        final wordFilePath =
+            await wordService.createWordDocumentWithImage(widget.selectedImage);
+        setState(() {
+          convertedFile = File(wordFilePath);
+        });
+      } else if (widget.selectedFormat == 'PDF') {
         final pdf = pw.Document();
+        final image = pw.MemoryImage(
+          widget.selectedImage.readAsBytesSync(),
+        );
 
-        // Load the image
-        final imageBytes = await widget.selectedImage.readAsBytes();
-        final image = pw.MemoryImage(imageBytes);
-
-        // Add image to the PDF
         pdf.addPage(
           pw.Page(
-            pageFormat: PdfPageFormat.a4,
             build: (pw.Context context) {
               return pw.Center(
                 child: pw.Image(image),
@@ -69,42 +100,21 @@ class _SaveScreenState extends State<SaveScreen> {
           ),
         );
 
-        // Save the PDF to a file
-        final output = await getTemporaryDirectory();
-        final pdfPath = '${output.path}/$currentFileName.pdf';
-        final file = File(pdfPath);
+        final directory = await getTemporaryDirectory();
+        final path = '${directory.path}/$currentFileName.pdf';
+        final file = File(path);
         await file.writeAsBytes(await pdf.save());
 
-        // Update state with the converted file
         setState(() {
           convertedFile = file;
-          isConverting = false;
-          isCompleted = true;
-          conversionProgress = 1.0;
         });
-
-        // Cancel the progress timer if it's still running
-        _timer?.cancel();
       } else {
-        // For other formats, implement their conversion logic here
-        // For now, just simulate conversion with a delay
         await Future.delayed(const Duration(seconds: 2));
         setState(() {
-          isConverting = false;
-          isCompleted = true;
-          conversionProgress = 1.0;
+          convertedFile = widget.selectedImage;
         });
-        _timer?.cancel();
       }
     } catch (e) {
-      // Handle errors
-      setState(() {
-        isConverting = false;
-        isCompleted = false;
-      });
-      _timer?.cancel();
-
-      // Show error
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error converting file: ${e.toString()}')),
@@ -113,29 +123,7 @@ class _SaveScreenState extends State<SaveScreen> {
     }
   }
 
-  void _startProgressAnimation() {
-    _timer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
-      setState(() {
-        // Progress more slowly to give time for actual conversion
-        conversionProgress += 0.005;
-        if (conversionProgress >= 0.95) {
-          // Cap at 95% until the actual conversion is done
-          conversionProgress = 0.95;
-        }
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  // Get file information
-  String get fileName {
-    return '$currentFileName.${_getFormatExtension()}';
-  }
+  String get fileName => '$currentFileName.${_getFormatExtension()}';
 
   String _getFormatExtension() {
     switch (widget.selectedFormat) {
@@ -148,507 +136,8 @@ class _SaveScreenState extends State<SaveScreen> {
       case 'PDF':
         return 'pdf';
       default:
-        return 'docx';
+        return 'png';
     }
-  }
-
-  String get fileSize {
-    if (convertedFile != null) {
-      return (convertedFile!.lengthSync() / (1024 * 1024)).toStringAsFixed(2);
-    }
-    return (widget.selectedImage.lengthSync() / (1024 * 1024))
-        .toStringAsFixed(2);
-  }
-
-  String get formattedDate {
-    final now = DateTime.now();
-    return '${now.day}/${now.month}/${now.year.toString().substring(2)}';
-  }
-
-  String get formattedTime {
-    final now = DateTime.now();
-    return '${now.hour}:${now.minute.toString().padLeft(2, '0')}${now.hour < 12 ? 'am' : 'pm'}';
-  }
-
-  // Method to open the PDF file
-  Future<void> _openPdf() async {
-    if (convertedFile != null) {
-      try {
-        final result = await OpenFile.open(convertedFile!.path);
-        if (result.type != ResultType.done) {
-          // If OpenFile fails
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Cannot open PDF: ${result.message}')),
-            );
-          }
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error opening PDF: ${e.toString()}')),
-          );
-        }
-      }
-    }
-  }
-
-  // Show file options menu
-  void _showOptionsMenu(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildOptionItem(context, 'Edit', Icons.edit, () {
-                Navigator.pop(context);
-                _showEditFileNameDialog(context);
-              }),
-              const Divider(),
-              _buildOptionItem(context, 'Export', Icons.download, () {
-                Navigator.pop(context);
-                // Implement export functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content:
-                          Text('Export functionality will be implemented')),
-                );
-              }),
-              const Divider(),
-              _buildOptionItem(context, 'Delete', Icons.delete, () {
-                Navigator.pop(context);
-                _showDeleteConfirmationDialog(context);
-              }),
-              const Divider(),
-              _buildOptionItem(context, 'Lock', Icons.lock, () {
-                Navigator.pop(context);
-                // Implement lock functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Lock functionality will be implemented')),
-                );
-              }),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildOptionItem(
-      BuildContext context, String title, IconData icon, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-        child: Row(
-          children: [
-            Icon(icon, size: 24, color: AppColors.primary),
-            const SizedBox(width: 16),
-            Text(
-              title,
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Show dialog to edit file name
-  void _showEditFileNameDialog(BuildContext context) {
-    final TextEditingController controller =
-        TextEditingController(text: currentFileName);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit File Name'),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              hintText: 'Enter new file name',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (controller.text.isNotEmpty) {
-                  setState(() {
-                    currentFileName = controller.text;
-                  });
-
-                  // If file exists, rename it
-                  if (convertedFile != null) {
-                    final directory = convertedFile!.parent;
-                    final newPath =
-                        '${directory.path}/$currentFileName.${_getFormatExtension()}';
-
-                    // Save with new name on next save operation
-                    // We won't actually rename the temp file here
-                  }
-                }
-                Navigator.pop(context);
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Show delete confirmation dialog
-  void _showDeleteConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Delete File'),
-          content: const Text('Are you sure you want to delete this file?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                // Delete the file
-                if (convertedFile != null && convertedFile!.existsSync()) {
-                  try {
-                    convertedFile!.deleteSync();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('File deleted successfully')),
-                    );
-                    // Go back to home screen
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content:
-                              Text('Error deleting file: ${e.toString()}')),
-                    );
-                  }
-                }
-                Navigator.pop(context);
-              },
-              child: const Text('Delete', style: TextStyle(color: Colors.red)),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          isConverting ? 'Converting file' : 'Converted File',
-          style: const TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
-        ),
-        actions: [
-          if (!isConverting)
-            IconButton(
-              icon: const Icon(Icons.close, color: Colors.black),
-              onPressed: () =>
-                  Navigator.of(context).popUntil((route) => route.isFirst),
-            ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 40),
-
-            // Show progress indicator or success icon
-            isConverting
-                ? _buildConversionProgress()
-                : _buildConversionComplete(),
-
-            const SizedBox(height: 40),
-
-            // File details
-            if (isCompleted) _buildFileDetails(),
-
-            const Spacer(),
-
-            // Action buttons - Only Save button now
-            if (isCompleted)
-              CustomGradientButton(
-                text: 'Save',
-                onPressed: () async {
-                  // Save to a more permanent location if needed
-                  if (convertedFile != null) {
-                    try {
-                      final appDocDir =
-                          await getApplicationDocumentsDirectory();
-                      final savedFile = await convertedFile!
-                          .copy('${appDocDir.path}/${fileName}');
-
-                      // Show success message and return to home
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('File saved successfully!')),
-                        );
-                        Navigator.of(context)
-                            .popUntil((route) => route.isFirst);
-                      }
-                    } catch (e) {
-                      // Show error
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content:
-                                  Text('Error saving file: ${e.toString()}')),
-                        );
-                      }
-                    }
-                  }
-                },
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildConversionProgress() {
-    return Column(
-      children: [
-        Container(
-          width: 130,
-          height: 130,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: 90,
-                  height: 90,
-                  child: CircularProgressIndicator(
-                    value: conversionProgress,
-                    strokeWidth: 8,
-                    backgroundColor: Colors.grey.shade200,
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(AppColors.primary),
-                  ),
-                ),
-                Text(
-                  '${(conversionProgress * 100).toInt()}%',
-                  style: GoogleFonts.inter(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Converting your file',
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Please wait',
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: Colors.grey,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildConversionComplete() {
-    return Column(
-      children: [
-        Container(
-          width: 262,
-          height: 248,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Container(
-              width: 145,
-              height: 145,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.primary.withOpacity(0.1),
-              ),
-              child: Icon(
-                Icons.check_circle,
-                size: 60,
-                color: AppColors.primary,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Conversion Complete',
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFileDetails() {
-    return GestureDetector(
-      onTap: () {
-        if (widget.selectedFormat == 'PDF' && convertedFile != null) {
-          _openPdf();
-        }
-      },
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
-        child: IntrinsicHeight(
-          child: Row(
-            children: [
-              // Document thumbnail
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  width: 50,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
-                    color: Colors.grey.shade100,
-                  ),
-                  child: Center(
-                    child: SvgPicture.asset(
-                      _getFormatIcon(),
-                      width: 28,
-                      height: 32,
-                    ),
-                  ),
-                ),
-              ),
-
-              // Vertical Divider
-              Container(
-                width: 1,
-                color: Colors.grey.shade300,
-              ),
-
-              const SizedBox(width: 12),
-
-              // File info
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        fileName,
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '$formattedDate | $formattedTime | $fileSize MB',
-                        style: GoogleFonts.inter(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // More Options icon
-              IconButton(
-                icon: Icon(
-                  Icons.more_vert,
-                  size: 16,
-                  color: Colors.grey[600],
-                ),
-                onPressed: () => _showOptionsMenu(context),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   String _getFormatIcon() {
@@ -660,9 +149,100 @@ class _SaveScreenState extends State<SaveScreen> {
       case 'PowerPoint':
         return 'assets/icons/powerpoint_icon.svg';
       case 'PDF':
-        return 'assets/icons/convert_img_icon.svg';
+        return 'assets/icons/convert_pdf.svg';
       default:
-        return 'assets/icons/word_icon.svg';
+        return 'assets/icons/image_icon.svg';
     }
+  }
+
+  Future<void> _openFile() async {
+    if (convertedFile != null && convertedFile!.existsSync()) {
+      try {
+        final result = await OpenFile.open(convertedFile!.path);
+        if (result.type != ResultType.done && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Cannot open file: ${result.message}')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error opening file: ${e.toString()}')),
+          );
+        }
+      }
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('File not found or not yet converted')),
+      );
+    }
+  }
+
+  void _handleFileDeleted() {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('File deleted successfully')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(title: 'Convert Image'),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(20.0),
+            child: Padding(
+              padding: const EdgeInsets.all(14.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  _buildLoadingContainer(),
+                  if (_animationCompleted && convertedFile != null) ...[
+                    const SizedBox(height: 36),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Converted File:',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    DocumentContainer(
+                      filePath: convertedFile!.path,
+                      onTap: _openFile,
+                      onDelete: _handleFileDeleted,
+                    ),
+                  ],
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 300),
+                ],
+              ),
+            ),
+          ),
+          if (_animationCompleted && convertedFile != null)
+            Positioned(
+              left: 20,
+              right: 20,
+              bottom: MediaQuery.of(context).padding.bottom + 20,
+              child: SaveDocumentButton(
+                documentFile: convertedFile!,
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingContainer() {
+    return AnimatedLoadingContainer(
+      animationController: _animationController,
+      animationCompleted: _animationCompleted,
+    );
   }
 }

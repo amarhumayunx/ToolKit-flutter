@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import '../../widgets/buttons/gradient_btn.dart';
-import '../../widgets/custom_appbar.dart';
+import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/dotted_file_drop.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/ocr_file_selection.dart';
@@ -120,13 +120,9 @@ class _OcrScreenState extends State<OcrScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Center(
-                    child: SvgPicture.asset(
-                      'assets/images/ocr_image.svg',
-                      height: 176,
-                      width: 186,
-                    ),
-                  ),
+
+
+                  CustomSvgImage(imagePath: 'assets/images/ocr_image.svg'),
                   const SizedBox(height: 30),
                   InfoCard(
                     title: 'Extract text from files',

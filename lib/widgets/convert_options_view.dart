@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../screens/convert_image_screens/convert_img_main_screen.dart';
+import '../screens/convert_pdf_screens/convert_pdf_main_screen.dart'; // Add this import
 import 'tool_item.dart';
 
 class ConvertOptionsView extends StatelessWidget {
@@ -24,13 +26,28 @@ class ConvertOptionsView extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: convertOptions.length,
         itemBuilder: (context, index) {
+          final option = convertOptions[index];
           return Padding(
             padding: const EdgeInsets.only(right: 6),
             child: ToolItem(
-              icon: convertOptions[index]['icon'] as String,
-              name: convertOptions[index]['name'] as String,
+              icon: option['icon']!,
+              name: option['name']!,
               onTap: () {
-                // Handle convert option tap
+                if (option['name'] == 'Convert Image') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ConvertImgMainScreen(),
+                    ),
+                  );
+                } else if (option['name'] == 'Convert pdf') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ConvertPdfMainScreen(),
+                    ),
+                  );
+                }
               },
             ),
           );

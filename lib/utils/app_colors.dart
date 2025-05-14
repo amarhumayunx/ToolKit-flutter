@@ -22,6 +22,7 @@ class AppColors {
   static const Color t3LeftColumn =  Color(0xFFF2E8E1);
   static const Color t3Primary =  Color(0xFFC06829);
   static const Color t3SubHeading =  Color(0xFF505062);
+  static const Color scannerBackground = Color(0xFFEEECEC);
 }
 
 
