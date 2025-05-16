@@ -3,6 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../provider/template_provider.dart';
+import '../../widgets/tools/info_card.dart';
+import '../../widgets/tools/tools_app_bar.dart';
 import 'main_cv_screen.dart';
 class CvMakerScreen extends StatefulWidget {
   const CvMakerScreen({super.key});
@@ -41,28 +43,8 @@ class _CvMakerScreenState extends State<CvMakerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leadingWidth: 40,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 14, top: 20),
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ),
-        title: Padding(
-          padding: const EdgeInsets.only(left: 8, top: 20),
-          child: Text(
-            'CV Maker',
-            style: GoogleFonts.inter(
-              color: Colors.black,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
+      appBar: ToolsAppBar(
+        title: 'CV Maker',
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -82,48 +64,12 @@ class _CvMakerScreenState extends State<CvMakerScreen> {
               // Make your CV title
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: 100,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.16),
-                        blurRadius: 2,
-                        offset: const Offset(0, 0),
-                      )
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Make your CV',
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Quickly craft a professional, eye-catching CV tailored to your career goals.',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                child: InfoCard(
+                  title: 'Make your CV',
+                  description:
+                  'Quickly craft a professional, eye-catching CV tailored to your career goals.',
                 ),
               ),
-
               const SizedBox(height: 8),
 
               // Select Template text
@@ -135,8 +81,8 @@ class _CvMakerScreenState extends State<CvMakerScreen> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.16),
-                        blurRadius: 2,
+                        color: Colors.black.withOpacity(0.10),
+                        blurRadius: 12,
                         offset: const Offset(0, 0),
                       )
                     ],

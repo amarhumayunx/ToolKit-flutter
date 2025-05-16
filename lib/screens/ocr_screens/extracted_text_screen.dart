@@ -1,12 +1,9 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_file/open_file.dart';
 import 'package:toolkit/widgets/custom_appbar.dart';
-import 'package:share_plus/share_plus.dart';
 import '../../services/word_document_service.dart';
 import '../../widgets/buttons/save_document_btn.dart';
 import '../../widgets/tools/animated_loaded_container.dart';

@@ -143,6 +143,9 @@ class _Template4State extends State<Template4> {
         }
         if (item.projects.isNotEmpty) {
           itemHeight += item.projects.length * 10;
+          if (item.projectUrls.isNotEmpty) {
+            itemHeight += item.projectUrls.length * 5; // Additional space for URLs
+          }
         }
 
         final experienceItem = _buildExperienceItem(
@@ -151,6 +154,7 @@ class _Template4State extends State<Template4> {
           item.description,
           dateRange,
           bulletPoints: item.projects.isNotEmpty ? item.projects : null,
+          projectUrls: item.projectUrls.isNotEmpty ? item.projectUrls : null,
         );
 
         addWidgetToMainColumn(experienceItem, itemHeight);
@@ -1073,7 +1077,7 @@ class _Template4State extends State<Template4> {
 
   Widget _buildExperienceItem(
       String title, String company, String description, String dateRange,
-      {List<String>? bulletPoints}) {
+      {List<String>? bulletPoints, List<String>? projectUrls}) {
     // Parse the dateRange to handle ongoing positions
     final dates = dateRange.split(' - ');
     final startDate = dates.isNotEmpty ? dates[0] : '';
@@ -1087,17 +1091,16 @@ class _Template4State extends State<Template4> {
           children: [
             Expanded(
               child: Row(
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.poppins(
-                      fontSize: 6,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFFA81919),
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 6,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFFA81919),
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ]),
             ),
             Text(
               '$startDate - $endDate',
@@ -1136,9 +1139,14 @@ class _Template4State extends State<Template4> {
               color: Colors.black,
             ),
           ),
-          ...bulletPoints
-              .map(
-                (point) => Row(
+          ...bulletPoints.asMap().entries.map((entry) {
+            final index = entry.key;
+            final point = entry.value;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('• ',
@@ -1158,8 +1166,29 @@ class _Template4State extends State<Template4> {
                     ),
                   ],
                 ),
-              )
-              .toList(),
+                // Add project URL if available
+                if (projectUrls != null &&
+                    index < projectUrls.length &&
+                    projectUrls[index].isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 6, top: 1),
+                    child: GestureDetector(
+                      onTap: () {
+                        // Handle URL tap if needed
+                      },
+                      child: Text(
+                        projectUrls[index],
+                        style: GoogleFonts.inter(
+                          fontSize: 6,
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }).toList(),
         ]
       ],
     );

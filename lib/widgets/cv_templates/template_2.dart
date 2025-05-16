@@ -246,6 +246,7 @@ class _Template2State extends State<Template2> {
           '${item.company ?? ''} | $dateRange',
           item.description ?? '',
           bulletPoints: item.projects ?? [],
+          projectUrls: item.projectUrls ?? [],
         );
 
         addWidgetToRightColumn(experienceItem, itemHeight);
@@ -1007,7 +1008,7 @@ class _Template2State extends State<Template2> {
   }
 
   Widget _buildExperienceItem(String title, String company, String description,
-      {List<String>? bulletPoints}) {
+      {List<String>? bulletPoints, List<String>? projectUrls}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1042,13 +1043,17 @@ class _Template2State extends State<Template2> {
           ),
         if (bulletPoints != null && bulletPoints.isNotEmpty) ...[
           const SizedBox(height: 4),
-          ...bulletPoints
-              .map((point) {
-                if (point.trim().isEmpty) return Container();
+          ...bulletPoints.asMap().entries.map((entry) {
+            final index = entry.key;
+            final point = entry.value;
+            if (point.trim().isEmpty) return Container();
 
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 2),
-                  child: Row(
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 2),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -1069,10 +1074,30 @@ class _Template2State extends State<Template2> {
                       ),
                     ],
                   ),
-                );
-              })
-              .where((widget) => widget != Container())
-              .toList(),
+                  // Add project URL if available
+                  if (projectUrls != null &&
+                      index < projectUrls.length &&
+                      projectUrls[index].isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 6, top: 1),
+                      child: GestureDetector(
+                        onTap: () {
+                          // Handle URL tap if needed
+                        },
+                        child: Text(
+                          projectUrls[index],
+                          style: GoogleFonts.poppins(
+                            fontSize: 6,
+                            color: Colors.blue,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          }).where((widget) => widget != Container()).toList(),
         ],
       ],
     );

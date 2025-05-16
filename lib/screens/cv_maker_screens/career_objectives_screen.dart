@@ -4,7 +4,8 @@ import 'package:provider/provider.dart'; // Import provider
 
 import '../../utils/app_colors.dart';
 import '../../widgets/buttons/save_edit_delete_btns.dart';
-import '../../provider/user_provider.dart'; // Import UserProvider
+import '../../provider/user_provider.dart';
+import '../../widgets/cv_widgets/custom_divider.dart'; // Import UserProvider
 
 class CareerObjectivesPage extends StatefulWidget {
   const CareerObjectivesPage({
@@ -139,18 +140,15 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.only(left: 18,right: 18,top: 10),
+        padding: const EdgeInsets.only(left: 18, right: 18, top: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Objective field with expanded height
             _buildObjectiveField(),
             const SizedBox(height: 32),
-            const Divider(
-              height: 1,
-              thickness: 1,
-              color: AppColors.dividerColor,
-            ),
+            const CustomDivider(),
+
             const SizedBox(height: 20),
 
             // Using the new SaveButton widget
@@ -191,7 +189,7 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
           child: TextFormField(
             controller: _objectiveController,
             maxLines: 8,
-             maxLength: 200,
+            maxLength: 200,
             decoration: InputDecoration(
               hintText: 'Type your career objectives / Profile Summary',
               hintStyle: GoogleFonts.inter(

@@ -134,6 +134,7 @@ class _Template1State extends State<Template1> {
             item.description,
             dateRange,
             bulletPoints: item.projects.isNotEmpty ? item.projects : null,
+            projectUrls: item.projectUrls.isNotEmpty ? item.projectUrls : null,
           ),
         ));
 
@@ -197,8 +198,7 @@ class _Template1State extends State<Template1> {
         final certItemKey = GlobalKey();
         final item = certificationItems[i];
 
-        String dateRange =
-             "${item.startDate}";
+        String dateRange = "${item.startDate}";
 
         _allContentWidgets.add(KeyedSubtree(
           key: certItemKey,
@@ -847,9 +847,9 @@ class _Template1State extends State<Template1> {
               ),
 
             // Website URL from UserModel (if present)
-                    if (userData.websiteUrl != null &&
-    userData.websiteUrl!.isNotEmpty &&
-    !websites.any((website) => website.url == userData.websiteUrl))
+            if (userData.websiteUrl != null &&
+                userData.websiteUrl!.isNotEmpty &&
+                !websites.any((website) => website.url == userData.websiteUrl))
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -870,26 +870,26 @@ class _Template1State extends State<Template1> {
               ),
 
             // All additional websites from provider
-            ...websites.map((website) =>
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SvgPicture.asset(
-                      'assets/icons/url_icon.svg',
-                      width: 6,
-                      height: 6,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      website.url,
-                      style: GoogleFonts.inriaSerif(
-                        fontSize: 8,
-                        color: Colors.grey.shade700,
-                      ),
-                    ),
-                  ],
-                )
-            ).toList(),
+            ...websites
+                .map((website) => Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/icons/url_icon.svg',
+                          width: 6,
+                          height: 6,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          website.url,
+                          style: GoogleFonts.inriaSerif(
+                            fontSize: 8,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ],
+                    ))
+                .toList(),
           ],
         ),
         // Add spacing before the first section (Objective)
@@ -928,8 +928,8 @@ class _Template1State extends State<Template1> {
   }
 
   Widget _buildExperienceItem(
-      String title, String company, String description, String dateRange,
-      {List<String>? bulletPoints}) {
+      String? title, String? company, String? description, String dateRange,
+      {List<String>? bulletPoints, List<String>? projectUrls}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -938,7 +938,7 @@ class _Template1State extends State<Template1> {
           children: [
             Expanded(
               child: Text(
-                title,
+                title ?? '',
                 style: GoogleFonts.poppins(
                   fontSize: 8,
                   fontWeight: FontWeight.w500,
@@ -956,14 +956,14 @@ class _Template1State extends State<Template1> {
         ),
         const SizedBox(height: 2),
         Text(
-          company,
+          company ?? '',
           style: GoogleFonts.poppins(
             fontSize: 7,
             color: Colors.grey.shade700,
             fontStyle: FontStyle.italic,
           ),
         ),
-        if (description.isNotEmpty) ...[
+        if (description != null && description.isNotEmpty) ...[
           const SizedBox(height: 2),
           Text(
             description,
@@ -975,9 +975,13 @@ class _Template1State extends State<Template1> {
         ],
         if (bulletPoints != null && bulletPoints.isNotEmpty) ...[
           const SizedBox(height: 2),
-          ...bulletPoints
-              .map(
-                (point) => Row(
+          ...bulletPoints.asMap().entries.map((entry) {
+            final index = entry.key;
+            final point = entry.value;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('• ',
@@ -994,8 +998,29 @@ class _Template1State extends State<Template1> {
                     ),
                   ],
                 ),
-              )
-              .toList(),
+                // Add project URL if available
+                if (projectUrls != null &&
+                    index < projectUrls.length &&
+                    projectUrls[index].isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 6, top: 1),
+                    child: GestureDetector(
+                      onTap: () {
+                        // Handle URL tap if needed
+                      },
+                      child: Text(
+                        projectUrls[index],
+                        style: GoogleFonts.inter(
+                          fontSize: 6,
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }).toList(),
         ]
       ],
     );
@@ -1124,7 +1149,6 @@ class _Template1State extends State<Template1> {
     );
   }
 
-
   Widget _buildLanguagesList(List<Language> languages) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1153,7 +1177,6 @@ class _Template1State extends State<Template1> {
       }).toList(),
     );
   }
-
 
   Widget _buildTemplateButtons() {
     return TemplateActionButtons(

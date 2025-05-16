@@ -15,14 +15,14 @@ import '../../widgets/cv_templates/template4.dart';
 import 'career_objectives_screen.dart';
 import 'certifications_screen.dart';
 import 'education_details_screen.dart';
-import 'job_detail_screen.dart';
 import 'language_screen.dart';
 
 class MainCVScreen extends StatefulWidget {
   final int templateId;
   final String templateName;
+  final GlobalKey<PersonalInfoPageState> personalInfoKey = GlobalKey();
 
-  const MainCVScreen({
+  MainCVScreen({
     Key? key,
     required this.templateId,
     required this.templateName,
@@ -38,7 +38,6 @@ class _MainCVScreenState extends State<MainCVScreen> {
 
   final List<String> stepTitles = [
     'Personal Information',
-
     'Career Objectives',
     'Education Details',
     'Work Experience',
@@ -76,7 +75,8 @@ class _MainCVScreenState extends State<MainCVScreen> {
   void _navigateToTemplate(BuildContext context) {
     // You can either use the widget.templateId directly or get it from the TemplateProvider
     // Let's use the TemplateProvider approach for consistency with WebsiteScreen
-    final templateProvider = Provider.of<TemplateProvider>(context, listen: false);
+    final templateProvider =
+        Provider.of<TemplateProvider>(context, listen: false);
     final templateId = templateProvider.selectedTemplateId;
 
     Widget templateScreen;
@@ -95,7 +95,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
         templateScreen = Template4();
         break;
       default:
-      // Fallback to Template1 if templateId doesn't match any case
+        // Fallback to Template1 if templateId doesn't match any case
         templateScreen = Template1();
     }
 
@@ -107,6 +107,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -142,6 +143,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
               children: [
                 // Your different screen contents as pages
                 PersonalInfoPage(
+                  key: widget.personalInfoKey,
                   templateId: widget.templateId,
                   templateName: widget.templateName,
                 ),
@@ -162,15 +164,23 @@ class _MainCVScreenState extends State<MainCVScreen> {
           bottom: 28.0,
           left: 28.0,
           right: 28.0,
-          // This prevents the button from being pushed up by the keyboard
           top: 10.0,
         ),
         child: CustomGradientButton(
           text: currentStep == stepTitles.length ? 'Add' : 'Next',
-          onPressed: currentStep < stepTitles.length
-              ? goToNextPage
-              : () {
-            _navigateToTemplate(context);
+          onPressed: () {
+            if (currentStep == 1) {
+              // For PersonalInfoPage
+              final isValid =
+                  widget.personalInfoKey.currentState?.validate() ?? false;
+              if (isValid) {
+                goToNextPage();
+              }
+            } else if (currentStep < stepTitles.length) {
+              goToNextPage();
+            } else {
+              _navigateToTemplate(context);
+            }
           },
         ),
       ),

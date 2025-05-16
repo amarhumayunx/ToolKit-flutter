@@ -7,6 +7,7 @@ import '../../utils/app_colors.dart';
 import '../../widgets/buttons/add_another_button.dart';
 import '../../widgets/buttons/save_edit_delete_btns.dart';
 import '../../widgets/custom_text_field.dart';
+import '../../widgets/cv_widgets/custom_divider.dart';
 import '../../widgets/date_picker_field.dart';
 
 class WorkExperiencePage extends StatefulWidget {
@@ -24,11 +25,13 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
   final TextEditingController _startDateController = TextEditingController();
   final TextEditingController _endDateController = TextEditingController();
   final TextEditingController _projectController = TextEditingController();
+  final TextEditingController _projectUrlController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
   bool isCurrent = false;
   bool showForm = false;
   List<String> projectsList = [];
+  List<String> projectUrlsList = [];
   DateTime? startDate;
   DateTime? endDate;
   String? dateError;
@@ -40,11 +43,13 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
     _startDateController.dispose();
     _endDateController.dispose();
     _projectController.dispose();
+    _projectUrlController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
 
-  void _selectDate(BuildContext context, TextEditingController controller, bool isStartDate) async {
+  void _selectDate(BuildContext context, TextEditingController controller,
+      bool isStartDate) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: isStartDate ? DateTime.now() : (startDate ?? DateTime.now()),
@@ -81,7 +86,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
       // Format date as DD/MM/YY to match the UI design
       setState(() {
         controller.text =
-        "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString().substring(2)}";
+            "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString().substring(2)}";
       });
     }
   }
@@ -91,13 +96,16 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
 
     setState(() {
       projectsList.add(_projectController.text);
+      projectUrlsList.add(_projectUrlController.text); // Make sure this is being added
       _projectController.clear();
+      _projectUrlController.clear();
     });
   }
 
   void _removeProject(int index) {
     setState(() {
       projectsList.removeAt(index);
+      projectUrlsList.removeAt(index);
     });
   }
 
@@ -107,19 +115,25 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
     }
 
     // Additional validation for dates
-    if (!isCurrent && (_startDateController.text.isEmpty || _endDateController.text.isEmpty)) {
+    if (!isCurrent &&
+        (_startDateController.text.isEmpty ||
+            _endDateController.text.isEmpty)) {
       return;
     }
 
     // Validate end date is after start date if both exist
-    if (!isCurrent && startDate != null && endDate != null && endDate!.isBefore(startDate!)) {
+    if (!isCurrent &&
+        startDate != null &&
+        endDate != null &&
+        endDate!.isBefore(startDate!)) {
       setState(() {
         dateError = 'End date must be after start date';
       });
       return;
     }
 
-    final provider = Provider.of<WorkExperienceProvider>(context, listen: false);
+    final provider =
+        Provider.of<WorkExperienceProvider>(context, listen: false);
 
     provider.addWorkExperience(
       WorkExperienceItem(
@@ -128,6 +142,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
         startDate: _startDateController.text,
         endDate: isCurrent ? 'Present' : _endDateController.text,
         projects: projectsList,
+        projectUrls: projectUrlsList,
         description: _descriptionController.text,
         isCurrent: isCurrent,
       ),
@@ -140,8 +155,10 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
       _startDateController.clear();
       _endDateController.clear();
       _projectController.clear();
+      _projectUrlController.clear();
       _descriptionController.clear();
       projectsList = [];
+      projectUrlsList = [];
       isCurrent = false;
       startDate = null;
       endDate = null;
@@ -150,7 +167,8 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
   }
 
   void _editWorkExperience(BuildContext context, int index) {
-    final provider = Provider.of<WorkExperienceProvider>(context, listen: false);
+    final provider =
+        Provider.of<WorkExperienceProvider>(context, listen: false);
     final item = provider.workExperienceItems[index];
 
     // Parse the dates when editing
@@ -180,6 +198,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
       _startDateController.text = item.startDate;
       _endDateController.text = item.isCurrent ? '' : item.endDate;
       projectsList = List.from(item.projects);
+      projectUrlsList = List.from(item.projectUrls ?? []);
       _descriptionController.text = item.description;
       isCurrent = item.isCurrent;
       showForm = true;
@@ -190,7 +209,8 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
   }
 
   void _deleteWorkExperience(BuildContext context, int index) {
-    final provider = Provider.of<WorkExperienceProvider>(context, listen: false);
+    final provider =
+        Provider.of<WorkExperienceProvider>(context, listen: false);
     provider.deleteWorkExperience(index);
   }
 
@@ -204,8 +224,10 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
         _startDateController.clear();
         _endDateController.clear();
         _projectController.clear();
+        _projectUrlController.clear();
         _descriptionController.clear();
         projectsList = [];
+        projectUrlsList = [];
         isCurrent = false;
         startDate = null;
         endDate = null;
@@ -226,7 +248,8 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 26, right: 26, bottom: 8),
+                  padding:
+                      const EdgeInsets.only(left: 26, right: 26, bottom: 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -293,8 +316,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
               style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.black
-              ),
+                  color: AppColors.black),
             ),
             const SizedBox(height: 4),
 
@@ -311,12 +333,71 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
             ),
 
             const SizedBox(height: 10),
-            const Divider(
-              height: 9,
-              thickness: 1,
-              color: AppColors.dividerColor,
-            ),
+            const CustomDivider(),
+
             const SizedBox(height: 8),
+
+            // Projects list with URLs if available
+            if (item.projects.isNotEmpty) ...[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Projects:',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  for (int i = 0; i < item.projects.length; i++)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "• ",
+                              style: GoogleFonts.urbanist(
+                                fontSize: 14,
+                                color: const Color(0xFFB5B5B8),
+                              ),
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.projects[i],
+                                    style: GoogleFonts.urbanist(
+                                      fontSize: 12,
+                                      color: const Color(0xFFB5B5B8),
+                                    ),
+                                  ),
+                                  if (item.projectUrls != null &&
+                                      i < item.projectUrls!.length &&
+                                      item.projectUrls![i].isNotEmpty)
+                                    Text(
+                                      item.projectUrls![i],
+                                      style: GoogleFonts.urbanist(
+                                        fontSize: 12,
+                                        color: Colors.blue,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                      ],
+                    ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ],
 
             // Edit/Delete buttons
             EditDeleteActionRow(
@@ -371,7 +452,8 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                   child: DateField(
                     label: 'Start date',
                     controller: _startDateController,
-                    onTap: () => _selectDate(context, _startDateController, true),
+                    onTap: () =>
+                        _selectDate(context, _startDateController, true),
                   ),
                 ),
                 const SizedBox(width: 20),
@@ -381,7 +463,8 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                     child: DateField(
                       label: 'End Date',
                       controller: _endDateController,
-                      onTap: () => _selectDate(context, _endDateController, false),
+                      onTap: () =>
+                          _selectDate(context, _endDateController, false),
                       errorText: dateError,
                     ),
                   ),
@@ -430,8 +513,6 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Projects - Multiple projects support
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -450,118 +531,172 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                 const SizedBox(height: 8),
 
                 // Input field for adding a new project
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Column(
                   children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.30),
-                              blurRadius: 2,
-                              offset: const Offset(0, 0),
-                            ),
-                          ],
-                          color: AppColors.bgBoxColor,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: TextFormField(
-                          controller: _projectController,
-                          decoration: InputDecoration(
-                            hintText: 'Add a project',
-                            hintStyle: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w300,
-                              color: AppColors.fieldHintColor,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
+                    // Project name field
+                    Container(
+                      width: double.infinity, // Takes full width
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.30),
+                            blurRadius: 2,
+                            offset: const Offset(0, 0),
+                          ),
+                        ],
+                        color: AppColors.bgBoxColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: TextFormField(
+                        controller: _projectController,
+                        decoration: InputDecoration(
+                          hintText: 'Project name',
+                          hintStyle: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w300,
+                            color: AppColors.fieldHintColor,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: _addProject,
-                      child: Container(
-                        height: 45,
-                        width: 45,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppColors.gradientStart,
-                              AppColors.gradientEnd,
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
+                    const SizedBox(height: 8),
+
+                    // Project URL field with add button
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.30),
+                                  blurRadius: 2,
+                                  offset: const Offset(0, 0),
+                                ),
+                              ],
+                              color: AppColors.bgBoxColor,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: TextFormField(
+                              controller: _projectUrlController,
+                              decoration: InputDecoration(
+                                hintText: 'Project URL (optional)',
+                                hintStyle: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w300,
+                                  color: AppColors.fieldHintColor,
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                              ),
+                            ),
                           ),
-                          borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(
-                          Icons.add,
-                          color: AppColors.white,
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: _addProject,
+                          child: Container(
+                            height: 45,
+                            width: 45,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.gradientStart,
+                                  AppColors.gradientEnd,
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.add,
+                              color: AppColors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // Display added projects
+                    if (projectsList.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF7F7F7),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey[200]!),
+                        ),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: projectsList.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12.0,
+                                vertical: 8.0,
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "• ",
+                                    style: GoogleFonts.urbanist(
+                                      fontSize: 14,
+                                      color: const Color(0xFFB5B5B8),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          projectsList[index],
+                                          style: GoogleFonts.urbanist(
+                                            fontSize: 12,
+                                            color: const Color(0xFFB5B5B8),
+                                          ),
+                                        ),
+                                        if (projectUrlsList[index].isNotEmpty)
+                                          Text(
+                                            projectUrlsList[index],
+                                            style: GoogleFonts.urbanist(
+                                              fontSize: 12,
+                                              color: Colors.blue,
+                                              decoration:
+                                                  TextDecoration.underline,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () => _removeProject(index),
+                                    child: const Icon(
+                                      Icons.close,
+                                      size: 16,
+                                      color: Color(0xFFC74A4A),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
-
-                // Display added projects
-                if (projectsList.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF7F7F7),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey[200]!),
-                    ),
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: projectsList.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12.0,
-                            vertical: 8.0,
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                "• ",
-                                style: GoogleFonts.urbanist(
-                                  fontSize: 14,
-                                  color: const Color(0xFFB5B5B8),
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  projectsList[index],
-                                  style: GoogleFonts.urbanist(
-                                    fontSize: 12,
-                                    color: const Color(0xFFB5B5B8),
-                                  ),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () => _removeProject(index),
-                                child: const Icon(
-                                  Icons.close,
-                                  size: 16,
-                                  color: Color(0xFFC74A4A),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
               ],
             ),
             const SizedBox(height: 16),
@@ -631,11 +766,8 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
               ],
             ),
             const SizedBox(height: 20),
-            const Divider(
-              height: 1,
-              thickness: 1,
-              color: AppColors.dividerColor,
-            ),
+            const CustomDivider(),
+
             const SizedBox(height: 20),
 
             SaveButton(

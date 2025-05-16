@@ -10,7 +10,8 @@ import 'package:path/path.dart' as path;
 class SaveDocumentService {
   /// Checks if storage permission is available or needed
   /// For Android 10+ (API 29+), we don't need explicit storage permission
-  static Future<bool> checkAndRequestStoragePermission(BuildContext context) async {
+  static Future<bool> checkAndRequestStoragePermission(
+      BuildContext context) async {
     if (Platform.isAndroid) {
       // For Android 10 (API 29) and above, we can use the media store without storage permission
       if (await _isAndroidVersionAbove29()) {
@@ -50,7 +51,7 @@ class SaveDocumentService {
           title: const Text('Permission Issue'),
           content: const Text(
               'Unable to save document. This might be due to permission restrictions on your device.\n\n'
-                  'For Android 11+ users: Please allow the app to manage all files in your device settings.'),
+              'For Android 11+ users: Please allow the app to manage all files in your device settings.'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancel'),
@@ -72,7 +73,8 @@ class SaveDocumentService {
   }
 
   /// Main method to save a document file
-  static Future<void> saveDocument(BuildContext context, File documentFile) async {
+  static Future<void> saveDocument(
+      BuildContext context, File documentFile) async {
     try {
       // Check if we can access storage (either with permission or on Android 10+)
       bool canAccessStorage = await checkAndRequestStoragePermission(context);
@@ -81,11 +83,13 @@ class SaveDocumentService {
         // Generate a unique filename
         String baseFileName = path.basename(documentFile.path);
         if (!baseFileName.toLowerCase().endsWith('.docx')) {
-          baseFileName = 'Document.docx'; // Default name if file doesn't have proper extension
+          baseFileName =
+              'Document.docx'; // Default name if file doesn't have proper extension
         }
 
         final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-        String uniqueFileName = '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
+        String uniqueFileName =
+            '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
 
         // Use the FlutterFileDialog directly (this handles permissions internally)
         final params = SaveFileDialogParams(
@@ -121,3 +125,5 @@ class SaveDocumentService {
     }
   }
 }
+
+

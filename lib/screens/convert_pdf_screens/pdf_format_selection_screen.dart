@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
+import '../../services/pdf_to_img_service.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../services/pdf_to_word_service.dart';
-import './pdf_save_screen.dart'; // Import the new screen
+import './pdf_save_screen.dart';
 
 class PdfFormatSelectionScreen extends StatefulWidget {
   final File selectedPdf;
@@ -47,25 +48,27 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
     });
 
     try {
-      final service = PdfToWordService();
-
       switch (selectedFormat) {
         case 'Word':
+          final service = PdfToWordService();
           _convertedFile = await service.convertPdfToWord(widget.selectedPdf);
+          break;
+        case 'Image':
+          // Use the new PDF to Image service
+          final service = PdfToImageService();
+          _convertedFile = await service.convertPdfToImage(widget.selectedPdf);
           break;
         case 'Excel':
           throw UnimplementedError('Excel conversion not implemented');
         case 'PowerPoint':
           throw UnimplementedError('PowerPoint conversion not implemented');
-        case 'Jpg':
-          throw UnimplementedError('JPG conversion not implemented');
         default:
           throw Exception('Unsupported format');
       }
 
       if (!mounted) return;
 
-      // Navigate to PdfSaveScreen instead of showing dialog
+      // Navigate to PdfSaveScreen
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -226,7 +229,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
                 _buildFormatOption(
                     'PowerPoint', 'assets/icons/powerpoint_icon.svg'),
                 _buildFormatOption(
-                    'Jpg', 'assets/icons/convert_img_icon.svg'),
+                    'Image', 'assets/icons/convert_img_icon.svg'),
               ],
             ),
             const Spacer(),

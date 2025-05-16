@@ -271,6 +271,7 @@ class _Template3State extends State<Template3> {
           item.description,
           dateRange,
           bulletPoints: item.projects.isNotEmpty ? item.projects : null,
+          projectUrls: item.projectUrls.isNotEmpty ? item.projectUrls : null,
         );
 
         addWidgetToRightColumn(experienceItem, itemHeight);
@@ -1093,7 +1094,7 @@ class _Template3State extends State<Template3> {
 
   Widget _buildExperienceItem(
       String title, String company, String description, String dateRange,
-      {List<String>? bulletPoints}) {
+      {List<String>? bulletPoints, List<String>? projectUrls}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1102,12 +1103,11 @@ class _Template3State extends State<Template3> {
           children: [
             Expanded(
               child: Text(
-                title,
-                style: GoogleFonts.poppins(
-                    fontSize: 7,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.t3Primary),
-              ),
+                  title,
+                  style: GoogleFonts.poppins(
+                      fontSize: 7,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.t3Primary)),
             ),
             Text(
               dateRange,
@@ -1135,9 +1135,14 @@ class _Template3State extends State<Template3> {
         ],
         if (bulletPoints != null && bulletPoints.isNotEmpty) ...[
           const SizedBox(height: 2),
-          ...bulletPoints
-              .map(
-                (point) => Row(
+          ...bulletPoints.asMap().entries.map((entry) {
+            final index = entry.key;
+            final point = entry.value;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('• ',
@@ -1154,8 +1159,29 @@ class _Template3State extends State<Template3> {
                     ),
                   ],
                 ),
-              )
-              .toList(),
+                // Add project URL if available
+                if (projectUrls != null &&
+                    index < projectUrls.length &&
+                    projectUrls[index].isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 6, top: 1),
+                    child: GestureDetector(
+                      onTap: () {
+                        // Handle URL tap if needed
+                      },
+                      child: Text(
+                        projectUrls[index],
+                        style: GoogleFonts.inter(
+                          fontSize: 6,
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }).toList(),
         ]
       ],
     );
