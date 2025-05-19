@@ -2,9 +2,11 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
+import 'package:pdf/pdf.dart' as pdf;
 import 'package:pdf_render/pdf_render.dart' hide ImageByteFormat;
 import 'dart:ui' as ui;
 import 'package:archive/archive.dart';
+
 
 class PdfToImageService {
   /// Converts all pages of a PDF file to PNG images and creates a zip archive

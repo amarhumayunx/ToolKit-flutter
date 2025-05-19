@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../screens/compress_files_screen/compress_file_screen.dart';
 import '../screens/ocr_screens/ocr_screen.dart';
+import '../screens/split_screen/split_screen.dart';
 import 'tool_item.dart';
 
 class ToolsListView extends StatefulWidget {
@@ -72,9 +73,9 @@ class _ToolsListViewState extends State<ToolsListView> {
         // ));
         break;
       case 'Split File':
-        // Navigator.of(context).push(MaterialPageRoute(
-        //   builder: (context) => const SplitFilePage(),
-        // ));
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => const SplitScreen(),
+        ));
         break;
       case 'Rearrange File':
         // Navigator.of(context).push(MaterialPageRoute(

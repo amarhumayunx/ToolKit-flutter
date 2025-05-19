@@ -63,6 +63,9 @@ dependencies:
   crop_image: ^1.0.16
   flutter_file_dialog: ^3.0.2
   syncfusion_flutter_pdf: ^29.1.38
+  pdfrx: ^1.1.29
+  flutter_image_compress: ^2.4.0
+  path: ^1.9.1
   pdf_render: ^1.4.12
 
 

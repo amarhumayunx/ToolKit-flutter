@@ -10,6 +10,7 @@ import '../../widgets/tools/file_selection_container.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
 import 'compress_file_result_screen.dart';
+import 'file_compression_service.dart'; // Import our file compressor
 
 class CompressFileScreen extends StatefulWidget {
   const CompressFileScreen({super.key});
@@ -21,6 +22,7 @@ class CompressFileScreen extends StatefulWidget {
 class _CompressFileScreenState extends State<CompressFileScreen> {
   List<File> _selectedFiles = [];
   bool _isCompressing = false;
+  double _compressionQuality = 85; // Default compression quality
 
   Future<void> _pickFiles() async {
     try {
@@ -69,11 +71,37 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
     });
 
     try {
-      // Simulate compression process
-      await Future.delayed(const Duration(seconds: 2));
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 20),
+                  const Text('Compressing files...'),
+                  const SizedBox(height: 10),
+                  Text('${_selectedFiles.length} files being processed'),
+                ],
+              ),
+            ),
+          );
+        },
+      );
 
-      // Here you would implement actual file compression logic
-      // For each file in _selectedFiles, compress it and save the result
+      // Perform actual compression using our FileCompressor utility
+      List<File> compressedFiles = await FileCompressor.compressBatch(
+        _selectedFiles,
+        quality: _compressionQuality.round(),
+      );
+
+      // Close the loading dialog
+      Navigator.of(context).pop();
 
       setState(() {
         _isCompressing = false;
@@ -85,15 +113,20 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
         MaterialPageRoute(
           builder: (context) => CompressedFileResultScreen(
             originalFiles: _selectedFiles,
-            // In a real implementation, you would pass compressed files here
-            compressedFiles: _selectedFiles,
+            compressedFiles: compressedFiles,
           ),
         ),
       );
     } catch (e) {
+      // Close the loading dialog if open
+      if (Navigator.canPop(context)) {
+        Navigator.of(context).pop();
+      }
+
       setState(() {
         _isCompressing = false;
       });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error compressing files: $e')),
       );
@@ -127,7 +160,7 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                   InfoCard(
                     title: 'Reduce file size',
                     description:
-                        'Reduce the size of PDFs, documents, and images while preserving original quality.',
+                    'Reduce the size of PDFs, documents, and images while preserving original quality.',
                   ),
                   const SizedBox(height: 24),
                   // Combined container with shadow
@@ -139,16 +172,68 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                     onRemoveFile: _removeFile,
                     isMultipleSelection: true,
                   ),
+
+                  // Add compression quality slider
+                  if (_selectedFiles.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Compression Quality',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Text('Maximum\nCompression'),
+                              Expanded(
+                                child: Slider(
+                                  value: _compressionQuality,
+                                  min: 30,
+                                  max: 100,
+                                  divisions: 7,
+                                  label: _compressionQuality.round().toString(),
+                                  onChanged: (double value) {
+                                    setState(() {
+                                      _compressionQuality = value;
+                                    });
+                                  },
+                                ),
+                              ),
+                              const Text('Maximum\nQuality'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
           ),
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+            const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
             child: CustomGradientButton(
-              text: 'Compress',
-              onPressed: _compressFiles,
+              text: _isCompressing ? 'Compressing...' : 'Compress',
+              onPressed: _isCompressing ? null : _compressFiles,
             ),
           ),
         ],
