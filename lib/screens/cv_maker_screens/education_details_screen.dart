@@ -37,7 +37,8 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
     super.dispose();
   }
 
-  void _selectDate(BuildContext context, TextEditingController controller, bool isStartDate) async {
+  void _selectDate(BuildContext context, TextEditingController controller,
+      bool isStartDate) async {
     FocusScope.of(context).unfocus();
 
     final DateTime? picked = await showDatePicker(
@@ -73,7 +74,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
 
       setState(() {
         controller.text =
-        "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString().substring(2)}";
+            "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString().substring(2)}";
       });
     }
   }
@@ -89,7 +90,8 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
       return;
     }
 
-    final educationProvider = Provider.of<EducationProvider>(context, listen: false);
+    final educationProvider =
+        Provider.of<EducationProvider>(context, listen: false);
     final newEducation = EducationItem(
       degree: _degreeController.text,
       institute: _instituteController.text,
@@ -109,7 +111,8 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
   }
 
   void _editEducation(int index) {
-    final educationProvider = Provider.of<EducationProvider>(context, listen: false);
+    final educationProvider =
+        Provider.of<EducationProvider>(context, listen: false);
     final item = educationProvider.educationItems[index];
 
     final startDateParts = item.startDate.split('/');
@@ -146,7 +149,8 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
   }
 
   void _deleteEducation(int index) {
-    final educationProvider = Provider.of<EducationProvider>(context, listen: false);
+    final educationProvider =
+        Provider.of<EducationProvider>(context, listen: false);
     educationProvider.deleteEducationItem(index);
   }
 

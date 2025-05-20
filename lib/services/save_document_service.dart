@@ -51,7 +51,7 @@ class SaveDocumentService {
           title: const Text('Permission Issue'),
           content: const Text(
               'Unable to save document. This might be due to permission restrictions on your device.\n\n'
-              'For Android 11+ users: Please allow the app to manage all files in your device settings.'),
+                  'For Android 11+ users: Please allow the app to manage all files in your device settings.'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancel'),
@@ -73,7 +73,7 @@ class SaveDocumentService {
   }
 
   /// Main method to save a document file
-  static Future<void> saveDocument(
+  static Future<bool?> saveDocument(
       BuildContext context, File documentFile) async {
     try {
       // Check if we can access storage (either with permission or on Android 10+)
@@ -84,7 +84,7 @@ class SaveDocumentService {
         String baseFileName = path.basename(documentFile.path);
         if (!baseFileName.toLowerCase().endsWith('.docx')) {
           baseFileName =
-              'Document.docx'; // Default name if file doesn't have proper extension
+          'Document.docx'; // Default name if file doesn't have proper extension
         }
 
         final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
@@ -103,27 +103,30 @@ class SaveDocumentService {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Document saved successfully')),
           );
+          return true; // Successful save
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Document saving canceled')),
           );
+          return false; // Save was canceled
         }
       } else {
         // Show a dialog with a more helpful message about permission issues
         showPermissionHelperDialog(context);
+        return null; // Permission issue
       }
     } on PlatformException catch (e) {
       print('Platform Exception in saving file: ${e.message}');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to save document: ${e.message}')),
       );
+      return null; // Error
     } catch (e) {
       print('Error saving file: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to save document: $e')),
       );
+      return null; // Error
     }
   }
 }
-
-

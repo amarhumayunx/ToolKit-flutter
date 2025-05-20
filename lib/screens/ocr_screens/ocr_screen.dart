@@ -1,3 +1,4 @@
+// ocr_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:io';
@@ -20,14 +21,14 @@ class OcrScreen extends StatefulWidget {
 }
 
 class _OcrScreenState extends State<OcrScreen> {
-  List<File> _selectedImages = []; // Changed to list of files
+  List<File> _selectedImages = [];
   final ImagePicker _picker = ImagePicker();
   String _extractedText = '';
+  bool _shouldClearImages = false;
 
   Future<void> _pickImages(ImageSource source) async {
     try {
       if (source == ImageSource.camera) {
-        // Navigate to our custom camera screen
         final List<File>? capturedImages = await Navigator.push(
           context,
           MaterialPageRoute(
@@ -38,35 +39,40 @@ class _OcrScreenState extends State<OcrScreen> {
         if (capturedImages != null && capturedImages.isNotEmpty) {
           setState(() {
             _selectedImages.addAll(capturedImages);
+            _shouldClearImages = false;
           });
         }
       } else {
-        // Original gallery code
         final List<XFile> pickedFiles = await _picker.pickMultiImage();
         if (pickedFiles.isNotEmpty) {
           setState(() {
             _selectedImages
                 .addAll(pickedFiles.map((file) => File(file.path)).toList());
+            _shouldClearImages = false;
           });
         }
       }
     } catch (e) {
-      // SnackBar removed
+      print("Error picking images: $e");
     }
   }
 
   Future<void> _extractTextFromImages() async {
     if (_selectedImages.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select at least one image')),
+      );
       return;
     }
 
     setState(() {
-      _extractedText = ''; // Clear previous text
+      _extractedText = '';
     });
 
     try {
       final textRecognizer = GoogleMlKit.vision.textRecognizer();
       StringBuffer combinedText = StringBuffer();
+      bool textFound = false;
 
       for (var imageFile in _selectedImages) {
         final inputImage = InputImage.fromFilePath(imageFile.path);
@@ -74,8 +80,9 @@ class _OcrScreenState extends State<OcrScreen> {
             await textRecognizer.processImage(inputImage);
 
         if (recognizedText.text.isNotEmpty) {
+          textFound = true;
           combinedText.writeln(recognizedText.text);
-          combinedText.writeln(); // Add space between different images
+          combinedText.writeln();
         }
       }
 
@@ -85,23 +92,48 @@ class _OcrScreenState extends State<OcrScreen> {
         _extractedText = combinedText.toString();
       });
 
-      if (_extractedText.isNotEmpty) {
-        Navigator.push(
+      if (textFound) {
+        final shouldClear = await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) =>
                 ExtractedTextScreen(extractedText: _extractedText),
           ),
         );
+
+        if (shouldClear == true) {
+          _clearSelectedImages();
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No text could be found in the selected images'),
+            duration: Duration(seconds: 3),
+          ),
+        );
       }
     } catch (e) {
-      setState(() {});
+      print("Error in OCR: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error processing images: $e'),
+          duration: Duration(seconds: 3),
+        ),
+      );
     }
   }
 
   void _removeImage(int index) {
     setState(() {
       _selectedImages.removeAt(index);
+    });
+  }
+
+  void _clearSelectedImages() {
+    setState(() {
+      _selectedImages.clear();
+      _extractedText = '';
+      _shouldClearImages = true;
     });
   }
 
@@ -120,8 +152,6 @@ class _OcrScreenState extends State<OcrScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-
-
                   CustomSvgImage(imagePath: 'assets/images/ocr_image.svg'),
                   const SizedBox(height: 30),
                   InfoCard(
@@ -130,7 +160,6 @@ class _OcrScreenState extends State<OcrScreen> {
                         'Seamlessly extract text copy from multiple images or documents instantly.',
                   ),
                   const SizedBox(height: 24),
-                  // Combined container with shadow
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -145,13 +174,11 @@ class _OcrScreenState extends State<OcrScreen> {
                     ),
                     child: Column(
                       children: [
-                        // File selection section
                         FileSelectionSection(
                           sectionTitle: 'Choose File',
                           onSelectFiles: () => _pickImages(ImageSource.gallery),
                           onScanNew: () => _pickImages(ImageSource.camera),
                         ),
-                        // Dotted file drop zone
                         Padding(
                           padding: const EdgeInsets.only(
                               left: 16, right: 16, bottom: 16),
@@ -159,6 +186,9 @@ class _OcrScreenState extends State<OcrScreen> {
                             selectedImages: _selectedImages,
                             onTap: () => _pickImages(ImageSource.gallery),
                             onRemoveImage: _removeImage,
+                            isEmpty:
+                                _shouldClearImages || _selectedImages.isEmpty,
+                            emptyStateText: 'Click to choose files',
                           ),
                         ),
                       ],

@@ -5,19 +5,20 @@ import 'dart:async';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
-import '../../services/word_img_service.dart';
+import '../../services/word_images_service.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import '../../widgets/tools/document_container.dart';
 import '../../widgets/buttons/save_document_btn.dart';
 
 class SaveScreen extends StatefulWidget {
-  final File selectedImage;
+  final List<File>
+      selectedImages; // Changed to List<File> to support multiple images
   final String selectedFormat;
 
   const SaveScreen({
     super.key,
-    required this.selectedImage,
+    required this.selectedImages,
     required this.selectedFormat,
   });
 
@@ -50,8 +51,9 @@ class _SaveScreenState extends State<SaveScreen>
       }
     });
 
+    // Use the first image's name as the base name
     final originalName =
-        widget.selectedImage.path.split('/').last.split('.').first;
+        widget.selectedImages.first.path.split('/').last.split('.').first;
     currentFileName = originalName;
 
     _convertFile();
@@ -73,40 +75,18 @@ class _SaveScreenState extends State<SaveScreen>
   Future<void> _convertFile() async {
     try {
       if (widget.selectedFormat == 'Word') {
-        final wordService = WordImageService();
-        final wordFilePath =
-            await wordService.createWordDocumentWithImage(widget.selectedImage);
+        final wordFile =
+            await WordImagesService.createWordDocument(widget.selectedImages);
         setState(() {
-          convertedFile = File(wordFilePath);
+          convertedFile = wordFile;
         });
       } else if (widget.selectedFormat == 'PDF') {
-        final pdf = pw.Document();
-        final image = pw.MemoryImage(
-          widget.selectedImage.readAsBytesSync(),
-        );
-
-        pdf.addPage(
-          pw.Page(
-            build: (pw.Context context) {
-              return pw.Center(
-                child: pw.Image(image),
-              );
-            },
-          ),
-        );
-
-        final directory = await getTemporaryDirectory();
-        final path = '${directory.path}/$currentFileName.pdf';
-        final file = File(path);
-        await file.writeAsBytes(await pdf.save());
-
-        setState(() {
-          convertedFile = file;
-        });
+        await _createPDFWithMultipleImages();
       } else {
+        // For other formats, just use the first image for now
         await Future.delayed(const Duration(seconds: 2));
         setState(() {
-          convertedFile = widget.selectedImage;
+          convertedFile = widget.selectedImages.first;
         });
       }
     } catch (e) {
@@ -116,6 +96,73 @@ class _SaveScreenState extends State<SaveScreen>
         );
       }
     }
+  }
+
+  Future<void> _createPDFWithMultipleImages() async {
+    final pdf = pw.Document();
+
+    // Create memory images from all selected files
+    List<pw.MemoryImage> images = [];
+    for (File imageFile in widget.selectedImages) {
+      images.add(pw.MemoryImage(imageFile.readAsBytesSync()));
+    }
+
+    // Option 1: All images on one page (if you have few images)
+    if (widget.selectedImages.length <= 4) {
+      pdf.addPage(
+        pw.Page(
+          build: (pw.Context context) {
+            return pw.Column(
+              children: images
+                  .map((image) => pw.Container(
+                        margin: const pw.EdgeInsets.only(bottom: 20),
+                        height: 200, // Fixed height for each image
+                        child: pw.Image(
+                          image,
+                          fit: pw.BoxFit.contain,
+                        ),
+                      ))
+                  .toList(),
+            );
+          },
+        ),
+      );
+    }
+    // Option 2: Multiple pages with 2-3 images per page
+    else {
+      const int imagesPerPage = 2;
+      for (int i = 0; i < images.length; i += imagesPerPage) {
+        final pageImages = images.skip(i).take(imagesPerPage).toList();
+
+        pdf.addPage(
+          pw.Page(
+            build: (pw.Context context) {
+              return pw.Column(
+                children: pageImages
+                    .map((image) => pw.Container(
+                          margin: const pw.EdgeInsets.only(bottom: 20),
+                          height: 250, // Adjust height based on images per page
+                          child: pw.Image(
+                            image,
+                            fit: pw.BoxFit.contain,
+                          ),
+                        ))
+                    .toList(),
+              );
+            },
+          ),
+        );
+      }
+    }
+
+    final directory = await getTemporaryDirectory();
+    final path = '${directory.path}/$currentFileName.pdf';
+    final file = File(path);
+    await file.writeAsBytes(await pdf.save());
+
+    setState(() {
+      convertedFile = file;
+    });
   }
 
   String get fileName => '$currentFileName.${_getFormatExtension()}';
@@ -174,7 +221,10 @@ class _SaveScreenState extends State<SaveScreen>
   }
 
   void _handleFileDeleted() {
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    // Pop twice to go back two screens
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
+    // Show a success message
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('File deleted successfully')),
     );
@@ -184,7 +234,7 @@ class _SaveScreenState extends State<SaveScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(title: 'Convert Image'),
+      appBar: CustomAppBar(title: 'Convert Images'),
       body: Stack(
         children: [
           SingleChildScrollView(

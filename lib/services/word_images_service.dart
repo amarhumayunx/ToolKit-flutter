@@ -3,10 +3,22 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 import 'package:archive/archive.dart';
+import 'dart:typed_data';
+import 'package:image/image.dart' as img;
 
 class WordImagesService {
   static Future<File> createWordDocument(List<File> imageFiles) async {
     final archive = Archive();
+
+    // Process images to fix orientation
+    List<Uint8List> processedImages = [];
+    List<String> imageExtensions = [];
+
+    for (File imageFile in imageFiles) {
+      final processedImage = await _processImage(imageFile);
+      processedImages.add(processedImage);
+      imageExtensions.add(_getImageExtension(imageFile.path));
+    }
 
     // Add content types
     archive.addFile(ArchiveFile(
@@ -19,14 +31,14 @@ class WordImagesService {
         utf8.encode(_getRelationshipsXml())));
 
     // Add document relationships
-    final docRelsXml = _getDocumentRelationshipsXml(imageFiles.length);
+    final docRelsXml = _getDocumentRelationshipsXml(imageFiles.length, imageExtensions);
     archive.addFile(ArchiveFile('word/_rels/document.xml.rels',
         docRelsXml.length, utf8.encode(docRelsXml)));
 
-    // Add media files
-    for (int i = 0; i < imageFiles.length; i++) {
-      final imageBytes = await imageFiles[i].readAsBytes();
-      final ext = _getImageExtension(imageFiles[i].path);
+    // Add processed media files
+    for (int i = 0; i < processedImages.length; i++) {
+      final imageBytes = processedImages[i];
+      final ext = imageExtensions[i];
       archive.addFile(ArchiveFile(
           'word/media/image${i + 1}.$ext', imageBytes.length, imageBytes));
     }
@@ -55,6 +67,34 @@ class WordImagesService {
     return File(filePath)..writeAsBytes(zipData);
   }
 
+  static Future<Uint8List> _processImage(File imageFile) async {
+    try {
+      final imageBytes = await imageFile.readAsBytes();
+
+      // Decode the image
+      img.Image? image = img.decodeImage(imageBytes);
+      if (image == null) {
+        // If we can't decode, return original bytes
+        return imageBytes;
+      }
+
+      // Fix orientation based on EXIF data
+      image = img.bakeOrientation(image);
+
+      // Re-encode the image
+      final ext = _getImageExtension(imageFile.path);
+      if (ext == 'png') {
+        return Uint8List.fromList(img.encodePng(image));
+      } else {
+        // Default to JPEG
+        return Uint8List.fromList(img.encodeJpg(image, quality: 85));
+      }
+    } catch (e) {
+      // If processing fails, return original bytes
+      return await imageFile.readAsBytes();
+    }
+  }
+
   static String _getImageExtension(String path) {
     final ext = path.split('.').last.toLowerCase();
     return ext == 'jpg' ? 'jpeg' : ext;
@@ -64,11 +104,15 @@ class WordImagesService {
     final imageElements = StringBuffer();
     for (int i = 1; i <= imageCount; i++) {
       imageElements.write('''
-    <w:p>
+    <w:p w:rsidR="00000000" w:rsidRDefault="00000000">
+      <w:pPr>
+        <w:jc w:val="center"/>
+        <w:spacing w:before="120" w:after="120"/>
+      </w:pPr>
       <w:r>
         <w:drawing>
           <wp:inline distT="0" distB="0" distL="0" distR="0">
-            <wp:extent cx="5000000" cy="3000000"/>
+            <wp:extent cx="4500000" cy="3000000"/>
             <wp:effectExtent l="0" t="0" r="0" b="0"/>
             <wp:docPr id="$i" name="Picture $i"/>
             <wp:cNvGraphicFramePr>
@@ -90,7 +134,7 @@ class WordImagesService {
                   <pic:spPr>
                     <a:xfrm>
                       <a:off x="0" y="0"/>
-                      <a:ext cx="5000000" cy="3000000"/>
+                      <a:ext cx="4500000" cy="3000000"/>
                     </a:xfrm>
                     <a:prstGeom prst="rect">
                       <a:avLst/>
@@ -101,12 +145,6 @@ class WordImagesService {
             </a:graphic>
           </wp:inline>
         </w:drawing>
-      </w:r>
-    </w:p>
-    <w:p>
-      <w:r>
-        <w:br/> <!-- Line break -->
-        <w:spacing w:before="240" w:after="240"/> <!-- Add space after image -->
       </w:r>
     </w:p>
     ''');
@@ -132,7 +170,7 @@ class WordImagesService {
     final imageTypes = StringBuffer();
     for (int i = 1; i <= imageCount; i++) {
       imageTypes.write('''
-      <Default Extension="jpeg" ContentType="image/jpeg"/>
+  <Default Extension="jpeg" ContentType="image/jpeg"/>
   <Default Extension="png" ContentType="image/png"/>
   ''');
     }
@@ -154,11 +192,12 @@ class WordImagesService {
 </Relationships>''';
   }
 
-  static String _getDocumentRelationshipsXml(int imageCount) {
+  static String _getDocumentRelationshipsXml(int imageCount, List<String> imageExtensions) {
     final relationships = StringBuffer();
     for (int i = 1; i <= imageCount; i++) {
+      final ext = i <= imageExtensions.length ? imageExtensions[i-1] : 'jpeg';
       relationships.write('''
-  <Relationship Id="rId$i" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/image$i.jpeg"/>
+  <Relationship Id="rId$i" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/image$i.$ext"/>
   ''');
     }
 

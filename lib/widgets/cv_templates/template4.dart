@@ -9,6 +9,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'dart:io';
 import 'package:flutter/rendering.dart';
+import 'package:toolkit/widgets/cv_templates/template_1.dart';
+import 'package:toolkit/widgets/cv_templates/template_2.dart';
+import 'package:toolkit/widgets/cv_templates/template_3.dart';
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 import '../../models/language_model.dart';
@@ -20,12 +23,14 @@ import '../../provider/education_provider.dart';
 import '../../provider/language_provider.dart';
 import '../../provider/saved_cv_provider.dart';
 import '../../provider/skills_provider.dart';
+import '../../provider/template_provider.dart';
 import '../../provider/user_provider.dart';
 import '../../provider/work_experience_provider.dart';
 import '../../screens/cv_maker_screens/cv_maker_screen.dart';
 import '../../utils/app_colors.dart';
 import '../buttons/template_action_btn.dart';
 import '../custom_appbar.dart';
+import '../cv_widgets/template_selection_dialog.dart';
 
 class Template4 extends StatefulWidget {
   final List<Website> websites;
@@ -75,6 +80,52 @@ class _Template4State extends State<Template4> {
     final int charsPerLine = (width / charWidth).floor();
     final int lines = (text.length / charsPerLine).ceil();
     return lines * charHeight;
+  }
+
+  void _showTemplateSelectionDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => const TemplateSelectionDialog(),
+    ).then((selectedTemplateId) {
+      if (selectedTemplateId != null) {
+        _changeTemplate(selectedTemplateId);
+      }
+    });
+  }
+
+  void _changeTemplate(int templateId) {
+    final templateProvider =
+        Provider.of<TemplateProvider>(context, listen: false);
+    templateProvider.setTemplate(templateId, 'Template $templateId');
+
+    final websites = Provider.of<UserProvider>(context, listen: false).websites;
+
+    Widget templateScreen;
+
+    switch (templateId) {
+      case 1:
+        templateScreen = Template1(websites: websites);
+        break;
+      case 2:
+        templateScreen = Template2(websites: websites);
+        break;
+      case 3:
+        templateScreen = Template3(websites: websites);
+        break;
+      case 4:
+        templateScreen = Template4(websites: websites);
+        break;
+      default:
+        templateScreen = Template4(websites: websites);
+    }
+
+    // Replace the current route with the new template
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => templateScreen,
+      ),
+    );
   }
 
   void _distributeContent() {
@@ -144,7 +195,8 @@ class _Template4State extends State<Template4> {
         if (item.projects.isNotEmpty) {
           itemHeight += item.projects.length * 10;
           if (item.projectUrls.isNotEmpty) {
-            itemHeight += item.projectUrls.length * 5; // Additional space for URLs
+            itemHeight +=
+                item.projectUrls.length * 5; // Additional space for URLs
           }
         }
 
@@ -1090,17 +1142,16 @@ class _Template4State extends State<Template4> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
-              child: Row(
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.poppins(
-                        fontSize: 6,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFFA81919),
-                      ),
-                    ),
-                  ]),
+              child: Row(children: [
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: 6,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFFA81919),
+                  ),
+                ),
+              ]),
             ),
             Text(
               '$startDate - $endDate',
@@ -1238,9 +1289,11 @@ class _Template4State extends State<Template4> {
   Widget _buildTemplateButtons() {
     return TemplateActionButtons(
       onChangeTemplate: () {
-        // Handle template change
+        _showTemplateSelectionDialog(context);
       },
-      onExport: _exportToPdf,
+      onExport: () {
+        _exportToPdf();
+      },
     );
   }
 }

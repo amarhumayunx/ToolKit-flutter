@@ -8,6 +8,7 @@ class SaveDocumentButton extends StatelessWidget {
   final String buttonText;
   final double? width;
   final EdgeInsetsGeometry? padding;
+  final VoidCallback? onSaveCompleted;
 
   const SaveDocumentButton({
     Key? key,
@@ -15,6 +16,7 @@ class SaveDocumentButton extends StatelessWidget {
     this.buttonText = 'Save',
     this.width,
     this.padding,
+    this.onSaveCompleted,
   }) : super(key: key);
 
   @override
@@ -32,7 +34,17 @@ class SaveDocumentButton extends StatelessWidget {
   }
 
   Future<void> _handleSave(BuildContext context) async {
-    await SaveDocumentService.saveDocument(context, documentFile);
+    final result = await SaveDocumentService.saveDocument(context, documentFile);
+
+    // If save was successful or canceled, navigate back to OCR screen
+    if (result != null) {
+      // Call the callback if provided
+      if (onSaveCompleted != null) {
+        onSaveCompleted!();
+      }
+
+      // Navigate back to OCR screen and pass true to indicate data should be cleared
+      Navigator.of(context).pop(true);
+    }
   }
 }
-

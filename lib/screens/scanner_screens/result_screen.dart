@@ -106,9 +106,7 @@ class _ResultScreenState extends State<ResultScreen>
 
   void _handleFileDeleted() {
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('File deleted successfully')),
-    );
+    Navigator.pop(context);
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-
 import '../screens/compress_files_screen/compress_file_screen.dart';
+import '../screens/edit_files_screen/edit_file_screen.dart';
+import '../screens/merge_files_screens/merge_file_main_screen.dart';
 import '../screens/ocr_screens/ocr_screen.dart';
 import '../screens/split_screen/split_screen.dart';
 import 'tool_item.dart';
@@ -63,14 +64,14 @@ class _ToolsListViewState extends State<ToolsListView> {
         ));
         break;
       case 'Merge Files':
-        // Navigator.of(context).push(MaterialPageRoute(
-        //   builder: (context) => const MergeFilesPage(),
-        // ));
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => MergeFileMainScreen(),
+        ));
         break;
       case 'Edit File':
-        // Navigator.of(context).push(MaterialPageRoute(
-        //   builder: (context) => const EditFilePage(),
-        // ));
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => EditFileScreen(),
+        ));
         break;
       case 'Split File':
         Navigator.of(context).push(MaterialPageRoute(

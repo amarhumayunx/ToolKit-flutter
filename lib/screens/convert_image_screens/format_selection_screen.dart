@@ -9,9 +9,9 @@ import '../../widgets/buttons/gradient_btn.dart';
 import 'save_screen.dart';
 
 class SelectFormatScreen extends StatefulWidget {
-  final File selectedImage;
+  final List<File> selectedImages; // Changed to List<File>
 
-  const SelectFormatScreen({super.key, required this.selectedImage});
+  const SelectFormatScreen({super.key, required this.selectedImages});
 
   @override
   State<SelectFormatScreen> createState() => _SelectFormatScreenState();
@@ -20,18 +20,23 @@ class SelectFormatScreen extends StatefulWidget {
 class _SelectFormatScreenState extends State<SelectFormatScreen> {
   String? selectedFormat;
 
-  String get fileName => widget.selectedImage.path.split('/').last;
+  // For display purposes, we'll use the first image's info
+  String get fileName => widget.selectedImages.first.path.split('/').last;
 
-  String get fileSize =>
-      (widget.selectedImage.lengthSync() / (1024 * 1024)).toStringAsFixed(2);
+  String get fileSize {
+    // Calculate total size of all images
+    double totalSizeBytes = widget.selectedImages
+        .fold(0.0, (sum, file) => sum + file.lengthSync());
+    return (totalSizeBytes / (1024 * 1024)).toStringAsFixed(2);
+  }
 
   String get formattedDate {
-    final modifiedDate = widget.selectedImage.lastModifiedSync();
+    final modifiedDate = widget.selectedImages.first.lastModifiedSync();
     return '${modifiedDate.day}/${modifiedDate.month}/${modifiedDate.year.toString().substring(2)}';
   }
 
   String get formattedTime {
-    final modifiedDate = widget.selectedImage.lastModifiedSync();
+    final modifiedDate = widget.selectedImages.first.lastModifiedSync();
     return '${modifiedDate.hour}:${modifiedDate.minute.toString().padLeft(2, '0')}${modifiedDate.hour < 12 ? 'am' : 'pm'}';
   }
 
@@ -39,7 +44,7 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(title: 'Convert Image'),
+      appBar: CustomAppBar(title: 'Convert Images'),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -47,86 +52,20 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
           children: [
             const SizedBox(height: 20),
             Text(
-              'Selected File',
+              'Selected Files (${widget.selectedImages.length})',
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 10),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade300),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    offset: const Offset(0, 1),
-                  ),
-                ],
-              ),
-              child: IntrinsicHeight(
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        width: 50,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
-                          image: DecorationImage(
-                            image: FileImage(widget.selectedImage),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(width: 1, color: Colors.grey.shade300),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              fileName,
-                              style: GoogleFonts.inter(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '$formattedDate | $formattedTime | $fileSize MB',
-                              style: GoogleFonts.inter(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(
-                        Icons.more_vert,
-                        size: 16,
-                        color: Colors.grey[600],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
+
+            // Show multiple file containers or a summary
+            if (widget.selectedImages.length == 1)
+              _buildSingleFileContainer()
+            else
+              _buildMultipleFilesContainer(),
+
             const SizedBox(height: 30),
             Text(
               'Select Format:',
@@ -160,7 +99,7 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => SaveScreen(
-                          selectedImage: widget.selectedImage,
+                          selectedImages: widget.selectedImages,
                           selectedFormat: selectedFormat!,
                         ),
                       ),
@@ -173,6 +112,163 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
                     );
                   }
                 },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSingleFileContainer() {
+    final image = widget.selectedImages.first;
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                width: 50,
+                height: 60,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  image: DecorationImage(
+                    image: FileImage(image),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+            Container(width: 1, color: Colors.grey.shade300),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      fileName,
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$formattedDate | $formattedTime | $fileSize MB',
+                      style: GoogleFonts.inter(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(
+                Icons.more_vert,
+                size: 16,
+                color: Colors.grey[600],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMultipleFilesContainer() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                // Show first few images as thumbnails
+                ...widget.selectedImages.take(3).map((image) =>
+                    Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        image: DecorationImage(
+                          image: FileImage(image),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                ),
+                if (widget.selectedImages.length > 3)
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      color: Colors.grey.shade200,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '+${widget.selectedImages.length - 3}',
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '${widget.selectedImages.length} images selected',
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Total size: $fileSize MB',
+              style: GoogleFonts.inter(
+                fontSize: 9,
+                fontWeight: FontWeight.w400,
+                color: Colors.grey[600],
               ),
             ),
           ],

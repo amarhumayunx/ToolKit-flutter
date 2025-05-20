@@ -698,9 +698,11 @@ class _ScannerScreenState extends State<ScannerScreen>
                         topLeft: Radius.circular(20),
                         topRight: Radius.circular(20),
                       ),
-                      border: Border.all(
-                        color: AppColors.primary,
-                        width: 1.0,
+                      border: Border(
+                        top: BorderSide(
+                          color: AppColors.primary,
+                          width: 1,
+                        ),
                       ),
                     ),
                     clipBehavior: Clip.antiAlias,

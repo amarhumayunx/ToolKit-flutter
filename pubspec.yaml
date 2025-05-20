@@ -50,7 +50,7 @@ dependencies:
   permission_handler: ^12.0.0+1
 
   # Text get from the images
-  google_mlkit_text_recognition: ^0.15.0
+
   image_cropper: ^9.1.0
   file_picker: ^10.1.2
   dotted_border: ^2.1.0

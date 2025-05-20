@@ -22,6 +22,7 @@ class _CvMakerScreenState extends State<CvMakerScreen> {
     'Executive Style'
   ];
 
+  // In CvMakerScreen.dart
   void _navigateToPersonalInfo(int templateId) {
     // Update the provider with selected template
     Provider.of<TemplateProvider>(context, listen: false)
@@ -31,7 +32,6 @@ class _CvMakerScreenState extends State<CvMakerScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => MainCVScreen(
-
           templateId: templateId,
           templateName: templateNames[templateId - 1],
         ),

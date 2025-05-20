@@ -19,20 +19,20 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
   List<File> _selectedImages = [];
   final ImagePicker _picker = ImagePicker();
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImages() async {
     try {
-      final XFile? pickedFile =
-          await _picker.pickImage(source: ImageSource.gallery);
+      final List<XFile> pickedFiles = await _picker.pickMultiImage();
 
-      if (pickedFile != null) {
+      if (pickedFiles.isNotEmpty) {
         setState(() {
-          _selectedImages.add(File(pickedFile.path));
+          _selectedImages
+              .addAll(pickedFiles.map((file) => File(file.path)).toList());
         });
       }
     } catch (e) {
       // Handle any errors
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error selecting image: $e')),
+        SnackBar(content: Text('Error selecting images: $e')),
       );
     }
   }
@@ -43,7 +43,7 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
     });
   }
 
-  Future<void> _convertImage() async {
+  Future<void> _convertImages() async {
     if (_selectedImages.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select at least one image first')),
@@ -59,18 +59,18 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
 
       setState(() {});
 
-      // Navigate to format selection screen with the first image
+      // Pass all selected images to SelectFormatScreen
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) =>
-              SelectFormatScreen(selectedImage: _selectedImages.first),
+              SelectFormatScreen(selectedImages: _selectedImages),
         ),
       );
     } catch (e) {
       setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error processing image: $e')),
+        SnackBar(content: Text('Error processing images: $e')),
       );
     }
   }
@@ -95,17 +95,17 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
                   InfoCard(
                     title: 'Convert Image Format',
                     description:
-                        'Easily convert images to various formats while maintaining quality, resolution and clarity.',
+                    'Easily convert multiple images to various formats while maintaining quality, resolution and clarity.',
                   ),
                   const SizedBox(height: 24),
                   // Combined container with shadow
                   FileSelectionContainer(
-                    title: 'Select File',
-                    emptyStateText: 'Click to choose file',
+                    title: 'Select Images',
+                    emptyStateText: 'click to choose file',
                     selectedFiles: _selectedImages,
-                    onTap: _pickImage,
+                    onTap: _pickImages,
                     onRemoveFile: _removeImage,
-                    isMultipleSelection: false,
+                    isMultipleSelection: true,
                   ),
                 ],
               ),
@@ -113,10 +113,10 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
           ),
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+            const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
             child: CustomGradientButton(
               text: 'Next',
-              onPressed: _convertImage,
+              onPressed: _convertImages,
             ),
           ),
         ],

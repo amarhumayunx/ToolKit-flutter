@@ -4,6 +4,12 @@ import 'package:toolkit/screens/cv_maker_screens/personal_info_screen.dart';
 import 'package:toolkit/screens/cv_maker_screens/skills_screen.dart';
 import 'package:toolkit/screens/cv_maker_screens/website_screen.dart';
 import 'package:toolkit/screens/cv_maker_screens/work_experience_screen.dart';
+import '../../provider/certification_provider.dart';
+import '../../provider/education_provider.dart';
+import '../../provider/language_provider.dart';
+import '../../provider/skills_provider.dart';
+import '../../provider/user_provider.dart';
+import '../../provider/work_experience_provider.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/cv_progress_indicator.dart';
 import '../../widgets/custom_appbar.dart';
@@ -71,35 +77,40 @@ class _MainCVScreenState extends State<MainCVScreen> {
     }
   }
 
-  // Navigate to appropriate template based on selected template ID
+  // In MainCVScreen.dart
+// Update the _navigateToTemplate method
   void _navigateToTemplate(BuildContext context) {
-    // You can either use the widget.templateId directly or get it from the TemplateProvider
-    // Let's use the TemplateProvider approach for consistency with WebsiteScreen
-    final templateProvider =
-        Provider.of<TemplateProvider>(context, listen: false);
+    final templateProvider = Provider.of<TemplateProvider>(context, listen: false);
     final templateId = templateProvider.selectedTemplateId;
+
+    // Get all the data from providers
+    final userData = Provider.of<UserProvider>(context, listen: false).userData;
+    final workExperienceItems = Provider.of<WorkExperienceProvider>(context, listen: false).workExperienceItems;
+    final educationItems = Provider.of<EducationProvider>(context, listen: false).educationItems;
+    final certificationItems = Provider.of<CertificationProvider>(context, listen: false).certificationItems;
+    final skillItems = Provider.of<SkillsProvider>(context, listen: false).skillItems;
+    final languageItems = Provider.of<LanguageProvider>(context, listen: false).languages;
+    final websites = Provider.of<UserProvider>(context, listen: false).websites;
 
     Widget templateScreen;
 
     switch (templateId) {
       case 1:
-        templateScreen = Template1();
+        templateScreen = Template1(websites: websites);
         break;
       case 2:
-        templateScreen = Template2();
+        templateScreen = Template2(websites: websites);
         break;
       case 3:
-        templateScreen = Template3();
+        templateScreen = Template3(websites: websites);
         break;
       case 4:
-        templateScreen = Template4();
+        templateScreen = Template4(websites: websites);
         break;
       default:
-        // Fallback to Template1 if templateId doesn't match any case
-        templateScreen = Template1();
+        templateScreen = Template1(websites: websites);
     }
 
-    // Navigate to the selected template
     Navigator.push(
       context,
       MaterialPageRoute(

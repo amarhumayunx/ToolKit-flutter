@@ -54,7 +54,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
           _convertedFile = await service.convertPdfToWord(widget.selectedPdf);
           break;
         case 'Image':
-          //Use the new PDF to Image service
+         // Use the new PDF to Image service
           final service = PdfToImageService();
           _convertedFile = await service.convertPdfToImage(widget.selectedPdf);
           break;

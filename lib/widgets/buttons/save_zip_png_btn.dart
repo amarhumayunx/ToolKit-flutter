@@ -3,13 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/save_zip_png_service.dart';
-import '../../utils/app_colors.dart'; // Make sure to import your AppColors
+import '../../utils/app_colors.dart';
 
 class SaveFileButton extends StatelessWidget {
   final File file;
-  final String fileType; // 'png', 'zip', 'docx', etc.
+  final String fileType; // 'png', 'zip', 'docx', 'pdf', etc.
   final String buttonText;
   final double? width;
+  final VoidCallback? onSaveCompleted;
 
   const SaveFileButton({
     Key? key,
@@ -17,6 +18,7 @@ class SaveFileButton extends StatelessWidget {
     required this.fileType,
     this.buttonText = 'Save',
     this.width,
+    this.onSaveCompleted,
   }) : super(key: key);
 
   @override
@@ -37,7 +39,12 @@ class SaveFileButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
         ),
         child: ElevatedButton(
-          onPressed: () => SaveFileService.saveFile(context, file, fileType),
+          onPressed: () async {
+            await SaveFileService.saveFile(context, file, fileType);
+            if (onSaveCompleted != null) {
+              onSaveCompleted!();
+            }
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,

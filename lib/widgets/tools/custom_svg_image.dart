@@ -3,14 +3,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class CustomSvgImage extends StatelessWidget {
   final String imagePath;
-  final double height;
-  final double width;
+  final double? height;
+  final double? width;
 
   const CustomSvgImage({
     Key? key,
     required this.imagePath,
-    this.height = 176,
-    this.width = 186,
+    this.height,
+    this.width,
   }) : super(key: key);
 
   @override

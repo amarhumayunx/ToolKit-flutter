@@ -6,8 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
 class SaveFileService {
+  static const String toolkitFolderName = 'Toolkit';
+
   /// Checks if storage permission is available or needed
   static Future<bool> checkAndRequestStoragePermission(
       BuildContext context) async {
@@ -75,34 +78,68 @@ class SaveFileService {
     );
   }
 
-  /// Save PNG file to device storage (like downloads)
+  /// Creates Toolkit folder if it doesn't exist
+  static Future<Directory?> _createToolkitFolder() async {
+    try {
+      Directory? baseDir;
+
+      if (Platform.isAndroid) {
+        // For Android, we'll use the Downloads directory
+        baseDir = Directory('/storage/emulated/0/Download');
+        if (!await baseDir.exists()) {
+          // Fallback to app documents directory if Downloads not accessible
+          baseDir = await getApplicationDocumentsDirectory();
+        }
+      } else if (Platform.isIOS) {
+        // For iOS, use the app's documents directory
+        baseDir = await getApplicationDocumentsDirectory();
+      } else {
+        // Unsupported platform
+        return null;
+      }
+
+      // Create the Toolkit directory
+      final toolkitDir = Directory('${baseDir.path}/$toolkitFolderName');
+      if (!await toolkitDir.exists()) {
+        await toolkitDir.create(recursive: true);
+      }
+
+      return toolkitDir;
+    } catch (e) {
+      debugPrint('Error creating Toolkit folder: $e');
+      return null;
+    }
+  }
+
+  /// Save PNG file to Toolkit folder
   static Future<void> savePngFile(BuildContext context, File imageFile) async {
     try {
       // Check if we can access storage
       bool hasPermission = await checkAndRequestStoragePermission(context);
 
       if (hasPermission) {
+        // Try to create the Toolkit folder
+        final toolkitDir = await _createToolkitFolder();
+
+        if (toolkitDir == null) {
+          // If folder creation failed, use default save mechanism
+          await _saveFileWithDialog(context, imageFile, 'png');
+          return;
+        }
+
         // Generate a unique filename
         String baseFileName = path.basenameWithoutExtension(imageFile.path);
         String uniqueFileName = '${baseFileName}_${DateTime.now().millisecondsSinceEpoch}.png';
 
-        // Use the FlutterFileDialog to save the file
-        final params = SaveFileDialogParams(
-          sourceFilePath: imageFile.path,
-          fileName: uniqueFileName,
+        // Create destination file path in Toolkit folder
+        final destinationPath = '${toolkitDir.path}/$uniqueFileName';
+
+        // Copy the file to the Toolkit folder
+        await imageFile.copy(destinationPath);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Image saved to ${toolkitDir.path}')),
         );
-
-        final savedFilePath = await FlutterFileDialog.saveFile(params: params);
-
-        if (savedFilePath != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Image saved successfully')),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Image saving canceled')),
-          );
-        }
       } else {
         await showPermissionHelperDialog(context);
       }
@@ -119,34 +156,35 @@ class SaveFileService {
     }
   }
 
-  /// Save ZIP file to device storage
+  /// Save ZIP file to Toolkit folder
   static Future<void> saveZipFile(BuildContext context, File zipFile) async {
     try {
       // Check if we can access storage
       bool hasPermission = await checkAndRequestStoragePermission(context);
 
       if (hasPermission) {
+        // Try to create the Toolkit folder
+        final toolkitDir = await _createToolkitFolder();
+
+        if (toolkitDir == null) {
+          // If folder creation failed, use default save mechanism
+          await _saveFileWithDialog(context, zipFile, 'zip');
+          return;
+        }
+
         // Generate a unique filename
         String baseFileName = path.basenameWithoutExtension(zipFile.path);
         String uniqueFileName = '${baseFileName}_${DateTime.now().millisecondsSinceEpoch}.zip';
 
-        // Use the FlutterFileDialog to save the file
-        final params = SaveFileDialogParams(
-          sourceFilePath: zipFile.path,
-          fileName: uniqueFileName,
+        // Create destination file path in Toolkit folder
+        final destinationPath = '${toolkitDir.path}/$uniqueFileName';
+
+        // Copy the file to the Toolkit folder
+        await zipFile.copy(destinationPath);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('ZIP file saved to ${toolkitDir.path}')),
         );
-
-        final savedFilePath = await FlutterFileDialog.saveFile(params: params);
-
-        if (savedFilePath != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('ZIP file saved successfully')),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('ZIP file saving canceled')),
-          );
-        }
       } else {
         await showPermissionHelperDialog(context);
       }
@@ -163,7 +201,7 @@ class SaveFileService {
     }
   }
 
-  /// Main method to save any file based on its type
+  /// Main method to save any file based on its type to Toolkit folder
   static Future<void> saveFile(
       BuildContext context, File file, String fileType) async {
     try {
@@ -176,12 +214,12 @@ class SaveFileService {
         case 'zip':
           await saveZipFile(context, file);
           break;
+        case 'pdf':
+          await _savePdfFile(context, file);
+          break;
         case 'docx':
         case 'xlsx':
         case 'pptx':
-        // Delegate to document service if you have one
-          await _saveGenericFile(context, file);
-          break;
         default:
           await _saveGenericFile(context, file);
       }
@@ -193,38 +231,119 @@ class SaveFileService {
     }
   }
 
-  /// Generic file saving method for other file types
+  /// Save PDF file to Toolkit folder
+  static Future<void> _savePdfFile(BuildContext context, File pdfFile) async {
+    try {
+      // Check if we can access storage
+      bool hasPermission = await checkAndRequestStoragePermission(context);
+
+      if (hasPermission) {
+        // Try to create the Toolkit folder
+        final toolkitDir = await _createToolkitFolder();
+
+        if (toolkitDir == null) {
+          // If folder creation failed, use default save mechanism
+          await _saveFileWithDialog(context, pdfFile, 'pdf');
+          return;
+        }
+
+        // Generate a unique filename
+        String baseFileName = path.basenameWithoutExtension(pdfFile.path);
+        String uniqueFileName = '${baseFileName}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+
+        // Create destination file path in Toolkit folder
+        final destinationPath = '${toolkitDir.path}/$uniqueFileName';
+
+        // Copy the file to the Toolkit folder
+        await pdfFile.copy(destinationPath);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('PDF saved to ${toolkitDir.path}')),
+        );
+      } else {
+        await showPermissionHelperDialog(context);
+      }
+    } on PlatformException catch (e) {
+      debugPrint('Platform Exception in saving PDF file: ${e.message}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save PDF: ${e.message}')),
+      );
+    } catch (e) {
+      debugPrint('Error saving PDF file: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save PDF: ${e.toString()}')),
+      );
+    }
+  }
+
+  /// Generic file saving method for other file types to Toolkit folder
   static Future<void> _saveGenericFile(BuildContext context, File file) async {
     try {
       bool hasPermission = await checkAndRequestStoragePermission(context);
 
       if (hasPermission) {
+        // Try to create the Toolkit folder
+        final toolkitDir = await _createToolkitFolder();
+
+        if (toolkitDir == null) {
+          // If folder creation failed, use default save mechanism
+          await _saveFileWithDialog(context, file, path.extension(file.path).replaceAll('.', ''));
+          return;
+        }
+
+        // Generate a unique filename
         String baseFileName = path.basename(file.path);
         final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
         String uniqueFileName =
             '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
 
-        final params = SaveFileDialogParams(
-          sourceFilePath: file.path,
-          fileName: uniqueFileName,
+        // Create destination file path in Toolkit folder
+        final destinationPath = '${toolkitDir.path}/$uniqueFileName';
+
+        // Copy the file to the Toolkit folder
+        await file.copy(destinationPath);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('File saved to ${toolkitDir.path}')),
         );
-
-        final savedFilePath = await FlutterFileDialog.saveFile(params: params);
-
-        if (savedFilePath != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('File saved successfully')),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('File saving canceled')),
-          );
-        }
       } else {
         await showPermissionHelperDialog(context);
       }
     } catch (e) {
       debugPrint('Error saving generic file: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save file: ${e.toString()}')),
+      );
+    }
+  }
+
+  /// Fallback method to save files using system dialog if Toolkit folder creation fails
+  static Future<void> _saveFileWithDialog(
+      BuildContext context, File file, String fileType) async {
+    try {
+      String baseFileName = path.basename(file.path);
+      final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      String uniqueFileName =
+          '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
+
+      final params = SaveFileDialogParams(
+        sourceFilePath: file.path,
+        fileName: uniqueFileName,
+      );
+
+      final savedFilePath = await FlutterFileDialog.saveFile(params: params);
+
+      if (savedFilePath != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('File saved successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('File saving canceled')),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in _saveFileWithDialog: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to save file: ${e.toString()}')),
       );

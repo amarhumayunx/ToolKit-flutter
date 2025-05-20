@@ -431,7 +431,8 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
   }
 
   void _retakePhoto() {
-    Navigator.pop(context, null); // Return null to indicate retake
+    Navigator.pop(context, null);
+    Navigator.pop(context, null);// Return null to indicate retake
   }
 
   void _toggleFilterView() {
