@@ -73,7 +73,7 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
   void _determineFileType() {
     if (widget.selectedFormat == 'Image') {
       _isSinglePageImage =
-          !widget.convertedFile.path.toLowerCase().endsWith('.zip');
+      !widget.convertedFile.path.toLowerCase().endsWith('.zip');
       _isZipFile = widget.convertedFile.path.toLowerCase().endsWith('.zip');
 
       if (_isZipFile) {
@@ -243,12 +243,12 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
                         Expanded(
                           child: _extractedImageFiles.isNotEmpty
                               ? Image.file(
-                                  _extractedImageFiles[_currentImageIndex],
-                                  fit: BoxFit.contain,
-                                )
+                            _extractedImageFiles[_currentImageIndex],
+                            fit: BoxFit.contain,
+                          )
                               : const Center(
-                                  child: Text('No images available'),
-                                ),
+                            child: Text('No images available'),
+                          ),
                         ),
                         if (_extractedImageFiles.length > 1)
                           Padding(

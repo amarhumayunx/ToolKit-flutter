@@ -9,10 +9,10 @@ class CustomGradientButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
   const CustomGradientButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class CustomGradientButton extends StatelessWidget {
       height: 48,
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             colors: [
               AppColors.gradientStart,
               AppColors.gradientEnd,

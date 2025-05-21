@@ -7,7 +7,7 @@ import '../screens/split_screen/split_screen.dart';
 import 'tool_item.dart';
 
 class ToolsListView extends StatefulWidget {
-  const ToolsListView({Key? key}) : super(key: key);
+  const ToolsListView({super.key});
 
   @override
   State createState() => _ToolsListViewState();
@@ -55,12 +55,12 @@ class _ToolsListViewState extends State<ToolsListView> {
     switch (toolName) {
       case 'OCR':
         Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => OcrScreen(),
+          builder: (context) => const OcrScreen(),
         ));
         break;
       case 'Compress Files':
         Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => CompressFileScreen(),
+          builder: (context) => const CompressFileScreen(),
         ));
         break;
       case 'Merge Files':
@@ -186,7 +186,7 @@ class _ToolsListViewState extends State<ToolsListView> {
 
 // You'll need to create these pages
 class OcrPage extends StatelessWidget {
-  const OcrPage({Key? key}) : super(key: key);
+  const OcrPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +198,7 @@ class OcrPage extends StatelessWidget {
 }
 
 class CompressFilesPage extends StatelessWidget {
-  const CompressFilesPage({Key? key}) : super(key: key);
+  const CompressFilesPage({super.key});
 
   @override
   Widget build(BuildContext context) {

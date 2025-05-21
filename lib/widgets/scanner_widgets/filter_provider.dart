@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class FilterProvider extends ChangeNotifier {
   String _selectedFilter = 'Original';
-  Map<String, File> _filterCache = {};
+  final Map<String, File> _filterCache = {};
 
   String get selectedFilter => _selectedFilter;
   Map<String, File> get filterCache => _filterCache;

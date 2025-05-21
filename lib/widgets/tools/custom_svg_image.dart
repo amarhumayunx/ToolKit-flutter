@@ -7,11 +7,11 @@ class CustomSvgImage extends StatelessWidget {
   final double? width;
 
   const CustomSvgImage({
-    Key? key,
+    super.key,
     required this.imagePath,
     this.height,
     this.width,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

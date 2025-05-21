@@ -17,7 +17,7 @@ class TagInputWidget<T> extends StatefulWidget {
   final int maxItems; // Add maxItems parameter
 
   const TagInputWidget({
-    Key? key,
+    super.key,
     required this.title,
     required this.inputLabel,
     required this.hintText,
@@ -29,7 +29,7 @@ class TagInputWidget<T> extends StatefulWidget {
     required this.controller,
     required this.focusNode,
     this.maxItems = 6, // Default max items to 6 for backward compatibility
-  }) : super(key: key);
+  });
 
   @override
   State<TagInputWidget<T>> createState() => _TagInputWidgetState<T>();
@@ -158,7 +158,7 @@ class _TagInputWidgetState<T> extends State<TagInputWidget<T>> {
                   height: 50,
                   decoration: BoxDecoration(
                     gradient: canAddMore
-                        ? LinearGradient(
+                        ? const LinearGradient(
                       colors: [
                         AppColors.gradientStart,
                         AppColors.gradientEnd,
@@ -290,7 +290,7 @@ class _TagInputWidgetState<T> extends State<TagInputWidget<T>> {
                   width: 1.5,
                 ),
               ),
-              child: Center(
+              child: const Center(
                 child: Icon(
                   Icons.close,
                   color: AppColors.primary,

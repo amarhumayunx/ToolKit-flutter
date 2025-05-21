@@ -67,8 +67,8 @@ class SavedEducationItemWidget extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           item.isCompleted
-              ? item.startDate + " - Present"
-              : item.startDate + " - " + item.endDate,
+              ? "${item.startDate} - Present"
+              : "${item.startDate} - ${item.endDate}",
           style: GoogleFonts.inter(
             fontSize: 12,
             fontWeight: FontWeight.w400,

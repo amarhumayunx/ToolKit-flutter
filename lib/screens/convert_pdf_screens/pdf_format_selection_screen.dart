@@ -126,7 +126,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(title: 'Convert PDF'),
+      appBar: const CustomAppBar(title: 'Convert PDF'),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(

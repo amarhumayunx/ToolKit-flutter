@@ -5,7 +5,7 @@ import '../../utils/app_colors.dart';
 class SaveButton extends StatelessWidget {
   final VoidCallback onPressed;
 
-  const SaveButton({Key? key, required this.onPressed}) : super(key: key);
+  const SaveButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

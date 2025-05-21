@@ -10,10 +10,10 @@ class PersonalInfoPage extends StatefulWidget {
   final String templateName;
 
   const PersonalInfoPage({
-    Key? key,
+    super.key,
     required this.templateId,
     required this.templateName,
-  }) : super(key: key);
+  });
 
   @override
   PersonalInfoPageState createState() => PersonalInfoPageState();

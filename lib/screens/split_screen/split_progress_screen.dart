@@ -4,20 +4,21 @@ import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart' as syncfusion;
 import 'package:archive/archive.dart';
-import 'package:toolkit/utils/app_colors.dart';
+import 'package:toolkit/widgets/tools/document_container.dart';
 import 'package:xml/xml.dart';
 import 'package:path/path.dart' as path;
 
-import '../../widgets/buttons/gradient_btn.dart';
+import '../../widgets/buttons/save_document_btn.dart';
 import '../../widgets/custom_appbar.dart';
+import '../../widgets/tools/animated_loaded_container.dart';
 import 'document_item.dart';
 
 class SplitProgressScreen extends StatefulWidget {
@@ -91,7 +92,9 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
   }
 
 
-  void _showOptionsMenu(BuildContext context) {
+
+
+  void _showOptionsMenu(BuildContext context, File file) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -103,11 +106,11 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               ListTile(
-                leading: const Icon(Icons.save),
-                title: const Text('Save Document'),
-                onTap: () async {
+                leading: const Icon(Icons.edit),
+                title: const Text('Rename Document'),
+                onTap: () {
                   Navigator.pop(context);
-                  await _saveDocument();
+                  _renameFile(context, file);
                 },
               ),
               ListTile(
@@ -115,7 +118,15 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
                 title: const Text('Share Document'),
                 onTap: () async {
                   Navigator.pop(context);
-                  await _shareDocument();
+                  await _shareDocument(file);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Delete Document', style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _confirmDeleteFile(context, file);
                 },
               ),
             ],
@@ -124,6 +135,132 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
       },
     );
   }
+
+  void _renameFile(BuildContext context, File file) {
+    if (_outputFile == null) return;
+
+    final TextEditingController renameController = TextEditingController();
+    final String currentFileName = path.basename(_outputFile!.path);
+    renameController.text = currentFileName;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Rename Document'),
+        content: TextField(
+          controller: renameController,
+          decoration: const InputDecoration(
+            labelText: 'New file name',
+            border: OutlineInputBorder(),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+
+              if (renameController.text.trim().isEmpty) {
+                _showSnackBar('File name cannot be empty');
+                return;
+              }
+
+              try {
+                final directory = path.dirname(_outputFile!.path);
+                final newPath = path.join(directory, renameController.text.trim());
+
+                // Check if a file with this name already exists
+                if (await File(newPath).exists()) {
+                  _showSnackBar('A file with this name already exists');
+                  return;
+                }
+
+                // Rename the file
+                final newFile = await _outputFile!.rename(newPath);
+                setState(() {
+                  _outputFile = newFile;
+                });
+
+                _showSnackBar('File renamed successfully');
+              } catch (e) {
+                print('Error renaming file: $e');
+                _showSnackBar('Error renaming file');
+              }
+            },
+            child: const Text('Rename'),
+          ),
+        ],
+      ),
+    );
+  }
+
+// Implement share file functionality
+  Future<void> _shareDocument(File file) async {
+    try {
+      if (_outputFile == null) {
+        _showSnackBar('No document available to share');
+        return;
+      }
+
+      // Share the file using share_plus package
+      await Share.shareXFiles(
+        [XFile(_outputFile!.path)],
+        text: 'Sharing split document: ${widget.document.name}',
+      );
+    } catch (e) {
+      print('Error sharing document: $e');
+      _showSnackBar('Error sharing document');
+    }
+  }
+
+// Implement delete file functionality
+  void _confirmDeleteFile(BuildContext context, File file) {
+    if (_outputFile == null) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Document'),
+        content: Text('Are you sure you want to delete "${path.basename(_outputFile!.path)}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                if (await _outputFile!.exists()) {
+                  await _outputFile!.delete();
+                  _showSnackBar('File deleted successfully');
+                  setState(() {
+                    _outputFile = null;
+                    _isCompleted = false; // Reset the state since there's no file
+                  });
+
+                  // Optional: Navigate back if there's no file to display
+                  // Navigator.pop(context);
+                } else {
+                  _showSnackBar('File not found');
+                }
+              } catch (e) {
+                print('Error deleting file: $e');
+                _showSnackBar('Error deleting file');
+              }
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Future<void> requestPermissionAndSaveFile(BuildContext context) async {
     try {
@@ -228,47 +365,6 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
     }
   }
 
-// Add these methods to handle save and share functionality
-  Future<void> _saveDocument() async {
-    try {
-      if (_outputFile == null) {
-        _showSnackBar('No document available to save');
-        return;
-      }
-
-      // Get app document directory for saving
-      final appDocDir = await getApplicationDocumentsDirectory();
-      final savedFileName = 'saved_${widget.document.name}';
-      final savedFilePath = '${appDocDir.path}/$savedFileName';
-
-      // Copy the output file to the documents directory
-      await _outputFile!.copy(savedFilePath);
-
-      _showSnackBar('Document saved successfully');
-    } catch (e) {
-      print('Error saving document: $e');
-      _showSnackBar('Error saving document');
-    }
-  }
-
-  Future<void> _shareDocument() async {
-    try {
-      if (_outputFile == null) {
-        _showSnackBar('No document available to share');
-        return;
-      }
-
-      // Share the file using share_plus package
-      await Share.shareXFiles(
-        [XFile(_outputFile!.path)],
-        text: 'Sharing split document: ${widget.document.name}',
-      );
-    } catch (e) {
-      print('Error sharing document: $e');
-      _showSnackBar('Error sharing document');
-    }
-  }
-
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -356,52 +452,6 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
     }
   }
 
-  Future<void> _processMultiplePdfFiles(List<DocumentItem> documents, String outputPath) async {
-    final combinedPdf = syncfusion.PdfDocument();
-
-    int totalPages = 0;
-    int processedPages = 0;
-
-    for (var docItem in documents) {
-      totalPages += docItem.selectedPages.where((selected) => selected).length;
-    }
-
-    for (var docItem in documents) {
-      final pdfData = await docItem.file.readAsBytes();
-      final document = syncfusion.PdfDocument(inputBytes: pdfData);
-
-      for (int i = 0; i < docItem.selectedPages.length; i++) {
-        if (!docItem.selectedPages[i]) continue;
-
-        int sourcePageIndex = i % document.pages.count;
-
-        final pageTemplate = document.pages[sourcePageIndex].createTemplate();
-        combinedPdf.pages.add().graphics.drawPdfTemplate(pageTemplate, const Offset(0, 0));
-
-        processedPages++;
-        if (mounted) {
-          setState(() {
-            _progress = processedPages / totalPages * 0.9;
-          });
-        }
-      }
-      document.dispose();
-    }
-
-    _outputFile = File(outputPath);
-    final bytes = combinedPdf.saveSync();
-    await _outputFile!.writeAsBytes(bytes);
-    combinedPdf.dispose();
-
-    if (mounted) {
-      setState(() {
-        _progress = 1.0;
-      });
-    }
-    _updateStatus("Processing complete!");
-  }
-
-
 // This is your original function modified to support the new approach
   Future<void> _processPdfFile(String outputPath) async {
     if (widget.isMultipleFiles && widget.documents.length > 1) {
@@ -466,6 +516,48 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
 
     setState(() => _progress = 1.0);
     _updateStatus("Processing complete!");
+  }
+
+  Future<void> _openFile() async {
+    try {
+      if (_outputFile == null) {
+        _showSnackBar('No document available to open');
+        return;
+      }
+
+      if (!await _outputFile!.exists()) {
+        _showSnackBar('File not found');
+        return;
+      }
+
+      // Use OpenFile package to open the file with the default app
+      final result = await OpenFile.open(_outputFile!.path);
+
+      if (result.type != ResultType.done) {
+        // If opening fails, show error message
+        _showSnackBar('Cannot open file: ${result.message}');
+
+        // For zip files, we might need to tell the user
+        if (_outputFile!.path.toLowerCase().endsWith('.zip')) {
+          _showSnackBar('This is a ZIP file. You may need a ZIP extractor app to view its contents.');
+        }
+      }
+    } catch (e) {
+      print('Error opening file: $e');
+      _showSnackBar('Error opening document');
+    }
+  }
+
+  void _handleFileDeleted() {
+    // First pop back to the first screen
+    Navigator.of(context).popUntil((route) => route.isFirst);
+
+    // Wait for the screen to rebuild, then show the SnackBar
+    Future.delayed(const Duration(milliseconds: 100), () {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('File deleted successfully')),
+      );
+    });
   }
 
   Future<void> _mergeMultiplePdfs(List<DocumentItem> documents, String outputPath) async {
@@ -561,138 +653,51 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const CustomAppBar(
-          title: 'Split'),
+      appBar: const CustomAppBar(title: 'Split Document'),
       body: Stack(
         children: [
           SingleChildScrollView(
             padding: const EdgeInsets.all(20.0),
-            child: Column(
-              children: [
-                const SizedBox(height: 40),
-
-                // Progress Animation Container
-                if (_isLoading || _animationCompleted) _buildLoadingContainer(),
-
-                const SizedBox(height: 30),
-
-                // Document Info Card
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Split File:',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.16),
-                        blurRadius: 4,
-                        offset: const Offset(0, 0),
+            child: Padding(
+              padding: const EdgeInsets.all(14.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  _buildLoadingContainer(),
+                  if (_animationCompleted) ...[
+                    const SizedBox(height: 36),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Split File:',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ],
-                  ),
-                  child: IntrinsicHeight(
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            width: 50,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Center(
-                              child: Image.asset(
-                                widget.document.name.toLowerCase().endsWith('.pdf')
-                                    ? 'assets/images/doc.png'
-                                    : widget.document.name.toLowerCase().endsWith('.docx')
-                                    ? 'assets/images/doc.png'
-                                    : 'assets/images/doc.png',
-                                width: 60,
-                                height: 60,
-                              )
-
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: 1,
-                          color: Colors.grey.shade300,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                widget.document.name,
-                                style: GoogleFonts.inter(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${_formatDateTime(widget.document.date)} | ${widget.document.sizeInMB.toInt()} MB',
-                                style: GoogleFonts.inter(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-
-                            ],
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            _showOptionsMenu(context);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Icon(
-                              Icons.more_vert,
-                              size: 16,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
-                  ),
-                ),
-
-
-                // Extra padding for button
-                SizedBox(height: MediaQuery.of(context).padding.bottom + 220),
-              ],
+                    const SizedBox(height: 10),
+                    DocumentContainer(
+                      filePath: _outputFile!.path,
+                      onTap: _openFile,
+                      onDelete: _handleFileDeleted,
+                    ),
+                  ],
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 300),
+                ],
+              ),
             ),
           ),
-
-          // Floating Save Button
-          if (!_isLoading)
+          if (_animationCompleted)
             Positioned(
               left: 20,
               right: 20,
               bottom: MediaQuery.of(context).padding.bottom + 20,
-              child: CustomGradientButton(
-                onPressed: () => requestPermissionAndSaveFile(context),
-                text: 'Save',
-              )
-
-            )
+              child: SaveDocumentButton(
+                documentFile: _outputFile!,
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              ),
+            ),
         ],
       ),
     );
@@ -700,85 +705,9 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
 
 // Progress Animation Widget
   Widget _buildLoadingContainer() {
-    final percentage = (_progressAnimation.value * 100).toInt();
-    return Container(
-      width: 262,
-      height: 258,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.16),
-            blurRadius: 4,
-            offset: const Offset(0, 0),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            _animationCompleted ? '' : 'Splitting Your File',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: _animationCompleted ? Colors.black : Colors.black,
-            ),
-          ),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 150,
-            width: 150,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-
-                SizedBox(
-                  height: 150,
-                  width: 150,
-                  child: CircularProgressIndicator(
-                    value: _progressAnimation.value,
-                    strokeWidth: 8,
-                    backgroundColor: Colors.grey.withOpacity(0.2),
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
-                  ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '$percentage%',
-                      style: GoogleFonts.inter(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    Text(
-                      _animationCompleted ? 'Completed' : '',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            _animationCompleted ? '' : 'Please Wait!',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: _animationCompleted ? Colors.black : Colors.black,
-            ),
-          ),
-        ],
-      ),
+    return AnimatedLoadingContainer(
+      animationController: _animationController,
+      animationCompleted: _animationCompleted,
     );
   }
 

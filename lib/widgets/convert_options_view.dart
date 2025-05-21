@@ -4,7 +4,7 @@ import '../screens/convert_pdf_screens/convert_pdf_main_screen.dart'; // Add thi
 import 'tool_item.dart';
 
 class ConvertOptionsView extends StatelessWidget {
-  const ConvertOptionsView({Key? key}) : super(key: key);
+  const ConvertOptionsView({super.key});
 
   final List<Map<String, String>> convertOptions = const [
     {

@@ -36,7 +36,7 @@ class _ScannerScreenState extends State<ScannerScreen>
   String? _selectedScanType = 'Batch'; // default selected
 
   // Recent images list - to show in place of image icon
-  List<File> _recentImages = [];
+  final List<File> _recentImages = [];
 
   // List to store batch mode images
   List<File> _batchImages = [];
@@ -202,9 +202,9 @@ class _ScannerScreenState extends State<ScannerScreen>
 
   Future<void> _pickImageFromGallery() async {
     if (_selectedScanType == 'Batch') {
-      final List<XFile>? pickedFiles = await _imagePicker.pickMultiImage();
+      final List<XFile> pickedFiles = await _imagePicker.pickMultiImage();
 
-      if (pickedFiles != null && pickedFiles.isNotEmpty) {
+      if (pickedFiles.isNotEmpty) {
         List<File> selectedImages =
             pickedFiles.map((file) => File(file.path)).toList();
 
@@ -535,9 +535,9 @@ class _ScannerScreenState extends State<ScannerScreen>
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(
+      return const Scaffold(
         backgroundColor: Colors.white,
-        body: const Center(
+        body: Center(
           child: CircularProgressIndicator(),
         ),
       );
@@ -571,9 +571,9 @@ class _ScannerScreenState extends State<ScannerScreen>
     }
 
     if (!_isCameraInitialized) {
-      return Scaffold(
+      return const Scaffold(
         backgroundColor: Colors.white,
-        body: const Center(
+        body: Center(
           child: Text('Initializing camera...'),
         ),
       );
@@ -834,7 +834,7 @@ class _ScannerScreenState extends State<ScannerScreen>
                                               ),
                                       ),
                                     )
-                                  : SizedBox(width: 40, height: 40),
+                                  : const SizedBox(width: 40, height: 40),
                               // Maintain layout spacing
                             ],
                           ),

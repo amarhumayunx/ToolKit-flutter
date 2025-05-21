@@ -3,7 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class RecentsView extends StatelessWidget {
-  const RecentsView({Key? key}) : super(key: key);
+  const RecentsView({super.key});
 
   @override
   Widget build(BuildContext context) {

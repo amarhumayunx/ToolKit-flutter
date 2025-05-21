@@ -5,9 +5,9 @@ class SectionHeading extends StatelessWidget {
   final String title;
 
   const SectionHeading({
-    Key? key,
+    super.key,
     required this.title,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -16,7 +16,7 @@ class PdfToWordService {
       for (int i = 0; i < document.pages.count; i++) {
         PdfTextExtractor extractor = PdfTextExtractor(document);
         String pageText = extractor.extractText(startPageIndex: i, endPageIndex: i);
-        pdfText += pageText + '\n\n';
+        pdfText += '$pageText\n\n';
       }
 
       // Close the document
@@ -154,7 +154,7 @@ class PdfToWordService {
         formattedParagraph = formattedParagraph.substring(0, formattedParagraph.length - 18);
       }
 
-      formattedContent += '<w:p>${formattedParagraph}</w:p>';
+      formattedContent += '<w:p>$formattedParagraph</w:p>';
     }
 
     return '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>

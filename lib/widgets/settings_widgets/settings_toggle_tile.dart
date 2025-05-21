@@ -48,23 +48,23 @@ class SettingToggleTile extends StatelessWidget {
               data: Theme.of(context).copyWith(
                 switchTheme: SwitchThemeData(
                   thumbColor:
-                      MaterialStateProperty.resolveWith<Color>((states) {
-                    if (states.contains(MaterialState.selected)) {
+                      WidgetStateProperty.resolveWith<Color>((states) {
+                    if (states.contains(WidgetState.selected)) {
                       return AppColors.primary;
                     }
                     return AppColors.primary; // Thumb color when OFF
                   }),
                   trackColor:
-                      MaterialStateProperty.resolveWith<Color>((states) {
-                    if (states.contains(MaterialState.selected)) {
+                      WidgetStateProperty.resolveWith<Color>((states) {
+                    if (states.contains(WidgetState.selected)) {
                       return AppColors.primary.withOpacity(0.4);
                     }
                     return AppColors.white; // Track when OFF
                   }),
-                  overlayColor: MaterialStateProperty.all(Colors.transparent),
+                  overlayColor: WidgetStateProperty.all(Colors.transparent),
                   trackOutlineColor:
-                      MaterialStateProperty.resolveWith<Color?>((states) {
-                    if (!states.contains(MaterialState.selected)) {
+                      WidgetStateProperty.resolveWith<Color?>((states) {
+                    if (!states.contains(WidgetState.selected)) {
                       return AppColors.primary; // Outline when OFF
                     }
                     return null;

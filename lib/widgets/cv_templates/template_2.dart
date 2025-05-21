@@ -34,14 +34,14 @@ import '../cv_widgets/template_selection_dialog.dart';
 class Template2 extends StatefulWidget {
   final List<Website> websites;
 
-  const Template2({Key? key, this.websites = const []}) : super(key: key);
+  const Template2({super.key, this.websites = const []});
 
   @override
   State<Template2> createState() => _Template2State();
 }
 
 class _Template2State extends State<Template2> {
-  int _currentPage = 1;
+  final int _currentPage = 1;
   int _totalPages = 1;
   final List<List<Widget>> _rightColumnContent = [];
   final List<List<Widget>> _leftColumnContent = [];
@@ -137,8 +137,8 @@ class _Template2State extends State<Template2> {
       double estimatedHeight = 30;
       for (var item in educationItems) {
         double itemHeight = 30;
-        if (item.description != null && item.description!.isNotEmpty) {
-          itemHeight += (item.description!.length / 30) * 5;
+        if (item.description.isNotEmpty) {
+          itemHeight += (item.description.length / 30) * 5;
         }
         estimatedHeight += itemHeight;
       }
@@ -242,8 +242,8 @@ class _Template2State extends State<Template2> {
         if (item.description.isNotEmpty) {
           itemHeight += 15 + (item.description.length / 50) * 5;
         }
-        if (item.projects != null && item.projects!.isNotEmpty) {
-          itemHeight += item.projects!.length * 10;
+        if (item.projects.isNotEmpty) {
+          itemHeight += item.projects.length * 10;
         }
 
         final experienceItem = _buildExperienceItem(
@@ -761,7 +761,7 @@ class _Template2State extends State<Template2> {
         // Profile image with white outline and purple border
         Stack(
           children: [
-            Container(
+            const SizedBox(
               width: 100, // Space for positioning
               height: 100,
             ),
@@ -879,15 +879,15 @@ class _Template2State extends State<Template2> {
           return Column(
             children: [
               _buildEducationItem(
-                item.degree?.toUpperCase() ?? '',
+                item.degree.toUpperCase() ?? '',
                 item.institute ?? '',
-                '${item.startDate ?? ''} ${item.endDate != null && item.endDate!.isNotEmpty ? '- ${item.endDate}' : ''}',
+                '${item.startDate ?? ''} ${item.endDate.isNotEmpty ? '- ${item.endDate}' : ''}',
                 item.description ?? '',
               ),
               const SizedBox(height: 4),
             ],
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -901,9 +901,9 @@ class _Template2State extends State<Template2> {
         ),
         const SizedBox(height: 4),
         ...skillItems
-            .where((skill) => skill.name != null && skill.name!.isNotEmpty)
-            .map((skill) => _buildBulletItem(skill.name!))
-            .toList(),
+            .where((skill) => skill.name.isNotEmpty)
+            .map((skill) => _buildBulletItem(skill.name))
+            ,
       ],
     );
   }
@@ -918,9 +918,9 @@ class _Template2State extends State<Template2> {
         const SizedBox(height: 4),
         ...languageItems
             .where((language) =>
-                language.name != null && language.name!.isNotEmpty)
-            .map((language) => _buildBulletItem(language.name!))
-            .toList(),
+                language.name.isNotEmpty)
+            .map((language) => _buildBulletItem(language.name))
+            ,
       ],
     );
   }
@@ -1145,7 +1145,7 @@ class _Template2State extends State<Template2> {
                 ],
               ),
             );
-          }).where((widget) => widget != Container()).toList(),
+          }).where((widget) => widget != Container()),
         ],
       ],
     );

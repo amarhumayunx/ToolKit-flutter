@@ -13,13 +13,13 @@ class SaveFileButton extends StatelessWidget {
   final VoidCallback? onSaveCompleted;
 
   const SaveFileButton({
-    Key? key,
+    super.key,
     required this.file,
     required this.fileType,
     this.buttonText = 'Save',
     this.width,
     this.onSaveCompleted,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class SaveFileButton extends StatelessWidget {
       height: 48,
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             colors: [
               AppColors.gradientStart,
               AppColors.gradientEnd,

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -9,9 +8,9 @@ class CVProgressIndicator extends StatelessWidget {
   final int totalSteps = 8; // Updated to 8
 
   const CVProgressIndicator({
-    Key? key,
+    super.key,
     required this.currentStep,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +46,7 @@ class CVProgressIndicator extends StatelessWidget {
               ),
               child: Center(
                 child: isPreviousStep
-                    ? Icon(
+                    ? const Icon(
                   Icons.check,
                   color: AppColors.white,
                   size: 14,

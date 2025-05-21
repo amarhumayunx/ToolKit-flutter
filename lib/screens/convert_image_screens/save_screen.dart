@@ -76,7 +76,7 @@ class _SaveScreenState extends State<SaveScreen>
     try {
       if (widget.selectedFormat == 'Word') {
         final wordFile =
-            await WordImagesService.createWordDocument(widget.selectedImages);
+        await WordImagesService.createWordDocument(widget.selectedImages);
         setState(() {
           convertedFile = wordFile;
         });
@@ -114,13 +114,13 @@ class _SaveScreenState extends State<SaveScreen>
             return pw.Column(
               children: images
                   .map((image) => pw.Container(
-                        margin: const pw.EdgeInsets.only(bottom: 20),
-                        height: 200, // Fixed height for each image
-                        child: pw.Image(
-                          image,
-                          fit: pw.BoxFit.contain,
-                        ),
-                      ))
+                margin: const pw.EdgeInsets.only(bottom: 20),
+                height: 200, // Fixed height for each image
+                child: pw.Image(
+                  image,
+                  fit: pw.BoxFit.contain,
+                ),
+              ))
                   .toList(),
             );
           },
@@ -139,13 +139,13 @@ class _SaveScreenState extends State<SaveScreen>
               return pw.Column(
                 children: pageImages
                     .map((image) => pw.Container(
-                          margin: const pw.EdgeInsets.only(bottom: 20),
-                          height: 250, // Adjust height based on images per page
-                          child: pw.Image(
-                            image,
-                            fit: pw.BoxFit.contain,
-                          ),
-                        ))
+                  margin: const pw.EdgeInsets.only(bottom: 20),
+                  height: 250, // Adjust height based on images per page
+                  child: pw.Image(
+                    image,
+                    fit: pw.BoxFit.contain,
+                  ),
+                ))
                     .toList(),
               );
             },

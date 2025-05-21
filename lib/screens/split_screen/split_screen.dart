@@ -24,7 +24,8 @@ class SplitScreen extends StatefulWidget {
 class _SplitScreenState extends State<SplitScreen> {
   final List<File> _selectedDocuments = [];
   final String _processedResult = '';
-  bool _isProcessing = false;
+  final bool _isProcessing = false;
+  String _documentErrorText = '';
   final DocxSplitterService _docxService = DocxSplitterService(); // <- Added
 
   void _removeDocument(int index) {
@@ -35,76 +36,13 @@ class _SplitScreenState extends State<SplitScreen> {
     });
   }
 
-  void _showDocumentSourceDialog() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Select Document Source',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildSourceOption(
-                  icon: Icons.cloud_upload,
-                  label: 'Cloud',
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickCloudDocuments();
-                  },
-                ),
-                _buildSourceOption(
-                  icon: Icons.folder,
-                  label: 'Files',
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickLocalDocuments();
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSourceOption({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: Colors.blue, size: 30),
-          ),
-          const SizedBox(height: 8),
-          Text(label),
-        ],
-      ),
-    );
-  }
-
   Future<void> _pickLocalDocuments() async {
     try {
+      // Reset error text when trying to pick new files
+      setState(() {
+        _documentErrorText = "";
+      });
+
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.any,
         allowMultiple: true,
@@ -113,57 +51,31 @@ class _SplitScreenState extends State<SplitScreen> {
       );
 
       if (result != null && result.files.isNotEmpty) {
+        final validExtensions = ['pdf', 'doc', 'docx'];
+
+        List<File> pickedFiles = result.files
+            .where((file) => file.path != null)
+            .map((file) => File(file.path!))
+            .toList();
+
+        List<File> validFiles = pickedFiles.where((file) {
+          final ext = file.path.split('.').last.toLowerCase();
+          return validExtensions.contains(ext);
+        }).toList();
+
         setState(() {
-          for (var file in result.files) {
-            if (file.path != null) {
-              String extension = file.path!.split('.').last.toLowerCase();
-              if (['pdf', 'doc', 'docx'].contains(extension)) {
-                _selectedDocuments.add(File(file.path!));
-              }
-            }
-          }
+          _selectedDocuments.addAll(validFiles);
+          _documentErrorText = validFiles.length == pickedFiles.length
+              ? ''
+              : 'Please select only PDF, DOC or DOCX files';
         });
       }
     } catch (e) {
+      setState(() {
+        _documentErrorText = 'Error selecting documents: ${e.toString()}';
+      });
       print('Error in file picker: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking documents: $e')),
-      );
     }
-  }
-
-  Future<void> _pickCloudDocuments() async {
-    setState(() => _isProcessing = true);
-
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
-        allowMultiple: true,
-        dialogTitle: 'Select Documents from Cloud',
-        withData: false,
-        withReadStream: true,
-      );
-
-      if (result != null && result.files.isNotEmpty) {
-        setState(() {
-          for (var file in result.files) {
-            if (file.path != null) {
-              String extension = file.path!.split('.').last.toLowerCase();
-              if (['pdf', 'doc', 'docx'].contains(extension)) {
-                _selectedDocuments.add(File(file.path!));
-              }
-            }
-          }
-        });
-      }
-    } catch (e) {
-      print('Error accessing cloud documents: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error accessing cloud documents: $e')),
-      );
-    }
-
-    setState(() => _isProcessing = false);
   }
 
   Future<bool> _processAndSplitDocuments() async {
@@ -255,7 +167,7 @@ class _SplitScreenState extends State<SplitScreen> {
             MaterialPageRoute(
               builder: (context) => SplitProgressScreen(
                 document: combinedDoc,
-                selectedPages: [true],
+                selectedPages: const [true],
                 isMultipleFiles: true,
                 documents: documents,
               ),
@@ -328,67 +240,6 @@ class _SplitScreenState extends State<SplitScreen> {
     }
   }
 
-
-  Future<bool> _processMultiplePdfFiles() async {
-    try {
-      final tempDir = await getTemporaryDirectory();
-      final outputPath = path.join(tempDir.path, 'merged_${DateTime.now().millisecondsSinceEpoch}.pdf');
-
-      final combinedPdf = syncfusion.PdfDocument();
-      int totalPages = 0;
-
-      for (var file in _selectedDocuments) {
-        final pdfData = await file.readAsBytes();
-        final document = syncfusion.PdfDocument(inputBytes: pdfData);
-
-        for (int i = 0; i < document.pages.count; i++) {
-          final pageTemplate = document.pages[i].createTemplate();
-          combinedPdf.pages.add().graphics.drawPdfTemplate(pageTemplate, const Offset(0, 0));
-          totalPages++;
-        }
-        document.dispose();
-      }
-
-      if (totalPages == 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No valid PDF pages found in selected files')),
-        );
-        return false;
-      }
-
-      final outputFile = File(outputPath);
-      await outputFile.writeAsBytes(combinedPdf.saveSync());
-      combinedPdf.dispose();
-
-      final combinedDocument = DocumentItem(
-        name: path.basename(outputFile.path),
-        date: DateTime.now(),
-        sizeInMB: outputFile.lengthSync() / (1024 * 1024),
-        file: outputFile,
-      );
-
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SplitProgressScreen(
-            document: combinedDocument,
-            selectedPages: List<bool>.filled(totalPages, true),
-          ),
-        ),
-      );
-
-      return true;
-    } catch (e) {
-      print("Error merging PDFs: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error merging PDF files: ${e.toString()}")),
-      );
-      return false;
-    }
-  }
-
-
-
   Future<File?> _processMultipleWordFiles(List<DocumentItem> documents, String outputPath) async {
     try {
       final allPages = <DocxPage>[];
@@ -438,7 +289,6 @@ class _SplitScreenState extends State<SplitScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: const ToolsAppBar(title: 'Split'),
@@ -460,9 +310,11 @@ class _SplitScreenState extends State<SplitScreen> {
                   const SizedBox(height: 30),
                   const InfoCard(
                     title: 'Split Pages In File',
-                    description: 'Effortlessly separate pages from files while keeping everything clear and intact.',
+                    description:
+                    'Effortlessly separate pages from files while keeping everything clear and intact.',
                   ),
                   const SizedBox(height: 24),
+                  // Styled file selection container
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -495,37 +347,58 @@ class _SplitScreenState extends State<SplitScreen> {
                           padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
                           child: DottedFileDropZoneone(
                             selectedFiles: _selectedDocuments,
-                            onTap: _showDocumentSourceDialog,
+                            onTap: _pickLocalDocuments,
                             onRemoveFile: _removeDocument,
                           ),
                         ),
+
                       ],
                     ),
                   ),
-                  SizedBox(height: screenHeight * 0.11),
-                  _isProcessing
-                      ? const CircularProgressIndicator()
-                      : CustomGradientButton(
-                    text: 'Split Document',
-                    onPressed: _processAndSplitDocuments,
-                  ),
-                  if (_processedResult.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Center(
                       child: Text(
-                        _processedResult,
+                        _documentErrorText,
                         style: const TextStyle(
-                          color: Colors.green,
-                          fontWeight: FontWeight.w500,
+                          fontSize: 12,
+                          color: Colors.red,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
+                  ),
                 ],
               ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+            child: Column(
+              children: [
+                _isProcessing
+                    ? const CircularProgressIndicator()
+                    : CustomGradientButton(
+                  text: 'Split Document',
+                  onPressed: _processAndSplitDocuments,
+                ),
+                if (_processedResult.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Text(
+                      _processedResult,
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+
 }

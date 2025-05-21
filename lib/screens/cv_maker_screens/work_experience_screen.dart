@@ -375,11 +375,10 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                                       color: const Color(0xFFB5B5B8),
                                     ),
                                   ),
-                                  if (item.projectUrls != null &&
-                                      i < item.projectUrls!.length &&
-                                      item.projectUrls![i].isNotEmpty)
+                                  if (i < item.projectUrls.length &&
+                                      item.projectUrls[i].isNotEmpty)
                                     Text(
-                                      item.projectUrls![i],
+                                      item.projectUrls[i],
                                       style: GoogleFonts.urbanist(
                                         fontSize: 12,
                                         color: Colors.blue,
@@ -608,7 +607,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                             height: 45,
                             width: 45,
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
+                              gradient: const LinearGradient(
                                 colors: [
                                   AppColors.gradientStart,
                                   AppColors.gradientEnd,

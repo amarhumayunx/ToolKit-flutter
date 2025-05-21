@@ -8,9 +8,9 @@ class BatchResultScreen extends StatefulWidget {
   final List<File> batchImages;
 
   const BatchResultScreen({
-    Key? key,
+    super.key,
     required this.batchImages,
-  }) : super(key: key);
+  });
 
   @override
   State<BatchResultScreen> createState() => _BatchResultScreenState();
@@ -19,7 +19,7 @@ class BatchResultScreen extends StatefulWidget {
 class _BatchResultScreenState extends State<BatchResultScreen> {
   List<File> _processedImages = [];
   bool _isProcessing = false;
-  bool _isExporting = false;
+  final bool _isExporting = false;
   int _selectedImageIndex = 0;
   bool _canScrollLeft = false;
   bool _canScrollRight = true;

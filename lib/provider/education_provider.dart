@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../models/education_item_model.dart';
 
 class EducationProvider with ChangeNotifier {
-  List<EducationItem> _educationItems = [];
+  final List<EducationItem> _educationItems = [];
 
   List<EducationItem> get educationItems => _educationItems;
 

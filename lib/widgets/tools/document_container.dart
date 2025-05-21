@@ -7,6 +7,7 @@ class DocumentContainer extends StatefulWidget {
   final String filePath;
   final String? date;
   final VoidCallback? onDelete;
+  final Function(String)? onFileRenamed;
   final VoidCallback? onTap;
 
   const DocumentContainer({
@@ -14,6 +15,7 @@ class DocumentContainer extends StatefulWidget {
     required this.filePath,
     this.date,
     this.onDelete,
+    this.onFileRenamed,
     this.onTap,
   });
 
@@ -22,6 +24,14 @@ class DocumentContainer extends StatefulWidget {
 }
 
 class _DocumentContainerState extends State<DocumentContainer> {
+  late String _currentFilePath;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentFilePath = widget.filePath;
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -67,7 +77,7 @@ class _DocumentContainerState extends State<DocumentContainer> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      widget.filePath.split('/').last,
+                      _currentFilePath.split('/').last,
                       style: GoogleFonts.inter(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -86,10 +96,18 @@ class _DocumentContainerState extends State<DocumentContainer> {
                   ],
                 ),
               ),
-              if (widget.onDelete != null)
+              if (widget.onDelete != null || widget.onFileRenamed != null)
                 FileOptionsMenu(
-                  filePath: widget.filePath,
+                  filePath: _currentFilePath,
                   onDelete: widget.onDelete,
+                  onFileRenamed: (newName) {
+                    setState(() {
+                      _currentFilePath = newName;
+                    });
+                    if (widget.onFileRenamed != null) {
+                      widget.onFileRenamed!(newName);
+                    }
+                  },
                 ),
             ],
           ),

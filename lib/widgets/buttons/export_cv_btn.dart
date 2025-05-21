@@ -5,7 +5,7 @@ import '../../utils/app_colors.dart';
 class ExportButton extends StatelessWidget {
   final VoidCallback onPressed;
 
-  const ExportButton({Key? key, required this.onPressed}) : super(key: key);
+  const ExportButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

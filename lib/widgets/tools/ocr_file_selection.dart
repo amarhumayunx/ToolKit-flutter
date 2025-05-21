@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import '../../utils/app_colors.dart';
 
 class FileSelectionSection extends StatefulWidget {
@@ -94,7 +95,7 @@ class _FileSelectionSectionState extends State<FileSelectionSection> {
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
-                                color: Color(
+                                color: const Color(
                                     0xFF00A3A3), // Teal color to match the theme
                               ),
                             ),

@@ -66,7 +66,7 @@ class _AnimatedLoadingContainerState extends State<AnimatedLoadingContainer> {
                       value: _progressAnimation.value,
                       strokeWidth: 8,
                       backgroundColor: Colors.grey.withOpacity(0.2),
-                      valueColor: AlwaysStoppedAnimation<Color>(
+                      valueColor: const AlwaysStoppedAnimation<Color>(
                         AppColors.primary,
                       ),
                     ),

@@ -33,14 +33,14 @@ import '../cv_widgets/template_selection_dialog.dart';
 class Template3 extends StatefulWidget {
   final List<Website> websites;
 
-  const Template3({Key? key, this.websites = const []}) : super(key: key);
+  const Template3({super.key, this.websites = const []});
 
   @override
   State<Template3> createState() => _Template3State();
 }
 
 class _Template3State extends State<Template3> {
-  int _currentPage = 1;
+  final int _currentPage = 1;
   int _totalPages = 1;
   final List<List<Widget>> _rightColumnContent = [];
   final List<List<Widget>> _leftColumnContent = [];
@@ -143,9 +143,9 @@ class _Template3State extends State<Template3> {
         double itemHeight = 30;
 
         // Add height for description if present
-        if (item.description != null && item.description!.isNotEmpty) {
+        if (item.description.isNotEmpty) {
           // Roughly estimate 5 points per line of text
-          itemHeight += (item.description!.length / 30) * 5;
+          itemHeight += (item.description.length / 30) * 5;
         }
 
         estimatedHeight += itemHeight;
@@ -832,7 +832,7 @@ class _Template3State extends State<Template3> {
                       fit: BoxFit.cover,
                     ),
                   )
-                : Icon(
+                : const Icon(
                     Icons.person,
                     size: 30,
                     color: AppColors.dividerColor,
@@ -854,7 +854,7 @@ class _Template3State extends State<Template3> {
 
     // Only show section if there's at least one contact info
     if (!hasPhone && !hasEmail && !hasWebsites) {
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
     }
 
     return Column(
@@ -955,7 +955,7 @@ class _Template3State extends State<Template3> {
 
     // Only show section if there are education items
     if (educationItems.isEmpty) {
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
     }
 
     return Column(
@@ -999,10 +999,10 @@ class _Template3State extends State<Template3> {
                   color: AppColors.black,
                 ),
               ),
-              if (item.description != null && item.description!.isNotEmpty) ...[
+              if (item.description.isNotEmpty) ...[
                 const SizedBox(height: 2),
                 Text(
-                  item.description!,
+                  item.description,
                   style: GoogleFonts.poppins(
                     fontSize: 6,
                     color: AppColors.black,
@@ -1012,7 +1012,7 @@ class _Template3State extends State<Template3> {
               if (item != educationItems.last) const SizedBox(height: 4),
             ],
           );
-        }).toList(),
+        }),
         const SizedBox(height: 4),
         _buildBlackDivider(),
       ],
@@ -1025,7 +1025,7 @@ class _Template3State extends State<Template3> {
 
     // Only show section if there are skills
     if (skillItems.isEmpty) {
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
     }
 
     return Column(
@@ -1040,7 +1040,7 @@ class _Template3State extends State<Template3> {
           ),
         ),
         const SizedBox(height: 4),
-        ...skillItems.map((skill) => _buildSkillItem(skill.name)).toList(),
+        ...skillItems.map((skill) => _buildSkillItem(skill.name)),
         const SizedBox(height: 6),
         _buildBlackDivider(),
       ],
@@ -1077,7 +1077,7 @@ class _Template3State extends State<Template3> {
 
     // Only show section if there are languages
     if (languageItems.isEmpty) {
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
     }
 
     return Column(
@@ -1094,7 +1094,7 @@ class _Template3State extends State<Template3> {
         const SizedBox(height: 4),
         ...languageItems
             .map((language) => _buildSkillItem(language.name))
-            .toList(),
+            ,
       ],
     );
   }
@@ -1229,7 +1229,7 @@ class _Template3State extends State<Template3> {
                   ),
               ],
             );
-          }).toList(),
+          }),
         ]
       ],
     );

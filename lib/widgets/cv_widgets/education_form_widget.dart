@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../models/education_item_model.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/buttons/save_edit_delete_btns.dart';
 import '../../widgets/custom_text_field.dart';

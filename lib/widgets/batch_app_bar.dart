@@ -9,11 +9,11 @@ class BatchAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String actionText; // New parameter for customizable action text
 
   const BatchAppBar({
-    Key? key,
+    super.key,
     required this.onNextPressed,
     required this.onBackPressed,
     this.actionText = 'Next', // Default value is 'Next'
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class BatchAppBar extends StatelessWidget implements PreferredSizeWidget {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.primary),
+          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
           onPressed: onBackPressed,
         ),
         actions: [
@@ -58,5 +58,5 @@ class BatchAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

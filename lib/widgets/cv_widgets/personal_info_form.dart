@@ -18,7 +18,7 @@ class PersonalInfoForm extends StatefulWidget {
   final Function(String?) onPhoneErrorChanged;
 
   const PersonalInfoForm({
-    Key? key,
+    super.key,
     required this.nameController,
     required this.designationController,
     required this.emailController,
@@ -31,7 +31,7 @@ class PersonalInfoForm extends StatefulWidget {
     required this.onDesignationErrorChanged, // Added designation error handler
     required this.onEmailErrorChanged,
     required this.onPhoneErrorChanged,
-  }) : super(key: key);
+  });
 
   @override
   _PersonalInfoFormState createState() => _PersonalInfoFormState();

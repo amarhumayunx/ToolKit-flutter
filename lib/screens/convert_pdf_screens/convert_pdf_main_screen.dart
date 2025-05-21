@@ -92,7 +92,7 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: ToolsAppBar(
+      appBar: const ToolsAppBar(
         title: 'Convert PDF',
       ),
       body: Column(
@@ -103,10 +103,10 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CustomSvgImage(
+                  const CustomSvgImage(
                       imagePath: 'assets/images/convert_pdf_img.svg'),
                   const SizedBox(height: 30),
-                  InfoCard(
+                  const InfoCard(
                       title: 'Convert PDF Format',
                       description:
                           'Easily convert PDF’s to various formats while maintaining it’s quality, resolution and clarity.'),
@@ -117,7 +117,7 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
                     const SizedBox(height: 8),
                     Text(
                       _errorMessage!,
-                      style: TextStyle(color: Colors.red, fontSize: 10),
+                      style: const TextStyle(color: Colors.red, fontSize: 10),
                     ),
                   ],
                 ],
@@ -196,8 +196,8 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 10),
+                                    const Padding(
+                                      padding: EdgeInsets.only(top: 10),
                                       child: Icon(
                                         Icons.picture_as_pdf,
                                         size: 30,

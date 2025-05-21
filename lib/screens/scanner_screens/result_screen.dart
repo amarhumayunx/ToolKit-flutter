@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -14,7 +13,7 @@ import '../../widgets/tools/document_container.dart';
 class ResultScreen extends StatefulWidget {
   final File wordDocument;
 
-  const ResultScreen({Key? key, required this.wordDocument}) : super(key: key);
+  const ResultScreen({super.key, required this.wordDocument});
 
   @override
   _ResultScreenState createState() => _ResultScreenState();
@@ -112,7 +111,7 @@ class _ResultScreenState extends State<ResultScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(title: 'Edit'),
+      appBar: const CustomAppBar(title: 'Edit'),
       body: Stack(
         children: [
           SingleChildScrollView(

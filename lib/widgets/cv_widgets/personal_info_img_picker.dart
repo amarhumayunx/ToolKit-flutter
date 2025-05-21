@@ -9,10 +9,10 @@ class PersonalInfoImagePicker extends StatelessWidget {
   final Function(File) onImagePicked;
 
   const PersonalInfoImagePicker({
-    Key? key,
+    super.key,
     required this.imageFile,
     required this.onImagePicked,
-  }) : super(key: key);
+  });
 
   Future<void> _pickImage(BuildContext context) async {
     final picker = ImagePicker();
@@ -63,7 +63,7 @@ class PersonalInfoImagePicker extends StatelessWidget {
             color: AppColors.bgBoxColor,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(Icons.add,
+          child: const Icon(Icons.add,
               color: AppColors.primary, size: 22),
         ),
         const SizedBox(width: 26),

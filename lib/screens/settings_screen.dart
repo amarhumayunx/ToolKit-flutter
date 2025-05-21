@@ -36,7 +36,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             SizedBox(height: MediaQuery.of(context).padding.top + 30),
             _buildSettingsAppBar(context),
-            SizedBox(
+            const SizedBox(
               height: 6,
             ),
             Expanded(

@@ -81,7 +81,7 @@ class _JobPageState extends State<JobPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 10,),
+                    const SizedBox(height: 10,),
                     // Show job form or saved job detail
                     hasJobDetail ? _buildSavedJobDetail() : _buildJobForm(),
                   ],

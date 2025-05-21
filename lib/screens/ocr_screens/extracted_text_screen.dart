@@ -1,4 +1,3 @@
-// extracted_text_screen.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:open_file/open_file.dart';
 import 'package:toolkit/widgets/custom_appbar.dart';
 import '../../services/word_document_service.dart';
-import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/save_document_btn.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import '../../widgets/tools/document_container.dart';
@@ -90,28 +88,20 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
       setState(() {
         _isSaving = false;
       });
-      AppSnackBar.show(context, message: 'Error saving file: $e');
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error saving file: $e')));
     }
   }
 
+  void _handleFileRenamed(String newFilePath) {
+    setState(() {
+      _savedFilePath = newFilePath;
+    });
+  }
 
-  Future<void> _handleFileDeleted() async {
-    try {
-      if (_savedFilePath != null) {
-        final file = File(_savedFilePath!);
-        if (await file.exists()) {
-          await file.delete();
-        }
-      }
-      // Navigate back with true flag to indicate images should be cleared
-      if (mounted) {
-        Navigator.of(context).pop(true);
-      }
-    } catch (e) {
-      if (mounted) {
-        AppSnackBar.show(context, message: 'Error deleting file: $e');
-      }
-    }
+  void _handleFileDeleted() {
+    Navigator.of(context).pop();
   }
 
   Future<void> _openDocument() async {
@@ -120,11 +110,14 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
     try {
       final result = await OpenFile.open(_savedFilePath!);
       if (result.type != ResultType.done) {
-        AppSnackBar.show(context, message: 'Could not open file: ${result.message}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open file: ${result.message}')),
+        );
       }
     } catch (e) {
-      AppSnackBar.show(context, message: 'Error opening file: $e');
-
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error opening file: $e')),
+      );
     }
   }
 
@@ -132,112 +125,78 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(
-        title: 'OCR',
-        onBackPressed: () {
-          // Just pop without any data clearing flag (false)
-          Navigator.of(context).pop(false);
-        },
-      ),
-      body: WillPopScope(
-        onWillPop: () async {
-          Navigator.of(context).pop(false);
-          return false;
-        },
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              padding: const EdgeInsets.all(20.0),
-              child: Padding(
-                padding: const EdgeInsets.all(14.0),
-                child: Column(
-                  children: [
+      appBar: CustomAppBar(title: 'OCR'),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(20.0),
+            child: Padding(
+              padding: const EdgeInsets.all(14.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  if (_isLoading || _animationCompleted)
+                    _buildLoadingContainer(),
+                  const SizedBox(height: 36),
+                  if (!_isLoading) ...[
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Extracted Text File:',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    if (_savedFilePath != null)
+                      DocumentContainer(
+                        filePath: _savedFilePath!,
+                        onTap: _openDocument,
+                        onDelete: _handleFileDeleted,
+                        onFileRenamed: _handleFileRenamed,
+                      ),
                     const SizedBox(height: 20),
-                    if (_isLoading || _animationCompleted)
-                      _buildLoadingContainer(),
-                    const SizedBox(height: 36),
-                    if (!_isLoading) ...[
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Extracted Text File:',
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Extracted Text:',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      if (_savedFilePath != null)
-                        DocumentContainer(
-                          filePath: _savedFilePath!,
-                          onTap: _openDocument,
-                          onDelete: _handleFileDeleted,
-                        ),
-                      if (_savedFilePath == null)
-                        Container(
-                          width: double.infinity,
-                          height: 70,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'No file available',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ),
-                        ),
-                      const SizedBox(height: 20),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Extracted Text:',
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                    ),
+                    const SizedBox(height: 10),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: MediaQuery.of(context).size.height * 0.4,
                       ),
-                      const SizedBox(height: 10),
-                      ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minHeight: MediaQuery.of(context).size.height * 0.4,
-                        ),
-                        child: Column(
-                          children: [
-                            _buildTextContainer(),
-                            const SizedBox(height: 60),
-                          ],
-                        ),
+                      child: Column(
+                        children: [
+                          _buildTextContainer(),
+                          const SizedBox(height: 60),
+                        ],
                       ),
-                    ],
-                    SizedBox(
-                        height: MediaQuery.of(context).padding.bottom + 20),
+                    ),
                   ],
-                ),
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
+                ],
               ),
             ),
-            if (!_isLoading && _savedFilePath != null)
-              Positioned(
-                left: 20,
-                right: 20,
-                bottom: MediaQuery.of(context).padding.bottom + 20,
-                child: SaveDocumentButton(
-                  documentFile: File(_savedFilePath!),
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  onSaveCompleted: () {
-                    // This will be called after successful save
-                  },
-                ),
+          ),
+          if (!_isLoading && _savedFilePath != null)
+            Positioned(
+              left: 20,
+              right: 20,
+              bottom: MediaQuery.of(context).padding.bottom + 20,
+              child: SaveDocumentButton(
+                documentFile: File(_savedFilePath!),
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }

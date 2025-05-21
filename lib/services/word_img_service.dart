@@ -46,7 +46,7 @@ class WordImageService {
         docRelsXml.length, utf8.encode(docRelsXml)));
 
     // Add media (image) file
-    final imageId = 'rId1';
+    const imageId = 'rId1';
     final imageExt = _getImageExtension(imageFile.path);
     archive.addFile(ArchiveFile(
         'word/media/image1.$imageExt', imageBytes.length, imageBytes));

@@ -7,10 +7,10 @@ class TemplateActionButtons extends StatelessWidget {
   final VoidCallback onExport;
 
   const TemplateActionButtons({
-    Key? key,
+    super.key,
     required this.onChangeTemplate,
     required this.onExport,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

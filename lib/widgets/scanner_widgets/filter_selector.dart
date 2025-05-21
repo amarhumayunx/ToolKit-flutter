@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -16,12 +15,12 @@ class FilterSelector extends StatelessWidget {
   final bool previewsReady;
 
   const FilterSelector({
-    Key? key,
+    super.key,
     required this.filterOptions,
     required this.onFilterSelected,
     required this.filterPreviews,
     required this.previewsReady,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

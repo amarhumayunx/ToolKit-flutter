@@ -8,10 +8,10 @@ class DocumentPreview extends StatelessWidget {
   final VoidCallback? onClose; // Optional callback for when the close button is pressed
 
   const DocumentPreview({
-    Key? key,
+    super.key,
     required this.image,
     this.onClose,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +47,7 @@ class DocumentPreview extends StatelessWidget {
                   onTap: onClose ?? () => Navigator.of(context).pop(),
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.primary,
                       shape: BoxShape.circle,
                     ),

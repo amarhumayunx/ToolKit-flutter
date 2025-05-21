@@ -99,7 +99,7 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
 
                     // Show objective form or saved objective detail
                     hasObjective

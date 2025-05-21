@@ -13,12 +13,12 @@ class SaveButton extends StatelessWidget {
   final double height;
 
   const SaveButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     this.text = 'Save',
     this.width = 88,
     this.height = 36,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -71,12 +71,12 @@ class ActionButton extends StatelessWidget {
   final double height;
 
   const ActionButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.text,
     this.width = 88,
     this.height = 36,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -122,12 +122,12 @@ class EditDeleteActionRow extends StatelessWidget {
   final double buttonHeight;
 
   const EditDeleteActionRow({
-    Key? key,
+    super.key,
     required this.onEdit,
     required this.onDelete,
     this.buttonWidth = 88,
     this.buttonHeight = 36,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -160,13 +160,13 @@ class SavedDetailContainer extends StatelessWidget {
   final bool showTitle;
 
   const SavedDetailContainer({
-    Key? key,
+    super.key,
     required this.title,
     required this.content,
     required this.onEdit,
     required this.onDelete,
     this.showTitle = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
+import '../../utils/app_colors.dart';
+
 class DottedFileDropZoneone extends StatelessWidget {
   final List<File> selectedFiles;
   final VoidCallback onTap;
@@ -17,7 +19,6 @@ class DottedFileDropZoneone extends StatelessWidget {
     required this.onRemoveFile,
   });
 
-  // Helper function to get file icon based on extension
   IconData _getFileIcon(String extension) {
     switch (extension.toLowerCase()) {
       case '.pdf':
@@ -30,7 +31,6 @@ class DottedFileDropZoneone extends StatelessWidget {
     }
   }
 
-  // Get file name from path
   String _getFileName(String filePath) {
     return path.basename(filePath);
   }
@@ -38,7 +38,7 @@ class DottedFileDropZoneone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DottedBorder(
-      color: const Color(0xFF00BCD4), // AppColors.primary
+      color: AppColors.primary,
       strokeWidth: 1.5,
       dashPattern: const [5, 4],
       borderType: BorderType.RRect,
@@ -57,77 +57,67 @@ class DottedFileDropZoneone extends StatelessWidget {
             ? SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: selectedFiles.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final file = entry.value;
-                    final extension = path.extension(file.path);
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: selectedFiles.asMap().entries.map((entry) {
+                final index = entry.key;
+                final file = entry.value;
+                final extension = path.extension(file.path);
 
-                    return Stack(
-                      children: [
-                        Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
+                return Stack(
+                  children: [
+                    SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            _getFileIcon(extension),
+                            size: 40,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(height: 6),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Text(
+                              _getFileName(file.path),
+                              style: GoogleFonts.inter(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w400,
+                              ),
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      top: 5,
+                      right: 5,
+                      child: GestureDetector(
+                        onTap: () => onRemoveFile(index),
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: const BoxDecoration(
                             color: Colors.white,
-                            border: Border.all(
-                              color: Colors.grey.withOpacity(0.3),
-                            ),
+                            shape: BoxShape.circle,
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                _getFileIcon(extension),
-                                size: 40,
-                                color: const Color(0xFF00BCD4),
-                              ),
-                              const SizedBox(height: 5),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 4),
-                                child: Text(
-                                  _getFileName(file.path),
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
+                          child: const Icon(
+                            Icons.close,
+                            size: 16,
+                            color: Colors.grey,
                           ),
                         ),
-                        Positioned(
-                          top: 5,
-                          right: 5,
-                          child: GestureDetector(
-                            onTap: () => onRemoveFile(index),
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.close,
-                                size: 16,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ],
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
             ),
           ),
         )

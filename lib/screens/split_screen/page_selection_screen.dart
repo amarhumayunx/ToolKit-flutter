@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart' as syncfusion;
 import 'package:toolkit/screens/split_screen/split_progress_screen.dart';
 import 'package:toolkit/widgets/buttons/gradient_btn.dart';
 import 'package:toolkit/widgets/custom_appbar.dart';
 
-import '../../utils/app_colors.dart';
 import 'document_item.dart';
 
 class PageSelectionScreen extends StatefulWidget {
@@ -116,76 +114,7 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Number of pages selector
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  children: [
-                    const Text(
-                      'Number of pages to split:',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextField(
-                        controller: _pageCountController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        ),
-                        onSubmitted: _updatePageCount,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [AppColors.gradientStart, AppColors.gradientEnd],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () => _updatePageCount(_pageCountController.text),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent, // optional to remove shadow
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text(
-                          'Apply',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    )
-
-                  ],
-                ),
-              ),
-
-              // Instructions
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12.0),
-                child: Text(
-                  'Select pages to Split:',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-
-              // Page grid - Changed to match the UI in the image
+              // Page grid only (Removed heading and page count input)
               Expanded(
                 child: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -214,7 +143,6 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
                               children: [
                                 Expanded(
                                   child: Center(
-                                    // Using a placeholder for the document preview
                                     child: Image.asset(
                                       'assets/images/doc.png',
                                       fit: BoxFit.cover,
@@ -260,7 +188,7 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
                                   : null,
                             ),
                           ),
-                          // Selected number indicator (showing 1,2,etc)
+                          // Selected number indicator
                           if (selectedPages[index])
                             Positioned(
                               top: 8,
@@ -305,4 +233,5 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
       ),
     );
   }
+
 }

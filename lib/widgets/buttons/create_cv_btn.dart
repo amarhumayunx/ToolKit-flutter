@@ -16,7 +16,7 @@ class CreateCVButton extends StatelessWidget {
       onTap:  () {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) =>  CreateCvScreen()),
+        MaterialPageRoute(builder: (context) =>  const CreateCvScreen()),
       );
     },
       child: Container(

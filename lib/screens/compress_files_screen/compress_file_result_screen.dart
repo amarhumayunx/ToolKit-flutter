@@ -1,37 +1,81 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:path/path.dart' as path;
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
+import 'package:open_file/open_file.dart';
+import 'package:toolkit/widgets/tools/document_container.dart';
+import '../../widgets/buttons/save_document_btn.dart';
+import '../../widgets/custom_appbar.dart';
+import '../../widgets/tools/animated_loaded_container.dart';
 import 'file_compression_service.dart';
 
-class CompressedFileResultScreen extends StatelessWidget {
+class CompressedFileResultScreen extends StatefulWidget {
   final List<File> originalFiles;
   final List<File> compressedFiles;
 
   const CompressedFileResultScreen({
-    Key? key,
+    super.key,
     required this.originalFiles,
     required this.compressedFiles,
-  }) : super(key: key);
+  });
+
+  @override
+  State<CompressedFileResultScreen> createState() => _CompressedFileResultScreenState();
+}
+
+class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
+    with SingleTickerProviderStateMixin {
+  bool _animationCompleted = false;
+  late AnimationController _animationController;
+  late Animation<double> _progressAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+    _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+    _progressAnimation.addListener(() => setState(() {}));
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _handleLoadingComplete();
+      }
+    });
+
+    _animationController.forward();
+  }
+
+  void _handleLoadingComplete() {
+    setState(() {
+      _animationCompleted = true;
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   // Calculate total size reduction
   double get totalSizeReduction {
     double originalSize = 0;
     double compressedSize = 0;
 
-    for (var file in originalFiles) {
+    for (var file in widget.originalFiles) {
       originalSize += file.lengthSync().toDouble();
     }
 
-    for (var file in compressedFiles) {
+    for (var file in widget.compressedFiles) {
       compressedSize += file.lengthSync().toDouble();
     }
 
-    // Calculate percentage reduction
     if (originalSize > 0) {
       return ((originalSize - compressedSize) / originalSize) * 100;
     }
-
     return 0;
   }
 
@@ -40,11 +84,11 @@ class CompressedFileResultScreen extends StatelessWidget {
     double originalSize = 0;
     double compressedSize = 0;
 
-    for (var file in originalFiles) {
+    for (var file in widget.originalFiles) {
       originalSize += file.lengthSync().toDouble();
     }
 
-    for (var file in compressedFiles) {
+    for (var file in widget.compressedFiles) {
       compressedSize += file.lengthSync().toDouble();
     }
 
@@ -52,92 +96,166 @@ class CompressedFileResultScreen extends StatelessWidget {
     return FileCompressor.getReadableFileSize(savedBytes.toInt());
   }
 
-  String _getFileSize(File file) {
-    return FileCompressor.getReadableFileSize(file.lengthSync());
+  Future<void> _openFile(File file) async {
+    try {
+      if (!await file.exists()) {
+        _showSnackBar('File not found');
+        return;
+      }
+
+      final result = await OpenFile.open(file.path);
+      if (result.type != ResultType.done) {
+        _showSnackBar('Cannot open file: ${result.message}');
+      }
+    } catch (e) {
+      print('Error opening file: $e');
+      _showSnackBar('Error opening document');
+    }
   }
 
-  void _saveFile(BuildContext context, File file) {
-    // In a real app, this would save the file to a user-selected location
+  void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('File would be saved: ${path.basename(file.path)}')),
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
     );
   }
 
-  void _shareFiles(BuildContext context) {
-    // This is a placeholder for sharing functionality
+  void _handleFileDeleted() {
+    Navigator.of(context).popUntil((route) => route.isFirst);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Sharing compressed files (placeholder)')),
+      const SnackBar(content: Text('File deleted successfully')),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Implementation remains similar to your original code
-    // Display the results and provide file handling options
     return Scaffold(
-      appBar: AppBar(title: const Text('Compression Results')),
-      body: Column(
+      backgroundColor: Colors.white,
+      appBar: const CustomAppBar(title: 'Compression Results'),
+      body: Stack(
         children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: originalFiles.length,
-              itemBuilder: (context, index) {
-                final originalFile = originalFiles[index];
-                final compressedFile = compressedFiles[index];
-
-                final originalSize = originalFile.lengthSync();
-                final compressedSize = compressedFile.lengthSync();
-
-                final savedPercent = ((originalSize - compressedSize) / originalSize * 100);
-
-                return ListTile(
-                  title: Text(path.basename(originalFile.path)),
-                  subtitle: Text(
-                      "${_getFileSize(originalFile)} → ${_getFileSize(compressedFile)}\n"
-                          "Saved: ${savedPercent.toStringAsFixed(1)}%"
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.download),
-                    onPressed: () => _saveFile(context, compressedFile),
-                  ),
-                );
-              },
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(20.0),
+            child: Padding(
+              padding: const EdgeInsets.all(14.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  _buildLoadingContainer(),
+                  if (_animationCompleted) ...[
+                    const SizedBox(height: 36),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.10),
+                            blurRadius: 10,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Total Reduction:",
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                "${totalSizeReduction.toStringAsFixed(1)}%",
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.blue[700],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Space Saved:",
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                totalSpaceSaved,
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.green[700],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Compressed Files:',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: widget.compressedFiles.length,
+                      itemBuilder: (context, index) {
+                        final compressedFile = widget.compressedFiles[index];
+                        return DocumentContainer(
+                          filePath: compressedFile.path,
+                          onTap: () => _openFile(compressedFile),
+                          onDelete: _handleFileDeleted,
+                        );
+                      },
+                    ),
+                    SizedBox(height: MediaQuery.of(context).padding.bottom + 300),
+                  ],
+                ],
+              ),
             ),
           ),
-
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: Colors.grey[100],
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("Total Reduction:"),
-                    Text("${totalSizeReduction.toStringAsFixed(1)}%"),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("Space Saved:"),
-                    Text(totalSpaceSaved),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => _shareFiles(context),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 48),
-                  ),
-                  child: const Text('Share Compressed Files'),
-                ),
-              ],
+          if (_animationCompleted)
+            Positioned(
+              left: 20,
+              right: 20,
+              bottom: MediaQuery.of(context).padding.bottom + 20,
+              child: SaveDocumentButton(
+                documentFile: widget.compressedFiles.first,
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              ),
             ),
-          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLoadingContainer() {
+    return AnimatedLoadingContainer(
+      animationController: _animationController,
+      animationCompleted: _animationCompleted,
     );
   }
 }

@@ -209,7 +209,7 @@ class _CertificationPageState extends State<CertificationPage> {
                       fontWeight: FontWeight.w500,
                       color: AppColors.black),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 4,
                 ),
                 Text(

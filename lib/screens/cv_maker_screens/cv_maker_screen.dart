@@ -43,7 +43,7 @@ class _CvMakerScreenState extends State<CvMakerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: ToolsAppBar(
+      appBar: const ToolsAppBar(
         title: 'CV Maker',
       ),
       body: SingleChildScrollView(
@@ -62,8 +62,8 @@ class _CvMakerScreenState extends State<CvMakerScreen> {
               const SizedBox(height: 10),
 
               // Make your CV title
-              Padding(
-                padding: const EdgeInsets.all(8.0),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
                 child: InfoCard(
                   title: 'Make your CV',
                   description:

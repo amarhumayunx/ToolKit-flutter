@@ -35,7 +35,7 @@ import '../cv_widgets/template_selection_dialog.dart';
 class Template4 extends StatefulWidget {
   final List<Website> websites;
 
-  const Template4({Key? key, this.websites = const []}) : super(key: key);
+  const Template4({super.key, this.websites = const []});
 
   @override
   State<Template4> createState() => _Template4State();
@@ -303,9 +303,9 @@ class _Template4State extends State<Template4> {
         double itemHeight = 30;
 
         // Add height for description if present
-        if (item.description != null && item.description!.isNotEmpty) {
+        if (item.description.isNotEmpty) {
           // Roughly estimate 5 points per line of text
-          itemHeight += (item.description!.length / 30) * 5;
+          itemHeight += (item.description.length / 30) * 5;
         }
 
         estimatedHeight += itemHeight;
@@ -746,7 +746,7 @@ class _Template4State extends State<Template4> {
                 // Side column (right)
                 Container(
                   width: 130,
-                  color: Color(0xFFE0DCD7),
+                  color: const Color(0xFFE0DCD7),
                   padding: const EdgeInsets.all(10),
                   child: SingleChildScrollView(
                     physics: const NeverScrollableScrollPhysics(),
@@ -879,10 +879,10 @@ class _Template4State extends State<Template4> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
+              const Icon(
                 Icons.phone,
                 size: 6,
-                color: const Color(0xFFA81919),
+                color: Color(0xFFA81919),
               ),
               const SizedBox(width: 4),
               Expanded(
@@ -903,10 +903,10 @@ class _Template4State extends State<Template4> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
+              const Icon(
                 Icons.email,
                 size: 6,
-                color: const Color(0xFFA81919),
+                color: Color(0xFFA81919),
               ),
               const SizedBox(width: 4),
               Expanded(
@@ -929,10 +929,10 @@ class _Template4State extends State<Template4> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
+                const Icon(
                   Icons.link,
                   size: 6,
-                  color: const Color(0xFFA81919),
+                  color: Color(0xFFA81919),
                 ),
                 const SizedBox(width: 4),
                 Expanded(
@@ -960,7 +960,7 @@ class _Template4State extends State<Template4> {
 
     // Only show section if there are education items
     if (educationItems.isEmpty) {
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
     }
 
     return Column(
@@ -1004,10 +1004,10 @@ class _Template4State extends State<Template4> {
                   color: AppColors.black,
                 ),
               ),
-              if (item.description != null && item.description!.isNotEmpty) ...[
+              if (item.description.isNotEmpty) ...[
                 const SizedBox(height: 2),
                 Text(
-                  item.description!,
+                  item.description,
                   style: GoogleFonts.poppins(
                     fontSize: 6,
                     color: AppColors.black,
@@ -1017,7 +1017,7 @@ class _Template4State extends State<Template4> {
               if (item != educationItems.last) const SizedBox(height: 4),
             ],
           );
-        }).toList(),
+        }),
         const SizedBox(height: 4),
       ],
     );
@@ -1036,7 +1036,7 @@ class _Template4State extends State<Template4> {
           ),
         ),
         const SizedBox(height: 4),
-        ...skills.map((skill) => _buildSkillItem(skill.name)).toList(),
+        ...skills.map((skill) => _buildSkillItem(skill.name)),
       ],
     );
   }
@@ -1081,7 +1081,7 @@ class _Template4State extends State<Template4> {
           ),
         ),
         const SizedBox(height: 4),
-        ...languages.map((language) => _buildSkillItem(language.name)).toList(),
+        ...languages.map((language) => _buildSkillItem(language.name)),
       ],
     );
   }
@@ -1239,7 +1239,7 @@ class _Template4State extends State<Template4> {
                   ),
               ],
             );
-          }).toList(),
+          }),
         ]
       ],
     );

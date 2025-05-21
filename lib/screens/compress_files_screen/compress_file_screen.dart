@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:toolkit/utils/app_colors.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
-import '../../widgets/tools/dotted_file_drop.dart';
 import '../../widgets/tools/file_selection_container.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
@@ -20,43 +18,51 @@ class CompressFileScreen extends StatefulWidget {
 }
 
 class _CompressFileScreenState extends State<CompressFileScreen> {
-  List<File> _selectedFiles = [];
+  String? _fileErrorText;
+
+  final List<File> _selectedFiles = [];
   bool _isCompressing = false;
   double _compressionQuality = 85; // Default compression quality
 
   Future<void> _pickFiles() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
+        allowMultiple: true,
         type: FileType.custom,
         allowedExtensions: [
-          'pdf',
-          'doc',
-          'docx',
-          'ppt',
-          'pptx',
-          'jpg',
-          'jpeg',
-          'png'
+          'pdf', 'doc', 'docx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png'
         ],
-        allowMultiple: true,
       );
 
       if (result != null && result.paths.isNotEmpty) {
+        final validExtensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png'];
+
+        List<File> pickedFiles = result.paths
+            .where((path) => path != null)
+            .map((path) => File(path!))
+            .toList();
+
+        List<File> validFiles = pickedFiles.where((file) {
+          final ext = file.path.split('.').last.toLowerCase();
+          return validExtensions.contains(ext);
+        }).toList();
+
         setState(() {
-          _selectedFiles.addAll(
-            result.paths
-                .where((path) => path != null)
-                .map((path) => File(path!))
-                .toList(),
-          );
+          _selectedFiles.addAll(validFiles);
+          _fileErrorText = validFiles.length == pickedFiles.length
+              ? null
+              : 'Please Select a Documents and Image Files';
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error selecting files: $e')),
-      );
+      setState(() {
+        _fileErrorText = 'Error selecting files: $e';
+      });
     }
   }
+
+
+
 
   Future<void> _compressFiles() async {
     if (_selectedFiles.isEmpty) {
@@ -133,6 +139,8 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
     }
   }
 
+
+
   void _removeFile(int index) {
     setState(() {
       _selectedFiles.removeAt(index);
@@ -143,7 +151,7 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: ToolsAppBar(
+      appBar: const ToolsAppBar(
         title: 'Compress File',
       ),
       body: Column(
@@ -154,10 +162,10 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CustomSvgImage(
+                  const CustomSvgImage(
                       imagePath: 'assets/images/compress_file_image.svg'),
                   const SizedBox(height: 30),
-                  InfoCard(
+                  const InfoCard(
                     title: 'Reduce file size',
                     description:
                     'Reduce the size of PDFs, documents, and images while preserving original quality.',
@@ -172,6 +180,22 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                     onRemoveFile: _removeFile,
                     isMultipleSelection: true,
                   ),
+
+                  if (_fileErrorText != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Center(
+                        child: Text(
+                          _fileErrorText!,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.red,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+
 
                   // Add compression quality slider
                   if (_selectedFiles.isNotEmpty) ...[
@@ -206,10 +230,11 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                               Expanded(
                                 child: Slider(
                                   value: _compressionQuality,
-                                  min: 30,
+                                  min: 25,
                                   max: 100,
-                                  divisions: 7,
+                                  divisions: 3,
                                   label: _compressionQuality.round().toString(),
+                                  activeColor: AppColors.primary,
                                   onChanged: (double value) {
                                     setState(() {
                                       _compressionQuality = value;

@@ -5,7 +5,7 @@ import '../../utils/app_colors.dart';
 class ChangeTemplateButton extends StatelessWidget {
   final VoidCallback onPressed;
 
-  const ChangeTemplateButton({Key? key, required this.onPressed}) : super(key: key);
+  const ChangeTemplateButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

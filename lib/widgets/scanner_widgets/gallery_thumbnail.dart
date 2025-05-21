@@ -13,7 +13,7 @@ class ThumbnailGallery extends StatelessWidget {
   final bool canScrollRight;
 
   const ThumbnailGallery({
-    Key? key,
+    super.key,
     required this.images,
     required this.selectedIndex,
     required this.onImageSelected,
@@ -22,7 +22,7 @@ class ThumbnailGallery extends StatelessWidget {
     required this.onScrollRight,
     required this.canScrollLeft,
     required this.canScrollRight,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -98,12 +98,12 @@ class ThumbnailItem extends StatelessWidget {
   final VoidCallback onTap;
 
   const ThumbnailItem({
-    Key? key,
+    super.key,
     required this.image,
     required this.index,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +141,7 @@ class ThumbnailItem extends StatelessWidget {
               child: Container(
                 width: 18,
                 height: 18,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppColors.primary,
                   shape: BoxShape.circle,
                 ),

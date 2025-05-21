@@ -22,7 +22,7 @@ class _CreateCvScreenState extends State<CreateCvScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: ToolsAppBar(
+      appBar: const ToolsAppBar(
         title: 'My Resume',
       ),
       body: Padding(
@@ -58,7 +58,7 @@ class _CreateCvScreenState extends State<CreateCvScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.add,
                         color: AppColors.textColor,
                         size: 24,
@@ -229,7 +229,7 @@ class _CreateCvScreenState extends State<CreateCvScreen> {
             '${cv.dateTime} | ${cv.fileSize}',
             style: GoogleFonts.inter(
               fontSize: 8,
-              color: Color(0xFFAAAAAE),
+              color: const Color(0xFFAAAAAE),
             ),
           ),
         ],
