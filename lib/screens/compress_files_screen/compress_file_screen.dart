@@ -265,4 +265,25 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
       ),
     );
   }
+
+  IconData _getFileIcon(String filePath) {
+    final ext = filePath.split('.').last.toLowerCase();
+
+    switch (ext) {
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'doc':
+      case 'docx':
+        return Icons.description;
+      case 'ppt':
+      case 'pptx':
+        return Icons.slideshow;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return Icons.image;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
 }
