@@ -7,6 +7,7 @@ import '../../widgets/buttons/save_document_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import 'file_compression_service.dart';
+import 'package:path/path.dart' as path;
 
 class CompressedFileResultScreen extends StatefulWidget {
   final List<File> originalFiles;
@@ -66,11 +67,15 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
     double compressedSize = 0;
 
     for (var file in widget.originalFiles) {
-      originalSize += file.lengthSync().toDouble();
+      if (file.existsSync()) {
+        originalSize += file.lengthSync().toDouble();
+      }
     }
 
     for (var file in widget.compressedFiles) {
-      compressedSize += file.lengthSync().toDouble();
+      if (file.existsSync()) {
+        compressedSize += file.lengthSync().toDouble();
+      }
     }
 
     if (originalSize > 0) {
@@ -79,22 +84,28 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
     return 0;
   }
 
+
   // Calculate total saved space
   String get totalSpaceSaved {
     double originalSize = 0;
     double compressedSize = 0;
 
     for (var file in widget.originalFiles) {
-      originalSize += file.lengthSync().toDouble();
+      if (file.existsSync()) {
+        originalSize += file.lengthSync().toDouble();
+      }
     }
 
     for (var file in widget.compressedFiles) {
-      compressedSize += file.lengthSync().toDouble();
+      if (file.existsSync()) {
+        compressedSize += file.lengthSync().toDouble();
+      }
     }
 
     double savedBytes = originalSize - compressedSize;
     return FileCompressor.getReadableFileSize(savedBytes.toInt());
   }
+
 
   Future<void> _openFile(File file) async {
     try {
@@ -225,7 +236,7 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
                       itemBuilder: (context, index) {
                         final compressedFile = widget.compressedFiles[index];
                         return DocumentContainer(
-                          filePath: compressedFile.path,
+                          filePath: compressedFile!.path,
                           onTap: () => _openFile(compressedFile),
                           onDelete: _handleFileDeleted,
                         );

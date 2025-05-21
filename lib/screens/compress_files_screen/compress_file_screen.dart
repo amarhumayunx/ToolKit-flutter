@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:toolkit/screens/compress_files_screen/file_drop_compress.dart';
 import 'package:toolkit/utils/app_colors.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
@@ -172,14 +173,55 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                   ),
                   const SizedBox(height: 24),
                   // Combined container with shadow
-                  FileSelectionContainer(
-                    title: 'Select Files',
-                    emptyStateText: 'Click to browse files',
-                    selectedFiles: _selectedFiles,
-                    onTap: _pickFiles,
-                    onRemoveFile: _removeFile,
-                    isMultipleSelection: true,
+
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.10),
+                          blurRadius: 10,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(top: 10, left: 16, bottom: 10),
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'Select File',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                          child: DottedFileDropZoneCompress(
+                            selectedFiles: _selectedFiles,
+                            onTap: _pickFiles,
+                            onRemoveFile: _removeFile,
+                          ),
+                        ),
+
+                      ],
+                    ),
                   ),
+                  // FileSelectionContainer(
+                  //   title: 'Select Files',
+                  //   emptyStateText: 'Click to browse files',
+                  //   selectedFiles: _selectedFiles,
+                  //   onTap: _pickFiles,
+                  //   onRemoveFile: _removeFile,
+                  //   isMultipleSelection: true,
+                  // ),
 
                   if (_fileErrorText != null)
                     Padding(

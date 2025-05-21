@@ -42,15 +42,12 @@ class SplitProgressScreen extends StatefulWidget {
 class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTickerProviderStateMixin {
 
   final TextEditingController _textController = TextEditingController();
-  bool _isLoading = true;
   bool _animationCompleted = false;
   late AnimationController _animationController;
   late Animation<double> _progressAnimation;
-  bool _isCompleted = false;
   double _progress = 0.0;
   File? _outputFile;
   final String _resultText = '';
-  String _statusMessage = "Initializing...";
 
   // DocxSplitterService to handle DOCX processing
   final DocxSplitterService _docxService = DocxSplitterService();
@@ -74,7 +71,6 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
     _animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         setState(() {
-          _isLoading = false;
           _animationCompleted = true;
           _textController.text = _resultText;
         });
@@ -84,183 +80,6 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
     _animationController.forward();
     _startSplitting();
   }
-
-  String _formatDateTime(DateTime dateTime) {
-    final date = DateFormat('dd-MM-yy').format(dateTime);
-    final time = DateFormat('h:mma').format(dateTime).toLowerCase();
-    return '$date | $time';
-  }
-
-
-
-
-  void _showOptionsMenu(BuildContext context, File file) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.edit),
-                title: const Text('Rename Document'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _renameFile(context, file);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.share),
-                title: const Text('Share Document'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  await _shareDocument(file);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Delete Document', style: TextStyle(color: Colors.red)),
-                onTap: () {
-                  Navigator.pop(context);
-                  _confirmDeleteFile(context, file);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _renameFile(BuildContext context, File file) {
-    if (_outputFile == null) return;
-
-    final TextEditingController renameController = TextEditingController();
-    final String currentFileName = path.basename(_outputFile!.path);
-    renameController.text = currentFileName;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Rename Document'),
-        content: TextField(
-          controller: renameController,
-          decoration: const InputDecoration(
-            labelText: 'New file name',
-            border: OutlineInputBorder(),
-          ),
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-
-              if (renameController.text.trim().isEmpty) {
-                _showSnackBar('File name cannot be empty');
-                return;
-              }
-
-              try {
-                final directory = path.dirname(_outputFile!.path);
-                final newPath = path.join(directory, renameController.text.trim());
-
-                // Check if a file with this name already exists
-                if (await File(newPath).exists()) {
-                  _showSnackBar('A file with this name already exists');
-                  return;
-                }
-
-                // Rename the file
-                final newFile = await _outputFile!.rename(newPath);
-                setState(() {
-                  _outputFile = newFile;
-                });
-
-                _showSnackBar('File renamed successfully');
-              } catch (e) {
-                print('Error renaming file: $e');
-                _showSnackBar('Error renaming file');
-              }
-            },
-            child: const Text('Rename'),
-          ),
-        ],
-      ),
-    );
-  }
-
-// Implement share file functionality
-  Future<void> _shareDocument(File file) async {
-    try {
-      if (_outputFile == null) {
-        _showSnackBar('No document available to share');
-        return;
-      }
-
-      // Share the file using share_plus package
-      await Share.shareXFiles(
-        [XFile(_outputFile!.path)],
-        text: 'Sharing split document: ${widget.document.name}',
-      );
-    } catch (e) {
-      print('Error sharing document: $e');
-      _showSnackBar('Error sharing document');
-    }
-  }
-
-// Implement delete file functionality
-  void _confirmDeleteFile(BuildContext context, File file) {
-    if (_outputFile == null) return;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Document'),
-        content: Text('Are you sure you want to delete "${path.basename(_outputFile!.path)}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            onPressed: () async {
-              Navigator.pop(context);
-              try {
-                if (await _outputFile!.exists()) {
-                  await _outputFile!.delete();
-                  _showSnackBar('File deleted successfully');
-                  setState(() {
-                    _outputFile = null;
-                    _isCompleted = false; // Reset the state since there's no file
-                  });
-
-                  // Optional: Navigate back if there's no file to display
-                  // Navigator.pop(context);
-                } else {
-                  _showSnackBar('File not found');
-                }
-              } catch (e) {
-                print('Error deleting file: $e');
-                _showSnackBar('Error deleting file');
-              }
-            },
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-  }
-
 
   Future<void> requestPermissionAndSaveFile(BuildContext context) async {
     try {
@@ -381,7 +200,6 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
       if (mounted) {
         setState(() {
           _progress = i / 100;
-          _statusMessage = "Preparing document...";
         });
       }
       await Future.delayed(const Duration(milliseconds: 100));
@@ -438,8 +256,6 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
 
     if (mounted) {
       setState(() {
-        _isCompleted = true;
-        _statusMessage = "Split completed successfully!";
       });
     }
   }
@@ -447,7 +263,6 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
   void _updateStatus(String message) {
     if (mounted) {
       setState(() {
-        _statusMessage = message;
       });
     }
   }

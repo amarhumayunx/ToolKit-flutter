@@ -27,9 +27,9 @@ class FileOptionsMenu extends StatelessWidget {
       ),
       onSelected: (value) async {
         switch (value) {
-          case 'edit':
-            _showRenameDialog(context);
-            break;
+          // case 'edit':
+          //   _showRenameDialog(context);
+          //   break;
           case 'share':
             await _shareFile(context);
             break;
@@ -40,38 +40,38 @@ class FileOptionsMenu extends StatelessWidget {
       },
       itemBuilder: (BuildContext context) {
         return [
-          _buildMenuItem(
-            value: 'edit',
-            text: 'Edit',
-          ),
-          // Custom divider with padding and custom color
-          PopupMenuItem<String>(
-            enabled: false,
-            height: 2,
-            padding: EdgeInsets.zero,
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: AppColors.dividerColor,
-                ),
-              ),
-            ),
-          ),
+          // _buildMenuItem(
+          //   value: 'edit',
+          //   text: 'Edit',
+          // ),
+          // // Custom divider with padding and custom color
+          // const PopupMenuItem<String>(
+          //   enabled: false,
+          //   height: 2,
+          //   padding: EdgeInsets.zero,
+          //   child: Center(
+          //     child: Padding(
+          //       padding: EdgeInsets.symmetric(horizontal: 16),
+          //       child: Divider(
+          //         height: 1,
+          //         thickness: 1,
+          //         color: AppColors.dividerColor,
+          //       ),
+          //     ),
+          //   ),
+          // ),
           _buildMenuItem(
             value: 'share',
             text: 'Share',
           ),
           // Custom divider with padding and custom color
-          PopupMenuItem<String>(
+          const PopupMenuItem<String>(
             enabled: false,
             height: 10,
             padding: EdgeInsets.zero,
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Divider(
                   height: 1,
                   thickness: 1,
