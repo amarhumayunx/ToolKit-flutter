@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../../services/save_document_service.dart';
+import '../../services/save_zip_png_service.dart';
+import '../../utils/app_snackbar.dart';
 import 'gradient_btn.dart';
 
 class SaveDocumentButton extends StatelessWidget {
@@ -22,7 +23,8 @@ class SaveDocumentButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: padding ?? const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+      padding: padding ??
+          const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
       child: SizedBox(
         width: width ?? double.infinity,
         child: CustomGradientButton(
@@ -34,17 +36,27 @@ class SaveDocumentButton extends StatelessWidget {
   }
 
   Future<void> _handleSave(BuildContext context) async {
-    final result = await SaveDocumentService.saveDocument(context, documentFile);
+    try {
+      // Determine file extension (assuming it's a DOCX file by default)
+      String fileExtension = 'docx';
+      if (documentFile.path.contains('.')) {
+        fileExtension = documentFile.path.split('.').last.toLowerCase();
+      }
 
-    // If save was successful or canceled, navigate back to OCR screen
-    if (result != null) {
+      // Save the file using SaveFileService
+      await SaveFileService.saveFile(context, documentFile, fileExtension);
+
       // Call the callback if provided
       if (onSaveCompleted != null) {
         onSaveCompleted!();
       }
 
-      // Navigate back to OCR screen and pass true to indicate data should be cleared
+      // Navigate back and pass true to indicate data should be cleared
       Navigator.of(context).pop(true);
+    } catch (e) {
+      debugPrint('Error saving document: $e');
+      AppSnackBar.show(context,
+          message: 'Failed to save document: ${e.toString()}');
     }
   }
 }

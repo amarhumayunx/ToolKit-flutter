@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/info_card.dart';
@@ -36,10 +37,8 @@ class _EditFileScreenState extends State<EditFileScreen> {
         });
       }
     } catch (e) {
-      // Handle any errors
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error selecting files: $e')),
-      );
+
+      AppSnackBar.show(context, message: 'Error selecting files: $e');
     }
   }
 
@@ -59,9 +58,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error capturing document: $e')),
-      );
+      AppSnackBar.show(context, message:'Error capturing document: $e');
     }
   }
 
@@ -73,9 +70,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
 
   Future<void> _editFiles() async {
     if (_selectedFiles.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one file')),
-      );
+      AppSnackBar.show(context, message:'Please select at least one file');
       return;
     }
 

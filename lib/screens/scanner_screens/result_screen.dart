@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/save_document_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
@@ -66,9 +67,7 @@ class _ResultScreenState extends State<ResultScreen>
     try {
       await OpenFile.open(widget.wordDocument.path);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to open document: $e')),
-      );
+      AppSnackBar.show(context, message: 'Failed to open document: $e');
     }
   }
 

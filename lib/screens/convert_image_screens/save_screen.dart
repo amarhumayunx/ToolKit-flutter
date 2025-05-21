@@ -6,14 +6,14 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import '../../services/word_images_service.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import '../../widgets/tools/document_container.dart';
 import '../../widgets/buttons/save_document_btn.dart';
 
 class SaveScreen extends StatefulWidget {
-  final List<File>
-      selectedImages; // Changed to List<File> to support multiple images
+  final List<File> selectedImages;
   final String selectedFormat;
 
   const SaveScreen({
@@ -91,9 +91,8 @@ class _SaveScreenState extends State<SaveScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error converting file: ${e.toString()}')),
-        );
+        AppSnackBar.show(context,
+            message: 'Error converting file: ${e.toString()}');
       }
     }
   }
@@ -182,52 +181,30 @@ class _SaveScreenState extends State<SaveScreen>
     }
   }
 
-  String _getFormatIcon() {
-    switch (widget.selectedFormat) {
-      case 'Word':
-        return 'assets/icons/word_icon.svg';
-      case 'Excel':
-        return 'assets/icons/excel_icon.svg';
-      case 'PowerPoint':
-        return 'assets/icons/powerpoint_icon.svg';
-      case 'PDF':
-        return 'assets/icons/convert_pdf.svg';
-      default:
-        return 'assets/icons/image_icon.svg';
-    }
-  }
-
   Future<void> _openFile() async {
     if (convertedFile != null && convertedFile!.existsSync()) {
       try {
         final result = await OpenFile.open(convertedFile!.path);
         if (result.type != ResultType.done && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Cannot open file: ${result.message}')),
-          );
+          AppSnackBar.show(context,
+              message: 'Cannot open file: ${result.message}');
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error opening file: ${e.toString()}')),
-          );
+          AppSnackBar.show(context,
+              message: 'Error opening file: ${e.toString()}');
         }
       }
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('File not found or not yet converted')),
-      );
+      AppSnackBar.show(context, message: 'File not found or not yet converted');
     }
   }
 
   void _handleFileDeleted() {
-    // Pop twice to go back two screens
-    Navigator.of(context).pop();
-    Navigator.of(context).pop();
-    // Show a success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('File deleted successfully')),
-    );
+    Navigator.of(context).pop(true);
+    Navigator.of(context).pop(true);
+
+    AppSnackBar.show(context, message: 'File deleted successfully');
   }
 
   @override

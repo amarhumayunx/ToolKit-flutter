@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../utils/app_colors.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/info_card.dart';
@@ -22,6 +23,11 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
   File? _selectedPdf;
   String? _errorMessage;
 
+  void _clearSelectedFile() {
+    setState(() {
+      _selectedPdf = null;
+    });
+  }
   Future<void> _pickPdf() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -61,21 +67,25 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
 
   Future<void> _convertPdf() async {
     if (_selectedPdf == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a PDF file first')),
-      );
+      AppSnackBar.show(context, message: 'Please select a PDF file first');
       return;
     }
 
-    // Navigate to format selection screen
-    Navigator.push(
+    // Navigate to format selection screen with a callback
+    final shouldClearFile = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => PdfFormatSelectionScreen(
           selectedPdf: _selectedPdf!,
+          onFileDeleted: _clearSelectedFile, // Pass the callback
         ),
       ),
     );
+
+    // Clear the file if needed
+    if (shouldClearFile == true) {
+      _clearSelectedFile();
+    }
   }
 
   @override

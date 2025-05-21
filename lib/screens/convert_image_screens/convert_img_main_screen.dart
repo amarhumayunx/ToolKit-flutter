@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/file_selection_container.dart';
@@ -30,10 +31,7 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
         });
       }
     } catch (e) {
-      // Handle any errors
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error selecting images: $e')),
-      );
+      AppSnackBar.show(context, message: 'Error selecting images: $e');
     }
   }
 
@@ -45,9 +43,8 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
 
   Future<void> _convertImages() async {
     if (_selectedImages.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one image first')),
-      );
+      AppSnackBar.show(context,
+          message: 'Please select at least one image first');
       return;
     }
 
@@ -59,19 +56,24 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
 
       setState(() {});
 
-      // Pass all selected images to SelectFormatScreen
-      Navigator.push(
+      // Pass all selected images to SelectFormatScreen and wait for result
+      final result = await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) =>
               SelectFormatScreen(selectedImages: _selectedImages),
         ),
       );
+
+      // Check if we need to clear images (result will be true if file was deleted)
+      if (result == true) {
+        setState(() {
+          _selectedImages = [];
+        });
+      }
     } catch (e) {
       setState(() {});
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error processing images: $e')),
-      );
+      AppSnackBar.show(context, message: 'Error processing images: $e');
     }
   }
 

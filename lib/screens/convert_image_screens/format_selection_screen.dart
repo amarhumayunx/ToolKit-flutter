@@ -5,6 +5,7 @@ import 'package:toolkit/widgets/custom_appbar.dart';
 import 'dart:io';
 
 import '../../utils/app_colors.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import 'save_screen.dart';
 
@@ -38,6 +39,29 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
   String get formattedTime {
     final modifiedDate = widget.selectedImages.first.lastModifiedSync();
     return '${modifiedDate.hour}:${modifiedDate.minute.toString().padLeft(2, '0')}${modifiedDate.hour < 12 ? 'am' : 'pm'}';
+  }
+
+  Future<void> _convertImages() async {
+    if (selectedFormat == null) {
+      AppSnackBar.show(context, message: 'Please select a format first');
+      return;
+    }
+
+    // Navigate to the save screen and wait for a result
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SaveScreen(
+          selectedImages: widget.selectedImages,
+          selectedFormat: selectedFormat!,
+        ),
+      ),
+    );
+
+    // If file was deleted, pass this information back to main screen
+    if (result == true) {
+      Navigator.pop(context, true);
+    }
   }
 
   @override
@@ -93,25 +117,7 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
               padding: const EdgeInsets.only(bottom: 20),
               child: CustomGradientButton(
                 text: 'Convert',
-                onPressed: () {
-                  if (selectedFormat != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SaveScreen(
-                          selectedImages: widget.selectedImages,
-                          selectedFormat: selectedFormat!,
-                        ),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please select a format first'),
-                      ),
-                    );
-                  }
-                },
+                onPressed: _convertImages,
               ),
             ),
           ],

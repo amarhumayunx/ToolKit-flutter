@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import '../../services/pdf_to_img_service.dart';
 import '../../utils/app_colors.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../services/pdf_to_word_service.dart';
@@ -11,8 +12,9 @@ import './pdf_save_screen.dart';
 
 class PdfFormatSelectionScreen extends StatefulWidget {
   final File selectedPdf;
+  final VoidCallback? onFileDeleted;
 
-  const PdfFormatSelectionScreen({super.key, required this.selectedPdf});
+  const PdfFormatSelectionScreen({super.key, required this.selectedPdf,     this.onFileDeleted,});
 
   @override
   State<PdfFormatSelectionScreen> createState() =>
@@ -40,7 +42,11 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
   }
 
   Future<void> _convertFile() async {
-    if (selectedFormat == null) return;
+    // Check if no format is selected
+    if (selectedFormat == null) {
+      AppSnackBar.show(context, message: 'Please select a format first');
+      return;
+    }
 
     setState(() {
       _isConverting = true;
@@ -54,7 +60,6 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
           _convertedFile = await service.convertPdfToWord(widget.selectedPdf);
           break;
         case 'Image':
-         // Use the new PDF to Image service
           final service = PdfToImageService();
           _convertedFile = await service.convertPdfToImage(widget.selectedPdf);
           break;
@@ -76,6 +81,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
             selectedPdf: widget.selectedPdf,
             convertedFile: _convertedFile!,
             selectedFormat: selectedFormat!,
+            onFileDeleted: widget.onFileDeleted,
           ),
         ),
       );
@@ -237,9 +243,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
               padding: const EdgeInsets.only(bottom: 20),
               child: CustomGradientButton(
                 text: _isConverting ? 'Converting...' : 'Convert',
-                onPressed: _isConverting || selectedFormat == null
-                    ? null
-                    : _convertFile,
+                onPressed: _isConverting ? null : _convertFile,
               ),
             ),
           ],

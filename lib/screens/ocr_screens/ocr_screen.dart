@@ -1,9 +1,8 @@
-// ocr_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/dotted_file_drop.dart';
@@ -59,9 +58,8 @@ class _OcrScreenState extends State<OcrScreen> {
 
   Future<void> _extractTextFromImages() async {
     if (_selectedImages.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one image')),
-      );
+      AppSnackBar.show(context, message: 'Please select at least one image');
+
       return;
     }
 
@@ -105,21 +103,12 @@ class _OcrScreenState extends State<OcrScreen> {
           _clearSelectedImages();
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No text could be found in the selected images'),
-            duration: Duration(seconds: 3),
-          ),
-        );
+        AppSnackBar.show(context,
+            message: 'No text could be found in the selected images');
       }
     } catch (e) {
       print("Error in OCR: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error processing images: $e'),
-          duration: Duration(seconds: 3),
-        ),
-      );
+      AppSnackBar.show(context, message: 'Error processing images: $e');
     }
   }
 

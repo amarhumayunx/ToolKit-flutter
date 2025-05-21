@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:archive/archive.dart';
+import '../../utils/app_snackbar.dart'; // Added import
 import '../../widgets/buttons/save_zip_png_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
@@ -14,12 +15,14 @@ class PdfSaveScreen extends StatefulWidget {
   final File selectedPdf;
   final File convertedFile;
   final String selectedFormat;
+  final VoidCallback? onFileDeleted;
 
   const PdfSaveScreen({
     super.key,
     required this.selectedPdf,
     required this.convertedFile,
     required this.selectedFormat,
+    this.onFileDeleted,
   });
 
   @override
@@ -92,7 +95,7 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
         try {
           file.deleteSync();
         } catch (e) {
-          print('Error deleting temporary file: $e');
+          debugPrint('Error deleting temporary file: $e');
         }
       }
     }
@@ -119,11 +122,10 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
         }
       }
     } catch (e) {
-      print('Error extracting ZIP file: $e');
+      debugPrint('Error extracting ZIP file: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to extract images: ${e.toString()}')),
-        );
+        AppSnackBar.show(context,
+            message: 'Failed to extract images: ${e.toString()}');
       }
     }
   }
@@ -178,37 +180,30 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
         } else if (_isSinglePageImage) {
           final result = await OpenFile.open(widget.convertedFile.path);
           if (result.type != ResultType.done && mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Cannot open image: ${result.message}')),
-            );
+            AppSnackBar.show(context,
+                message: 'Cannot open image: ${result.message}');
           }
         } else {
           final result = await OpenFile.open(widget.convertedFile.path);
           if (result.type != ResultType.done && mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Cannot open file: ${result.message}')),
-            );
+            AppSnackBar.show(context,
+                message: 'Cannot open file: ${result.message}');
           }
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error opening file: ${e.toString()}')),
-          );
+          AppSnackBar.show(context,
+              message: 'Error opening file: ${e.toString()}');
         }
       }
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('File not found or not yet converted')),
-      );
+      AppSnackBar.show(context, message: 'File not found or not yet converted');
     }
   }
 
   void _showImagePreviewDialog() {
     if (_extractedImageFiles.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No preview images available')),
-      );
+      AppSnackBar.show(context, message: 'No preview images available');
       return;
     }
 
@@ -317,15 +312,15 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
       },
     );
   }
+
   void _handleFileDeleted() {
+    widget.onFileDeleted?.call();
     // Pop twice to go back two screens
     Navigator.of(context).pop(); // First pop (current screen)
     Navigator.of(context).pop(); // Second pop (previous screen)
 
     // Show a success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('File deleted successfully')),
-    );
+    AppSnackBar.show(context, message: 'File deleted successfully');
   }
 
   String get fileTypeForSaving {
@@ -399,6 +394,10 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
                 file: widget.convertedFile,
                 fileType: fileTypeForSaving,
                 buttonText: 'Save',
+                onSaveCompleted: () {
+                  // Navigate back to ConvertPdfMainScreen
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
               ),
             ),
         ],

@@ -1,12 +1,11 @@
 import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:path/path.dart' as path;
-
+import '../utils/app_snackbar.dart';
 class SaveDocumentService {
   /// Checks if storage permission is available or needed
   /// For Android 10+ (API 29+), we don't need explicit storage permission
@@ -51,7 +50,7 @@ class SaveDocumentService {
           title: const Text('Permission Issue'),
           content: const Text(
               'Unable to save document. This might be due to permission restrictions on your device.\n\n'
-                  'For Android 11+ users: Please allow the app to manage all files in your device settings.'),
+              'For Android 11+ users: Please allow the app to manage all files in your device settings.'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancel'),
@@ -84,7 +83,7 @@ class SaveDocumentService {
         String baseFileName = path.basename(documentFile.path);
         if (!baseFileName.toLowerCase().endsWith('.docx')) {
           baseFileName =
-          'Document.docx'; // Default name if file doesn't have proper extension
+              'Document.docx'; // Default name if file doesn't have proper extension
         }
 
         final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
@@ -100,14 +99,10 @@ class SaveDocumentService {
         final savedFilePath = await FlutterFileDialog.saveFile(params: params);
 
         if (savedFilePath != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Document saved successfully')),
-          );
+          AppSnackBar.show(context, message: 'Document saved successfully');
           return true; // Successful save
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Document saving canceled')),
-          );
+          AppSnackBar.show(context, message: 'Document saving canceled');
           return false; // Save was canceled
         }
       } else {
@@ -117,15 +112,12 @@ class SaveDocumentService {
       }
     } on PlatformException catch (e) {
       print('Platform Exception in saving file: ${e.message}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save document: ${e.message}')),
-      );
+      AppSnackBar.show(context,
+          message: 'Failed to save document: ${e.message}');
       return null; // Error
     } catch (e) {
       print('Error saving file: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save document: $e')),
-      );
+      AppSnackBar.show(context, message: 'Failed to save document: $e');
       return null; // Error
     }
   }

@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 import 'package:permission_handler/permission_handler.dart';
 import '../../services/document_scanner_service.dart';
 import '../../utils/app_colors.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/scanner_widgets/batch_scan.dart';
 import '../../widgets/scanner_widgets/camera_appbar.dart';
 import '../../widgets/scanner_widgets/document_crop_frame.dart';
@@ -212,13 +213,8 @@ class _ScannerScreenState extends State<ScannerScreen>
             _batchImages.addAll(selectedImages);
           });
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                  'Added ${selectedImages.length} images to batch. Total: ${_batchImages.length}'),
-              duration: const Duration(seconds: 2),
-            ),
-          );
+
+          AppSnackBar.show(context, message:'Added ${selectedImages.length} images to batch. Total: ${_batchImages.length}');
         } else {
           setState(() {
             _batchImages = selectedImages;
@@ -365,12 +361,7 @@ class _ScannerScreenState extends State<ScannerScreen>
       }
     } catch (e) {
       print('Error capturing image: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to capture image: ${e.toString()}'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      AppSnackBar.show(context, message: 'Failed to capture image: ${e.toString()}');
     }
   }
 

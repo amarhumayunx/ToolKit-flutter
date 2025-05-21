@@ -1,16 +1,11 @@
-// Add this at the top of your file with other imports
 import 'dart:io';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-
 import '../../utils/app_colors.dart';
-import '../../widgets/scanner_widgets/camera_appbar.dart';
-
 // Updated OcrCameraScreen with image preview and proper done button functionality
 class OcrCameraScreen extends StatefulWidget {
   const OcrCameraScreen({super.key});
@@ -120,7 +115,6 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
         _returnWithImages();
       }
     } catch (e) {
-      // Removed snackbar as per requirements
       print('Error capturing image: $e');
     }
   }
@@ -139,7 +133,6 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
         }
       }
     } catch (e) {
-      // Removed snackbar as per requirements
       print('Error selecting images: $e');
     }
   }

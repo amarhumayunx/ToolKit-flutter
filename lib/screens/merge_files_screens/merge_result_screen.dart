@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'package:open_file/open_file.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/save_zip_png_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
@@ -87,44 +88,33 @@ class _MergeResultScreenState extends State<MergeResultScreen>
       try {
         final result = await OpenFile.open(widget.mergedFilePath);
         if (result.type != ResultType.done && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Cannot open file: ${result.message}')),
-          );
+          AppSnackBar.show(context,
+              message: 'Cannot open file: ${result.message}');
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error opening file: ${e.toString()}')),
-          );
+          AppSnackBar.show(context,
+              message: 'Error opening file: ${e.toString()}');
         }
       }
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('File not found or not yet processed')),
-      );
+      AppSnackBar.show(context, message: 'File not found or not yet processed');
     }
   }
 
   void _handleFileDeleted() {
-    // Pop twice to go back two screens
-    Navigator.of(context).pop(); // First pop (current screen)
-
-    // Show a success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('File deleted successfully')),
-    );
+    if (widget.onSaveAndReturn != null) {
+      widget.onSaveAndReturn!(); // Call the callback to clear selected PDFs
+    }
+    Navigator.of(context).pop(); // Navigate back
   }
 
-  // New function to handle navigation after save
   void _handleSaveCompleted() {
     if (widget.onSaveAndReturn != null) {
       widget.onSaveAndReturn!(); // Call the callback if provided
     }
     Navigator.of(context).pop(); // Navigate back
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('File saved successfully')),
-    );
+    AppSnackBar.show(context, message: 'File saved successfully');
   }
 
   @override
@@ -134,7 +124,6 @@ class _MergeResultScreenState extends State<MergeResultScreen>
       appBar: CustomAppBar(
         title: 'Merge',
         onBackPressed: () {
-          // Just pop without any data clearing flag (false)
           Navigator.of(context).pop(false);
         },
       ),
@@ -181,7 +170,7 @@ class _MergeResultScreenState extends State<MergeResultScreen>
                 file: File(widget.mergedFilePath),
                 fileType: 'pdf',
                 buttonText: 'Save',
-                onSaveCompleted: _handleSaveCompleted, // Add this parameter
+                onSaveCompleted: _handleSaveCompleted,
               ),
             ),
         ],

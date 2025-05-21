@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:open_file/open_file.dart';
 import 'package:toolkit/widgets/custom_appbar.dart';
 import '../../services/word_document_service.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/save_document_btn.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import '../../widgets/tools/document_container.dart';
@@ -89,17 +90,10 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
       setState(() {
         _isSaving = false;
       });
-
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error saving file: $e')));
+      AppSnackBar.show(context, message: 'Error saving file: $e');
     }
   }
 
-  void _handleFileRenamed(String newFilePath) {
-    setState(() {
-      _savedFilePath = newFilePath;
-    });
-  }
 
   Future<void> _handleFileDeleted() async {
     try {
@@ -115,8 +109,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error deleting file: $e')));
+        AppSnackBar.show(context, message: 'Error deleting file: $e');
       }
     }
   }
@@ -127,14 +120,11 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
     try {
       final result = await OpenFile.open(_savedFilePath!);
       if (result.type != ResultType.done) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open file: ${result.message}')),
-        );
+        AppSnackBar.show(context, message: 'Could not open file: ${result.message}');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error opening file: $e')),
-      );
+      AppSnackBar.show(context, message: 'Error opening file: $e');
+
     }
   }
 
@@ -183,7 +173,6 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
                           filePath: _savedFilePath!,
                           onTap: _openDocument,
                           onDelete: _handleFileDeleted,
-                          onFileRenamed: _handleFileRenamed,
                         ),
                       if (_savedFilePath == null)
                         Container(

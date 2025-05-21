@@ -8,6 +8,8 @@ import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
+import '../utils/app_snackbar.dart';
+
 class SaveFileService {
   static const String toolkitFolderName = 'Toolkit';
 
@@ -137,22 +139,16 @@ class SaveFileService {
         // Copy the file to the Toolkit folder
         await imageFile.copy(destinationPath);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Image saved to ${toolkitDir.path}')),
-        );
+        AppSnackBar.show(context, message: 'Image saved to ${toolkitDir.path}');
       } else {
         await showPermissionHelperDialog(context);
       }
     } on PlatformException catch (e) {
       debugPrint('Platform Exception in saving PNG file: ${e.message}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save image: ${e.message}')),
-      );
+      AppSnackBar.show(context, message: 'Failed to save image: ${e.message}');
     } catch (e) {
       debugPrint('Error saving PNG file: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save image: ${e.toString()}')),
-      );
+      AppSnackBar.show(context, message: 'Failed to save image: ${e.toString()}');
     }
   }
 
@@ -182,22 +178,16 @@ class SaveFileService {
         // Copy the file to the Toolkit folder
         await zipFile.copy(destinationPath);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('ZIP file saved to ${toolkitDir.path}')),
-        );
+        AppSnackBar.show(context, message: 'ZIP file saved to ${toolkitDir.path}');
       } else {
         await showPermissionHelperDialog(context);
       }
     } on PlatformException catch (e) {
       debugPrint('Platform Exception in saving ZIP file: ${e.message}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save ZIP file: ${e.message}')),
-      );
+      AppSnackBar.show(context, message: 'Failed to save ZIP file: ${e.message}');
     } catch (e) {
       debugPrint('Error saving ZIP file: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save ZIP file: ${e.toString()}')),
-      );
+      AppSnackBar.show(context, message: 'Failed to save ZIP file: ${e.toString()}');
     }
   }
 
@@ -218,6 +208,8 @@ class SaveFileService {
           await _savePdfFile(context, file);
           break;
         case 'docx':
+          await _saveDocumentFile(context, file);
+          break;
         case 'xlsx':
         case 'pptx':
         default:
@@ -225,9 +217,46 @@ class SaveFileService {
       }
     } catch (e) {
       debugPrint('Error in saveFile: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save file: ${e.toString()}')),
-      );
+      AppSnackBar.show(context, message: 'Failed to save file: ${e.toString()}');
+    }
+  }
+
+  /// Save DOCX document file to Toolkit folder
+  static Future<void> _saveDocumentFile(BuildContext context, File docFile) async {
+    try {
+      // Check if we can access storage
+      bool hasPermission = await checkAndRequestStoragePermission(context);
+
+      if (hasPermission) {
+        // Try to create the Toolkit folder
+        final toolkitDir = await _createToolkitFolder();
+
+        if (toolkitDir == null) {
+          // If folder creation failed, use default save mechanism
+          await _saveFileWithDialog(context, docFile, 'docx');
+          return;
+        }
+
+        // Generate a unique filename
+        String baseFileName = path.basenameWithoutExtension(docFile.path);
+        String uniqueFileName = '${baseFileName}_${DateTime.now().millisecondsSinceEpoch}.docx';
+
+        // Create destination file path in Toolkit folder
+        final destinationPath = '${toolkitDir.path}/$uniqueFileName';
+
+        // Copy the file to the Toolkit folder
+        await docFile.copy(destinationPath);
+
+        AppSnackBar.show(context, message: 'Document saved to ${toolkitDir.path}');
+      } else {
+        await showPermissionHelperDialog(context);
+      }
+    } on PlatformException catch (e) {
+      debugPrint('Platform Exception in saving document file: ${e.message}');
+      AppSnackBar.show(context, message: 'Failed to save document: ${e.message}');
+    } catch (e) {
+      debugPrint('Error saving document file: $e');
+      AppSnackBar.show(context, message: 'Failed to save document: ${e.toString()}');
     }
   }
 
@@ -257,22 +286,16 @@ class SaveFileService {
         // Copy the file to the Toolkit folder
         await pdfFile.copy(destinationPath);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('PDF saved to ${toolkitDir.path}')),
-        );
+        AppSnackBar.show(context, message: 'PDF saved to ${toolkitDir.path}');
       } else {
         await showPermissionHelperDialog(context);
       }
     } on PlatformException catch (e) {
       debugPrint('Platform Exception in saving PDF file: ${e.message}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save PDF: ${e.message}')),
-      );
+      AppSnackBar.show(context, message: 'Failed to save PDF: ${e.message}');
     } catch (e) {
       debugPrint('Error saving PDF file: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save PDF: ${e.toString()}')),
-      );
+      AppSnackBar.show(context, message: 'Failed to save PDF: ${e.toString()}');
     }
   }
 
@@ -303,17 +326,13 @@ class SaveFileService {
         // Copy the file to the Toolkit folder
         await file.copy(destinationPath);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('File saved to ${toolkitDir.path}')),
-        );
+        AppSnackBar.show(context, message: 'File saved to ${toolkitDir.path}');
       } else {
         await showPermissionHelperDialog(context);
       }
     } catch (e) {
       debugPrint('Error saving generic file: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save file: ${e.toString()}')),
-      );
+      AppSnackBar.show(context, message: 'Failed to save file: ${e.toString()}');
     }
   }
 
@@ -334,19 +353,13 @@ class SaveFileService {
       final savedFilePath = await FlutterFileDialog.saveFile(params: params);
 
       if (savedFilePath != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('File saved successfully')),
-        );
+        AppSnackBar.show(context, message: 'File saved successfully');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('File saving canceled')),
-        );
+        AppSnackBar.show(context, message: 'File saving canceled');
       }
     } catch (e) {
       debugPrint('Error in _saveFileWithDialog: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save file: ${e.toString()}')),
-      );
+      AppSnackBar.show(context, message: 'Failed to save file: ${e.toString()}');
     }
   }
 }

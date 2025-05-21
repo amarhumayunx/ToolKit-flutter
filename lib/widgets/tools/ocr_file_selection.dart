@@ -32,7 +32,7 @@ class _FileSelectionSectionState extends State<FileSelectionSection> {
             widget.sectionTitle,
             style: GoogleFonts.inter(
               fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               color: Colors.black,
             ),
           ),
@@ -40,7 +40,7 @@ class _FileSelectionSectionState extends State<FileSelectionSection> {
           // Container with rounded corners for both buttons
           Container(
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.teal.shade200),
+              border: Border.all(color: AppColors.primary),
               borderRadius: BorderRadius.circular(8),
             ),
             child: IntrinsicHeight(
@@ -114,7 +114,7 @@ class _FileSelectionSectionState extends State<FileSelectionSection> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               decoration: BoxDecoration(
-                color: const Color(0xFF00A3A3),
+                color: AppColors.primary,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -122,7 +122,7 @@ class _FileSelectionSectionState extends State<FileSelectionSection> {
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Colors.white,
+                  color: AppColors.white,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
