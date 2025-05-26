@@ -1,131 +1,201 @@
-// provider/saved_cv_provider.dart
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../models/saved_cv.dart';
+import '../models/saved_cv_adapter.dart';
 
 class SavedCVProvider with ChangeNotifier {
   List<SavedCV> _savedCVs = [];
-  final String _prefsKey = 'saved_cvs';
+  Box<SavedCV>? _savedCVsBox;
+  bool _isInitialized = false;
+  bool _isInitializing = false;
 
   List<SavedCV> get savedCVs => _savedCVs;
+  bool get isInitialized => _isInitialized;
 
-  SavedCVProvider() {
-    _loadSavedCVs();
-  }
+  Future<void> initHive() async {
+    if (_isInitialized || _isInitializing) return;
 
-  // Load saved CVs from SharedPreferences
-  Future<void> _loadSavedCVs() async {
+    _isInitializing = true;
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final savedCVsJson = prefs.getStringList(_prefsKey) ?? [];
+      await Hive.initFlutter();
 
-      _savedCVs = [];
-
-      for (var cvJson in savedCVsJson) {
-        final cvMap = jsonDecode(cvJson) as Map<String, dynamic>;
-
-        // Try to load thumbnail if it exists
-        Uint8List? thumbnailBytes;
-        try {
-          final thumbFile = File('${cvMap['filePath']}_thumb.png');
-          if (await thumbFile.exists()) {
-            thumbnailBytes = await thumbFile.readAsBytes();
-          }
-        } catch (e) {
-          print('Error loading thumbnail: $e');
-        }
-
-        _savedCVs.add(SavedCV.fromMap(cvMap, thumbBytes: thumbnailBytes));
+      // Check if adapter is already registered
+      if (!Hive.isAdapterRegistered(0)) {
+        Hive.registerAdapter(SavedCVAdapter());
       }
 
+      try {
+        _savedCVsBox = await Hive.openBox<SavedCV>('saved_cvs');
+        await loadSavedCVs();
+      } catch (boxError) {
+        debugPrint('Error opening box, clearing corrupted data: $boxError');
+        // Delete the corrupted box and create a new one
+        try {
+          await Hive.deleteBoxFromDisk('saved_cvs');
+          _savedCVsBox = await Hive.openBox<SavedCV>('saved_cvs');
+          _savedCVs = [];
+        } catch (deleteError) {
+          debugPrint('Error creating new box: $deleteError');
+          _savedCVs = [];
+        }
+      }
+
+      _isInitialized = true;
+    } catch (e) {
+      debugPrint('Error initializing Hive: $e');
+      _savedCVs = []; // Ensure we have an empty list on error
+    } finally {
+      _isInitializing = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadSavedCVs() async {
+    if (_savedCVsBox == null) {
+      debugPrint('SavedCVs box is not initialized');
+      return;
+    }
+
+    try {
+      final values = _savedCVsBox!.values.toList();
+      _savedCVs = values;
+      debugPrint('Loaded ${_savedCVs.length} CVs successfully');
       notifyListeners();
     } catch (e) {
-      print('Error loading saved CVs: $e');
+      debugPrint('Error loading CVs: $e');
+      // If data is corrupted, clear the box
+      try {
+        await _savedCVsBox!.clear();
+        _savedCVs = [];
+        debugPrint('Cleared corrupted CV data');
+        notifyListeners();
+      } catch (clearError) {
+        debugPrint('Error clearing corrupted data: $clearError');
+        _savedCVs = [];
+        notifyListeners();
+      }
     }
   }
 
-  // Save CVs to SharedPreferences
-  Future<void> _saveCVsToPrefs() async {
+  Future<void> clearAllData() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final savedCVsJson = _savedCVs.map((cv) => jsonEncode(cv.toMap())).toList();
-      await prefs.setStringList(_prefsKey, savedCVsJson);
+      if (_savedCVsBox != null) {
+        await _savedCVsBox!.clear();
+        _savedCVs = [];
+        notifyListeners();
+        debugPrint('All CV data cleared successfully');
+      }
     } catch (e) {
-      print('Error saving CVs to prefs: $e');
+      debugPrint('Error clearing all data: $e');
     }
   }
 
-  // Add a new saved CV
-  Future<void> addSavedCV(String fileName, String filePath, Uint8List? thumbnailBytes) async {
+  Future<void> addSavedCV({
+    required String fileName,
+    required String filePath,
+    required Uint8List? thumbnailBytes,
+    required int templateId,
+    required Map<String, dynamic> formData,
+  }) async {
+    if (_savedCVsBox == null) {
+      debugPrint('Cannot add CV: SavedCVs box is not initialized');
+      return;
+    }
+
     try {
-      final uuid = const Uuid().v4();
-      final now = DateTime.now();
-      final dateTime = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year.toString().substring(2)} | '
-          '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}${now.hour >= 12 ? 'pm' : 'am'}';
+      // Validate thumbnail bytes
+      if (thumbnailBytes != null && thumbnailBytes.isEmpty) {
+        thumbnailBytes = null;
+      }
 
-      // Get file size
+      // Validate file exists
       final file = File(filePath);
-      final fileSize = await file.length();
-      final fileSizeString = _formatFileSize(fileSize);
-
-      // Save thumbnail if available
-      if (thumbnailBytes != null) {
-        // Save thumbnail with a consistent naming convention
-        final thumbFile = File('${filePath}_thumb.png');
-        await thumbFile.writeAsBytes(thumbnailBytes);
+      if (!await file.exists()) {
+        debugPrint('File does not exist: $filePath');
+        return;
       }
 
       final savedCV = SavedCV(
-        id: uuid,
+        id: const Uuid().v4(),
         fileName: fileName,
-        dateTime: dateTime,
-        fileSize: fileSizeString,
+        dateTime: _formatDateTime(DateTime.now()),
+        fileSize: _formatFileSize(await file.length()),
         thumbnailBytes: thumbnailBytes,
         filePath: filePath,
+        templateId: templateId,
+        formData: formData,
       );
 
-      _savedCVs.add(savedCV);
-      await _saveCVsToPrefs();
-      notifyListeners();
+      await _savedCVsBox!.add(savedCV);
+      await loadSavedCVs();
     } catch (e) {
-      print('Error adding saved CV: $e');
-      rethrow; // Rethrow to handle in UI
+      debugPrint('Error adding CV: $e');
+      rethrow;
     }
   }
 
-  // Format file size to readable format
+  String _formatDateTime(DateTime now) {
+    final hour12 = now.hour > 12 ? now.hour - 12 : (now.hour == 0 ? 12 : now.hour);
+    final amPm = now.hour >= 12 ? 'pm' : 'am';
+
+    return '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year.toString().substring(2)} | '
+        '${hour12.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}$amPm';
+  }
+
   String _formatFileSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
-  // Delete a saved CV
   Future<void> deleteSavedCV(String id) async {
+    if (_savedCVsBox == null) {
+      debugPrint('Cannot delete CV: SavedCVs box is not initialized');
+      return;
+    }
+
     try {
-      final cvToDelete = _savedCVs.firstWhere((cv) => cv.id == id);
+      final keys = _savedCVsBox!.keys.toList();
+      dynamic keyToDelete;
 
-      // Delete the actual file
-      final file = File(cvToDelete.filePath);
-      if (await file.exists()) {
-        await file.delete();
+      for (var key in keys) {
+        final cv = _savedCVsBox!.get(key);
+        if (cv?.id == id) {
+          keyToDelete = key;
+          break;
+        }
       }
 
-      // Delete thumbnail if it exists
-      final thumbFile = File('${cvToDelete.filePath}_thumb.png');
-      if (await thumbFile.exists()) {
-        await thumbFile.delete();
-      }
+      if (keyToDelete != null) {
+        final cvToDelete = _savedCVsBox!.get(keyToDelete);
+        if (cvToDelete != null) {
+          final file = File(cvToDelete.filePath);
+          if (await file.exists()) {
+            try {
+              await file.delete();
+            } catch (e) {
+              debugPrint('Error deleting file: $e');
+            }
+          }
 
-      _savedCVs.removeWhere((cv) => cv.id == id);
-      await _saveCVsToPrefs();
-      notifyListeners();
+          await _savedCVsBox!.delete(keyToDelete);
+          await loadSavedCVs();
+        }
+      }
     } catch (e) {
-      print('Error deleting saved CV: $e');
+      debugPrint('Error deleting saved CV: $e');
+    }
+  }
+
+  Future<void> close() async {
+    if (_isInitialized && _savedCVsBox != null) {
+      await _savedCVsBox!.close();
+      _isInitialized = false;
+      _savedCVsBox = null;
     }
   }
 }

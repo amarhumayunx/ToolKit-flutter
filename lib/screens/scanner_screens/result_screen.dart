@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
+import '../../provider/file_provider.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/save_document_btn.dart';
 import '../../widgets/custom_appbar.dart';
@@ -103,8 +105,13 @@ class _ResultScreenState extends State<ResultScreen>
   }
 
   void _handleFileDeleted() {
+    // Clear all files from the provider when a file is deleted
+    final fileProvider = Provider.of<FileProvider>(context, listen: false);
+    fileProvider.clearAllFiles();
+
     Navigator.pop(context);
     Navigator.pop(context);
+    AppSnackBar.show(context, message: 'File deleted successfully');
   }
 
   @override
@@ -140,7 +147,7 @@ class _ResultScreenState extends State<ResultScreen>
                     DocumentContainer(
                       filePath: widget.wordDocument.path,
                       onTap: _openDocument,
-                      onDelete: _handleFileDeleted,
+                      onDelete: _handleFileDeleted, // This will now clear the provider
                     ),
                   ],
                   SizedBox(height: MediaQuery.of(context).padding.bottom + 300),

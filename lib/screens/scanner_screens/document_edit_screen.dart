@@ -9,6 +9,7 @@ import 'package:image/image.dart' as img;
 import 'package:toolkit/screens/scanner_screens/result_screen.dart';
 import '../../services/word_images_service.dart';
 import '../../utils/app_colors.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/batch_app_bar.dart';
 import '../../widgets/scanner_widgets/document_preview.dart';
 import 'package:provider/provider.dart';
@@ -202,15 +203,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     } catch (e) {
       debugPrint('Error cropping image: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.black,
-            content: Text(
-              'Failed to crop image',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        );
+        AppSnackBar.show(context, message: 'Failed to crop image');
       }
     } finally {
       if (mounted) {
@@ -480,12 +473,8 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
       } catch (e) {
         if (mounted) {
           Navigator.pop(context); // Close loading dialog
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to create document: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
+
+          AppSnackBar.show(context, message: 'Failed to create document: $e');
         }
       }
     }

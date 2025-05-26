@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import '../../provider/file_provider.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
@@ -20,7 +22,6 @@ class EditFileScreen extends StatefulWidget {
 }
 
 class _EditFileScreenState extends State<EditFileScreen> {
-  List<File> _selectedFiles = [];
   final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickFiles() async {
@@ -31,13 +32,11 @@ class _EditFileScreenState extends State<EditFileScreen> {
       );
 
       if (result != null && result.files.isNotEmpty) {
-        setState(() {
-          _selectedFiles
-              .addAll(result.files.map((file) => File(file.path!)).toList());
-        });
+        final fileProvider = Provider.of<FileProvider>(context, listen: false);
+        final newFiles = result.files.map((file) => File(file.path!)).toList();
+        fileProvider.addFiles(newFiles);
       }
     } catch (e) {
-
       AppSnackBar.show(context, message: 'Error selecting files: $e');
     }
   }
@@ -53,9 +52,8 @@ class _EditFileScreenState extends State<EditFileScreen> {
       );
 
       if (capturedImages != null && capturedImages.isNotEmpty) {
-        setState(() {
-          _selectedFiles.addAll(capturedImages);
-        });
+        final fileProvider = Provider.of<FileProvider>(context, listen: false);
+        fileProvider.addFiles(capturedImages);
       }
     } catch (e) {
       AppSnackBar.show(context, message:'Error capturing document: $e');
@@ -63,13 +61,14 @@ class _EditFileScreenState extends State<EditFileScreen> {
   }
 
   void _removeFile(int index) {
-    setState(() {
-      _selectedFiles.removeAt(index);
-    });
+    final fileProvider = Provider.of<FileProvider>(context, listen: false);
+    fileProvider.removeFile(index);
   }
 
   Future<void> _editFiles() async {
-    if (_selectedFiles.isEmpty) {
+    final fileProvider = Provider.of<FileProvider>(context, listen: false);
+
+    if (!fileProvider.hasFiles) {
       AppSnackBar.show(context, message:'Please select at least one file');
       return;
     }
@@ -79,7 +78,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => BatchResultScreen(
-          batchImages: _selectedFiles,
+          batchImages: fileProvider.selectedFiles,
         ),
       ),
     );
@@ -131,15 +130,19 @@ class _EditFileScreenState extends State<EditFileScreen> {
                           onSelectFiles: _pickFiles,
                           onScanNew: _scanNewDocument,
                         ),
-                        // Dotted file drop zone
+                        // Dotted file drop zone - Now using Consumer to listen to provider changes
                         Padding(
                           padding: const EdgeInsets.only(
                               left: 16, right: 16, bottom: 16),
-                          child: DottedFileDropZone(
-                            selectedImages: _selectedFiles,
-                            onTap: _pickFiles,
-                            onRemoveImage: _removeFile,
-                            emptyStateText: 'Click to choose files or drag and drop',
+                          child: Consumer<FileProvider>(
+                            builder: (context, fileProvider, child) {
+                              return DottedFileDropZone(
+                                selectedImages: fileProvider.selectedFiles,
+                                onTap: _pickFiles,
+                                onRemoveImage: _removeFile,
+                                emptyStateText: 'Click to choose files or drag and drop',
+                              );
+                            },
                           ),
                         ),
                       ],

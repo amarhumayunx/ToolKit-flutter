@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/work_experience_model.dart';
 
-class WorkExperienceProvider extends ChangeNotifier {
+class WorkExperienceProvider with ChangeNotifier {
   List<WorkExperienceItem> _workExperienceItems = [];
 
   List<WorkExperienceItem> get workExperienceItems => _workExperienceItems;
@@ -18,6 +18,13 @@ class WorkExperienceProvider extends ChangeNotifier {
     }
   }
 
+  // Load all work experience items at once
+  void loadWorkExperienceItems(List<WorkExperienceItem> items) {
+    _workExperienceItems.clear();
+    _workExperienceItems.addAll(items);
+    notifyListeners();
+  }
+
   void deleteWorkExperience(int index) {
     if (index >= 0 && index < _workExperienceItems.length) {
       _workExperienceItems.removeAt(index);
@@ -25,12 +32,6 @@ class WorkExperienceProvider extends ChangeNotifier {
     }
   }
 
-  void setWorkExperienceItems(List<WorkExperienceItem> items) {
-    _workExperienceItems = items;
-    notifyListeners();
-  }
-
-  // Add this new method to clear work experience items
   void clearWorkExperienceItems() {
     _workExperienceItems.clear();
     notifyListeners();

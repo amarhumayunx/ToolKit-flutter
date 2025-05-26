@@ -26,6 +26,7 @@ import '../../provider/template_provider.dart';
 import '../../provider/user_provider.dart';
 import '../../provider/work_experience_provider.dart';
 import '../../provider/certification_provider.dart';
+import '../../screens/cv_maker_screens/base_cv_template_screen.dart';
 import '../../utils/app_colors.dart';
 import '../buttons/template_action_btn.dart';
 import '../custom_appbar.dart';
@@ -72,13 +73,6 @@ class _Template2State extends State<Template2> {
     }
   }
 
-  double _estimateTextHeight(String text, TextStyle style, double width) {
-    final double charHeight = style.fontSize! * 1.2;
-    final double charWidth = style.fontSize! * 0.6;
-    final int charsPerLine = (width / charWidth).floor();
-    final int lines = (text.length / charsPerLine).ceil();
-    return lines * charHeight;
-  }
 
   void _distributeContent() {
     final userData = Provider.of<UserProvider>(context, listen: false).userData;
@@ -375,106 +369,6 @@ class _Template2State extends State<Template2> {
       ),
     );
   }
-  Future<void> _saveCv(BuildContext context) async {
-    try {
-      final userData =
-          Provider.of<UserProvider>(context, listen: false).userData;
-      final fileName = userData.fullName != null &&
-              userData.fullName!.isNotEmpty
-          ? '${userData.fullName!.toLowerCase().replaceAll(' ', '_')}_resume.pdf'
-          : 'resume.pdf';
-
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return Dialog(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 20),
-                  Text('Saving CV...', style: GoogleFonts.inter()),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-
-      final pdf = pw.Document();
-      for (int i = 0; i < _pageKeys.length; i++) {
-        final imageBytes = await _capturePageAsImage(_pageKeys[i]);
-        if (imageBytes != null) {
-          final image = pw.MemoryImage(imageBytes);
-          pdf.addPage(
-            pw.Page(
-              pageFormat: PdfPageFormat.a4,
-              build: (pw.Context context) {
-                return pw.Center(
-                  child: pw.Image(image),
-                );
-              },
-            ),
-          );
-        }
-      }
-
-      final directory = await getApplicationDocumentsDirectory();
-      final filePath = '${directory.path}/$fileName';
-      final file = File(filePath);
-      await file.writeAsBytes(await pdf.save());
-
-      Navigator.of(context).pop();
-
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('CV Saved',
-                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-            content: Text('Your CV has been saved successfully.',
-                style: GoogleFonts.inter()),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                },
-                child: Text('OK', style: GoogleFonts.inter()),
-              ),
-            ],
-          );
-        },
-      );
-    } catch (e) {
-      if (Navigator.canPop(context)) {
-        Navigator.pop(context);
-      }
-
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error',
-                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-            content: Text('Failed to save CV: ${e.toString()}',
-                style: GoogleFonts.inter()),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('OK', style: GoogleFonts.inter()),
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
 
   Future<void> _exportToPdf() async {
     try {
@@ -604,57 +498,23 @@ class _Template2State extends State<Template2> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: CustomAppBar(
-        title: 'CV',
-        onBackPressed: () {
-          Navigator.pop(context);
-        },
-        actions: [
-          TextButton(
-            onPressed: () {
-              _saveCv(context);
-            },
-            child: Text(
-              'Save',
-              style: GoogleFonts.inter(
-                color: AppColors.primary,
-                fontSize: 16,
-              ),
+    return BaseCVTemplateScreen(
+      cvContent: !_contentMeasured
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+        children: [
+          for (int i = 1; i <= _totalPages; i++) ...[
+            RepaintBoundary(
+              key: _pageKeys[i - 1],
+              child: _buildPage(i),
             ),
-          ),
+            if (i < _totalPages) const SizedBox(height: 30),
+          ]
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 80),
-                    if (!_contentMeasured)
-                      const Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    else
-                      for (int i = 0; i < _totalPages; i++) ...[
-                        RepaintBoundary(
-                          key: _pageKeys[i],
-                          child: _buildPage(i + 1),
-                        ),
-                        if (i < _totalPages - 1) const SizedBox(height: 30),
-                      ]
-                  ],
-                ),
-              ),
-            ),
-            _buildTemplateButtons(),
-          ],
-        ),
-      ),
+      pageKeys: _pageKeys,
+      totalPages: _totalPages,
+
     );
   }
 

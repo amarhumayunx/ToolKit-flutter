@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
-
 import '../../utils/app_colors.dart';
+import '../../utils/app_snackbar.dart';
 
 class FileOptionsMenu extends StatelessWidget {
   final String filePath;
@@ -42,12 +42,12 @@ class FileOptionsMenu extends StatelessWidget {
         return [
           _buildMenuItem(
             value: 'edit',
-            text: 'Edit',
+            text: 'Rename',
           ),
           // Custom divider with padding and custom color
           PopupMenuItem<String>(
             enabled: false,
-            height: 2,
+            height: 10,
             padding: EdgeInsets.zero,
             child: Center(
               child: Padding(
@@ -117,7 +117,7 @@ class FileOptionsMenu extends StatelessWidget {
     try {
       final file = File(filePath);
       if (!await file.exists()) {
-        _showErrorSnackBar(context, 'File not found');
+        AppSnackBar.show(context, message: 'File not found');
         return;
       }
 
@@ -127,148 +127,8 @@ class FileOptionsMenu extends StatelessWidget {
         subject: 'Document from OCR Tool',
       );
     } catch (e) {
-      _showErrorSnackBar(context, 'Error sharing file: $e');
+      AppSnackBar.show(context, message: 'Error sharing file: $e');
     }
-  }
-
-  void _showRenameDialog(BuildContext context) {
-    final TextEditingController controller = TextEditingController();
-    final String currentFileName = filePath.split('/').last;
-    controller.text = currentFileName.split('.').first;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 15,
-                spreadRadius: 5,
-                offset: const Offset(0, 0),
-              ),
-            ],
-          ),
-          child: AlertDialog(
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Rename File',
-                  style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary // Primary color
-                      ),
-                ),
-                const SizedBox(height: 10),
-              ],
-            ),
-            content: TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                hintText: 'Enter new filename',
-                filled: true,
-                fillColor: Colors.grey[50],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide:
-                      const BorderSide(color: AppColors.primary, width: 2),
-                ),
-              ),
-              autofocus: true,
-            ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text(
-                        'Cancel',
-                        style: GoogleFonts.inter(color: Colors.grey[700]),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () async {
-                        if (controller.text.isNotEmpty) {
-                          try {
-                            final file = File(filePath);
-                            if (!await file.exists()) {
-                              _showErrorSnackBar(context, 'File not found');
-                              Navigator.of(context).pop();
-                              return;
-                            }
-
-                            final directory = file.parent;
-                            final extension = filePath.split('.').last;
-                            final newFilePath =
-                                '${directory.path}/${controller.text}.$extension';
-
-                            // Check if file already exists
-                            if (await File(newFilePath).exists()) {
-                              _showErrorSnackBar(context,
-                                  'A file with this name already exists');
-                              return;
-                            }
-
-                            // Rename the file
-                            await file.rename(newFilePath);
-
-                            if (onFileRenamed != null) {
-                              onFileRenamed!(newFilePath);
-                            }
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text('File renamed successfully')),
-                            );
-
-                            Navigator.of(context).pop();
-                          } catch (e) {
-                            _showErrorSnackBar(
-                                context, 'Error renaming file: $e');
-                            Navigator.of(context).pop();
-                          }
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 2,
-                      ),
-                      child: Text(
-                        'Rename',
-                        style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   void _showDeleteConfirmation(BuildContext context) {
@@ -284,7 +144,7 @@ class FileOptionsMenu extends StatelessWidget {
                 blurRadius: 15,
                 spreadRadius: 5,
                 offset: const Offset(0, 5),
-              ),
+              )
             ],
           ),
           child: AlertDialog(
@@ -335,17 +195,12 @@ class FileOptionsMenu extends StatelessWidget {
                             if (onDelete != null) {
                               onDelete!();
                             }
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('File deleted successfully')),
-                            );
                           }
                           Navigator.of(context).pop();
                         } catch (e) {
-                          _showErrorSnackBar(
-                              context, 'Error deleting file: $e');
                           Navigator.of(context).pop();
+                          AppSnackBar.show(context,
+                              message: 'Error deleting file: $e');
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -373,9 +228,119 @@ class FileOptionsMenu extends StatelessWidget {
     );
   }
 
-  void _showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+  void _showRenameDialog(BuildContext context) {
+    final fileName = File(filePath).uri.pathSegments.last;
+    final controller = TextEditingController(text: fileName);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 15,
+                spreadRadius: 5,
+                offset: const Offset(0, 5),
+              )
+            ],
+          ),
+          child: AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Rename File',
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
+            content: TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.dividerColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.primary),
+                ),
+              ),
+            ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.inter(color: Colors.grey[700]),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () async {
+                        try {
+                          final newName = controller.text.trim();
+                          if (newName.isEmpty) {
+                            AppSnackBar.show(context, message: 'Please enter a valid name');
+                            return;
+                          }
+
+                          final file = File(filePath);
+                          final newPath = filePath.replaceFirst(fileName, newName);
+
+                          await file.rename(newPath);
+
+                          if (onFileRenamed != null) {
+                            onFileRenamed!(newPath);
+                          }
+
+                          Navigator.of(context).pop();
+                          AppSnackBar.show(context, message: 'File renamed successfully');
+                        } catch (e) {
+                          Navigator.of(context).pop();
+                          AppSnackBar.show(context, message: 'Error renaming file: $e');
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 2,
+                      ),
+                      child: Text(
+                        'Save',
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

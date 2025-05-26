@@ -5,7 +5,9 @@ import '../../provider/language_provider.dart';
 import '../../widgets/tags_input_widget.dart';
 
 class LanguagesPage extends StatefulWidget {
+  final List<Map<String, dynamic>>? initialData;
   const LanguagesPage({
+    this.initialData,
     super.key,
   });
 
@@ -19,7 +21,29 @@ class _LanguagesPageState extends State<LanguagesPage> {
 
   // Set maximum number of languages
   final int _maxLanguages = 3;
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialData();
+  }
 
+  void _loadInitialData() {
+    if (widget.initialData != null && widget.initialData!.isNotEmpty) {
+      final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+
+      // Clear any existing data
+      languageProvider.clearLanguages();
+
+      // Load the initial data into the provider
+      for (var item in widget.initialData!) {
+        languageProvider.addLanguage(
+          Language(
+            name: item['name'] ?? '',
+          ),
+        );
+      }
+    }
+  }
   @override
   void dispose() {
     _languageController.dispose();

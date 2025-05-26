@@ -112,7 +112,7 @@ class WordImagesService {
       <w:r>
         <w:drawing>
           <wp:inline distT="0" distB="0" distL="0" distR="0">
-            <wp:extent cx="4500000" cy="3000000"/>
+            <wp:extent cx="3000000" cy="5000000"/>
             <wp:effectExtent l="0" t="0" r="0" b="0"/>
             <wp:docPr id="$i" name="Picture $i"/>
             <wp:cNvGraphicFramePr>
@@ -134,7 +134,7 @@ class WordImagesService {
                   <pic:spPr>
                     <a:xfrm>
                       <a:off x="0" y="0"/>
-                      <a:ext cx="4500000" cy="3000000"/>
+                      <a:ext cx="3000000" cy="3500000"/>
                     </a:xfrm>
                     <a:prstGeom prst="rect">
                       <a:avLst/>

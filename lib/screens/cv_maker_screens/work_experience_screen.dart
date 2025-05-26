@@ -11,7 +11,9 @@ import '../../widgets/cv_widgets/custom_divider.dart';
 import '../../widgets/date_picker_field.dart';
 
 class WorkExperiencePage extends StatefulWidget {
+  final List<Map<String, dynamic>>? initialData;
   const WorkExperiencePage({
+    this.initialData,
     super.key,
   });
 
@@ -35,7 +37,36 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
   DateTime? startDate;
   DateTime? endDate;
   String? dateError;
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialData();
+  }
 
+  void _loadInitialData() {
+    if (widget.initialData != null && widget.initialData!.isNotEmpty) {
+      final workExpProvider = Provider.of<WorkExperienceProvider>(context, listen: false);
+
+      // Clear any existing data
+      workExpProvider.clearWorkExperienceItems();
+
+      // Load the initial data into the provider
+      for (var item in widget.initialData!) {
+        workExpProvider.addWorkExperience(
+          WorkExperienceItem(
+            position: item['position'] ?? '',
+            company: item['company'] ?? '',
+            startDate: item['startDate'] ?? '',
+            endDate: item['endDate'] ?? '',
+            projects: List<String>.from(item['projects'] ?? []),
+            projectUrls: List<String>.from(item['projectUrls'] ?? []),
+            description: item['description'] ?? '',
+            isCurrent: item['isCurrent'] ?? false,
+          ),
+        );
+      }
+    }
+  }
   @override
   void dispose() {
     _positionController.dispose();
