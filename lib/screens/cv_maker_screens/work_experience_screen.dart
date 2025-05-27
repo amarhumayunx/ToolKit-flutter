@@ -40,31 +40,35 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
   @override
   void initState() {
     super.initState();
-    _loadInitialData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialData();
+    });
   }
 
   void _loadInitialData() {
     if (widget.initialData != null && widget.initialData!.isNotEmpty) {
       final workExpProvider = Provider.of<WorkExperienceProvider>(context, listen: false);
 
-      // Clear any existing data
-      workExpProvider.clearWorkExperienceItems();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Clear any existing data
+        workExpProvider.clearWorkExperienceItems();
 
-      // Load the initial data into the provider
-      for (var item in widget.initialData!) {
-        workExpProvider.addWorkExperience(
-          WorkExperienceItem(
-            position: item['position'] ?? '',
-            company: item['company'] ?? '',
-            startDate: item['startDate'] ?? '',
-            endDate: item['endDate'] ?? '',
-            projects: List<String>.from(item['projects'] ?? []),
-            projectUrls: List<String>.from(item['projectUrls'] ?? []),
-            description: item['description'] ?? '',
-            isCurrent: item['isCurrent'] ?? false,
-          ),
-        );
-      }
+        // Load the initial data into the provider
+        for (var item in widget.initialData!) {
+          workExpProvider.addWorkExperience(
+            WorkExperienceItem(
+              position: item['position'] ?? '',
+              company: item['company'] ?? '',
+              startDate: item['startDate'] ?? '',
+              endDate: item['endDate'] ?? '',
+              projects: List<String>.from(item['projects'] ?? []),
+              projectUrls: List<String>.from(item['projectUrls'] ?? []),
+              description: item['description'] ?? '',
+              isCurrent: item['isCurrent'] ?? false,
+            ),
+          );
+        }
+      });
     }
   }
   @override

@@ -32,27 +32,32 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
   @override
   void initState() {
     super.initState();
-    _loadInitialData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialData();
+    });
   }
 
   void _loadInitialData() {
     if (widget.initialData != null && widget.initialData!.isNotEmpty) {
       final educationProvider = Provider.of<EducationProvider>(context, listen: false);
 
-      // Clear any existing data
-      educationProvider.clearEducationItems();
+      // Schedule the updates in a post-frame callback to be safe
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Clear any existing data
+        educationProvider.clearEducationItems();
 
-      // Load the initial data into the provider
-      for (var item in widget.initialData!) {
-        educationProvider.addEducationItem(EducationItem(
-          degree: item['degree'] ?? '',
-          institute: item['institute'] ?? '',
-          startDate: item['startDate'] ?? '',
-          endDate: item['endDate'] ?? '',
-          description: item['description'] ?? '',
-          isCompleted: item['isCompleted'] ?? false,
-        ));
-      }
+        // Load the initial data into the provider
+        for (var item in widget.initialData!) {
+          educationProvider.addEducationItem(EducationItem(
+            degree: item['degree'] ?? '',
+            institute: item['institute'] ?? '',
+            startDate: item['startDate'] ?? '',
+            endDate: item['endDate'] ?? '',
+            description: item['description'] ?? '',
+            isCompleted: item['isCompleted'] ?? false,
+          ));
+        }
+      });
     }
   }
 

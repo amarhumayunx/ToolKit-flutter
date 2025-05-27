@@ -21,10 +21,13 @@ class _LanguagesPageState extends State<LanguagesPage> {
 
   // Set maximum number of languages
   final int _maxLanguages = 3;
+
   @override
   void initState() {
     super.initState();
-    _loadInitialData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialData();
+    });
   }
 
   void _loadInitialData() {
@@ -44,6 +47,7 @@ class _LanguagesPageState extends State<LanguagesPage> {
       }
     }
   }
+
   @override
   void dispose() {
     _languageController.dispose();

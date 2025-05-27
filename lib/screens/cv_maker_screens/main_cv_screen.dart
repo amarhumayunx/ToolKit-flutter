@@ -124,112 +124,195 @@ class _MainCVScreenState extends State<MainCVScreen> {
       _isLoadingEditData = false;
     }
   }
-
   Future<void> _loadEducationData(Map<String, dynamic> convertedData) async {
     await Future.delayed(Duration(milliseconds: 50));
     if (!mounted) return;
 
     final educationData = _getNestedListData('education');
     if (educationData != null) {
-      final educationProvider =
-      Provider.of<EducationProvider>(context, listen: false);
-      educationProvider.clearEducationItems();
+      final educationProvider = Provider.of<EducationProvider>(context, listen: false);
 
-      for (var item in educationData) {
-        educationProvider.addEducationItem(EducationItem(
-          degree: item['degree'] ?? '',
-          institute: item['institute'] ?? '',
-          startDate: item['startDate'] ?? '',
-          endDate: item['endDate'] ?? '',
-          description: item['description'] ?? '',
-          isCompleted: item['isCompleted'] ?? false,
-        ));
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        educationProvider.clearEducationItems();
+
+        for (var item in educationData) {
+          educationProvider.addEducationItem(EducationItem(
+            degree: item['degree'] ?? '',
+            institute: item['institute'] ?? '',
+            startDate: item['startDate'] ?? '',
+            endDate: item['endDate'] ?? '',
+            description: item['description'] ?? '',
+            isCompleted: item['isCompleted'] ?? false,
+          ));
+        }
+      });
     }
   }
 
-  Future<void> _loadWorkExperienceData(
-      Map<String, dynamic> convertedData) async {
+  Future<void> _loadWorkExperienceData(Map<String, dynamic> convertedData) async {
     await Future.delayed(Duration(milliseconds: 50));
     if (!mounted) return;
 
     final workExpData = _getNestedListData('workExperience');
     if (workExpData != null) {
-      final workExpProvider =
-      Provider.of<WorkExperienceProvider>(context, listen: false);
-      workExpProvider.clearWorkExperienceItems();
+      final workExpProvider = Provider.of<WorkExperienceProvider>(context, listen: false);
 
-      for (var item in workExpData) {
-        workExpProvider.addWorkExperience(WorkExperienceItem(
-          position: item['position'] ?? '',
-          company: item['company'] ?? '',
-          startDate: item['startDate'] ?? '',
-          endDate: item['endDate'] ?? '',
-          projects: List<String>.from(item['projects'] ?? []),
-          projectUrls: List<String>.from(item['projectUrls'] ?? []),
-          description: item['description'] ?? '',
-          isCurrent: item['isCurrent'] ?? false,
-        ));
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        workExpProvider.clearWorkExperienceItems();
+
+        for (var item in workExpData) {
+          workExpProvider.addWorkExperience(WorkExperienceItem(
+            position: item['position'] ?? '',
+            company: item['company'] ?? '',
+            startDate: item['startDate'] ?? '',
+            endDate: item['endDate'] ?? '',
+            projects: List<String>.from(item['projects'] ?? []),
+            projectUrls: List<String>.from(item['projectUrls'] ?? []),
+            description: item['description'] ?? '',
+            isCurrent: item['isCurrent'] ?? false,
+          ));
+        }
+      });
     }
   }
 
-  Future<void> _loadCertificationData(
-      Map<String, dynamic> convertedData) async {
-    await Future.delayed(Duration(milliseconds: 50));
-    if (!mounted) return;
+  Future<void> _loadCertificationData(Map<String, dynamic> convertedData) async {
+    if (_isLoadingEditData) return;
 
-    final certData = _getNestedListData('certifications');
-    if (certData != null) {
-      final certProvider =
-      Provider.of<CertificationProvider>(context, listen: false);
-      certProvider.clearCertificationItems();
+    try {
+      // Add a small delay to ensure the widget tree is ready
+      await Future.delayed(Duration(milliseconds: 50));
 
-      for (var item in certData) {
-        certProvider.addCertificationItem(CertificationItem(
-          certificationName: item['certificationName'] ?? '',
-          organizationName: item['organizationName'] ?? '',
-          startDate: item['startDate'] ?? '',
-          endDate: item['endDate'] ?? '',
-          description: item['description'] ?? '',
-          isCompleted: item['isCompleted'] ?? false,
-        ));
+      if (!mounted) return;
+
+      debugPrint('Loading certification data...');
+
+      // Get certification data using the helper method
+      final certData = _getNestedListData('certifications');
+      debugPrint('Certification data: $certData');
+
+      if (certData != null && certData.isNotEmpty) {
+        debugPrint('Processing ${certData.length} certification items');
+
+        final certProvider = Provider.of<CertificationProvider>(context, listen: false);
+
+        // Use post-frame callback to ensure safe state updates
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          try {
+            // Clear existing items
+            certProvider.clearCertificationItems();
+
+            // Add new items
+            for (var item in certData) {
+              final certificationItem = CertificationItem(
+                certificationName: item['certificationName']?.toString() ?? '',
+                organizationName: item['organizationName']?.toString() ?? '',
+                startDate: item['startDate']?.toString() ?? '',
+                endDate: item['endDate']?.toString() ?? '',
+                description: item['description']?.toString() ?? '',
+                isCompleted: item['isCompleted'] as bool? ?? false,
+              );
+              certProvider.addCertificationItem(certificationItem);
+            }
+
+            debugPrint('Successfully loaded ${certData.length} certifications');
+          } catch (e) {
+            debugPrint('Error processing certification items: $e');
+          }
+        });
+      } else {
+        debugPrint('No certification data found or data is empty');
       }
+    } catch (e) {
+      debugPrint('Error in _loadCertificationData: $e');
+    } finally {
+      _isLoadingEditData = false;
     }
   }
 
   Future<void> _loadSkillsData(Map<String, dynamic> convertedData) async {
-    await Future.delayed(Duration(milliseconds: 50));
-    if (!mounted) return;
+    if (_isLoadingEditData) return;
 
-    final skillsData = _getNestedListData('skills');
-    if (skillsData != null) {
-      final skillsProvider =
-      Provider.of<SkillsProvider>(context, listen: false);
-      skillsProvider.clearSkillItems();
+    try {
+      await Future.delayed(Duration(milliseconds: 50));
+      if (!mounted) return;
 
-      for (var item in skillsData) {
-        skillsProvider.addSkill(Skill(name: item['name'] ?? ''));
+      debugPrint('Loading skills data...');
+      final skillsData = _getNestedListData('skills');
+      debugPrint('Skills data: $skillsData');
+
+      if (skillsData != null && skillsData.isNotEmpty) {
+        debugPrint('Processing ${skillsData.length} skills');
+
+        final skillsProvider = Provider.of<SkillsProvider>(context, listen: false);
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          try {
+            skillsProvider.clearSkillItems();
+
+            for (var item in skillsData) {
+              skillsProvider.addSkill(
+                Skill(name: item['name']?.toString() ?? ''),
+              );
+            }
+
+            debugPrint('Successfully loaded ${skillsData.length} skills');
+          } catch (e) {
+            debugPrint('Error processing skills: $e');
+          }
+        });
+      } else {
+        debugPrint('No skills data found or data is empty');
       }
+    } catch (e) {
+      debugPrint('Error in _loadSkillsData: $e');
     }
   }
-
   Future<void> _loadLanguagesData(Map<String, dynamic> convertedData) async {
-    await Future.delayed(Duration(milliseconds: 50));
-    if (!mounted) return;
+    if (_isLoadingEditData) return;
 
-    final languageData = _getNestedListData('languages');
-    if (languageData != null) {
-      final languageProvider =
-      Provider.of<LanguageProvider>(context, listen: false);
-      languageProvider.clearLanguages();
+    try {
+      // Add a small delay to ensure the widget tree is ready
+      await Future.delayed(Duration(milliseconds: 50));
+      if (!mounted) return;
 
-      for (var item in languageData) {
-        languageProvider.addLanguage(Language(name: item['name'] ?? ''));
+      debugPrint('Loading languages data...');
+      final languageData = _getNestedListData('languages');
+      debugPrint('Languages data: $languageData');
+
+      if (languageData != null && languageData.isNotEmpty) {
+        debugPrint('Processing ${languageData.length} language items');
+
+        final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+
+        // Use post-frame callback to ensure safe state updates
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          try {
+            // Clear existing items
+            languageProvider.clearLanguages();
+
+            // Add new items
+            for (var item in languageData) {
+              final languageName = item['name']?.toString() ?? '';
+              if (languageName.isNotEmpty) {
+                languageProvider.addLanguage(Language(name: languageName));
+              }
+            }
+
+            debugPrint('Successfully loaded ${languageData.length} languages');
+          } catch (e) {
+            debugPrint('Error processing language items: $e');
+          }
+        });
+      } else {
+        debugPrint('No language data found or data is empty');
       }
+    } catch (e) {
+      debugPrint('Error in _loadLanguagesData: $e');
+    } finally {
+      _isLoadingEditData = false;
     }
   }
-// Replace the existing _loadWebsitesData method in MainCVScreen with this improved version:
 
   Future<void> _loadWebsitesData(Map<String, dynamic> convertedData) async {
     await Future.delayed(Duration(milliseconds: 50));

@@ -33,7 +33,9 @@ class _CertificationPageState extends State<CertificationPage> {
   @override
   void initState() {
     super.initState();
-    _loadInitialData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialData();
+    });
   }
 
   void _loadInitialData() {
@@ -56,8 +58,16 @@ class _CertificationPageState extends State<CertificationPage> {
           ),
         );
       }
+
+      // Update the local state after loading data
+      if (mounted) {
+        setState(() {
+          hasCertification = certProvider.certificationItems.isNotEmpty;
+        });
+      }
     }
   }
+
   @override
   void dispose() {
     _certificationNameController.dispose();
