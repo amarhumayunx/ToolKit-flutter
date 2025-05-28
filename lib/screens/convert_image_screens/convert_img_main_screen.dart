@@ -81,7 +81,7 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: ToolsAppBar(
+      appBar: const ToolsAppBar(
         title: 'Convert Image',
       ),
       body: Column(
@@ -92,9 +92,9 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CustomSvgImage(imagePath: 'assets/images/convert_image.svg'),
+                  const CustomSvgImage(imagePath: 'assets/images/convert_image.svg'),
                   const SizedBox(height: 30),
-                  InfoCard(
+                  const InfoCard(
                     title: 'Convert Image Format',
                     description:
                     'Easily convert multiple images to various formats while maintaining quality, resolution and clarity.',

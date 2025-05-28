@@ -68,7 +68,7 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(title: 'Convert Images'),
+      appBar: const CustomAppBar(title: 'Convert Images'),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(

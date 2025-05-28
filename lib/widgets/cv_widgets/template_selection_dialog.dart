@@ -9,9 +9,9 @@ class TemplateSelectionDialog extends StatelessWidget {
   final List<int> availableTemplates;
 
   const TemplateSelectionDialog({
-    Key? key,
+    super.key,
     this.availableTemplates = const [1, 2, 3, 4],
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,10 +52,9 @@ class _TemplateThumbnail extends StatelessWidget {
   final VoidCallback onSelected;
 
   const _TemplateThumbnail({
-    Key? key,
     required this.templateId,
     required this.onSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

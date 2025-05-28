@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:aspose_words_cloud/aspose_words_cloud.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
@@ -11,12 +10,6 @@ import 'package:image/image.dart' as img;
 import 'package:pdfx/pdfx.dart' as pdfx;
 
 class FileCompressor {
-
-  static final _asposeConfig = Configuration(
-    "137d1b4a-71de-436a-bec5-8ebfab22631b", // Replace with your App SID
-    "0552d6d00589255acd503e1207238a60",  // Replace with your App Key
-  );
-  static final _wordsApi = WordsApi(_asposeConfig);
 
   // Main compression function that handles different file types
   static Future<File?> compressFile(File file, {int quality = 85}) async {
@@ -265,11 +258,6 @@ class FileCompressor {
   }
 
   // Helper function to format file sizes
-  static String _formatSize(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-  }
 
   static Future<File> _compressWordDocument(File file) async {
     final dir = await getTemporaryDirectory();
@@ -338,26 +326,6 @@ class FileCompressor {
     }
   }
 
-  // Helper function to check if a file is an image
-  static bool _isImageFilefordocx(String filename) {
-    final lower = filename.toLowerCase();
-    return lower.endsWith('.png') ||
-        lower.endsWith('.jpg') ||
-        lower.endsWith('.jpeg');
-  }
-
-  // Helper function to compress images
-  static Uint8List _compressImage(Uint8List imageData, {int quality = 75}) {
-    try {
-      final image = img.decodeImage(imageData);
-      if (image == null) return imageData;
-
-      return Uint8List.fromList(img.encodeJpg(image, quality: quality));
-    } catch (e) {
-      return imageData;
-    }
-  }
-
   static String _formatSizefordocx(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
@@ -396,95 +364,6 @@ class FileCompressor {
       return file;
     }
   }
-
-  static Future<File> _compressOfficeFile(
-      File file,
-      String targetPath,
-      String mediaPath,
-      ) async {
-    try {
-      final bytes = await file.readAsBytes();
-      final archive = ZipDecoder().decodeBytes(bytes);
-      final optimized = Archive();
-
-      for (final file in archive.files) {
-        if (file.isFile) {
-          // Compress images in the media directory
-          if (file.name.startsWith(mediaPath)) {
-            final compressed = await _compressImageBytes(file.content as Uint8List);
-            optimized.addFile(ArchiveFile(
-              file.name,
-              compressed.length,
-              compressed,
-            ));
-          } else {
-            // Add other files unchanged
-            optimized.addFile(file);
-          }
-        }
-      }
-
-      final compressedBytes = ZipEncoder().encode(optimized);
-      return await File(targetPath).writeAsBytes(compressedBytes!);
-    } catch (e) {
-      print('Office file compression error: $e');
-      return file;
-    }
-  }
-
-  // For legacy .doc files (requires external conversion)
-  static Future<File> _compressLegacyWordDoc(File file, String targetPath) async {
-    try {
-      // Convert to DOCX first
-      final docxBytes = await _convertDocToDocx(file);
-      if (docxBytes != null) {
-        final tempPath = '${targetPath}x'; // Add 'x' to make it .docx
-        final tempFile = File(tempPath);
-        await tempFile.writeAsBytes(docxBytes);
-
-        // Now compress as DOCX
-        final result = await _compressOfficeFile(tempFile, targetPath, 'word/media/');
-
-        // Clean up temporary file
-        await tempFile.delete();
-
-        return result;
-      }
-      return file;
-    } catch (e) {
-      print('Legacy DOC compression error: $e');
-      return file;
-    }
-  }
-
-  // For legacy .ppt files (requires external conversion)
-  static Future<File> _compressLegacyPowerPoint(File file, String targetPath) async {
-    try {
-      // Convert to PPTX first (requires external library or service)
-      final pptxBytes = await _convertPptToPptx(file);
-      if (pptxBytes != null) {
-        final tempPptx = File('${targetPath}x');
-        await tempPptx.writeAsBytes(pptxBytes);
-        return await _compressPptx(tempPptx, targetPath);
-      }
-      return file;
-    } catch (e) {
-      print('Legacy PPT compression error: $e');
-      return file;
-    }
-  }
-
-
-  static Future<Uint8List?> _convertDocToDocx(File file) async {
-    return null;
-  }
-
-
-  static Future<Uint8List?> _convertPptToPptx(File file) async {
-
-    return null;
-  }
-
 
   static String getReadableFileSize(int bytes) {
     if (bytes <= 0) return "0 B";

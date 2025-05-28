@@ -683,9 +683,9 @@ class _ScannerScreenState extends State<ScannerScreen>
                     height: 150,
                     padding:
                         const EdgeInsets.only(top: 16, left: 16, right: 16),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.white,
-                      borderRadius: const BorderRadius.only(
+                      borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(20),
                         topRight: Radius.circular(20),
                       ),

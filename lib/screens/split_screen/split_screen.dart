@@ -12,6 +12,7 @@ import 'package:toolkit/widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
 import 'document_item.dart';
+import 'docxService.dart';
 import 'file_drop.dart'; // <- Ensure this is imported
 
 class SplitScreen extends StatefulWidget {

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:toolkit/screens/file_transfer_screen/file_transfer_screen.dart';
+import 'package:toolkit/screens/rearrange_file_screen/rearrange_file_screen.dart';
 import '../screens/compress_files_screen/compress_file_screen.dart';
 import '../screens/edit_files_screen/edit_file_screen.dart';
 import '../screens/merge_files_screens/merge_file_main_screen.dart';
@@ -65,12 +67,12 @@ class _ToolsListViewState extends State<ToolsListView> {
         break;
       case 'Merge Files':
         Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => MergeFileMainScreen(),
+          builder: (context) => const MergeFileMainScreen(),
         ));
         break;
       case 'Edit File':
         Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => EditFileScreen(),
+          builder: (context) => const EditFileScreen(),
         ));
         break;
       case 'Split File':
@@ -79,15 +81,15 @@ class _ToolsListViewState extends State<ToolsListView> {
         ));
         break;
       case 'Rearrange File':
-        // Navigator.of(context).push(MaterialPageRoute(
-        //   builder: (context) => const RearrangeFilePage(),
-        // ));
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => const RearrangeFileScreen(),
+        ));
         break;
       case 'File Transfer':
-        // Navigator.of(context).push(MaterialPageRoute(
-        //   // builder: (context) => const FileTransferPage(),
-        // )
-        // );
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => const FileTransferScreen(),
+        )
+        );
         break;
       default:
         // Handle unknown tool

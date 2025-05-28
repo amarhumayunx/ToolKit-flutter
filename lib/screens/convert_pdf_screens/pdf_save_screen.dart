@@ -37,7 +37,7 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
   bool _animationCompleted = false;
   late AnimationController _animationController;
   late Animation<double> _progressAnimation;
-  List<File> _extractedImageFiles = [];
+  final List<File> _extractedImageFiles = [];
   bool _isZipFile = false;
   bool _isSinglePageImage = false;
   int _currentImageIndex = 0;

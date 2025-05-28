@@ -66,11 +66,15 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
     double compressedSize = 0;
 
     for (var file in widget.originalFiles) {
-      originalSize += file.lengthSync().toDouble();
+      if (file.existsSync()) {
+        originalSize += file.lengthSync().toDouble();
+      }
     }
 
     for (var file in widget.compressedFiles) {
-      compressedSize += file.lengthSync().toDouble();
+      if (file.existsSync()) {
+        compressedSize += file.lengthSync().toDouble();
+      }
     }
 
     if (originalSize > 0) {
@@ -79,22 +83,28 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
     return 0;
   }
 
+
   // Calculate total saved space
   String get totalSpaceSaved {
     double originalSize = 0;
     double compressedSize = 0;
 
     for (var file in widget.originalFiles) {
-      originalSize += file.lengthSync().toDouble();
+      if (file.existsSync()) {
+        originalSize += file.lengthSync().toDouble();
+      }
     }
 
     for (var file in widget.compressedFiles) {
-      compressedSize += file.lengthSync().toDouble();
+      if (file.existsSync()) {
+        compressedSize += file.lengthSync().toDouble();
+      }
     }
 
     double savedBytes = originalSize - compressedSize;
     return FileCompressor.getReadableFileSize(savedBytes.toInt());
   }
+
 
   Future<void> _openFile(File file) async {
     try {
