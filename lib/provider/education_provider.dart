@@ -18,15 +18,22 @@ class EducationProvider with ChangeNotifier {
     }
   }
 
+  // Load all education items at once
+  void loadEducationItems(List<EducationItem> items) {
+    _educationItems.clear();
+    _educationItems.addAll(items);
+    notifyListeners();
+  }
+
   void deleteEducationItem(int index) {
-    if (index >= 0 && index < _educationItems.length) { // Changed from *educationItems to _educationItems
-      _educationItems.removeAt(index); // Changed from *educationItems to _educationItems
+    if (index >= 0 && index < _educationItems.length) {
+      _educationItems.removeAt(index);
       notifyListeners();
     }
   }
 
   void clearEducationItems() {
-    _educationItems.clear(); // Changed from *educationItems to _educationItems
+    _educationItems.clear();
     notifyListeners();
   }
 }

@@ -4,13 +4,16 @@ import 'package:flutter/foundation.dart';
 import '../models/language_model.dart';
 
 class LanguageProvider with ChangeNotifier {
-  final List<Language> _languages = [];
+  List<Language> _languages = [];
+  final int _maxLanguages = 3; // Maximum number of languages allowed
 
   List<Language> get languages => _languages;
 
   void addLanguage(Language language) {
-    _languages.add(language);
-    notifyListeners();
+    if (_languages.length < _maxLanguages) {  // Maintain the 3-language limit
+      _languages.add(language);
+      notifyListeners();
+    }
   }
 
   void removeLanguage(int index) {
@@ -18,6 +21,12 @@ class LanguageProvider with ChangeNotifier {
       _languages.removeAt(index);
       notifyListeners();
     }
+  }
+
+  // Load all language items at once
+  void loadLanguages(List<Language> languages) {
+    _languages = List.from(languages.take(_maxLanguages));  // Ensure max 3 languages
+    notifyListeners();
   }
 
   void clearLanguages() {

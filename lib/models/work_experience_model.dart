@@ -18,4 +18,17 @@ class WorkExperienceItem {
     required this.projectUrls,
     this.isCurrent = false,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'position': position,
+      'company': company,
+      'startDate': startDate,
+      'endDate': endDate,
+      'projects': projects,
+      'projectUrls': projectUrls,
+      'description': description,
+      'isCurrent': isCurrent,
+    };
+  }
 }

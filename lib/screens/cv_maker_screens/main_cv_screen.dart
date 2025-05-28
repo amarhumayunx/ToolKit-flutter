@@ -4,6 +4,18 @@ import 'package:toolkit/screens/cv_maker_screens/personal_info_screen.dart';
 import 'package:toolkit/screens/cv_maker_screens/skills_screen.dart';
 import 'package:toolkit/screens/cv_maker_screens/website_screen.dart';
 import 'package:toolkit/screens/cv_maker_screens/work_experience_screen.dart';
+import '../../models/certification_model.dart';
+import '../../models/education_item_model.dart';
+import '../../models/language_model.dart';
+import '../../models/skills_model.dart';
+import '../../models/website_model.dart';
+import '../../models/work_experience_model.dart';
+import '../../provider/certification_provider.dart';
+import '../../provider/education_provider.dart';
+import '../../provider/language_provider.dart';
+import '../../provider/skills_provider.dart';
+import '../../provider/user_provider.dart';
+import '../../provider/work_experience_provider.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/cv_progress_indicator.dart';
 import '../../widgets/custom_appbar.dart';
@@ -20,13 +32,17 @@ import 'language_screen.dart';
 class MainCVScreen extends StatefulWidget {
   final int templateId;
   final String templateName;
+  final dynamic editData;
+  final bool isEditing;
   final GlobalKey<PersonalInfoPageState> personalInfoKey = GlobalKey();
 
   MainCVScreen({
-    super.key,
+    Key? key,
     required this.templateId,
     required this.templateName,
-  });
+    this.editData,
+    this.isEditing = false,
+  }) : super(key: key);
 
   @override
   State<MainCVScreen> createState() => _MainCVScreenState();
@@ -35,6 +51,7 @@ class MainCVScreen extends StatefulWidget {
 class _MainCVScreenState extends State<MainCVScreen> {
   int currentStep = 1;
   final PageController _pageController = PageController(initialPage: 0);
+  bool _isLoadingEditData = false;
 
   final List<String> stepTitles = [
     'Personal Information',
@@ -48,6 +65,364 @@ class _MainCVScreenState extends State<MainCVScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Load edit data into providers if editing
+    if (widget.isEditing && widget.editData != null) {
+      _loadEditDataIntoProviders();
+    }
+  }
+
+
+
+  void _loadEditDataIntoProviders() async {
+    if (_isLoadingEditData) return;
+    _isLoadingEditData = true;
+
+    final convertedData = _convertToStringMap(widget.editData);
+    if (convertedData == null) {
+      _isLoadingEditData = false;
+      return;
+    }
+
+    try {
+      // Wait for the next frame to ensure the widget tree is built
+      await Future.delayed(Duration.zero);
+
+      if (!mounted) {
+        _isLoadingEditData = false;
+        return;
+      }
+
+      // Personal Info
+      final personalInfo = _convertToStringMap(convertedData['personalInfo']);
+      if (personalInfo != null) {
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        userProvider.updateUserData(
+          fullName: personalInfo['fullName'],
+          designation: personalInfo['designation'],
+          email: personalInfo['email'],
+          phoneNumber: personalInfo['phoneNumber'],
+          profileImagePath: personalInfo['profileImagePath'],
+        );
+
+        if (convertedData['careerObjective'] != null) {
+          userProvider.updateCareerObjective(convertedData['careerObjective']);
+        }
+      }
+
+      // Use a small delay between provider updates to prevent conflicts
+      await _loadEducationData(convertedData);
+      await _loadWorkExperienceData(convertedData);
+      await _loadCertificationData(convertedData);
+      await _loadSkillsData(convertedData);
+      await _loadLanguagesData(convertedData);
+      await _loadWebsitesData(convertedData);
+    } catch (e) {
+      debugPrint('Error loading edit data: $e');
+    } finally {
+      _isLoadingEditData = false;
+    }
+  }
+  Future<void> _loadEducationData(Map<String, dynamic> convertedData) async {
+    await Future.delayed(Duration(milliseconds: 50));
+    if (!mounted) return;
+
+    final educationData = _getNestedListData('education');
+    if (educationData != null) {
+      final educationProvider = Provider.of<EducationProvider>(context, listen: false);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        educationProvider.clearEducationItems();
+
+        for (var item in educationData) {
+          educationProvider.addEducationItem(EducationItem(
+            degree: item['degree'] ?? '',
+            institute: item['institute'] ?? '',
+            startDate: item['startDate'] ?? '',
+            endDate: item['endDate'] ?? '',
+            description: item['description'] ?? '',
+            isCompleted: item['isCompleted'] ?? false,
+          ));
+        }
+      });
+    }
+  }
+
+  Future<void> _loadWorkExperienceData(Map<String, dynamic> convertedData) async {
+    await Future.delayed(Duration(milliseconds: 50));
+    if (!mounted) return;
+
+    final workExpData = _getNestedListData('workExperience');
+    if (workExpData != null) {
+      final workExpProvider = Provider.of<WorkExperienceProvider>(context, listen: false);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        workExpProvider.clearWorkExperienceItems();
+
+        for (var item in workExpData) {
+          workExpProvider.addWorkExperience(WorkExperienceItem(
+            position: item['position'] ?? '',
+            company: item['company'] ?? '',
+            startDate: item['startDate'] ?? '',
+            endDate: item['endDate'] ?? '',
+            projects: List<String>.from(item['projects'] ?? []),
+            projectUrls: List<String>.from(item['projectUrls'] ?? []),
+            description: item['description'] ?? '',
+            isCurrent: item['isCurrent'] ?? false,
+          ));
+        }
+      });
+    }
+  }
+
+  Future<void> _loadCertificationData(Map<String, dynamic> convertedData) async {
+    if (_isLoadingEditData) return;
+
+    try {
+      // Add a small delay to ensure the widget tree is ready
+      await Future.delayed(Duration(milliseconds: 50));
+
+      if (!mounted) return;
+
+      debugPrint('Loading certification data...');
+
+      // Get certification data using the helper method
+      final certData = _getNestedListData('certifications');
+      debugPrint('Certification data: $certData');
+
+      if (certData != null && certData.isNotEmpty) {
+        debugPrint('Processing ${certData.length} certification items');
+
+        final certProvider = Provider.of<CertificationProvider>(context, listen: false);
+
+        // Use post-frame callback to ensure safe state updates
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          try {
+            // Clear existing items
+            certProvider.clearCertificationItems();
+
+            // Add new items
+            for (var item in certData) {
+              final certificationItem = CertificationItem(
+                certificationName: item['certificationName']?.toString() ?? '',
+                organizationName: item['organizationName']?.toString() ?? '',
+                startDate: item['startDate']?.toString() ?? '',
+                endDate: item['endDate']?.toString() ?? '',
+                description: item['description']?.toString() ?? '',
+                isCompleted: item['isCompleted'] as bool? ?? false,
+              );
+              certProvider.addCertificationItem(certificationItem);
+            }
+
+            debugPrint('Successfully loaded ${certData.length} certifications');
+          } catch (e) {
+            debugPrint('Error processing certification items: $e');
+          }
+        });
+      } else {
+        debugPrint('No certification data found or data is empty');
+      }
+    } catch (e) {
+      debugPrint('Error in _loadCertificationData: $e');
+    } finally {
+      _isLoadingEditData = false;
+    }
+  }
+
+  Future<void> _loadSkillsData(Map<String, dynamic> convertedData) async {
+    if (_isLoadingEditData) return;
+
+    try {
+      await Future.delayed(Duration(milliseconds: 50));
+      if (!mounted) return;
+
+      debugPrint('Loading skills data...');
+      final skillsData = _getNestedListData('skills');
+      debugPrint('Skills data: $skillsData');
+
+      if (skillsData != null && skillsData.isNotEmpty) {
+        debugPrint('Processing ${skillsData.length} skills');
+
+        final skillsProvider = Provider.of<SkillsProvider>(context, listen: false);
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          try {
+            skillsProvider.clearSkillItems();
+
+            for (var item in skillsData) {
+              skillsProvider.addSkill(
+                Skill(name: item['name']?.toString() ?? ''),
+              );
+            }
+
+            debugPrint('Successfully loaded ${skillsData.length} skills');
+          } catch (e) {
+            debugPrint('Error processing skills: $e');
+          }
+        });
+      } else {
+        debugPrint('No skills data found or data is empty');
+      }
+    } catch (e) {
+      debugPrint('Error in _loadSkillsData: $e');
+    }
+  }
+  Future<void> _loadLanguagesData(Map<String, dynamic> convertedData) async {
+    if (_isLoadingEditData) return;
+
+    try {
+      // Add a small delay to ensure the widget tree is ready
+      await Future.delayed(Duration(milliseconds: 50));
+      if (!mounted) return;
+
+      debugPrint('Loading languages data...');
+      final languageData = _getNestedListData('languages');
+      debugPrint('Languages data: $languageData');
+
+      if (languageData != null && languageData.isNotEmpty) {
+        debugPrint('Processing ${languageData.length} language items');
+
+        final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+
+        // Use post-frame callback to ensure safe state updates
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          try {
+            // Clear existing items
+            languageProvider.clearLanguages();
+
+            // Add new items
+            for (var item in languageData) {
+              final languageName = item['name']?.toString() ?? '';
+              if (languageName.isNotEmpty) {
+                languageProvider.addLanguage(Language(name: languageName));
+              }
+            }
+
+            debugPrint('Successfully loaded ${languageData.length} languages');
+          } catch (e) {
+            debugPrint('Error processing language items: $e');
+          }
+        });
+      } else {
+        debugPrint('No language data found or data is empty');
+      }
+    } catch (e) {
+      debugPrint('Error in _loadLanguagesData: $e');
+    } finally {
+      _isLoadingEditData = false;
+    }
+  }
+
+  Future<void> _loadWebsitesData(Map<String, dynamic> convertedData) async {
+    await Future.delayed(Duration(milliseconds: 50));
+    if (!mounted) return;
+
+    debugPrint('Loading websites data...');
+    debugPrint('Converted data keys: ${convertedData.keys}');
+
+    // Check for both possible keys
+    final websitesData = convertedData['websites'] ?? convertedData['website'];
+    debugPrint('Websites data: $websitesData');
+
+    if (websitesData != null) {
+      debugPrint('Processing websites data...');
+
+      List<Website> websites = [];
+
+      if (websitesData is List) {
+        // Handle list format
+        for (var item in websitesData) {
+          final websiteMap = _convertToStringMap(item);
+          if (websiteMap != null) {
+            websites.add(Website(
+              name: websiteMap['name'] ?? 'Website',
+              url: websiteMap['url'] ?? '',
+            ));
+          }
+        }
+      } else if (websitesData is Map) {
+        // Handle single website (legacy format)
+        final websiteMap = _convertToStringMap(websitesData);
+        if (websiteMap != null) {
+          websites.add(Website(
+            name: websiteMap['name'] ?? 'Website',
+            url: websiteMap['url'] ?? websiteMap['websiteUrl'] ?? '',
+          ));
+        }
+      }
+
+      debugPrint('Loaded ${websites.length} websites');
+      if (websites.isNotEmpty) {
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        userProvider.updateWebsites(websites);
+        debugPrint('Websites updated in provider');
+      }
+    } else {
+      debugPrint('No websites data found');
+    }
+  }
+
+// Also, make sure your _getNestedListData method has proper debugging:
+  List<Map<String, dynamic>>? _getNestedListData(String key) {
+    final convertedData = _convertToStringMap(widget.editData);
+    debugPrint('_getNestedListData called for key: $key');
+    debugPrint('Converted data: $convertedData');
+
+    if (convertedData == null) {
+      debugPrint('Converted data is null');
+      return null;
+    }
+
+    final nestedData = convertedData[key];
+    debugPrint('Nested data for $key: $nestedData');
+    debugPrint('Nested data type: ${nestedData.runtimeType}');
+
+    if (nestedData is List) {
+      debugPrint('Processing list with ${nestedData.length} items');
+      final result = nestedData.map<Map<String, dynamic>>((item) {
+        debugPrint('Processing item: $item (${item.runtimeType})');
+        if (item is Map) {
+          final converted = Map<String, dynamic>.from(item as Map);
+          debugPrint('Converted item: $converted');
+          return converted;
+        }
+        debugPrint('Item is not a Map, returning empty map');
+        return <String, dynamic>{};
+      }).toList();
+
+      debugPrint('Final result for $key: $result');
+      return result;
+    }
+
+    debugPrint('Nested data is not a List');
+    return null;
+  }
+
+  Map<String, dynamic>? _convertToStringMap(dynamic data) {
+    if (data == null) return null;
+    if (data is Map<String, dynamic>) return data;
+    if (data is Map) {
+      try {
+        return Map<String, dynamic>.from(
+            data.map((key, value) => MapEntry(key.toString(), value)));
+      } catch (e) {
+        debugPrint('Error converting map: $e');
+        return <String, dynamic>{};
+      }
+    }
+    return null;
+  }
+
+  Map<String, dynamic>? _getNestedData(String key) {
+    final convertedData = _convertToStringMap(widget.editData);
+    if (convertedData == null) return null;
+
+    final nestedData = convertedData[key];
+    return _convertToStringMap(nestedData);
+  }
+
+  @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
@@ -55,8 +430,11 @@ class _MainCVScreenState extends State<MainCVScreen> {
 
   void goToNextPage() {
     if (currentStep < stepTitles.length) {
+      // Save current page data before moving to next
+      _saveCurrentPageData();
+
       _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
+        duration: Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     }
@@ -64,124 +442,152 @@ class _MainCVScreenState extends State<MainCVScreen> {
 
   void goToPreviousPage() {
     if (currentStep > 1) {
+      // Save current page data before moving to previous
+      _saveCurrentPageData();
+
       _pageController.previousPage(
-        duration: const Duration(milliseconds: 300),
+        duration: Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     }
   }
 
-  // Navigate to appropriate template based on selected template ID
+  void _saveCurrentPageData() {
+    // Save data for the current page
+    switch (currentStep) {
+      case 1:
+      // Personal Info - data is automatically saved via saveCurrentDataToProvider
+        widget.personalInfoKey.currentState?.saveCurrentDataToProvider();
+        break;
+    // Add cases for other pages as needed
+    }
+  }
+
   void _navigateToTemplate(BuildContext context) {
-    // You can either use the widget.templateId directly or get it from the TemplateProvider
-    // Let's use the TemplateProvider approach for consistency with WebsiteScreen
     final templateProvider =
-        Provider.of<TemplateProvider>(context, listen: false);
+    Provider.of<TemplateProvider>(context, listen: false);
     final templateId = templateProvider.selectedTemplateId;
+    final websites = Provider.of<UserProvider>(context, listen: false).websites;
 
     Widget templateScreen;
 
     switch (templateId) {
       case 1:
-        templateScreen = const Template1();
+        templateScreen = Template1(websites: websites);
         break;
       case 2:
-        templateScreen = const Template2();
+        templateScreen = Template2(websites: websites);
         break;
       case 3:
-        templateScreen = const Template3();
+        templateScreen = Template3(websites: websites);
         break;
       case 4:
-        templateScreen = const Template4();
+        templateScreen = Template4(websites: websites);
         break;
       default:
-        // Fallback to Template1 if templateId doesn't match any case
-        templateScreen = const Template1();
+        templateScreen = Template1(websites: websites);
     }
 
-    // Navigate to the selected template
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => templateScreen,
-      ),
+      MaterialPageRoute(builder: (context) => templateScreen),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: CustomAppBar(
-        title: stepTitles[currentStep - 1],
-        onBackPressed: () {
-          if (currentStep > 1) {
-            goToPreviousPage();
-          } else {
-            Navigator.pop(context);
-          }
-        },
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 26, left: 26, top: 30),
-            child: CVProgressIndicator(currentStep: currentStep),
-          ),
-          const SizedBox(height: 20),
-
-          // Main content area with PageView
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              onPageChanged: (index) {
-                setState(() {
-                  currentStep = index + 1;
-                });
-              },
-              children: [
-                // Your different screen contents as pages
-                PersonalInfoPage(
-                  key: widget.personalInfoKey,
-                  templateId: widget.templateId,
-                  templateName: widget.templateName,
-                ),
-                const CareerObjectivesPage(),
-                const EducationDetailPage(),
-                const WorkExperiencePage(),
-                const CertificationPage(),
-                const SkillsPage(),
-                const LanguagesPage(),
-                const WebsitePage(),
-              ],
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(
-          bottom: 28.0,
-          left: 28.0,
-          right: 28.0,
-          top: 10.0,
-        ),
-        child: CustomGradientButton(
-          text: currentStep == stepTitles.length ? 'Add' : 'Next',
-          onPressed: () {
-            if (currentStep == 1) {
-              // For PersonalInfoPage
-              final isValid =
-                  widget.personalInfoKey.currentState?.validate() ?? false;
-              if (isValid) {
-                goToNextPage();
-              }
-            } else if (currentStep < stepTitles.length) {
-              goToNextPage();
+    return WillPopScope(
+      onWillPop: () async {
+        if (currentStep > 1) {
+          goToPreviousPage();
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: CustomAppBar(
+          title: stepTitles[currentStep - 1],
+          onBackPressed: () {
+            if (currentStep > 1) {
+              goToPreviousPage();
             } else {
-              _navigateToTemplate(context);
+              Navigator.pop(context);
             }
           },
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 26, left: 26, top: 30),
+              child: CVProgressIndicator(currentStep: currentStep),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                physics: NeverScrollableScrollPhysics(),
+                onPageChanged: (index) {
+                  setState(() {
+                    currentStep = index + 1;
+                  });
+                },
+                children: [
+                  PersonalInfoPage(
+                    key: widget.personalInfoKey,
+                    templateId: widget.templateId,
+                    templateName: widget.templateName,
+                    initialData: _getNestedData('personalInfo'),
+                  ),
+                  CareerObjectivesPage(),
+                  EducationDetailPage(
+                    initialData: _getNestedListData('education'),
+                  ),
+                  WorkExperiencePage(
+                    initialData: _getNestedListData('workExperience'),
+                  ),
+                  CertificationPage(
+                    initialData: _getNestedListData('certifications'),
+                  ),
+                  SkillsPage(
+                    initialData: _getNestedListData('skills'),
+                  ),
+                  LanguagesPage(
+                    initialData: _getNestedListData('languages'),
+                  ),
+                  WebsitePage(
+                    initialData: _getNestedListData('websites'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        bottomNavigationBar: Padding(
+          padding: EdgeInsets.only(
+            bottom: 28.0,
+            left: 28.0,
+            right: 28.0,
+            top: 10.0,
+          ),
+          child: CustomGradientButton(
+            text: widget.isEditing
+                ? 'Update'
+                : (currentStep == stepTitles.length ? 'Add' : 'Next'),
+            onPressed: () {
+              if (currentStep == 1) {
+                final isValid =
+                    widget.personalInfoKey.currentState?.validate() ?? false;
+                if (isValid) {
+                  goToNextPage();
+                }
+              } else if (currentStep < stepTitles.length) {
+                goToNextPage();
+              } else {
+                _navigateToTemplate(context);
+              }
+            },
+          ),
         ),
       ),
     );

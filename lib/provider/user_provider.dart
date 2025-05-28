@@ -9,6 +9,32 @@ class UserProvider extends ChangeNotifier {
   UserModel get userData => _userData;
   List<Website> get websites => _websites;
 
+  // Load all user data at once
+  void loadUserData({
+    required UserModel userData,
+    List<Website>? websites,
+  }) {
+    debugPrint('UserProvider: loadUserData called');
+    debugPrint('User data: ${userData.fullName}, ${userData.email}');
+    debugPrint('Websites: ${websites?.map((w) => '${w.name}: ${w.url}').toList()}');
+
+    _userData.fullName = userData.fullName;
+    _userData.designation = userData.designation;
+    _userData.email = userData.email;
+    _userData.phoneNumber = userData.phoneNumber;
+    _userData.profileImagePath = userData.profileImagePath;
+    _userData.careerObjective = userData.careerObjective;
+    _userData.websiteUrl = userData.websiteUrl;
+
+    if (websites != null) {
+      _websites = List<Website>.from(websites); // Create a new list
+      debugPrint('Websites loaded: ${_websites.length} items');
+    }
+
+    notifyListeners();
+    debugPrint('UserProvider: loadUserData completed, notifyListeners called');
+  }
+
   void updateUserData({
     String? fullName,
     String? designation,
@@ -18,6 +44,9 @@ class UserProvider extends ChangeNotifier {
     String? careerObjective,
     String? websiteUrl,
   }) {
+    debugPrint('UserProvider: updateUserData called');
+    debugPrint('Parameters: fullName=$fullName, email=$email, websiteUrl=$websiteUrl');
+
     if (fullName != null) _userData.fullName = fullName;
     if (designation != null) _userData.designation = designation;
     if (email != null) _userData.email = email;
@@ -25,36 +54,46 @@ class UserProvider extends ChangeNotifier {
     if (profileImagePath != null) _userData.profileImagePath = profileImagePath;
     if (careerObjective != null) _userData.careerObjective = careerObjective;
     if (websiteUrl != null) _userData.websiteUrl = websiteUrl;
+
     notifyListeners();
+    debugPrint('UserProvider: updateUserData completed');
   }
 
   void updateCareerObjective(String objective) {
+    debugPrint('UserProvider: updateCareerObjective called with: $objective');
     _userData.careerObjective = objective;
     notifyListeners();
   }
 
-  // Update method to store multiple websites
   void updateWebsite(String? url) {
-    _userData.websiteUrl = url; // Keep for backward compatibility
+    debugPrint('UserProvider: updateWebsite called with: $url');
+    _userData.websiteUrl = url;
     notifyListeners();
   }
 
-  // Add a new method to handle multiple websites
   void updateWebsites(List<Website> websites) {
-    _websites = websites;
-    // Also update the single websiteUrl for backward compatibility
-    _userData.websiteUrl = websites.isNotEmpty ? websites[0].url : null;
+    debugPrint('Updating websites with ${websites.length} items');
+    _websites = List<Website>.from(websites);
     notifyListeners();
   }
+
+  // Add method to get websites as maps
+  List<Map<String, dynamic>> getWebsitesAsMaps() {
+    return _websites.map((website) => website.toMap()).toList();
+  }
+
 
   void clearUserData() {
+    debugPrint('UserProvider: clearUserData called');
     _userData.fullName = null;
     _userData.designation = null;
     _userData.email = null;
     _userData.phoneNumber = null;
+    _userData.profileImagePath = null;
     _userData.careerObjective = null;
     _userData.websiteUrl = null;
     _websites = [];
     notifyListeners();
+    debugPrint('UserProvider: clearUserData completed');
   }
 }

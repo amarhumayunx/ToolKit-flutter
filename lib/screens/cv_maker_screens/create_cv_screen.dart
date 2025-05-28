@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'dart:io';
-import 'package:open_file/open_file.dart';
-
-import '../../models/saved_cv.dart';
 import '../../provider/saved_cv_provider.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/tools/tools_app_bar.dart';
+import '../home_screen.dart';
 import 'cv_maker_screen.dart';
+import 'main_cv_screen.dart';
 
 class CreateCvScreen extends StatefulWidget {
   const CreateCvScreen({super.key});
@@ -18,239 +16,319 @@ class CreateCvScreen extends StatefulWidget {
 }
 
 class _CreateCvScreenState extends State<CreateCvScreen> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeProvider();
+  }
+
+  Future<void> _initializeProvider() async {
+    try {
+      final provider = Provider.of<SavedCVProvider>(context, listen: false);
+      debugPrint('Initializing SavedCVProvider...');
+
+      if (!provider.isInitialized) {
+        await provider.initHive();
+      } else {
+        // If already initialized, just reload the data
+        await provider.loadSavedCVs();
+      }
+
+      debugPrint('SavedCVProvider initialized successfully');
+      debugPrint('Number of saved CVs: ${provider.savedCVs.length}');
+    } catch (e) {
+      debugPrint('Error initializing provider: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const ToolsAppBar(
+      appBar: ToolsAppBar(
         title: 'My Resume',
+        onBackPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        },
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(30.0),
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Create New Button with Navigation
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const CvMakerScreen()),
-                  );
-                },
-                child: Container(
-                  height: 110,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.16),
-                        blurRadius: 2,
-                        offset: const Offset(0, 0),
-                      )
-                    ],
-                    color: AppColors.bgBoxColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.add,
-                        color: AppColors.textColor,
-                        size: 24,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Create New',
-                        style: GoogleFonts.inter(
-                          color: AppColors.textColor,
-                          fontWeight: FontWeight.w400,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Consumer<SavedCVProvider>(
+              builder: (context, savedCVProvider, child) {
+                final savedCVs = savedCVProvider.savedCVs;
 
-              const SizedBox(height: 30),
+                // Debug print to see current state
+                debugPrint(
+                    'Building CreateCvScreen with ${savedCVs.length} CVs');
 
-              // Previously Created Resumes Container
-              Consumer<SavedCVProvider>(
-                builder: (context, savedCVProvider, child) {
-                  final savedCVs = savedCVProvider.savedCVs;
-
-                  if (savedCVs.isEmpty) {
-                    return Container(
-                      width: double.infinity,
-                      height: 270,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    await savedCVProvider.loadSavedCVs();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(30.0),
+                    child: SafeArea(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Text(
-                              'Previously created Resume',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 80),
-                          Center(
-                            child: Text(
-                              'No saved resumes yet',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 22),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Previously Created Resumes Title
-                        Text(
-                          'Previously created Resume',
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // Resume previews
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxHeight: MediaQuery.of(context).size.height * 0.5,
-                          ),
-                          child: GridView.builder(
-                            shrinkWrap: true,
-                            physics: savedCVs.length > 2
-                                ? const ScrollPhysics()
-                                : const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 12,
-                              childAspectRatio: 0.7,
-                            ),
-                            itemCount: savedCVs.length,
-                            itemBuilder: (context, index) {
-                              return _buildResumePreview(
-                                savedCVs[index],
-                                onTap: () =>
-                                    _openCvFile(savedCVs[index].filePath),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const CvMakerScreen(),
+                                ),
                               );
                             },
+                            child: Container(
+                              height: 110,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.16),
+                                    blurRadius: 2,
+                                    offset: const Offset(0, 0),
+                                  )
+                                ],
+                                color: AppColors.bgBoxColor,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.add,
+                                    color: AppColors.textColor,
+                                    size: 24,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Create New',
+                                    style: GoogleFonts.inter(
+                                      color: AppColors.textColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildResumePreview(SavedCV cv, {required Function() onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Resume document preview
-          Container(
-            width: 130,
-            height: 162,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: AppColors.dividerColor),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(14.0),
-              child: cv.thumbnailBytes != null
-                  ? ClipRRect(
-                      child: Image.memory(
-                        cv.thumbnailBytes!,
-                        width: 130,
-                        height: 162,
-                        fit: BoxFit.cover,
+                          const SizedBox(height: 30),
+                          Expanded(
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Previously created Resume',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        Text(
+                                          '(${savedCVs.length})',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 12,
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: savedCVs.isEmpty
+                                        ? Center(
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons.description_outlined,
+                                                  size: 48,
+                                                  color: Colors.grey[400],
+                                                ),
+                                                const SizedBox(height: 16),
+                                                Text(
+                                                  'No saved resumes yet',
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 14,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Text(
+                                                  'Create your first resume above',
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 12,
+                                                    color: Colors.grey[400],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                        : Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 12.0),
+                                            child: GridView.builder(
+                                              gridDelegate:
+                                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 2,
+                                                childAspectRatio: 130 / 180,
+                                                crossAxisSpacing: 12,
+                                                mainAxisSpacing: 12,
+                                              ),
+                                              itemCount: savedCVs.length,
+                                              itemBuilder: (context, index) {
+                                                final cv = savedCVs[index];
+                                                return Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                MainCVScreen(
+                                                              templateId:
+                                                                  cv.templateId,
+                                                              templateName:
+                                                                  'Template ${cv.templateId}',
+                                                              editData:
+                                                                  cv.formData,
+                                                              isEditing: true,
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                      child: Container(
+                                                        width: 130,
+                                                        height: 190,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color:
+                                                              Colors.grey[100],
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8),
+                                                          border: Border.all(
+                                                            color: Colors
+                                                                .grey[300]!,
+                                                            width: 1,
+                                                          ),
+                                                        ),
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8),
+                                                          child:
+                                                              cv.thumbnailBytes !=
+                                                                      null
+                                                                  ? Image
+                                                                      .memory(
+                                                                      cv.thumbnailBytes!,
+                                                                      fit: BoxFit
+                                                                          .cover,
+                                                                      errorBuilder: (context,
+                                                                          error,
+                                                                          stackTrace) {
+                                                                        return const Center(
+                                                                          child:
+                                                                              Icon(
+                                                                            Icons.picture_as_pdf,
+                                                                            size:
+                                                                                40,
+                                                                            color:
+                                                                                Colors.grey,
+                                                                          ),
+                                                                        );
+                                                                      },
+                                                                    )
+                                                                  : const Center(
+                                                                      child:
+                                                                          Icon(
+                                                                        Icons
+                                                                            .picture_as_pdf,
+                                                                        size:
+                                                                            40,
+                                                                        color: Colors
+                                                                            .grey,
+                                                                      ),
+                                                                    ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 8),
+                                                    Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 4),
+                                                      child: Text(
+                                                        '${cv.dateTime} | ${cv.fileSize}',
+                                                        style:
+                                                            GoogleFonts.inter(
+                                                          fontSize: 8,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          color:
+                                                              Colors.grey[600],
+                                                        ),
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
                       ),
-                    )
-                  : Container(),
-            ), // Empty container when no thumbnail
-          ),
-          const SizedBox(height: 8),
-          // Date and size details
-          Text(
-            '${cv.dateTime} | ${cv.fileSize}',
-            style: GoogleFonts.inter(
-              fontSize: 8,
-              color: const Color(0xFFAAAAAE),
+                    ),
+                  ),
+                );
+              },
             ),
-          ),
-        ],
-      ),
     );
-  }
-
-  void _openCvFile(String filePath) async {
-    try {
-      final file = File(filePath);
-      if (await file.exists()) {
-        await OpenFile.open(filePath);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('File not found')),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error opening file: $e')),
-      );
-    }
   }
 }

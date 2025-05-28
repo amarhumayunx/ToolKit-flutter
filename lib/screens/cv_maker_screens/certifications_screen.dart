@@ -9,8 +9,10 @@ import '../../widgets/buttons/save_edit_delete_btns.dart';
 import '../../widgets/custom_text_field.dart';
 
 class CertificationPage extends StatefulWidget {
+  final List<Map<String, dynamic>>? initialData;
   const CertificationPage({
     super.key,
+    this.initialData,
   });
 
   @override
@@ -28,6 +30,43 @@ class _CertificationPageState extends State<CertificationPage> {
   bool hasCertification = false;
   bool showForm = false;
   int? editingIndex;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialData();
+    });
+  }
+
+  void _loadInitialData() {
+    if (widget.initialData != null && widget.initialData!.isNotEmpty) {
+      final certProvider = Provider.of<CertificationProvider>(context, listen: false);
+
+      // Clear any existing data
+      certProvider.clearCertificationItems();
+
+      // Load the initial data into the provider
+      for (var item in widget.initialData!) {
+        certProvider.addCertificationItem(
+          CertificationItem(
+            certificationName: item['certificationName'] ?? '',
+            organizationName: item['organizationName'] ?? '',
+            startDate: item['startDate'] ?? '',
+            endDate: item['endDate'] ?? '',
+            description: item['description'] ?? '',
+            isCompleted: item['isCompleted'] ?? false,
+          ),
+        );
+      }
+
+      // Update the local state after loading data
+      if (mounted) {
+        setState(() {
+          hasCertification = certProvider.certificationItems.isNotEmpty;
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/certification_model.dart';
 
-class CertificationProvider extends ChangeNotifier {
-  final List<CertificationItem> _certificationItems = [];
+class CertificationProvider with ChangeNotifier {
+  List<CertificationItem> _certificationItems = [];
 
   List<CertificationItem> get certificationItems => _certificationItems;
 
@@ -16,6 +16,13 @@ class CertificationProvider extends ChangeNotifier {
       _certificationItems[index] = item;
       notifyListeners();
     }
+  }
+
+  // Load all certification items at once
+  void loadCertificationItems(List<CertificationItem> items) {
+    _certificationItems.clear();
+    _certificationItems.addAll(items);
+    notifyListeners();
   }
 
   void removeCertificationItem(int index) {

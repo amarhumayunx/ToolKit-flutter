@@ -1,4 +1,3 @@
-// Model class for education items
 class EducationItem {
   final String degree;
   final String institute;
@@ -15,4 +14,15 @@ class EducationItem {
     required this.description,
     required this.isCompleted,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'degree': degree,
+      'institute': institute,
+      'startDate': startDate,
+      'endDate': endDate,
+      'description': description,
+      'isCompleted': isCompleted,
+    };
+  }
 }

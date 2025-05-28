@@ -106,7 +106,9 @@ class _MergeResultScreenState extends State<MergeResultScreen>
     if (widget.onSaveAndReturn != null) {
       widget.onSaveAndReturn!(); // Call the callback to clear selected PDFs
     }
-    Navigator.of(context).pop(); // Navigate back
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();// Navigate back
+    AppSnackBar.show(context, message: 'File deleted successfully');
   }
 
   void _handleSaveCompleted() {

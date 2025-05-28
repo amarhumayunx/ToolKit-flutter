@@ -13,6 +13,8 @@ class DottedFileDropZone extends StatelessWidget {
   final Function(int) onRemoveImage;
   final String emptyStateText;
   final bool isMultipleSelection;
+  final bool isEmpty; // New parameter to force empty state
+
   const DottedFileDropZone({
     super.key,
     required this.selectedImages,
@@ -20,100 +22,103 @@ class DottedFileDropZone extends StatelessWidget {
     required this.onRemoveImage,
     this.emptyStateText = 'Click to choose files',
     this.isMultipleSelection = true,
+    this.isEmpty = false, // Default to false
   });
 
   @override
   Widget build(BuildContext context) {
-    return DottedBorder(
-      color: AppColors.primary,
-      strokeWidth: 1.5,
-      dashPattern: const [5, 4],
-      borderType: BorderType.RRect,
-      radius: const Radius.circular(8),
-      child: Container(
-        width: double.infinity,
-        constraints: BoxConstraints(
-          minHeight: 128,
-          maxHeight: selectedImages.isNotEmpty ? 300 : 128,
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: const Color(0xFF00BCD4).withOpacity(0.05),
-        ),
-        child: selectedImages.isNotEmpty
-            ? SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: selectedImages.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final image = entry.value;
-                    return Stack(
-                      children: [
-                        Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            image: DecorationImage(
-                              image: FileImage(image),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          top: 5,
-                          right: 5,
-                          child: GestureDetector(
-                            onTap: () => onRemoveImage(index),
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: const BoxDecoration(
-                                color: AppColors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.close,
-                                size: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
+    final showEmptyState = isEmpty || selectedImages.isEmpty;
+
+    return InkWell(
+      onTap: onTap,
+      child: DottedBorder(
+        color: AppColors.primary,
+        strokeWidth: 1.5,
+        dashPattern: const [5, 4],
+        borderType: BorderType.RRect,
+        radius: const Radius.circular(8),
+        child: Container(
+          width: double.infinity,
+          constraints: BoxConstraints(
+            minHeight: 128,
+            maxHeight: showEmptyState ? 128 : 300,
           ),
-        )
-            : Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            InkWell(
-              onTap: onTap,
-              child: SvgPicture.asset(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: const Color(0xFF00BCD4).withOpacity(0.05),
+          ),
+          child: showEmptyState
+              ? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
                 'assets/icons/upload_file_icon.svg',
                 height: 28,
                 width: 36,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              emptyStateText,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                color: Colors.grey,
-                fontSize: 10,
-                fontWeight: FontWeight.w400,
+              const SizedBox(height: 8),
+              Text(
+                emptyStateText,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  color: Colors.grey,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+          )
+              : SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: selectedImages.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final image = entry.value;
+                      return Stack(
+                        children: [
+                          Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              image: DecorationImage(
+                                image: FileImage(image),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 5,
+                            right: 5,
+                            child: GestureDetector(
+                              onTap: () => onRemoveImage(index),
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: const BoxDecoration(
+                                  color: AppColors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.close,
+                                  size: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

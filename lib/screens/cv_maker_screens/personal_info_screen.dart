@@ -8,11 +8,13 @@ import '../../widgets/cv_widgets/personal_info_img_picker.dart';
 class PersonalInfoPage extends StatefulWidget {
   final int templateId;
   final String templateName;
+  final Map<String, dynamic>? initialData;
 
   const PersonalInfoPage({
     super.key,
     required this.templateId,
     required this.templateName,
+    this.initialData,
   });
 
   @override
@@ -27,7 +29,7 @@ class PersonalInfoPageState extends State<PersonalInfoPage> {
   final TextEditingController _phoneController = TextEditingController();
 
   String? _nameError;
-  String? _designationError; // Added designation error state
+  String? _designationError;
   String? _emailError;
   String? _phoneError;
 
@@ -41,6 +43,24 @@ class PersonalInfoPageState extends State<PersonalInfoPage> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userData = userProvider.userData;
 
+    // Check for initial data first (edit mode)
+    if (widget.initialData != null) {
+      _nameController.text = widget.initialData!['fullName'] ?? '';
+      _designationController.text = widget.initialData!['designation'] ?? '';
+      _emailController.text = widget.initialData!['email'] ?? '';
+      _phoneController.text = widget.initialData!['phoneNumber'] ?? '';
+
+      if (widget.initialData!['profileImagePath'] != null) {
+        final file = File(widget.initialData!['profileImagePath']);
+        if (file.existsSync()) {
+          setState(() => _imageFile = file);
+        }
+      }
+    }
+    // Fall back to user provider data (create mode)
+    else if (userData.fullName?.isNotEmpty ?? false) {
+      _nameController.text = userData.fullName!;
+    }
     if (userData.fullName?.isNotEmpty ?? false) {
       _nameController.text = userData.fullName!;
     }
@@ -71,15 +91,34 @@ class PersonalInfoPageState extends State<PersonalInfoPage> {
     super.dispose();
   }
 
+  // Add this method to save current field values to UserProvider
+  void saveCurrentDataToProvider() {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    userProvider.updateUserData(
+      fullName: _nameController.text.trim(),
+      designation: _designationController.text.trim(),
+      email: _emailController.text.trim(),
+      phoneNumber: _phoneController.text.trim(),
+      profileImagePath: _imageFile?.path,
+    );
+  }
+
   bool validate() {
     bool isValid = true;
+
+    // Clear previous errors
+    setState(() {
+      _nameError = null;
+      _designationError = null;
+      _emailError = null;
+      _phoneError = null;
+    });
 
     if (_nameController.text.isEmpty) {
       setState(() => _nameError = 'Please enter your name');
       isValid = false;
     }
 
-    // Added designation validation
     if (_designationController.text.isEmpty) {
       setState(() => _designationError = 'Please enter your designation');
       isValid = false;
@@ -104,6 +143,11 @@ class PersonalInfoPageState extends State<PersonalInfoPage> {
       isValid = false;
     }
 
+    // If validation passes, save all current data to provider
+    if (isValid) {
+      saveCurrentDataToProvider();
+    }
+
     return isValid;
   }
 
@@ -117,7 +161,6 @@ class PersonalInfoPageState extends State<PersonalInfoPage> {
     return phoneRegex.hasMatch(phone);
   }
 
-  // Added designation validation method
   bool _isValidDesignation(String designation) {
     final designationRegex = RegExp(r'^[a-zA-Z0-9\s\-]{2,}$');
     return designationRegex.hasMatch(designation);
@@ -125,38 +168,49 @@ class PersonalInfoPageState extends State<PersonalInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 26.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 10),
-            PersonalInfoImagePicker(
-              imageFile: _imageFile,
-              onImagePicked: (file) {
-                setState(() => _imageFile = file);
-                Provider.of<UserProvider>(context, listen: false)
-                    .updateUserData(profileImagePath: file.path);
-              },
-            ),
-            if (_imageFile == null) const SizedBox(height: 20),
-            if (_imageFile == null || _imageFile != null)const SizedBox(height: 20),
-            PersonalInfoForm(
-              nameController: _nameController,
-              designationController: _designationController,
-              emailController: _emailController,
-              phoneController: _phoneController,
-              nameError: _nameError,
-              designationError: _designationError, // Added designation error
-              emailError: _emailError,
-              phoneError: _phoneError,
-              onNameErrorChanged: (error) => setState(() => _nameError = error),
-              onDesignationErrorChanged: (error) => setState(() => _designationError = error), // Added handler
-              onEmailErrorChanged: (error) => setState(() => _emailError = error),
-              onPhoneErrorChanged: (error) => setState(() => _phoneError = error),
-            ),
-          ],
+    return WillPopScope(
+      onWillPop: () async {
+        // Save current data when user navigates back
+        saveCurrentDataToProvider();
+        return true;
+      },
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 26.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+              PersonalInfoImagePicker(
+                imageFile: _imageFile,
+                onImagePicked: (file) {
+                  setState(() => _imageFile = file);
+                  Provider.of<UserProvider>(context, listen: false)
+                      .updateUserData(profileImagePath: file.path);
+                },
+              ),
+              if (_imageFile == null) const SizedBox(height: 20),
+              if (_imageFile == null || _imageFile != null)
+                const SizedBox(height: 20),
+              PersonalInfoForm(
+                nameController: _nameController,
+                designationController: _designationController,
+                emailController: _emailController,
+                phoneController: _phoneController,
+                nameError: _nameError,
+                designationError: _designationError,
+                emailError: _emailError,
+                phoneError: _phoneError,
+                onNameErrorChanged: (error) => setState(() => _nameError = error),
+                onDesignationErrorChanged: (error) =>
+                    setState(() => _designationError = error),
+                onEmailErrorChanged: (error) =>
+                    setState(() => _emailError = error),
+                onPhoneErrorChanged: (error) =>
+                    setState(() => _phoneError = error),
+              ),
+            ],
+          ),
         ),
       ),
     );

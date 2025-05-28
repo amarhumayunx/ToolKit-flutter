@@ -5,12 +5,13 @@ import 'dart:async';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
+import 'package:toolkit/widgets/buttons/gradient_btn.dart';
+import '../../services/save_zip_png_service.dart';
 import '../../services/word_images_service.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import '../../widgets/tools/document_container.dart';
-import '../../widgets/buttons/save_document_btn.dart';
 
 class SaveScreen extends StatefulWidget {
   final List<File> selectedImages;
@@ -107,46 +108,54 @@ class _SaveScreenState extends State<SaveScreen>
     }
 
     // Option 1: All images on one page (if you have few images)
-    if (widget.selectedImages.length <= 4) {
+    if (widget.selectedImages.length <= 2) {
       pdf.addPage(
         pw.Page(
           build: (pw.Context context) {
-            return pw.Column(
-              children: images
-                  .map((image) => pw.Container(
-                margin: const pw.EdgeInsets.only(bottom: 20),
-                height: 200, // Fixed height for each image
-                child: pw.Image(
-                  image,
-                  fit: pw.BoxFit.contain,
-                ),
-              ))
-                  .toList(),
+            return pw.Center(
+              child: pw.Column(
+                mainAxisAlignment: pw.MainAxisAlignment.center,
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
+                children: images
+                    .map((image) => pw.Container(
+                  margin: const pw.EdgeInsets.symmetric(vertical: 20),
+                  width: 400, // Increased width
+                  height: 300, // Increased height
+                  child: pw.Center(
+                    child: pw.Image(
+                      image,
+                      fit: pw.BoxFit.contain,
+                      width: 400,
+                      height: 300,
+                    ),
+                  ),
+                ))
+                    .toList(),
+              ),
             );
           },
         ),
       );
     }
-    // Option 2: Multiple pages with 2-3 images per page
+    // Option 2: One image per page for better quality and centering
     else {
-      const int imagesPerPage = 2;
-      for (int i = 0; i < images.length; i += imagesPerPage) {
-        final pageImages = images.skip(i).take(imagesPerPage).toList();
-
+      for (pw.MemoryImage image in images) {
         pdf.addPage(
           pw.Page(
             build: (pw.Context context) {
-              return pw.Column(
-                children: pageImages
-                    .map((image) => pw.Container(
-                  margin: const pw.EdgeInsets.only(bottom: 20),
-                  height: 250, // Adjust height based on images per page
-                  child: pw.Image(
-                    image,
-                    fit: pw.BoxFit.contain,
+              return pw.Center(
+                child: pw.Container(
+                  width: 500, // Large width for single image
+                  height: 400, // Large height for single image
+                  child: pw.Center(
+                    child: pw.Image(
+                      image,
+                      fit: pw.BoxFit.contain,
+                      width: 500,
+                      height: 400,
+                    ),
                   ),
-                ))
-                    .toList(),
+                ),
               );
             },
           ),
@@ -207,6 +216,24 @@ class _SaveScreenState extends State<SaveScreen>
     AppSnackBar.show(context, message: 'File deleted successfully');
   }
 
+  // New method to handle saving the file
+  Future<void> _handleSaveFile() async {
+    if (convertedFile != null) {
+      try {
+        await SaveFileService.saveFile(
+          context,
+          convertedFile!,
+          _getFormatExtension(),
+        );
+        // Navigate back to home after saving
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      } catch (e) {
+        AppSnackBar.show(context,
+            message: 'Failed to save file: ${e.toString()}');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -248,14 +275,13 @@ class _SaveScreenState extends State<SaveScreen>
           ),
           if (_animationCompleted && convertedFile != null)
             Positioned(
-              left: 20,
-              right: 20,
-              bottom: MediaQuery.of(context).padding.bottom + 20,
-              child: SaveDocumentButton(
-                documentFile: convertedFile!,
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              ),
-            ),
+                left: 20,
+                right: 20,
+                bottom: MediaQuery.of(context).padding.bottom + 20,
+                child: CustomGradientButton(
+                  text: 'Save',
+                  onPressed: _handleSaveFile,
+                )),
         ],
       ),
     );

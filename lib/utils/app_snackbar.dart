@@ -9,7 +9,6 @@ class AppSnackBar {
     final snackBar = SnackBar(
       content: Text(
         message,
-
         style: const TextStyle(
           color: AppColors.white,
           fontWeight: FontWeight.bold,
@@ -17,7 +16,6 @@ class AppSnackBar {
       ),
       backgroundColor: Colors.red.withOpacity(0.9),
       behavior: SnackBarBehavior.floating,
-
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),

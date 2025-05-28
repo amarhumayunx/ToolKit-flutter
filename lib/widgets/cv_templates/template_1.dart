@@ -1,15 +1,17 @@
-// Keep or add the standard import for typed data
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
-import 'package:open_file/open_file.dart';
 import 'dart:io';
 import 'package:flutter/rendering.dart';
+import 'package:toolkit/widgets/cv_templates/template4.dart';
+import 'package:toolkit/widgets/cv_templates/template_2.dart';
+import 'package:toolkit/widgets/cv_templates/template_3.dart';
 import 'dart:ui' as ui;
 
 import '../../models/language_model.dart';
@@ -21,36 +23,32 @@ import '../../provider/education_provider.dart';
 import '../../provider/language_provider.dart';
 import '../../provider/saved_cv_provider.dart';
 import '../../provider/skills_provider.dart';
+import '../../provider/template_provider.dart';
 import '../../provider/user_provider.dart';
 import '../../provider/work_experience_provider.dart';
-import '../../screens/cv_maker_screens/cv_maker_screen.dart';
+import '../../screens/cv_maker_screens/base_cv_template_screen.dart';
+import '../../screens/cv_maker_screens/create_cv_screen.dart'
+    show CreateCvScreen;
 import '../../utils/app_colors.dart';
+import '../../utils/app_snackbar.dart';
 import '../buttons/template_action_btn.dart';
-import '../custom_appbar.dart';
-
+import '../cv_widgets/template_selection_dialog.dart';
 
 class Template1 extends StatefulWidget {
   final List<Website> websites;
 
-  const Template1({super.key, this.websites = const []});
+  const Template1({Key? key, this.websites = const []}) : super(key: key);
 
   @override
   State<Template1> createState() => _Template1State();
 }
 
 class _Template1State extends State<Template1> {
-  // Current page being displayed
   int _currentPage = 1;
   int _totalPages = 1;
-
-  // Store all content sections in a flattened list for better pagination
   List<Widget> _allContentWidgets = [];
-
-  // Heights for each widget to estimate pagination
   final Map<Key, double> _widgetHeights = {};
-  final double _pageContentHeight = 462; // Max height minus padding
-
-  // Keys for each page container to capture as images
+  final double _pageContentHeight = 462;
   List<GlobalKey> _pageKeys = [];
 
   @override
@@ -196,7 +194,7 @@ class _Template1State extends State<Template1> {
         final certItemKey = GlobalKey();
         final item = certificationItems[i];
 
-        String dateRange = item.startDate;
+        String dateRange = "${item.startDate}";
 
         _allContentWidgets.add(KeyedSubtree(
           key: certItemKey,
@@ -254,7 +252,6 @@ class _Template1State extends State<Template1> {
   @override
   void initState() {
     super.initState();
-    // Schedule a post-frame callback to measure actual widget heights
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _measureActualWidgetHeights();
     });
@@ -279,6 +276,236 @@ class _Template1State extends State<Template1> {
     // Recalculate pagination with actual measurements
     _calculateTotalPages();
     setState(() {});
+  }
+
+  void _showTemplateSelectionDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => const TemplateSelectionDialog(),
+    ).then((selectedTemplateId) {
+      if (selectedTemplateId != null) {
+        _changeTemplate(selectedTemplateId);
+      }
+    });
+  }
+
+  Future<Map<String, dynamic>> _collectAllFormData() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final workExpProvider =
+        Provider.of<WorkExperienceProvider>(context, listen: false);
+    final educationProvider =
+        Provider.of<EducationProvider>(context, listen: false);
+    final certificationProvider =
+        Provider.of<CertificationProvider>(context, listen: false);
+    final skillsProvider = Provider.of<SkillsProvider>(context, listen: false);
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
+    final templateProvider =
+        Provider.of<TemplateProvider>(context, listen: false);
+
+    return {
+      'personalInfo': {
+        'fullName': userProvider.userData.fullName,
+        'designation': userProvider.userData.designation,
+        'email': userProvider.userData.email,
+        'phoneNumber': userProvider.userData.phoneNumber,
+        'profileImagePath': userProvider.userData.profileImagePath,
+      },
+      'careerObjective': userProvider.userData.careerObjective,
+      'education':
+          educationProvider.educationItems.map((e) => e.toMap()).toList(),
+      'workExperience':
+          workExpProvider.workExperienceItems.map((e) => e.toMap()).toList(),
+      'certifications': certificationProvider.certificationItems
+          .map((e) => e.toMap())
+          .toList(),
+      'skills': skillsProvider.skillItems.map((e) => e.toMap()).toList(),
+      'languages': languageProvider.languages.map((e) => e.toMap()).toList(),
+      // 'websites': userProvider.websites.map((e) => e.toMap()).toList(),
+      'templateId': templateProvider.selectedTemplateId,
+    };
+  }
+
+  Future<void> _exportAsPdf({required bool openAfterExport}) async {
+    try {
+      // First collect all form data
+      final formData = await _collectAllFormData();
+
+      final pdf = pw.Document();
+      List<Uint8List> pageImages = [];
+
+      // Capture all pages as images
+      for (int i = 0; i < _pageKeys.length; i++) {
+        final imageBytes = await _capturePageAsImage(_pageKeys[i]);
+        if (imageBytes != null) {
+          pageImages.add(imageBytes);
+          pdf.addPage(
+            pw.Page(
+              pageFormat: PdfPageFormat.a4,
+              build: (pw.Context context) {
+                return pw.Center(child: pw.Image(pw.MemoryImage(imageBytes)));
+              },
+            ),
+          );
+        }
+      }
+
+      // Get the Downloads directory
+      Directory? directory;
+      if (Platform.isAndroid) {
+        directory = Directory('/storage/emulated/0/Download');
+        if (!await directory.exists()) {
+          directory = await getExternalStorageDirectory();
+        }
+      } else if (Platform.isIOS) {
+        directory = await getApplicationDocumentsDirectory();
+      }
+
+      if (directory == null) {
+        throw Exception('Could not access storage directory');
+      }
+
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final fileName = 'CV_$timestamp.pdf';
+      final filePath = '${directory.path}/$fileName';
+      final file = File(filePath);
+
+      await file.writeAsBytes(await pdf.save());
+
+      // Create a thumbnail from the first page
+      Uint8List? thumbnailBytes;
+      if (pageImages.isNotEmpty) {
+        thumbnailBytes = await _createThumbnail(pageImages.first);
+      }
+
+      // Get template ID
+      final templateProvider =
+          Provider.of<TemplateProvider>(context, listen: false);
+      final templateId = templateProvider.selectedTemplateId;
+
+      // Save to SavedCVProvider with all required parameters
+      final savedCVProvider =
+          Provider.of<SavedCVProvider>(context, listen: false);
+      await savedCVProvider.addSavedCV(
+        fileName: fileName,
+        filePath: filePath,
+        thumbnailBytes: thumbnailBytes,
+        templateId: templateId,
+        formData: formData,
+      );
+
+      if (mounted) {
+        AppSnackBar.show(
+          context,
+          message: 'PDF saved successfully',
+        );
+      }
+
+      // Open the file if requested
+      if (openAfterExport) {
+        if (Platform.isAndroid || Platform.isIOS) {
+          await OpenFile.open(filePath);
+        }
+      }
+
+      // Clear all provider data after successful export
+      _clearAllData();
+    } catch (e) {
+      if (mounted) {
+        AppSnackBar.show(
+          context,
+          message: 'Error: ${e.toString()}',
+        );
+      }
+      debugPrint('Export error: $e');
+    }
+  }
+
+  Future<Uint8List> _createThumbnail(Uint8List imageBytes) async {
+    try {
+      // Create a smaller version of the image for thumbnail
+      final codec = await ui.instantiateImageCodec(
+        imageBytes,
+        targetWidth: 200, // Adjust thumbnail size as needed
+      );
+      final frame = await codec.getNextFrame();
+      final byteData =
+          await frame.image.toByteData(format: ui.ImageByteFormat.png);
+      return byteData!.buffer.asUint8List();
+    } catch (e) {
+      debugPrint('Error creating thumbnail: $e');
+      throw e;
+    }
+  }
+
+// Add this method to clear all provider data
+  void _clearAllData() {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final workExpProvider =
+        Provider.of<WorkExperienceProvider>(context, listen: false);
+    final educationProvider =
+        Provider.of<EducationProvider>(context, listen: false);
+    final certificationProvider =
+        Provider.of<CertificationProvider>(context, listen: false);
+    final skillsProvider = Provider.of<SkillsProvider>(context, listen: false);
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
+
+    // Clear all data from providers
+    userProvider.clearUserData();
+    workExpProvider.clearWorkExperienceItems();
+    educationProvider.clearEducationItems();
+    certificationProvider.clearCertificationItems();
+    skillsProvider.clearSkillItems();
+    languageProvider.clearLanguages();
+  }
+
+// Modify the redirect method to also clear data
+  void _redirectToCreateCvScreen() {
+    // Clear data before redirecting (as a backup)
+    _clearAllData();
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => CreateCvScreen()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
+// Method to handle template change
+  void _changeTemplate(int templateId) {
+    final templateProvider =
+        Provider.of<TemplateProvider>(context, listen: false);
+    templateProvider.setTemplate(templateId, 'Template $templateId');
+
+    final websites = Provider.of<UserProvider>(context, listen: false).websites;
+
+    Widget templateScreen;
+
+    switch (templateId) {
+      case 1:
+        templateScreen = Template1(websites: websites);
+        break;
+      case 2:
+        templateScreen = Template2(websites: websites);
+        break;
+      case 3:
+        templateScreen = Template3(websites: websites);
+        break;
+      case 4:
+        templateScreen = Template4(websites: websites);
+        break;
+      default:
+        templateScreen = Template1(websites: websites);
+    }
+
+    // Replace the current route with the new template
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => templateScreen,
+      ),
+    );
   }
 
   void _calculateTotalPages() {
@@ -307,321 +534,22 @@ class _Template1State extends State<Template1> {
     }
   }
 
-  Future<void> _saveCv(BuildContext context) async {
-    try {
-      final userData =
-          Provider.of<UserProvider>(context, listen: false).userData;
-
-      Provider.of<EducationProvider>(context, listen: false)
-          .clearEducationItems();
-      Provider.of<WorkExperienceProvider>(context, listen: false)
-          .clearWorkExperienceItems();
-      Provider.of<CertificationProvider>(context, listen: false)
-          .clearCertificationItems();
-      Provider.of<SkillsProvider>(context, listen: false).clearSkillItems();
-      Provider.of<LanguageProvider>(context, listen: false).clearLanguages();
-      final fileName =
-          '${userData.fullName?.replaceAll(' ', '_') ?? 'cv'}_resume.pdf';
-
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return Dialog(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 20),
-                  Text('Saving CV...', style: GoogleFonts.inter()),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-
-      // Create a PDF document
-      final pdf = pw.Document();
-
-      // Convert each page to an image and add to PDF
-      List<Uint8List> pageImages = [];
-      for (int i = 0; i < _pageKeys.length; i++) {
-        final imageBytes = await _capturePageAsImage(_pageKeys[i]);
-        if (imageBytes != null) {
-          pageImages.add(imageBytes);
-          final image = pw.MemoryImage(imageBytes);
-
-          pdf.addPage(
-            pw.Page(
-              pageFormat: PdfPageFormat.a4,
-              build: (pw.Context context) {
-                return pw.Center(
-                  child: pw.Image(image),
-                );
-              },
-            ),
-          );
-        }
-      }
-
-      // Use the first page image as thumbnail
-      Uint8List? thumbnailBytes = pageImages.isNotEmpty ? pageImages[0] : null;
-
-      // Save the PDF
-      final directory = await getApplicationDocumentsDirectory();
-      final filePath = '${directory.path}/$fileName';
-      final file = File(filePath);
-      await file.writeAsBytes(await pdf.save());
-
-      // Save CV to provider
-      final savedCVProvider =
-          Provider.of<SavedCVProvider>(context, listen: false);
-      await savedCVProvider.addSavedCV(fileName, filePath, thumbnailBytes);
-
-      // Clear user data fields after saving
-      Provider.of<UserProvider>(context, listen: false).clearUserData();
-
-      // Close the loading dialog
-      Navigator.of(context).pop();
-
-      // Show success dialog
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('CV Saved',
-                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-            content: Text('Your CV has been saved successfully.',
-                style: GoogleFonts.inter()),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // This will dismiss the alert dialog
-                  Navigator.pushReplacement(
-                    // Navigate back to CV maker screen
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const CvMakerScreen()),
-                  );
-                },
-                child: Text('OK', style: GoogleFonts.inter()),
-              ),
-            ],
-          );
-        },
-      );
-    } catch (e) {
-      // Close the loading dialog if it's open
-      if (Navigator.canPop(context)) {
-        Navigator.pop(context);
-      }
-
-      // Show error dialog
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error',
-                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-            content: Text('Failed to save CV: ${e.toString()}',
-                style: GoogleFonts.inter()),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('OK', style: GoogleFonts.inter()),
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
-
-// Also update the export function
-  Future<void> _exportToPdf() async {
-    try {
-      final userData =
-          Provider.of<UserProvider>(context, listen: false).userData;
-      Provider.of<WorkExperienceProvider>(context, listen: false)
-          .clearWorkExperienceItems();
-      Provider.of<EducationProvider>(context, listen: false)
-          .clearEducationItems();
-      Provider.of<SkillsProvider>(context, listen: false).clearSkillItems();
-      Provider.of<LanguageProvider>(context, listen: false).clearLanguages();
-      final fileName =
-          '${userData.fullName?.replaceAll(' ', '_') ?? 'cv'}_resume.pdf';
-
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return Dialog(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 20),
-                  Text('Generating PDF...', style: GoogleFonts.inter()),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-
-      // Create a PDF document
-      final pdf = pw.Document();
-
-      // Convert each page to an image and add to PDF
-      for (int i = 0; i < _pageKeys.length; i++) {
-        final imageBytes = await _capturePageAsImage(_pageKeys[i]);
-        if (imageBytes != null) {
-          final image = pw.MemoryImage(imageBytes);
-
-          pdf.addPage(
-            pw.Page(
-              pageFormat: PdfPageFormat.a4,
-              build: (pw.Context context) {
-                return pw.Center(
-                  child: pw.Image(image),
-                );
-              },
-            ),
-          );
-        }
-      }
-
-      // Save the PDF
-      final directory = await getApplicationDocumentsDirectory();
-      final filePath = '${directory.path}/$fileName';
-      final file = File(filePath);
-      await file.writeAsBytes(await pdf.save());
-
-      // Clear user data fields after exporting
-      Provider.of<UserProvider>(context, listen: false).clearUserData();
-
-      // Close the loading dialog
-      Navigator.pop(context);
-
-      // Show success dialog
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('PDF Created',
-                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-            content: Text('Your CV has been exported as a PDF.',
-                style: GoogleFonts.inter()),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  // Navigate back to form screen after exporting
-                  Navigator.pop(context);
-                },
-                child: Text('Close', style: GoogleFonts.inter()),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  OpenFile.open(filePath);
-                  // After opening the file, navigate back to form
-                  Navigator.pop(context);
-                },
-                child: Text('Open PDF',
-                    style: GoogleFonts.inter(color: AppColors.primary)),
-              ),
-            ],
-          );
-        },
-      );
-    } catch (e) {
-      // Close the loading dialog if it's open
-      if (Navigator.canPop(context)) {
-        Navigator.pop(context);
-      }
-
-      // Show error dialog
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error',
-                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-            content: Text('Failed to export PDF: ${e.toString()}',
-                style: GoogleFonts.inter()),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('OK', style: GoogleFonts.inter()),
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: CustomAppBar(
-        title: 'CV',
-        onBackPressed: () {
-          Navigator.pop(context);
-        },
-        actions: [
-          // Update the TextButton in the Custom App Bar in the build method:
-          TextButton(
-            onPressed: () {
-              // Save functionality
-              _saveCv(context);
-            },
-            child: Text(
-              'Save',
-              style: GoogleFonts.inter(
-                color: AppColors.primary,
-                fontSize: 16,
-              ),
+    return BaseCVTemplateScreen(
+      cvContent: Column(
+        children: [
+          for (int i = 1; i <= _totalPages; i++) ...[
+            RepaintBoundary(
+              key: _pageKeys[i - 1],
+              child: _buildPage(i),
             ),
-          ),
+            if (i < _totalPages) const SizedBox(height: 30),
+          ]
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(children: [
-                  const SizedBox(height: 80),
-                  // Build all pages instead of just the current one
-                  for (int i = 1; i <= _totalPages; i++) ...[
-                    RepaintBoundary(
-                      key: _pageKeys[i - 1],
-                      // Use the corresponding page key
-                      child: _buildPage(i),
-                    ),
-                    // Add spacing between pages
-                    if (i < _totalPages) const SizedBox(height: 30),
-                  ]
-                ]),
-              ),
-            ),
-            _buildTemplateButtons(),
-          ],
-        ),
-      ),
+      pageKeys: _pageKeys,
+      totalPages: _totalPages,
     );
   }
 
@@ -646,7 +574,7 @@ class _Template1State extends State<Template1> {
       ),
       padding: const EdgeInsets.all(10),
       child: SingleChildScrollView(
-        physics: const NeverScrollableScrollPhysics(),
+        physics: NeverScrollableScrollPhysics(),
         // Prevent scrolling within the page
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -887,7 +815,7 @@ class _Template1State extends State<Template1> {
                         ),
                       ],
                     ))
-                ,
+                .toList(),
           ],
         ),
         // Add spacing before the first section (Objective)
@@ -1018,7 +946,7 @@ class _Template1State extends State<Template1> {
                   ),
               ],
             );
-          }),
+          }).toList(),
         ]
       ],
     );
@@ -1173,17 +1101,6 @@ class _Template1State extends State<Template1> {
           ],
         );
       }).toList(),
-    );
-  }
-
-  Widget _buildTemplateButtons() {
-    return TemplateActionButtons(
-      onChangeTemplate: () {
-        // Handle template change
-      },
-      onExport: () {
-        _exportToPdf();
-      },
     );
   }
 }

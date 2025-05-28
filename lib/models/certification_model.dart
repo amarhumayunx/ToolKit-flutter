@@ -14,4 +14,15 @@ class CertificationItem {
     this.isCompleted = false,
     this.description = '',
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'certificationName': certificationName,
+      'organizationName': organizationName,
+      'startDate': startDate,
+      'endDate': endDate,
+      'isCompleted': isCompleted,
+      'description': description,
+    };
+  }
 }

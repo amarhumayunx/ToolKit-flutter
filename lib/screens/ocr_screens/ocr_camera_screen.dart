@@ -1,15 +1,11 @@
-// Add this at the top of your file with other imports
 import 'dart:io';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-
 import '../../utils/app_colors.dart';
-
 // Updated OcrCameraScreen with image preview and proper done button functionality
 class OcrCameraScreen extends StatefulWidget {
   const OcrCameraScreen({super.key});
@@ -27,7 +23,7 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
   String _errorMessage = '';
   bool _isLoading = true;
   String _selectedScanType = 'Single'; // default to Single
-  final List<File> _capturedImages = [];
+  List<File> _capturedImages = [];
   final ImagePicker _imagePicker = ImagePicker();
   bool _isFlashOn = false;
   bool _isGridVisible = true;
@@ -119,15 +115,14 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
         _returnWithImages();
       }
     } catch (e) {
-      // Removed snackbar as per requirements
       print('Error capturing image: $e');
     }
   }
 
   Future<void> _pickImageFromGallery() async {
     try {
-      final List<XFile> pickedFiles = await _imagePicker.pickMultiImage();
-      if (pickedFiles.isNotEmpty) {
+      final List<XFile>? pickedFiles = await _imagePicker.pickMultiImage();
+      if (pickedFiles != null && pickedFiles.isNotEmpty) {
         setState(() {
           _capturedImages
               .addAll(pickedFiles.map((file) => File(file.path)).toList());
@@ -138,7 +133,6 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
         }
       }
     } catch (e) {
-      // Removed snackbar as per requirements
       print('Error selecting images: $e');
     }
   }
@@ -197,9 +191,9 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: Colors.white,
-        body: Center(
+        body: const Center(
           child: CircularProgressIndicator(),
         ),
       );
@@ -233,9 +227,9 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
     }
 
     if (!_isCameraInitialized) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: Colors.white,
-        body: Center(
+        body: const Center(
           child: Text('Initializing camera...'),
         ),
       );
@@ -292,9 +286,9 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
             child: Container(
               height: 150,
               padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.white,
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),

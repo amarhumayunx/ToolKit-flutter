@@ -21,7 +21,7 @@ class TemplateActionButtons extends StatelessWidget {
         children: [
           ChangeTemplateButton(onPressed: onChangeTemplate),
           const SizedBox(width: 16),
-          ExportButton(onPressed: onExport),
+          ExportButton(onExport: onExport),
         ],
       ),
     );

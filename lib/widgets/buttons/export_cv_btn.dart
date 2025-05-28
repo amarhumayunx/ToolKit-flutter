@@ -3,9 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../utils/app_colors.dart';
 
 class ExportButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback onExport; // Rename to be more specific
 
-  const ExportButton({super.key, required this.onPressed});
+  const ExportButton({super.key, required this.onExport});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class ExportButton extends StatelessWidget {
         ],
       ),
       child: TextButton(
-        onPressed: onPressed,
+        onPressed: onExport, // Use the renamed callback
         style: TextButton.styleFrom(
           padding: EdgeInsets.zero,
           foregroundColor: AppColors.primary,

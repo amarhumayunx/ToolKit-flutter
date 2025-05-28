@@ -7,7 +7,9 @@ import '../../widgets/cv_widgets/education_form_widget.dart';
 import '../../widgets/cv_widgets/saved_education_item.dart';
 
 class EducationDetailPage extends StatefulWidget {
-  const EducationDetailPage({super.key});
+  final List<Map<String, dynamic>>? initialData;
+
+  const EducationDetailPage({super.key, this.initialData});
 
   @override
   State<EducationDetailPage> createState() => _EducationDetailPageState();
@@ -26,6 +28,38 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
   DateTime? startDate;
   DateTime? endDate;
   String? dateError;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialData();
+    });
+  }
+
+  void _loadInitialData() {
+    if (widget.initialData != null && widget.initialData!.isNotEmpty) {
+      final educationProvider = Provider.of<EducationProvider>(context, listen: false);
+
+      // Schedule the updates in a post-frame callback to be safe
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Clear any existing data
+        educationProvider.clearEducationItems();
+
+        // Load the initial data into the provider
+        for (var item in widget.initialData!) {
+          educationProvider.addEducationItem(EducationItem(
+            degree: item['degree'] ?? '',
+            institute: item['institute'] ?? '',
+            startDate: item['startDate'] ?? '',
+            endDate: item['endDate'] ?? '',
+            description: item['description'] ?? '',
+            isCompleted: item['isCompleted'] ?? false,
+          ));
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -74,7 +108,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
 
       setState(() {
         controller.text =
-            "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString().substring(2)}";
+        "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString().substring(2)}";
       });
     }
   }
@@ -91,7 +125,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
     }
 
     final educationProvider =
-        Provider.of<EducationProvider>(context, listen: false);
+    Provider.of<EducationProvider>(context, listen: false);
     final newEducation = EducationItem(
       degree: _degreeController.text,
       institute: _instituteController.text,
@@ -112,7 +146,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
 
   void _editEducation(int index) {
     final educationProvider =
-        Provider.of<EducationProvider>(context, listen: false);
+    Provider.of<EducationProvider>(context, listen: false);
     final item = educationProvider.educationItems[index];
 
     final startDateParts = item.startDate.split('/');
@@ -150,7 +184,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
 
   void _deleteEducation(int index) {
     final educationProvider =
-        Provider.of<EducationProvider>(context, listen: false);
+    Provider.of<EducationProvider>(context, listen: false);
     educationProvider.deleteEducationItem(index);
   }
 

@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/skills_model.dart';
 import '../../provider/skills_provider.dart';
-
 import '../../widgets/tags_input_widget.dart';
 
 class SkillsPage extends StatefulWidget {
+  final List<Map<String, dynamic>>? initialData;
   const SkillsPage({
+    this.initialData,
     super.key,
   });
 
@@ -17,6 +18,32 @@ class SkillsPage extends StatefulWidget {
 class _SkillsPageState extends State<SkillsPage> {
   final TextEditingController _skillController = TextEditingController();
   final FocusNode _skillFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialData();
+    });
+  }
+
+  void _loadInitialData() {
+    if (widget.initialData != null && widget.initialData!.isNotEmpty) {
+      final skillsProvider = Provider.of<SkillsProvider>(context, listen: false);
+
+      // Clear any existing data
+      skillsProvider.clearSkillItems();
+
+      // Load the initial data into the provider
+      for (var item in widget.initialData!) {
+        skillsProvider.addSkill(
+          Skill(
+            name: item['name']?.toString() ?? '',
+          ),
+        );
+      }
+    }
+  }
 
   @override
   void dispose() {

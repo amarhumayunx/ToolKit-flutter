@@ -1,3 +1,4 @@
+import 'package:crop_image/crop_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,6 +9,7 @@ import 'package:image/image.dart' as img;
 import 'package:toolkit/screens/scanner_screens/result_screen.dart';
 import '../../services/word_images_service.dart';
 import '../../utils/app_colors.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/batch_app_bar.dart';
 import '../../widgets/scanner_widgets/document_preview.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +18,7 @@ import '../../widgets/scanner_widgets/filter_selector.dart';
 // Filter provider to manage filter state
 class FilterProvider extends ChangeNotifier {
   String _selectedFilter = 'Original';
-  final Map<String, File> _filterCache = {};
+  Map<String, File> _filterCache = {};
 
   String get selectedFilter => _selectedFilter;
 
@@ -49,7 +51,7 @@ class DocumentEditScreen extends StatefulWidget {
   final Rect? cropRect;
 
   const DocumentEditScreen({
-    super.key,
+    Key? key,
     required this.imageFile,
     this.isBatchMode = false,
     this.batchImages,
@@ -60,7 +62,7 @@ class DocumentEditScreen extends StatefulWidget {
     this.isLegal = false,
     this.isLetter = false,
     this.isIdCard = false,
-  });
+  }) : super(key: key);
 
   @override
   State<DocumentEditScreen> createState() => _DocumentEditScreenState();
@@ -98,7 +100,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
   ];
 
   // Pre-computed filter thumbnails
-  final Map<String, File> _filterPreviews = {};
+  Map<String, File> _filterPreviews = {};
   bool _previewsReady = false;
 
   late FilterProvider _filterProvider;
@@ -201,15 +203,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     } catch (e) {
       debugPrint('Error cropping image: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Colors.black,
-            content: Text(
-              'Failed to crop image',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        );
+        AppSnackBar.show(context, message: 'Failed to crop image');
       }
     } finally {
       if (mounted) {
@@ -479,12 +473,8 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
       } catch (e) {
         if (mounted) {
           Navigator.pop(context); // Close loading dialog
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to create document: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
+
+          AppSnackBar.show(context, message: 'Failed to create document: $e');
         }
       }
     }

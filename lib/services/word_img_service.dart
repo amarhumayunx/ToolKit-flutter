@@ -46,14 +46,14 @@ class WordImageService {
         docRelsXml.length, utf8.encode(docRelsXml)));
 
     // Add media (image) file
-    const imageId = 'rId1';
+    final imageId = 'rId1';
     final imageExt = _getImageExtension(imageFile.path);
     archive.addFile(ArchiveFile(
         'word/media/image1.$imageExt', imageBytes.length, imageBytes));
 
     // Add main document content with embedded image
     final docXml =
-        _generateWordDocumentWithImageXml(imageId, widthEmu, heightEmu);
+    _generateWordDocumentWithImageXml(imageId, widthEmu, heightEmu);
     archive.addFile(
         ArchiveFile('word/document.xml', docXml.length, utf8.encode(docXml)));
 

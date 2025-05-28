@@ -7,21 +7,27 @@ class SkillsProvider with ChangeNotifier {
   List<Skill> get skillItems => _skillItems;
 
   void addSkill(Skill skill) {
-    _skillItems.add(skill);
-    notifyListeners();
+    if (_skillItems.length < 6) {  // Maintain the 6-skill limit
+      _skillItems.add(skill);
+      notifyListeners();
+    }
   }
 
   void removeSkill(int index) {
-    _skillItems.removeAt(index);
+    if (index >= 0 && index < _skillItems.length) {
+      _skillItems.removeAt(index);
+      notifyListeners();
+    }
+  }
+
+  // Load all skill items at once
+  void loadSkills(List<Skill> skills) {
+    _skillItems = List.from(skills.take(6));  // Ensure max 6 skills
     notifyListeners();
   }
 
-  void setSkills(List<Skill> skills) {
-    _skillItems = skills;
-    notifyListeners();
-  }
   void clearSkillItems() {
-    _skillItems = [];
+    _skillItems.clear();
     notifyListeners();
   }
 }

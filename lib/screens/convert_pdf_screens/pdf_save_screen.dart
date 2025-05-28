@@ -317,7 +317,8 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
     widget.onFileDeleted?.call();
     // Pop twice to go back two screens
     Navigator.of(context).pop(); // First pop (current screen)
-    Navigator.of(context).pop(); // Second pop (previous screen)
+    Navigator.of(context).pop();
+    Navigator.of(context).pop(true);// Second pop (previous screen)
 
     // Show a success message
     AppSnackBar.show(context, message: 'File deleted successfully');
