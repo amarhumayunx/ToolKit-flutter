@@ -7,7 +7,6 @@ import '../../widgets/buttons/save_document_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import 'file_compression_service.dart';
-import 'package:path/path.dart' as path;
 
 class CompressedFileResultScreen extends StatefulWidget {
   final List<File> originalFiles;
@@ -236,7 +235,7 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
                       itemBuilder: (context, index) {
                         final compressedFile = widget.compressedFiles[index];
                         return DocumentContainer(
-                          filePath: compressedFile!.path,
+                          filePath: compressedFile.path,
                           onTap: () => _openFile(compressedFile),
                           onDelete: _handleFileDeleted,
                         );

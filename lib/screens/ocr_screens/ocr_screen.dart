@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
@@ -20,7 +19,7 @@ class OcrScreen extends StatefulWidget {
 }
 
 class _OcrScreenState extends State<OcrScreen> {
-  List<File> _selectedImages = []; // Changed to list of files
+  final List<File> _selectedImages = []; // Changed to list of files
   final ImagePicker _picker = ImagePicker();
   String _extractedText = '';
 
@@ -31,7 +30,7 @@ class _OcrScreenState extends State<OcrScreen> {
         final List<File>? capturedImages = await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => OcrCameraScreen(),
+            builder: (context) => const OcrCameraScreen(),
           ),
         );
 
@@ -109,7 +108,7 @@ class _OcrScreenState extends State<OcrScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: ToolsAppBar(
+      appBar: const ToolsAppBar(
         title: 'OCR',
       ),
       body: Column(
@@ -122,9 +121,9 @@ class _OcrScreenState extends State<OcrScreen> {
                 children: [
 
 
-                  CustomSvgImage(imagePath: 'assets/images/ocr_image.svg'),
+                  const CustomSvgImage(imagePath: 'assets/images/ocr_image.svg'),
                   const SizedBox(height: 30),
-                  InfoCard(
+                  const InfoCard(
                     title: 'Extract text from files',
                     description:
                         'Seamlessly extract text copy from multiple images or documents instantly.',

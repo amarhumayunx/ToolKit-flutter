@@ -211,7 +211,7 @@ class _SaveScreenState extends State<SaveScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(title: 'Convert Images'),
+      appBar: const CustomAppBar(title: 'Convert Images'),
       body: Stack(
         children: [
           SingleChildScrollView(

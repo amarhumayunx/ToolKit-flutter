@@ -11,11 +11,11 @@ class FileOptionsMenu extends StatelessWidget {
   final Function(String)? onFileRenamed;
 
   const FileOptionsMenu({
-    Key? key,
+    super.key,
     required this.filePath,
     this.onDelete,
     this.onFileRenamed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +106,7 @@ class FileOptionsMenu extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 12,
             fontWeight: FontWeight.w300,
-            color: Color(0xFF8E8E93),
+            color: const Color(0xFF8E8E93),
           ),
         ),
       ),
@@ -234,7 +234,7 @@ class FileOptionsMenu extends StatelessWidget {
                             }
 
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
+                              const SnackBar(
                                   content: Text('File renamed successfully')),
                             );
 

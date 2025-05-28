@@ -23,7 +23,7 @@ class MergeFileMainScreen extends StatefulWidget {
 }
 
 class _MergeFileMainScreenState extends State<MergeFileMainScreen> {
-  List<File> _selectedPdfs = [];
+  final List<File> _selectedPdfs = [];
   String? _errorMessage;
 
   Future<void> _pickPdfs() async {
@@ -137,7 +137,7 @@ class _MergeFileMainScreenState extends State<MergeFileMainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: ToolsAppBar(title: 'Merge PDFs'),
+      appBar: const ToolsAppBar(title: 'Merge PDFs'),
       body: Column(
         children: [
           Expanded(
@@ -146,9 +146,9 @@ class _MergeFileMainScreenState extends State<MergeFileMainScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CustomSvgImage(imagePath: 'assets/images/merge_file_img.svg'),
+                  const CustomSvgImage(imagePath: 'assets/images/merge_file_img.svg'),
                   const SizedBox(height: 30),
-                  InfoCard(
+                  const InfoCard(
                     title: 'Merge PDF Files',
                     description:
                         'Effortlessly merge PDF Files for easier sharing, storage, and organization.',

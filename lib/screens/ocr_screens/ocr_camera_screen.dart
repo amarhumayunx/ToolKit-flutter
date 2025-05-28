@@ -9,7 +9,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../utils/app_colors.dart';
-import '../../widgets/scanner_widgets/camera_appbar.dart';
 
 // Updated OcrCameraScreen with image preview and proper done button functionality
 class OcrCameraScreen extends StatefulWidget {
@@ -28,7 +27,7 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
   String _errorMessage = '';
   bool _isLoading = true;
   String _selectedScanType = 'Single'; // default to Single
-  List<File> _capturedImages = [];
+  final List<File> _capturedImages = [];
   final ImagePicker _imagePicker = ImagePicker();
   bool _isFlashOn = false;
   bool _isGridVisible = true;
@@ -127,8 +126,8 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
 
   Future<void> _pickImageFromGallery() async {
     try {
-      final List<XFile>? pickedFiles = await _imagePicker.pickMultiImage();
-      if (pickedFiles != null && pickedFiles.isNotEmpty) {
+      final List<XFile> pickedFiles = await _imagePicker.pickMultiImage();
+      if (pickedFiles.isNotEmpty) {
         setState(() {
           _capturedImages
               .addAll(pickedFiles.map((file) => File(file.path)).toList());
@@ -198,9 +197,9 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(
+      return const Scaffold(
         backgroundColor: Colors.white,
-        body: const Center(
+        body: Center(
           child: CircularProgressIndicator(),
         ),
       );
@@ -234,9 +233,9 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
     }
 
     if (!_isCameraInitialized) {
-      return Scaffold(
+      return const Scaffold(
         backgroundColor: Colors.white,
-        body: const Center(
+        body: Center(
           child: Text('Initializing camera...'),
         ),
       );
@@ -293,9 +292,9 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
             child: Container(
               height: 150,
               padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.white,
-                borderRadius: const BorderRadius.only(
+                borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),

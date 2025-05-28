@@ -25,16 +25,14 @@ import '../../provider/user_provider.dart';
 import '../../provider/work_experience_provider.dart';
 import '../../screens/cv_maker_screens/cv_maker_screen.dart';
 import '../../utils/app_colors.dart';
-import '../buttons/save_edit_delete_btns.dart';
 import '../buttons/template_action_btn.dart';
 import '../custom_appbar.dart';
 
-import 'package:uuid/uuid.dart';
 
 class Template1 extends StatefulWidget {
   final List<Website> websites;
 
-  const Template1({Key? key, this.websites = const []}) : super(key: key);
+  const Template1({super.key, this.websites = const []});
 
   @override
   State<Template1> createState() => _Template1State();
@@ -198,7 +196,7 @@ class _Template1State extends State<Template1> {
         final certItemKey = GlobalKey();
         final item = certificationItems[i];
 
-        String dateRange = "${item.startDate}";
+        String dateRange = item.startDate;
 
         _allContentWidgets.add(KeyedSubtree(
           key: certItemKey,
@@ -606,7 +604,7 @@ class _Template1State extends State<Template1> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(children: [
-                  SizedBox(height: 80),
+                  const SizedBox(height: 80),
                   // Build all pages instead of just the current one
                   for (int i = 1; i <= _totalPages; i++) ...[
                     RepaintBoundary(
@@ -648,7 +646,7 @@ class _Template1State extends State<Template1> {
       ),
       padding: const EdgeInsets.all(10),
       child: SingleChildScrollView(
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         // Prevent scrolling within the page
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -889,7 +887,7 @@ class _Template1State extends State<Template1> {
                         ),
                       ],
                     ))
-                .toList(),
+                ,
           ],
         ),
         // Add spacing before the first section (Objective)
@@ -1020,7 +1018,7 @@ class _Template1State extends State<Template1> {
                   ),
               ],
             );
-          }).toList(),
+          }),
         ]
       ],
     );

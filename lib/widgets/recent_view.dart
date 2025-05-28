@@ -56,10 +56,9 @@ class RecentsView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Center(
-                  child: SvgPicture.asset(
-                    'assets/icons/document_icon.svg',
-                    width: 20,
-                    height: 20,
+                  child: Image.asset(
+                    'assets/images/doc.png',
+                    fit: BoxFit.fill,
                   ),
                 ),
               ),

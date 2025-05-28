@@ -23,10 +23,10 @@ class MainCVScreen extends StatefulWidget {
   final GlobalKey<PersonalInfoPageState> personalInfoKey = GlobalKey();
 
   MainCVScreen({
-    Key? key,
+    super.key,
     required this.templateId,
     required this.templateName,
-  }) : super(key: key);
+  });
 
   @override
   State<MainCVScreen> createState() => _MainCVScreenState();
@@ -56,7 +56,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
   void goToNextPage() {
     if (currentStep < stepTitles.length) {
       _pageController.nextPage(
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     }
@@ -65,7 +65,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
   void goToPreviousPage() {
     if (currentStep > 1) {
       _pageController.previousPage(
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     }
@@ -83,20 +83,20 @@ class _MainCVScreenState extends State<MainCVScreen> {
 
     switch (templateId) {
       case 1:
-        templateScreen = Template1();
+        templateScreen = const Template1();
         break;
       case 2:
-        templateScreen = Template2();
+        templateScreen = const Template2();
         break;
       case 3:
-        templateScreen = Template3();
+        templateScreen = const Template3();
         break;
       case 4:
-        templateScreen = Template4();
+        templateScreen = const Template4();
         break;
       default:
         // Fallback to Template1 if templateId doesn't match any case
-        templateScreen = Template1();
+        templateScreen = const Template1();
     }
 
     // Navigate to the selected template
@@ -134,7 +134,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
           Expanded(
             child: PageView(
               controller: _pageController,
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               onPageChanged: (index) {
                 setState(() {
                   currentStep = index + 1;
@@ -147,20 +147,20 @@ class _MainCVScreenState extends State<MainCVScreen> {
                   templateId: widget.templateId,
                   templateName: widget.templateName,
                 ),
-                CareerObjectivesPage(),
-                EducationDetailPage(),
-                WorkExperiencePage(),
-                CertificationPage(),
-                SkillsPage(),
-                LanguagesPage(),
-                WebsitePage(),
+                const CareerObjectivesPage(),
+                const EducationDetailPage(),
+                const WorkExperiencePage(),
+                const CertificationPage(),
+                const SkillsPage(),
+                const LanguagesPage(),
+                const WebsitePage(),
               ],
             ),
           ),
         ],
       ),
       bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(
+        padding: const EdgeInsets.only(
           bottom: 28.0,
           left: 28.0,
           right: 28.0,

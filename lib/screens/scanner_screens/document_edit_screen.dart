@@ -1,4 +1,3 @@
-import 'package:crop_image/crop_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -17,7 +16,7 @@ import '../../widgets/scanner_widgets/filter_selector.dart';
 // Filter provider to manage filter state
 class FilterProvider extends ChangeNotifier {
   String _selectedFilter = 'Original';
-  Map<String, File> _filterCache = {};
+  final Map<String, File> _filterCache = {};
 
   String get selectedFilter => _selectedFilter;
 
@@ -50,7 +49,7 @@ class DocumentEditScreen extends StatefulWidget {
   final Rect? cropRect;
 
   const DocumentEditScreen({
-    Key? key,
+    super.key,
     required this.imageFile,
     this.isBatchMode = false,
     this.batchImages,
@@ -61,7 +60,7 @@ class DocumentEditScreen extends StatefulWidget {
     this.isLegal = false,
     this.isLetter = false,
     this.isIdCard = false,
-  }) : super(key: key);
+  });
 
   @override
   State<DocumentEditScreen> createState() => _DocumentEditScreenState();
@@ -99,7 +98,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
   ];
 
   // Pre-computed filter thumbnails
-  Map<String, File> _filterPreviews = {};
+  final Map<String, File> _filterPreviews = {};
   bool _previewsReady = false;
 
   late FilterProvider _filterProvider;
@@ -203,7 +202,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
       debugPrint('Error cropping image: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             backgroundColor: Colors.black,
             content: Text(
               'Failed to crop image',

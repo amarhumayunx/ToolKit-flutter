@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_pdf/pdf.dart' as syncfusion;
 import 'package:toolkit/screens/split_screen/split_progress_screen.dart';
 import 'package:toolkit/widgets/buttons/gradient_btn.dart';
 import 'package:toolkit/widgets/custom_appbar.dart';
@@ -47,40 +46,10 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
     });
   }
 
-  bool get _hasPagesSelected => selectedPages.any((selected) => selected);
 
-  Future<int> _getPdfPageCount() async {
-    if (!widget.selectedDocument.name.toLowerCase().endsWith('.pdf')) {
-      return 6; // Default for non-PDF files
-    }
 
-    try {
-      final pdfData = await widget.selectedDocument.file.readAsBytes();
-      final document = syncfusion.PdfDocument(inputBytes: pdfData);
-      final pageCount = document.pages.count;
-      document.dispose();
-      return pageCount;
-    } catch (e) {
-      print('Error getting PDF page count: $e');
-      return 6; // Fallback value
-    }
-  }
 
-  void _updatePageCount(String value) {
-    // Validate and update total pages
-    final newCount = int.tryParse(value);
-    if (newCount != null && newCount > 0) {
-      setState(() {
-        totalPages = newCount;
-        // Preserve selections for pages that still exist
-        List<bool> newSelectedPages = List.generate(totalPages, (index) => false);
-        for (int i = 0; i < newSelectedPages.length && i < selectedPages.length; i++) {
-          newSelectedPages[i] = selectedPages[i];
-        }
-        selectedPages = newSelectedPages;
-      });
-    }
-  }
+
 
   void _onSplitPressed() {
     final anySelected = selectedPages.any((s) => s);

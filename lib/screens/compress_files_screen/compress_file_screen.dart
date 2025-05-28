@@ -5,7 +5,6 @@ import 'package:toolkit/screens/compress_files_screen/file_drop_compress.dart';
 import 'package:toolkit/utils/app_colors.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
-import '../../widgets/tools/file_selection_container.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
 import 'compress_file_result_screen.dart';
@@ -78,29 +77,6 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
     });
 
     try {
-      // Show loading indicator
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return Dialog(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 20),
-                  const Text('Compressing files...'),
-                  const SizedBox(height: 10),
-                  Text('${_selectedFiles.length} files being processed'),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-
       // Perform actual compression using our FileCompressor utility
       List<File> compressedFiles = await FileCompressor.compressBatch(
         _selectedFiles,
@@ -139,8 +115,6 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
       );
     }
   }
-
-
 
   void _removeFile(int index) {
     setState(() {
@@ -214,14 +188,6 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                       ],
                     ),
                   ),
-                  // FileSelectionContainer(
-                  //   title: 'Select Files',
-                  //   emptyStateText: 'Click to browse files',
-                  //   selectedFiles: _selectedFiles,
-                  //   onTap: _pickFiles,
-                  //   onRemoveFile: _removeFile,
-                  //   isMultipleSelection: true,
-                  // ),
 
                   if (_fileErrorText != null)
                     Padding(
@@ -237,7 +203,6 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                         ),
                       ),
                     ),
-
 
                   // Add compression quality slider
                   if (_selectedFiles.isNotEmpty) ...[
@@ -306,26 +271,5 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
         ],
       ),
     );
-  }
-
-  IconData _getFileIcon(String filePath) {
-    final ext = filePath.split('.').last.toLowerCase();
-
-    switch (ext) {
-      case 'pdf':
-        return Icons.picture_as_pdf;
-      case 'doc':
-      case 'docx':
-        return Icons.description;
-      case 'ppt':
-      case 'pptx':
-        return Icons.slideshow;
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-        return Icons.image;
-      default:
-        return Icons.insert_drive_file;
-    }
   }
 }
