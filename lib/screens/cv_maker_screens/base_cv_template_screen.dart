@@ -45,34 +45,26 @@ class BaseCVTemplateScreen extends StatefulWidget {
 }
 
 class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
+  bool _isExporting = false;
+
   @override
   void initState() {
     super.initState();
-    // Remove automatic notification initialization
-    // Notifications will be initialized only when user enables them in settings
   }
 
   Future<Map<String, dynamic>> _collectAllFormData() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final workExpProvider =
-    Provider.of<WorkExperienceProvider>(context, listen: false);
-    final educationProvider =
-    Provider.of<EducationProvider>(context, listen: false);
-    final certificationProvider =
-    Provider.of<CertificationProvider>(context, listen: false);
+    final workExpProvider = Provider.of<WorkExperienceProvider>(context, listen: false);
+    final educationProvider = Provider.of<EducationProvider>(context, listen: false);
+    final certificationProvider = Provider.of<CertificationProvider>(context, listen: false);
     final skillsProvider = Provider.of<SkillsProvider>(context, listen: false);
-    final languageProvider =
-    Provider.of<LanguageProvider>(context, listen: false);
-    final templateProvider =
-    Provider.of<TemplateProvider>(context, listen: false);
+    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+    final templateProvider = Provider.of<TemplateProvider>(context, listen: false);
 
-    // Convert websites to serializable format
-    final websites = userProvider.websites
-        .map((website) => {
+    final websites = userProvider.websites.map((website) => {
       'name': website.name,
       'url': website.url,
-    })
-        .toList();
+    }).toList();
 
     return {
       'personalInfo': {
@@ -83,13 +75,9 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
         'profileImagePath': userProvider.userData.profileImagePath,
       },
       'careerObjective': userProvider.userData.careerObjective,
-      'education':
-      educationProvider.educationItems.map((e) => e.toMap()).toList(),
-      'workExperience':
-      workExpProvider.workExperienceItems.map((e) => e.toMap()).toList(),
-      'certifications': certificationProvider.certificationItems
-          .map((e) => e.toMap())
-          .toList(),
+      'education': educationProvider.educationItems.map((e) => e.toMap()).toList(),
+      'workExperience': workExpProvider.workExperienceItems.map((e) => e.toMap()).toList(),
+      'certifications': certificationProvider.certificationItems.map((e) => e.toMap()).toList(),
       'skills': skillsProvider.skillItems.map((e) => e.toMap()).toList(),
       'languages': languageProvider.languages.map((e) => e.toMap()).toList(),
       'websites': websites,
@@ -98,11 +86,12 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
   }
 
   Future<void> _exportAsPdf({required bool openAfterExport}) async {
+    if (_isExporting) return;
+    _isExporting = true;
+
     try {
-      // Show loading dialog
       _showLoadingDialog();
 
-      // Only show notifications if they are enabled in settings
       bool notificationsEnabled = await NotificationService.areNotificationsEnabled();
       if (notificationsEnabled) {
         await NotificationService.showExportStartNotification();
@@ -112,7 +101,6 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
       final pdf = pw.Document();
       List<Uint8List> pageImages = [];
 
-      // Capture pages as images
       for (final key in widget.pageKeys) {
         final imageBytes = await _capturePageAsImage(key);
         if (imageBytes != null && imageBytes.isNotEmpty) {
@@ -132,11 +120,8 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
         throw Exception('Failed to capture any pages');
       }
 
-      // Save PDF
       final toolkitDir = await _getToolkitDirectory();
       if (toolkitDir == null) throw Exception('Could not access storage');
-
-      await toolkitDir.create(recursive: true);
 
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final fileName = 'CV_$timestamp.pdf';
@@ -144,7 +129,6 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
 
       await File(filePath).writeAsBytes(await pdf.save());
 
-      // Create thumbnail (handle potential errors)
       Uint8List? thumbnailBytes;
       try {
         thumbnailBytes = await _createThumbnail(pageImages.first);
@@ -152,9 +136,7 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
         debugPrint('Error creating thumbnail: $e');
       }
 
-      // Save to provider and wait for completion
-      final savedCVProvider =
-      Provider.of<SavedCVProvider>(context, listen: false);
+      final savedCVProvider = Provider.of<SavedCVProvider>(context, listen: false);
       await savedCVProvider.addSavedCV(
         fileName: fileName,
         filePath: filePath,
@@ -163,31 +145,28 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
         formData: formData,
       );
 
-      // Wait a moment to ensure the provider has updated
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      // Show success notification only if notifications are enabled
       if (notificationsEnabled) {
         await NotificationService.cancelExportProgressNotification();
         await NotificationService.showExportNotification();
       }
 
       if (mounted) {
-        // Close loading dialog
         Navigator.pop(context);
-
         AppSnackBar.show(context, message: 'PDF saved successfully');
+
         if (openAfterExport) {
           await OpenFile.open(filePath);
         }
 
-        // Clear data and navigate
         _clearAllData();
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const CreateCvScreen()),
+              (Route<dynamic> route) => false,
+        );
       }
     } catch (e) {
       debugPrint('Export error: $e');
 
-      // Show error notification only if notifications are enabled
       bool notificationsEnabled = await NotificationService.areNotificationsEnabled();
       if (notificationsEnabled) {
         await NotificationService.cancelExportProgressNotification();
@@ -195,11 +174,11 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
       }
 
       if (mounted) {
-        // Close loading dialog if it exists
         Navigator.pop(context);
         AppSnackBar.show(context, message: 'Export failed: ${e.toString()}');
       }
-      rethrow;
+    } finally {
+      _isExporting = false;
     }
   }
 
@@ -221,44 +200,21 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
     );
   }
 
-  // Updated _handleExportAction method
   Future<void> _handleExportAction(bool openAfterExport) async {
-    Navigator.pop(context); // Close the dialog first
-
-    try {
-      await _exportAsPdf(openAfterExport: openAfterExport);
-
-      if (mounted) {
-        // Clear the entire navigation stack and go to CreateCvScreen
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const CreateCvScreen()),
-              (Route<dynamic> route) => false,
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        AppSnackBar.show(
-          context,
-          message: 'Error: ${e.toString()}',
-        );
-      }
-    }
+    Navigator.pop(context);
+    await _exportAsPdf(openAfterExport: openAfterExport);
   }
 
-  // Helper method to get toolkit directory
   Future<Directory?> _getToolkitDirectory() async {
     try {
       Directory? baseDir;
 
       if (Platform.isAndroid) {
-        // Try external storage first
         baseDir = Directory('/storage/emulated/0/Download');
         if (!await baseDir.exists()) {
-          // Fallback to external storage directory
           baseDir = await getExternalStorageDirectory();
         }
         if (baseDir == null) {
-          // Final fallback to application documents directory
           baseDir = await getApplicationDocumentsDirectory();
         }
       } else if (Platform.isIOS) {
@@ -268,7 +224,16 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
       }
 
       final toolkitDir = Directory('${baseDir.path}/Toolkit');
-      return toolkitDir;
+      if (!await toolkitDir.exists()) {
+        await toolkitDir.create(recursive: true);
+      }
+
+      final toolkitResumeDir = Directory('${toolkitDir.path}/Toolkit_Resume');
+      if (!await toolkitResumeDir.exists()) {
+        await toolkitResumeDir.create(recursive: true);
+      }
+
+      return toolkitResumeDir;
     } catch (e) {
       debugPrint('Error getting Toolkit directory: $e');
       return null;
@@ -277,30 +242,21 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
 
   Future<Uint8List?> _capturePageAsImage(GlobalKey key) async {
     try {
-      final RenderRepaintBoundary boundary =
-      key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final RenderRepaintBoundary boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      final ByteData? byteData =
-      await image.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData != null) {
-        return byteData.buffer.asUint8List();
-      }
-      return null;
+      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      return byteData?.buffer.asUint8List();
     } catch (e) {
-      print('Error capturing page as image: $e');
+      debugPrint('Error capturing page as image: $e');
       return null;
     }
   }
 
   Future<Uint8List> _createThumbnail(Uint8List imageBytes) async {
     try {
-      final codec = await ui.instantiateImageCodec(
-        imageBytes,
-        targetWidth: 200,
-      );
+      final codec = await ui.instantiateImageCodec(imageBytes, targetWidth: 200);
       final frame = await codec.getNextFrame();
-      final byteData =
-      await frame.image.toByteData(format: ui.ImageByteFormat.png);
+      final byteData = await frame.image.toByteData(format: ui.ImageByteFormat.png);
       return byteData!.buffer.asUint8List();
     } catch (e) {
       debugPrint('Error creating thumbnail: $e');
@@ -309,23 +265,30 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
   }
 
   void _clearAllData() {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final workExpProvider =
-    Provider.of<WorkExperienceProvider>(context, listen: false);
-    final educationProvider =
-    Provider.of<EducationProvider>(context, listen: false);
-    final certificationProvider =
-    Provider.of<CertificationProvider>(context, listen: false);
-    final skillsProvider = Provider.of<SkillsProvider>(context, listen: false);
-    final languageProvider =
-    Provider.of<LanguageProvider>(context, listen: false);
+    final providers = [
+      Provider.of<UserProvider>(context, listen: false),
+      Provider.of<WorkExperienceProvider>(context, listen: false),
+      Provider.of<EducationProvider>(context, listen: false),
+      Provider.of<CertificationProvider>(context, listen: false),
+      Provider.of<SkillsProvider>(context, listen: false),
+      Provider.of<LanguageProvider>(context, listen: false),
+    ];
 
-    userProvider.clearUserData();
-    workExpProvider.clearWorkExperienceItems();
-    educationProvider.clearEducationItems();
-    certificationProvider.clearCertificationItems();
-    skillsProvider.clearSkillItems();
-    languageProvider.clearLanguages();
+    for (final provider in providers) {
+      if (provider is UserProvider) {
+        provider.clearUserData();
+      } else if (provider is WorkExperienceProvider) {
+        provider.clearWorkExperienceItems();
+      } else if (provider is EducationProvider) {
+        provider.clearEducationItems();
+      } else if (provider is CertificationProvider) {
+        provider.clearCertificationItems();
+      } else if (provider is SkillsProvider) {
+        provider.clearSkillItems();
+      } else if (provider is LanguageProvider) {
+        provider.clearLanguages();
+      }
+    }
   }
 
   void _showExportOptions(BuildContext context) {
@@ -333,24 +296,16 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Export CV"),
-          content: Text("What would you like to do with your CV?"),
+          title: const Text("Export CV"),
+          content: const Text("What would you like to do with your CV?"),
           actions: [
-            // Export PDF button
             TextButton(
               onPressed: () => _handleExportAction(false),
-              child: Text(
-                "Export PDF",
-                style: TextStyle(color: AppColors.primary),
-              ),
+              child: const Text("Export PDF", style: TextStyle(color: AppColors.primary)),
             ),
-            // Open PDF button
             TextButton(
               onPressed: () => _handleExportAction(true),
-              child: Text(
-                "Open PDF",
-                style: TextStyle(color: AppColors.primary),
-              ),
+              child: const Text("Open PDF", style: TextStyle(color: AppColors.primary)),
             ),
           ],
         );
@@ -370,30 +325,18 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
   }
 
   void _changeTemplate(int templateId) {
-    final templateProvider =
-    Provider.of<TemplateProvider>(context, listen: false);
+    final templateProvider = Provider.of<TemplateProvider>(context, listen: false);
     templateProvider.setTemplate(templateId, 'Template $templateId');
 
     final websites = Provider.of<UserProvider>(context, listen: false).websites;
 
-    Widget templateScreen;
-
-    switch (templateId) {
-      case 1:
-        templateScreen = Template1(websites: websites);
-        break;
-      case 2:
-        templateScreen = Template2(websites: websites);
-        break;
-      case 3:
-        templateScreen = Template3(websites: websites);
-        break;
-      case 4:
-        templateScreen = Template4(websites: websites);
-        break;
-      default:
-        templateScreen = Template1(websites: websites);
-    }
+    Widget templateScreen = switch (templateId) {
+      1 => Template1(websites: websites),
+      2 => Template2(websites: websites),
+      3 => Template3(websites: websites),
+      4 => Template4(websites: websites),
+      _ => Template1(websites: websites),
+    };
 
     Navigator.pushReplacement(
       context,
@@ -406,11 +349,12 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBar(
-          title: 'CV',
-          onBackPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => CreateCvScreen()),
-          )),
+        title: 'CV',
+        onBackPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const CreateCvScreen()),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [

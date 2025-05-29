@@ -115,7 +115,9 @@ class _MergeResultScreenState extends State<MergeResultScreen>
     if (widget.onSaveAndReturn != null) {
       widget.onSaveAndReturn!(); // Call the callback if provided
     }
-    Navigator.of(context).pop(); // Navigate back
+    Navigator.of(context).pop();
+
+    Navigator.of(context).pop();// Navigate back
     AppSnackBar.show(context, message: 'File saved successfully');
   }
 

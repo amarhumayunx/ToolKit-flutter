@@ -218,32 +218,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
             child: Padding(
               padding: const EdgeInsets.all(10.0),
-              child:
-
-            Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'General',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'General',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87,
+                    ),
                   ),
-                ),
-                Transform.rotate(
-                  angle: _isGeneralExpanded ? 1.5708 : 0, // 90 degrees in radians
-                  child: SvgPicture.asset(
-                    'assets/icons/next_page_icon.svg',
-                    height: 12,
-                    width: 12,
-                    color: AppColors.primary,
+                  Transform.rotate(
+                    angle: _isGeneralExpanded ? 1.5708 : 0,
+                    // 90 degrees in radians
+                    child: SvgPicture.asset(
+                      'assets/icons/next_page_icon.svg',
+                      height: 12,
+                      width: 12,
+                      color: AppColors.primary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-
-    ),
           ),
 
           // Expandable content for language selection
@@ -322,32 +320,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
             child: Padding(
               padding: const EdgeInsets.all(10.0),
-              child:
-
-            Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Confidential Documents',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Confidential Documents',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87,
+                    ),
                   ),
-                ),
-                Transform.rotate(
-                  angle: _isConfidentialExpanded ? 1.5708 : 0, // 90 degrees in radians
-                  child: SvgPicture.asset(
-                    'assets/icons/next_page_icon.svg',
-                    height: 12,
-                    width: 12,
-                    color: AppColors.primary,
+                  Transform.rotate(
+                    angle: _isConfidentialExpanded ? 1.5708 : 0,
+                    // 90 degrees in radians
+                    child: SvgPicture.asset(
+                      'assets/icons/next_page_icon.svg',
+                      height: 12,
+                      width: 12,
+                      color: AppColors.primary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-
-    ),
           ),
 
           // Expandable content for Code Recovery Options
@@ -513,6 +509,3 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 }
-
-
-

@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../utils/app_colors.dart';
+
 // Updated OcrCameraScreen with image preview and proper done button functionality
 class OcrCameraScreen extends StatefulWidget {
   const OcrCameraScreen({super.key});
@@ -356,8 +357,8 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
                         GestureDetector(
                           onTap: _capturedImages.isNotEmpty
                               ? () {
-                            // Optionally show a larger preview or do something
-                          }
+                                  // Optionally show a larger preview or do something
+                                }
                               : null,
                           child: Stack(
                             alignment: Alignment.center,

@@ -23,7 +23,6 @@ class SavedCVProvider with ChangeNotifier {
     try {
       await Hive.initFlutter();
 
-      // Check if adapter is already registered
       if (!Hive.isAdapterRegistered(0)) {
         Hive.registerAdapter(SavedCVAdapter());
       }
@@ -33,7 +32,6 @@ class SavedCVProvider with ChangeNotifier {
         await loadSavedCVs();
       } catch (boxError) {
         debugPrint('Error opening box, clearing corrupted data: $boxError');
-        // Delete the corrupted box and create a new one
         try {
           await Hive.deleteBoxFromDisk('saved_cvs');
           _savedCVsBox = await Hive.openBox<SavedCV>('saved_cvs');
@@ -47,10 +45,10 @@ class SavedCVProvider with ChangeNotifier {
       _isInitialized = true;
     } catch (e) {
       debugPrint('Error initializing Hive: $e');
-      _savedCVs = []; // Ensure we have an empty list on error
+      _savedCVs = [];
     } finally {
       _isInitializing = false;
-      notifyListeners();
+      WidgetsBinding.instance.addPostFrameCallback((_) => notifyListeners());
     }
   }
 
@@ -64,19 +62,18 @@ class SavedCVProvider with ChangeNotifier {
       final values = _savedCVsBox!.values.toList();
       _savedCVs = values;
       debugPrint('Loaded ${_savedCVs.length} CVs successfully');
-      notifyListeners();
+      WidgetsBinding.instance.addPostFrameCallback((_) => notifyListeners());
     } catch (e) {
       debugPrint('Error loading CVs: $e');
-      // If data is corrupted, clear the box
       try {
         await _savedCVsBox!.clear();
         _savedCVs = [];
         debugPrint('Cleared corrupted CV data');
-        notifyListeners();
+        WidgetsBinding.instance.addPostFrameCallback((_) => notifyListeners());
       } catch (clearError) {
         debugPrint('Error clearing corrupted data: $clearError');
         _savedCVs = [];
-        notifyListeners();
+        WidgetsBinding.instance.addPostFrameCallback((_) => notifyListeners());
       }
     }
   }
@@ -86,7 +83,7 @@ class SavedCVProvider with ChangeNotifier {
       if (_savedCVsBox != null) {
         await _savedCVsBox!.clear();
         _savedCVs = [];
-        notifyListeners();
+        WidgetsBinding.instance.addPostFrameCallback((_) => notifyListeners());
         debugPrint('All CV data cleared successfully');
       }
     } catch (e) {
@@ -107,12 +104,10 @@ class SavedCVProvider with ChangeNotifier {
     }
 
     try {
-      // Validate thumbnail bytes
       if (thumbnailBytes != null && thumbnailBytes.isEmpty) {
         thumbnailBytes = null;
       }
 
-      // Validate file exists
       final file = File(filePath);
       if (!await file.exists()) {
         debugPrint('File does not exist: $filePath');

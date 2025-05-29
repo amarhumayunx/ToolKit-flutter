@@ -237,7 +237,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
                   documentFile: File(_savedFilePath!),
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   onSaveCompleted: () {
-                    // This will be called after successful save
+                    Navigator.of(context).pop(true);
                   },
                 ),
               ),
