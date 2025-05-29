@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/screens/rearrange_file_screen/rearrange_file_drop.dart';
+import 'package:toolkit/utils/app_snackbar.dart';
 
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
@@ -56,7 +57,7 @@ class _RearrangeFileScreenState extends State<RearrangeFileScreen> {
       }
     } catch (e) {
       setState(() {
-        _documentErrorText = 'Error selecting documents: ${e.toString()}';
+        AppSnackBar.show(context, message: 'Error selecting documents: ${e.toString()}');
       });
       print('Error in file picker: $e');
     }

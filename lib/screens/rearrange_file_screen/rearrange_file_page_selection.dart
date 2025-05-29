@@ -1,7 +1,13 @@
 import 'dart:io';
+import 'dart:ui' as ui;
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
+import 'package:pdfx/pdfx.dart';
 import 'package:toolkit/screens/rearrange_file_screen/pdf_rearrange_service.dart';
+import 'package:toolkit/utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../split_screen/docxService.dart';
@@ -9,11 +15,11 @@ import 'rearrange_file_result_screen.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 class RearrangeFilePageSelection extends StatefulWidget {
-  final File selectedFile; // Add this parameter
+  final File selectedFile;
 
   const RearrangeFilePageSelection({
     super.key,
-    required this.selectedFile, // Required parameter
+    required this.selectedFile,
   });
 
   @override
@@ -23,17 +29,25 @@ class RearrangeFilePageSelection extends StatefulWidget {
 class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection> {
   File? _docxFile;
   List<bool> _selectedPages = [];
-  List<int> _pageSelectionOrder = []; // New: Track selection order
+  List<int> _pageSelectionOrder = [];
   String _fileName = '';
-  bool _isLoading = true; // Start with loading state
   bool _isPdfFile = false;
   List<pw.Document> _pdfPages = [];
+  List<Uint8List?> _pageImages = []; // Store page preview images (only for PDF)
+  bool _isLoadingPreviews = false;
+  PdfDocument? _pdfDocument; // Keep reference to PDF document
 
   @override
   void initState() {
     super.initState();
-    // Process the file that was passed in
     _processSelectedFile();
+  }
+
+  @override
+  void dispose() {
+    // Close PDF document when widget is disposed
+    _pdfDocument?.close();
+    super.dispose();
   }
 
   Future<void> _processSelectedFile() async {
@@ -41,60 +55,149 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
       _docxFile = widget.selectedFile;
       _fileName = path.basename(_docxFile!.path);
 
-      // Check if it's a PDF file
       final fileExtension = path.extension(_docxFile!.path).toLowerCase();
       _isPdfFile = fileExtension == '.pdf';
 
       if (_isPdfFile) {
-        // Handle PDF file
-        final pdfService = PdfRearrangeService();
-        final pageCount = await pdfService.getPageCount(_docxFile!);
-        _pdfPages = await pdfService.extractPages(_docxFile!);
-
-        setState(() {
-          _selectedPages = List<bool>.filled(pageCount, true);
-          // Initialize selection order for all pages (initially selected)
-          _pageSelectionOrder = List.generate(pageCount, (index) => index);
-          _isLoading = false;
-        });
+        await _processPdfFile();
       } else {
-        // Handle DOCX file (existing logic)
-        final docxService = DocxSplitterService();
-        final pages = await docxService.extractPages(_docxFile!);
+        await _processDocxFile();
+      }
+    } catch (e) {
+      if (mounted) {
+        AppSnackBar.show(context, message: 'Error processing file: ${e.toString()}');
+      }
+    }
+  }
+
+  Future<void> _processPdfFile() async {
+    final pdfService = PdfRearrangeService();
+    final pageCount = await pdfService.getPageCount(_docxFile!);
+    _pdfPages = await pdfService.extractPages(_docxFile!);
+
+    setState(() {
+      _selectedPages = List<bool>.filled(pageCount, true);
+      _pageSelectionOrder = List.generate(pageCount, (index) => index);
+      _pageImages = List<Uint8List?>.filled(pageCount, null);
+      _isLoadingPreviews = true;
+    });
+
+    // Generate PDF page previews
+    await _generatePdfPreviews();
+  }
+
+  Future<void> _processDocxFile() async {
+    final docxService = DocxSplitterService();
+    final pages = await docxService.extractPages(_docxFile!);
+
+    setState(() {
+      _selectedPages = List<bool>.filled(pages.length, true);
+      _pageSelectionOrder = List.generate(pages.length, (index) => index);
+      // No need to initialize _pageImages for DOCX files
+      _isLoadingPreviews = false; // No loading needed for DOCX
+    });
+  }
+
+  Future<void> _generatePdfPreviews() async {
+    try {
+      // Open PDF document using pdfx package
+      _pdfDocument = await PdfDocument.openFile(_docxFile!.path);
+
+      // Generate preview for each page
+      for (int i = 0; i < _pdfDocument!.pagesCount; i++) {
+        try {
+          final page = await _pdfDocument!.getPage(i + 1);
+          final pageImage = await page.render(
+            width: 200,
+            height: 300,
+            format: PdfPageImageFormat.png,
+            backgroundColor: '#FFFFFF',
+          );
+
+          if (mounted) {
+            setState(() {
+              _pageImages[i] = pageImage?.bytes;
+            });
+          }
+        } catch (pageError) {
+          print('Error rendering page ${i + 1}: $pageError');
+          // Generate placeholder for failed pages
+          _pageImages[i] = await _generatePlaceholderImage(i + 1, 'PDF');
+        }
+      }
+
+      if (mounted) {
         setState(() {
-          _selectedPages = List<bool>.filled(pages.length, true);
-          // Initialize selection order for all pages (initially selected)
-          _pageSelectionOrder = List.generate(pages.length, (index) => index);
-          _isLoading = false;
+          _isLoadingPreviews = false;
         });
       }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      print('Error generating PDF previews: $e');
+
+      // Fallback to placeholder images
+      for (int i = 0; i < _pdfPages.length; i++) {
+        _pageImages[i] = await _generatePlaceholderImage(i + 1, 'PDF');
+      }
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error processing file: ${e.toString()}')),
-        );
+        setState(() {
+          _isLoadingPreviews = false;
+        });
       }
     }
+  }
+
+  // Generate a placeholder image with page information (only for PDF when rendering fails)
+  Future<Uint8List> _generatePlaceholderImage(int pageNumber, String fileType) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final paint = Paint();
+
+    // Draw background
+    paint.color = Colors.white;
+    canvas.drawRect(const Rect.fromLTWH(0, 0, 200, 300), paint);
+
+    // Draw border
+    paint.color = Colors.grey.shade300;
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = 2;
+    canvas.drawRect(const Rect.fromLTWH(0, 0, 200, 300), paint);
+
+    // Draw page content mockup lines
+    paint.color = Colors.grey.shade400;
+    paint.strokeWidth = 1;
+    for (int i = 0; i < 8; i++) {
+      canvas.drawLine(
+        Offset(20, 40 + (i * 25)),
+        Offset(180, 40 + (i * 25)),
+        paint,
+      );
+    }
+
+    // Draw file type icon area
+    paint.color = Colors.grey.shade200;
+    paint.style = PaintingStyle.fill;
+    canvas.drawRect(const Rect.fromLTWH(70, 220, 60, 40), paint);
+
+    final picture = recorder.endRecording();
+    final image = await picture.toImage(200, 300);
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    return byteData!.buffer.asUint8List();
   }
 
   void _togglePage(int index) {
     setState(() {
       if (_selectedPages[index]) {
-        // Deselecting page - remove from order
         _selectedPages[index] = false;
         _pageSelectionOrder.remove(index);
       } else {
-        // Selecting page - add to end of order
         _selectedPages[index] = true;
         _pageSelectionOrder.add(index);
       }
     });
   }
 
-  // Get the display number for a page based on its selection order
   int _getPageDisplayNumber(int pageIndex) {
     if (!_selectedPages[pageIndex]) return 0;
     return _pageSelectionOrder.indexOf(pageIndex) + 1;
@@ -103,28 +206,106 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
   void _navigateToResults() {
     if (_docxFile == null) return;
 
-    // Use the selection order as the new page order
     final newOrder = List<int>.from(_pageSelectionOrder);
 
     if (newOrder.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one page')),
-      );
+      AppSnackBar.show(context, message: 'please_select_one_page'.tr);
       return;
     }
 
-    // Navigate to result screen with file type information
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => RearrangeFileResultScreen(
           originalFile: _docxFile!,
           newPageOrder: newOrder,
-          isPdfFile: _isPdfFile, // Pass this parameter
-          pdfPages: _isPdfFile ? _pdfPages : null, // Pass PDF pages if it's a PDF
+          isPdfFile: _isPdfFile,
+          pdfPages: _isPdfFile ? _pdfPages : null,
         ),
       ),
     );
+  }
+
+  Widget _buildPagePreview(int index) {
+    if (_isPdfFile) {
+      // PDF file handling
+      if (_isLoadingPreviews) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      // If we have a page image, show it
+      if (_pageImages[index] != null) {
+        return Padding(
+          padding: const EdgeInsets.all(3.5),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              image: DecorationImage(
+                image: MemoryImage(_pageImages[index]!),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Fallback to PDF icon
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.picture_as_pdf,
+              size: 40,
+              color: Colors.grey.shade600,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Page ${index + 1}',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // DOCX file handling - show SVG icon
+      return Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: Image.asset(
+                'assets/images/doc.png',
+                fit: BoxFit.cover,
+                height: 150,
+                width: 150,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset(
+                    'assets/images/doc.png',
+                    color: Colors.grey.shade400,
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      );
+    }
   }
 
   @override
@@ -133,130 +314,127 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const CustomAppBar(title: 'Rearrange Pages'),
+      appBar: CustomAppBar(title: ('rearrange_pages'.tr)),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (_isLoading)
-                const LinearProgressIndicator()
-              else ...[
-                Text(
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
                   'Selected: $_fileName',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      childAspectRatio: 0.7,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 16,
+              ),
+              if (_isPdfFile && _isLoadingPreviews)
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Loading PDF page previews...',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
                     ),
-                    itemCount: totalPages,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () => _togglePage(index),
-                        child: Stack(
-                          children: [
-                            Container(
+                  ),
+                ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 0.7,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 16,
+                  ),
+                  itemCount: totalPages,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () => _togglePage(index),
+                      child: Stack(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: _selectedPages[index]
+                                    ? const Color(0xFF009688)
+                                    : Colors.grey.shade300,
+                                width: _selectedPages[index] ? 2 : 1,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: _buildPagePreview(index),
+                            ),
+                          ),
+                          // Selection indicator (bottom right)
+                          Positioned(
+                            bottom: 8,
+                            right: 8,
+                            child: Container(
+                              width: 24,
+                              height: 24,
                               decoration: BoxDecoration(
+                                color: _selectedPages[index]
+                                    ? const Color(0xFF009688)
+                                    : Colors.white,
+                                shape: BoxShape.circle,
                                 border: Border.all(
                                   color: _selectedPages[index]
-                                      ? const Color(0xFF009688)
-                                      : Colors.grey.shade300,
-                                  width: _selectedPages[index] ? 2 : 1,
+                                      ? Colors.transparent
+                                      : Colors.grey.shade400,
+                                  width: 2,
                                 ),
-                                borderRadius: BorderRadius.circular(8),
                               ),
-                              child: Column(
-                                children: [
-                                  Expanded(
-                                    child: Center(
-                                      child: Image.asset(
-                                        'assets/images/doc.png',
-                                        fit: BoxFit.cover,
-                                        height: 110,
-                                        width: 110,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Image.asset(
-                                            'assets/images/doc.png',
-                                            color: Colors.grey.shade400,
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              child: _selectedPages[index]
+                                  ? const Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: 16,
+                              )
+                                  : null,
                             ),
+                          ),
+                          // Order number (top left)
+                          if (_selectedPages[index])
                             Positioned(
-                              bottom: 8,
-                              right: 8,
+                              top: 8,
+                              left: 8,
                               child: Container(
                                 width: 24,
                                 height: 24,
-                                decoration: BoxDecoration(
-                                  color: _selectedPages[index]
-                                      ? const Color(0xFF009688)
-                                      : Colors.white,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF009688),
                                   shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: _selectedPages[index]
-                                        ? Colors.transparent
-                                        : Colors.grey.shade400,
-                                    width: 2,
-                                  ),
                                 ),
-                                child: _selectedPages[index]
-                                    ? const Icon(
-                                  Icons.check,
-                                  color: Colors.white,
-                                  size: 16,
-                                )
-                                    : null,
-                              ),
-                            ),
-                            if (_selectedPages[index])
-                              Positioned(
-                                top: 8,
-                                left: 8,
-                                child: Container(
-                                  width: 24,
-                                  height: 24,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF009688),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      '${_getPageDisplayNumber(index)}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                child: Center(
+                                  child: Text(
+                                    '${_getPageDisplayNumber(index)}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
                                     ),
                                   ),
                                 ),
                               ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                            ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: CustomGradientButton(
-                    text: 'Save',
-                    onPressed: _navigateToResults,
-                  ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: CustomGradientButton(
+                  text: 'Rearrange',
+                  onPressed: _navigateToResults,
                 ),
-              ],
+              ),
             ],
           ),
         ),

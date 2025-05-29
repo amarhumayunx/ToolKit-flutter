@@ -1,7 +1,6 @@
 // extracted_text_screen.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_file/open_file.dart';
 import 'package:toolkit/widgets/custom_appbar.dart';
@@ -272,7 +271,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           border: InputBorder.none,
         ),
       ),

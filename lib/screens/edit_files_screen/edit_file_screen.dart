@@ -47,7 +47,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
       final List<File>? capturedImages = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => OcrCameraScreen(),
+          builder: (context) => const OcrCameraScreen(),
         ),
       );
 
@@ -88,7 +88,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: ToolsAppBar(
+      appBar: const ToolsAppBar(
         title: 'Edit Files',
       ),
       body: Column(
@@ -99,11 +99,11 @@ class _EditFileScreenState extends State<EditFileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CustomSvgImage(
+                  const CustomSvgImage(
                     imagePath: 'assets/images/edit_file_img.svg',
                   ),
                   const SizedBox(height: 30),
-                  InfoCard(
+                  const InfoCard(
                     title: 'Edit Files',
                     description:
                     'Make changes to your files easily. Upload and modify multiple PDFs, images, and documents for a seamless experience.',

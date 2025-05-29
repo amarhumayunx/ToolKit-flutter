@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/certification_model.dart';
 
 class CertificationProvider with ChangeNotifier {
-  List<CertificationItem> _certificationItems = [];
+  final List<CertificationItem> _certificationItems = [];
 
   List<CertificationItem> get certificationItems => _certificationItems;
 

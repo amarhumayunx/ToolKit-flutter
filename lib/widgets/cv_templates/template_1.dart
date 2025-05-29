@@ -31,13 +31,12 @@ import '../../screens/cv_maker_screens/create_cv_screen.dart'
     show CreateCvScreen;
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
-import '../buttons/template_action_btn.dart';
 import '../cv_widgets/template_selection_dialog.dart';
 
 class Template1 extends StatefulWidget {
   final List<Website> websites;
 
-  const Template1({Key? key, this.websites = const []}) : super(key: key);
+  const Template1({super.key, this.websites = const []});
 
   @override
   State<Template1> createState() => _Template1State();
@@ -194,7 +193,7 @@ class _Template1State extends State<Template1> {
         final certItemKey = GlobalKey();
         final item = certificationItems[i];
 
-        String dateRange = "${item.startDate}";
+        String dateRange = item.startDate;
 
         _allContentWidgets.add(KeyedSubtree(
           key: certItemKey,
@@ -434,7 +433,7 @@ class _Template1State extends State<Template1> {
       return byteData!.buffer.asUint8List();
     } catch (e) {
       debugPrint('Error creating thumbnail: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -467,7 +466,7 @@ class _Template1State extends State<Template1> {
 
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => CreateCvScreen()),
+      MaterialPageRoute(builder: (context) => const CreateCvScreen()),
       (Route<dynamic> route) => false,
     );
   }
@@ -574,7 +573,7 @@ class _Template1State extends State<Template1> {
       ),
       padding: const EdgeInsets.all(10),
       child: SingleChildScrollView(
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         // Prevent scrolling within the page
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -815,7 +814,7 @@ class _Template1State extends State<Template1> {
                         ),
                       ],
                     ))
-                .toList(),
+                ,
           ],
         ),
         // Add spacing before the first section (Objective)
@@ -946,7 +945,7 @@ class _Template1State extends State<Template1> {
                   ),
               ],
             );
-          }).toList(),
+          }),
         ]
       ],
     );

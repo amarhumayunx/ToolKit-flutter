@@ -50,106 +50,107 @@ class DottedFileDropZoneCompress extends StatelessWidget {
       dashPattern: const [5, 4],
       borderType: BorderType.RRect,
       radius: const Radius.circular(8),
-      child: Container(
-        width: double.infinity,
-        constraints: BoxConstraints(
-          minHeight: 128,
-          maxHeight: selectedFiles.isNotEmpty ? 300 : 128,
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: const Color(0xFF00BCD4).withOpacity(0.05),
-        ),
-        child: selectedFiles.isNotEmpty
-            ? SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              alignment: WrapAlignment.center,
-              children: selectedFiles.asMap().entries.map((entry) {
-                final index = entry.key;
-                final file = entry.value;
-                final extension = path.extension(file.path);
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: double.infinity,
+          constraints: BoxConstraints(
+            minHeight: 128,
+            maxHeight: selectedFiles.isNotEmpty ? 300 : 128,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: const Color(0xFF00BCD4).withOpacity(0.05),
+          ),
+          child: selectedFiles.isNotEmpty
+              ? SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
+                children: selectedFiles.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final file = entry.value;
+                  final extension = path.extension(file.path);
 
-                return Stack(
-                  children: [
-                    SizedBox(
-                      width: 100,
-                      height: 100,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _getFileIcon(extension),
-                            size: 40,
-                            color: AppColors.primary,
-                          ),
-                          const SizedBox(height: 6),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: Text(
-                              _getFileName(file.path),
-                              style: GoogleFonts.inter(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w400,
-                              ),
-                              maxLines: 2,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
+                  return Stack(
+                    children: [
+                      SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              _getFileIcon(extension),
+                              size: 40,
+                              color: AppColors.primary,
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 6),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              child: Text(
+                                _getFileName(file.path),
+                                style: GoogleFonts.inter(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                maxLines: 2,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Positioned(
-                      top: 5,
-                      right: 5,
-                      child: GestureDetector(
-                        onTap: () => onRemoveFile(index),
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.close,
-                            size: 16,
-                            color: Colors.grey,
+                      Positioned(
+                        top: 5,
+                        right: 5,
+                        child: GestureDetector(
+                          onTap: () => onRemoveFile(index),
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                );
-              }).toList(),
+                    ],
+                  );
+                }).toList(),
+              ),
             ),
-          ),
-        )
-            : Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            InkWell(
-              onTap: onTap,
-              child: SvgPicture.asset(
+          )
+              : Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
                 'assets/icons/upload_file_icon.svg',
                 height: 28,
                 width: 36,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Drag & Drop or click to choose file',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                color: Colors.grey,
-                fontSize: 10,
-                fontWeight: FontWeight.w400,
+              const SizedBox(height: 8),
+              Text(
+                'Drag & Drop or click to choose file',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  color: Colors.grey,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

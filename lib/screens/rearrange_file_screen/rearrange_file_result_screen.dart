@@ -4,6 +4,7 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:toolkit/screens/rearrange_file_screen/pdf_rearrange_service.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/save_document_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
@@ -237,63 +238,6 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
     });
   }
 
-  Future<void> _saveFile() async {
-    if (_outputFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No file to save')),
-      );
-      return;
-    }
-
-    try {
-      // Validate file before saving
-      if (!await _outputFile!.exists()) {
-        throw Exception('File does not exist');
-      }
-
-      final fileSize = await _outputFile!.length();
-      if (fileSize == 0) {
-        throw Exception('File is empty - cannot save');
-      }
-
-      final directory = await getDownloadsDirectory();
-      if (directory == null) throw Exception('Could not access downloads directory');
-
-      // Ensure downloads directory exists
-      await directory.create(recursive: true);
-
-      final fileName = path.basename(_outputFile!.path);
-      final savePath = path.join(directory.path, fileName);
-
-      // Copy the file
-      await _outputFile!.copy(savePath);
-
-      // Verify the copied file
-      final copiedFile = File(savePath);
-      if (!await copiedFile.exists()) {
-        throw Exception('File was not copied successfully');
-      }
-
-      final copiedSize = await copiedFile.length();
-      if (copiedSize == 0) {
-        throw Exception('Copied file is empty');
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('File saved successfully to $savePath ($copiedSize bytes)')),
-        );
-      }
-
-    } catch (e) {
-      print('Error in _saveFile: $e'); // Debug log
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving file: ${e.toString()}')),
-        );
-      }
-    }
-  }
 
   Widget _buildLoadingContainer() {
     return AnimatedLoadingContainer(
@@ -315,22 +259,53 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
 
       // Add logic to open file if needed
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Opening file: ${file.path} ($fileSize bytes)')),
-        );
+        AppSnackBar.show(context, message: 'Opening file: ${file.path} ($fileSize bytes)');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cannot open file: ${e.toString()}')),
-        );
+        AppSnackBar.show(context, message: 'Cannot open file: ${e.toString()}');
       }
     }
   }
 
-  void _handleFileDeleted() {
-    // Add logic to handle file deletion if needed
+  void _handleFileDeleted() async {
+    try {
+      // Actually delete the file
+      if (_outputFile != null && await _outputFile!.exists()) {
+        await _outputFile!.delete();
+        print('File deleted: ${_outputFile!.path}');
+      }
+
+      // Remove from the list
+      _rearrangedFiles.clear();
+
+      // Update UI state
+      setState(() {
+        _outputFile = null;
+        _processingComplete = false;
+      });
+
+      // Show success message
+      if (mounted) {
+        AppSnackBar.show(context, message: 'File deleted successfully!');
+      }
+
+      // Navigate back with a small delay
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          Navigator.of(context).pop();
+          Navigator.of(context).pop();
+        }
+      });
+
+    } catch (e) {
+      print('Error deleting file: $e');
+      if (mounted) {
+        AppSnackBar.show(context, message: 'Error deleting file: $e');
+      }
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -339,8 +314,8 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
       appBar: const CustomAppBar(title: 'Rearrange Results'),
       body: Stack(
         children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(20.0),
+          Padding(
+            padding: const EdgeInsets.all(14.0),
             child: Column(
               children: [
                 const SizedBox(height: 20),
@@ -413,7 +388,7 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
                         ),
                       ),
                   ],
-                  SizedBox(height: MediaQuery.of(context).padding.bottom + 300),
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 250),
                 ],
               ],
             ),

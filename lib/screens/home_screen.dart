@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:toolkit/utils/app_colors.dart';
 import '../widgets/bottom_nav_bar/home_bottom_nav.dart';
@@ -52,11 +53,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           onTap: () {},
                         ),
                         const SizedBox(height: 28),
-                        const SectionHeading(title: 'Explore Tools'),
+                        SectionHeading(title: 'explore_tools'.tr),
                         const SizedBox(height: 14),
                         const ToolsListView(),
 
-                        const SectionHeading(title: 'Convert Options'),
+                        SectionHeading(title: 'convert_options'.tr),
                         const SizedBox(height: 14),
                         const ConvertOptionsView(),
                         // In the HomeScreen class, in the Column children list,
@@ -65,13 +66,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const SectionHeading(title: 'Recents'),
+                            SectionHeading(title: 'recents'.tr),
                             Padding(
                               padding: const EdgeInsets.only(right: 4),
                               child: Row(
                                 children: [
                                   Text(
-                                    'see all',
+                                    'see_all'.tr,
                                     style: GoogleFonts.inter(
                                       fontSize: 14,
                                       color: Colors.grey,
@@ -93,11 +94,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ],
                         ),
-// Add the RecentsView here
                         const SizedBox(height: 4),
                         const RecentsView(),
-
-// Extra space at bottom for nav bar
                         const SizedBox(height: 100),
                         // Extra space at bottom for nav bar
                       ],

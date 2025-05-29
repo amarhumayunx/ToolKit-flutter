@@ -34,11 +34,11 @@ class BaseCVTemplateScreen extends StatefulWidget {
   final int totalPages;
 
   const BaseCVTemplateScreen({
-    Key? key,
+    super.key,
     required this.cvContent,
     required this.pageKeys,
     required this.totalPages,
-  }) : super(key: key);
+  });
 
   @override
   State<BaseCVTemplateScreen> createState() => _BaseCVTemplateScreenState();
@@ -257,10 +257,7 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
           // Fallback to external storage directory
           baseDir = await getExternalStorageDirectory();
         }
-        if (baseDir == null) {
-          // Final fallback to application documents directory
-          baseDir = await getApplicationDocumentsDirectory();
-        }
+        baseDir ??= await getApplicationDocumentsDirectory();
       } else if (Platform.isIOS) {
         baseDir = await getApplicationDocumentsDirectory();
       } else {
@@ -304,7 +301,7 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
       return byteData!.buffer.asUint8List();
     } catch (e) {
       debugPrint('Error creating thumbnail: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -333,13 +330,13 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Export CV"),
-          content: Text("What would you like to do with your CV?"),
+          title: const Text("Export CV"),
+          content: const Text("What would you like to do with your CV?"),
           actions: [
             // Export PDF button
             TextButton(
               onPressed: () => _handleExportAction(false),
-              child: Text(
+              child: const Text(
                 "Export PDF",
                 style: TextStyle(color: AppColors.primary),
               ),
@@ -347,7 +344,7 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
             // Open PDF button
             TextButton(
               onPressed: () => _handleExportAction(true),
-              child: Text(
+              child: const Text(
                 "Open PDF",
                 style: TextStyle(color: AppColors.primary),
               ),
@@ -409,7 +406,7 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
           title: 'CV',
           onBackPressed: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => CreateCvScreen()),
+            MaterialPageRoute(builder: (context) => const CreateCvScreen()),
           )),
       body: SingleChildScrollView(
         child: Column(

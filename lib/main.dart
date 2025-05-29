@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:get/get.dart'; // Updated import for Get
 import 'package:hive_ce_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 import 'package:toolkit/provider/certification_provider.dart';
@@ -13,7 +13,9 @@ import 'package:toolkit/provider/template_provider.dart';
 import 'package:toolkit/provider/user_provider.dart';
 import 'package:toolkit/provider/work_experience_provider.dart';
 import 'package:toolkit/screens/home_screen.dart';
-import 'package:toolkit/services/notification_service.dart'; // Add this import
+import 'package:toolkit/services/notification_service.dart';
+import 'controllers/language_controller.dart';
+import 'localization/language.dart'; // Add your languages file
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +27,7 @@ void main() async {
 
   // Initialize Hive
   await Hive.initFlutter();
+
 
   runApp(
     MultiProvider(
@@ -49,14 +52,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ToolKit',
+    return GetMaterialApp(
+      title: 'Toolkit App',
       debugShowCheckedModeBanner: false,
+
+      // Localization setup
+      translations: Language(), // Your Translations class
+      locale: Get.deviceLocale, // Uses the device locale
+      fallbackLocale: const Locale('en', 'US'), // Fallback locale
+
       theme: ThemeData(
         primaryColor: const Color(0xFF00BFA5),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const AppInitializer(),
+
+      home: const AppInitializer(), // Your app's initial screen
     );
   }
 }

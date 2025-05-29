@@ -40,8 +40,8 @@ class _ToolsListViewState extends State<ToolsListView> {
 
       // Calculate which page we're on based on scroll position
       final int page = (offset /
-              maxScrollExtent *
-              ((tools.length / _itemsPerPage).ceil() - 1))
+          maxScrollExtent *
+          ((tools.length / _itemsPerPage).ceil() - 1))
           .round();
 
       if (page != _currentPage) {
@@ -92,7 +92,7 @@ class _ToolsListViewState extends State<ToolsListView> {
         );
         break;
       default:
-        // Handle unknown tool
+      // Handle unknown tool
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Tool $toolName is not implemented yet')),
         );
@@ -165,7 +165,7 @@ class _ToolsListViewState extends State<ToolsListView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
             pagesCount,
-            (index) => Padding(
+                (index) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 3),
               child: Container(
                 width: 8,
