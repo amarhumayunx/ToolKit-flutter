@@ -10,7 +10,6 @@ import '../widgets/home_app_bar.dart';
 import '../widgets/home_section_heading.dart';
 import '../widgets/recent_view.dart';
 import '../widgets/tools_list_view.dart';
-import 'files_screens/files_main_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,88 +20,54 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  final TextEditingController _searchController = TextEditingController();
-
-  // Screens for each tab
-  final List<Widget> _screens = [
-    const HomeContentView(),
-    const Placeholder(), // Scanner screen placeholder
-    const FilesMainScreen(),
-  ];
-
-  void _handleNavigation(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true,
-      body: _screens[_currentIndex],
-      bottomNavigationBar: HomeBottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _handleNavigation,
-      ),
-    );
-  }
-}
-
-class HomeContentView extends StatelessWidget {
-  const HomeContentView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return GradientBackgroundWidget(
-      child: Column(
-        children: [
-          SizedBox(height: MediaQuery.of(context).padding.top + 40),
-          const HomeAppBar(),
-          const SizedBox(height: 16),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
+      extendBody: true, // Important for transparent bottom nav overlay
+      body: GradientBackgroundWidget(
+        child: Column(
+          children: [
+            SizedBox(height: MediaQuery.of(context).padding.top + 40),
+            const HomeAppBar(),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
                 ),
-              ),
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 40),
-                      CreateCVButton(onTap: () {  },),
-                      const SizedBox(height: 28),
-                      const SectionHeading(title: 'Explore Tools'),
-                      const SizedBox(height: 14),
-                      const ToolsListView(),
-                      const SectionHeading(title: 'Convert Options'),
-                      const SizedBox(height: 14),
-                      const ConvertOptionsView(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const SectionHeading(title: 'Recents'),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 4),
-                            child: GestureDetector(
-                              onTap: () {
-                                // Switch to Files tab
-                                final homeState = context.findAncestorStateOfType<_HomeScreenState>();
-                                homeState?._handleNavigation(2);
-                              },
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 40),
+                        CreateCVButton(
+                          onTap: () {},
+                        ),
+                        const SizedBox(height: 28),
+                        const SectionHeading(title: 'Explore Tools'),
+                        const SizedBox(height: 14),
+                        const ToolsListView(),
+
+                        const SectionHeading(title: 'Convert Options'),
+                        const SizedBox(height: 14),
+                        const ConvertOptionsView(),
+                        // In the HomeScreen class, in the Column children list,
+// after the Row with the "Recents" heading and "see all" text:
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const SectionHeading(title: 'Recents'),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 4),
                               child: Row(
                                 children: [
                                   Text(
@@ -126,19 +91,32 @@ class HomeContentView extends StatelessWidget {
                                 ],
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                       const RecentsView(),
-                      const SizedBox(height: 100),
-                    ],
+                          ],
+                        ),
+// Add the RecentsView here
+                        const SizedBox(height: 4),
+                        const RecentsView(),
+
+// Extra space at bottom for nav bar
+                        const SizedBox(height: 100),
+                        // Extra space at bottom for nav bar
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+      bottomNavigationBar: HomeBottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+          // Handle navigation logic here
+        },
       ),
     );
   }

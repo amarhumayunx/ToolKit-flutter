@@ -13,10 +13,7 @@ import 'package:toolkit/provider/template_provider.dart';
 import 'package:toolkit/provider/user_provider.dart';
 import 'package:toolkit/provider/work_experience_provider.dart';
 import 'package:toolkit/screens/home_screen.dart';
-import 'package:toolkit/services/notification_service.dart';
-
-import 'models/file_model.dart';
-import 'models/file_model_adapter.dart'; // Add this import
+import 'package:toolkit/services/notification_service.dart'; // Add this import
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,12 +25,6 @@ void main() async {
 
   // Initialize Hive
   await Hive.initFlutter();
-
-  // Register the adapter manually
-  Hive.registerAdapter(FileModelAdapter());
-
-  // Open the box
-  await Hive.openBox<FileModel>('filesBox');
 
   runApp(
     MultiProvider(

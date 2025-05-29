@@ -45,13 +45,13 @@ class FileOptionsMenu extends StatelessWidget {
             text: 'Rename',
           ),
           // Custom divider with padding and custom color
-          PopupMenuItem<String>(
+          const PopupMenuItem<String>(
             enabled: false,
             height: 10,
             padding: EdgeInsets.zero,
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Divider(
                   height: 1,
                   thickness: 1,
@@ -270,11 +270,11 @@ class FileOptionsMenu extends StatelessWidget {
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.dividerColor),
+                  borderSide: const BorderSide(color: AppColors.dividerColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.primary),
+                  borderSide: const BorderSide(color: AppColors.primary),
                 ),
               ),
             ),

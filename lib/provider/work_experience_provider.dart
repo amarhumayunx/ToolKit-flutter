@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/work_experience_model.dart';
 
 class WorkExperienceProvider with ChangeNotifier {
-  List<WorkExperienceItem> _workExperienceItems = [];
+  final List<WorkExperienceItem> _workExperienceItems = [];
 
   List<WorkExperienceItem> get workExperienceItems => _workExperienceItems;
 

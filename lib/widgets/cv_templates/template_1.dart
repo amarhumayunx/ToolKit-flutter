@@ -31,7 +31,6 @@ import '../../screens/cv_maker_screens/create_cv_screen.dart'
     show CreateCvScreen;
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
-import '../buttons/template_action_btn.dart';
 import '../cv_widgets/template_selection_dialog.dart';
 
 class Template1 extends StatefulWidget {
@@ -434,7 +433,7 @@ class _Template1State extends State<Template1> {
       return byteData!.buffer.asUint8List();
     } catch (e) {
       debugPrint('Error creating thumbnail: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -467,7 +466,7 @@ class _Template1State extends State<Template1> {
 
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => CreateCvScreen()),
+      MaterialPageRoute(builder: (context) => const CreateCvScreen()),
       (Route<dynamic> route) => false,
     );
   }

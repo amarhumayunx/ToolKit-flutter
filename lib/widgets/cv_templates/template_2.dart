@@ -29,7 +29,6 @@ import '../../provider/certification_provider.dart';
 import '../../screens/cv_maker_screens/base_cv_template_screen.dart';
 import '../../utils/app_colors.dart';
 import '../buttons/template_action_btn.dart';
-import '../custom_appbar.dart';
 import '../cv_widgets/template_selection_dialog.dart';
 
 class Template2 extends StatefulWidget {

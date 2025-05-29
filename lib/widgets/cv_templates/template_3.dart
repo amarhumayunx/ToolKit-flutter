@@ -19,16 +19,13 @@ import '../../models/website_model.dart';
 import '../../provider/certification_provider.dart';
 import '../../provider/education_provider.dart';
 import '../../provider/language_provider.dart';
-import '../../provider/saved_cv_provider.dart';
 import '../../provider/skills_provider.dart';
 import '../../provider/template_provider.dart';
 import '../../provider/user_provider.dart';
 import '../../provider/work_experience_provider.dart';
 import '../../screens/cv_maker_screens/base_cv_template_screen.dart';
-import '../../screens/cv_maker_screens/cv_maker_screen.dart';
 import '../../utils/app_colors.dart';
 import '../buttons/template_action_btn.dart';
-import '../custom_appbar.dart';
 import '../cv_widgets/template_selection_dialog.dart';
 
 class Template3 extends StatefulWidget {

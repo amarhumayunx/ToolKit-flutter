@@ -11,13 +11,13 @@ class SaveDocumentButton extends StatelessWidget {
   final VoidCallback? onSaveCompleted;
 
   const SaveDocumentButton({
-    Key? key,
+    super.key,
     required this.documentFile,
     this.buttonText = 'Save',
     this.width,
     this.padding,
     this.onSaveCompleted,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

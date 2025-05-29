@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
@@ -27,7 +26,7 @@ class PdfToImageService {
         final page = await document.getPage(i);
 
         try {
-          final scaleFactor = 3.0; // Higher scale for better quality
+          const scaleFactor = 3.0; // Higher scale for better quality
           final pageImage = await page.render(
             width: page.width * scaleFactor,
             height: page.height * scaleFactor,
@@ -100,7 +99,7 @@ class PdfToImageService {
 
       try {
         // Calculate dimensions with higher resolution
-        final scaleFactor = 3.0; // Higher scale for better quality
+        const scaleFactor = 3.0; // Higher scale for better quality
 
         // Render the page to an image
         final pageImage = await page.render(

@@ -1,7 +1,15 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:path/path.dart' as path;
+import 'package:pdfx/pdfx.dart';
 import 'package:toolkit/screens/split_screen/split_progress_screen.dart';
+import 'package:toolkit/utils/app_snackbar.dart';
 import 'package:toolkit/widgets/buttons/gradient_btn.dart';
 import 'package:toolkit/widgets/custom_appbar.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 import 'document_item.dart';
 
@@ -14,7 +22,7 @@ class PageSelectionScreen extends StatefulWidget {
     super.key,
     required this.selectedDocument,
     this.initialPageCount = 1,
-    this.isWordDocument= false,
+    this.isWordDocument = false,
   });
 
   @override
@@ -22,22 +30,130 @@ class PageSelectionScreen extends StatefulWidget {
 }
 
 class _PageSelectionScreenState extends State<PageSelectionScreen> {
-  // Default page count that can be adjusted by user
   late int totalPages;
   late List<bool> selectedPages;
   final TextEditingController _pageCountController = TextEditingController(text: '6');
+
+  // PDF preview related variables
+  bool _isLoadingPreviews = false;
+  List<Uint8List?> _pageImages = []; // Store page preview images (only for PDF)
+  PdfDocument? _pdfDocument; // Keep reference to PDF document
+  bool _isPdfFile = false;
+  String? _filePath;
 
   @override
   void initState() {
     super.initState();
     totalPages = widget.initialPageCount;
     selectedPages = List.generate(totalPages, (index) => false);
+
+    // Get the file path from DocumentItem
+    _filePath = widget.selectedDocument.file?.path;
+
+    if (_filePath != null) {
+      // Check if the document is a PDF
+      final fileExtension = path.extension(_filePath!).toLowerCase();
+      _isPdfFile = fileExtension == '.pdf';
+
+      if (_isPdfFile) {
+        _loadPdfPreviews();
+      }
+    }
   }
 
   @override
   void dispose() {
     _pageCountController.dispose();
+    _pdfDocument?.close();
     super.dispose();
+  }
+
+  Future<void> _loadPdfPreviews() async {
+    if (_filePath == null) return;
+
+    try {
+      setState(() {
+        _isLoadingPreviews = true;
+        _pageImages = List<Uint8List?>.filled(totalPages, null);
+      });
+
+      // Open PDF document using pdfx package
+      _pdfDocument = await PdfDocument.openFile(_filePath!);
+
+      // Generate preview for each page
+      for (int i = 0; i < totalPages; i++) {
+        try {
+          final page = await _pdfDocument!.getPage(i + 1);
+          final pageImage = await page.render(
+            width: 200,
+            height: 300,
+            format: PdfPageImageFormat.png,
+            backgroundColor: '#FFFFFF',
+          );
+
+          if (mounted) {
+            setState(() {
+              _pageImages[i] = pageImage?.bytes;
+            });
+          }
+        } catch (pageError) {
+          print('Error rendering page ${i + 1}: $pageError');
+          // Generate placeholder for failed pages
+          _pageImages[i] = await _generatePlaceholderImage(i + 1, 'PDF');
+        }
+      }
+    } catch (e) {
+      print('Error generating PDF previews: $e');
+      // Fallback to placeholder images
+      for (int i = 0; i < totalPages; i++) {
+        _pageImages[i] = await _generatePlaceholderImage(i + 1, 'PDF');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingPreviews = false;
+        });
+      }
+    }
+  }
+
+  // Generate a placeholder image with page information (only for PDF when rendering fails)
+  Future<Uint8List> _generatePlaceholderImage(int pageNumber, String fileType) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final paint = Paint();
+
+    // Draw background
+    paint.color = Colors.white;
+    canvas.drawRect(const Rect.fromLTWH(0, 0, 200, 300), paint);
+
+    // Draw border
+    paint.color = Colors.grey.shade300;
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = 2;
+    canvas.drawRect(const Rect.fromLTWH(0, 0, 200, 300), paint);
+
+    // Draw page content mockup lines
+    paint.color = Colors.grey.shade400;
+    paint.strokeWidth = 1;
+    for (int i = 0; i < 8; i++) {
+      canvas.drawLine(
+        Offset(20, 40 + (i * 25)),
+        Offset(180, 40 + (i * 25)),
+        paint,
+      );
+    }
+
+    // Draw file type icon area
+    paint.color = Colors.grey.shade200;
+    paint.style = PaintingStyle.fill;
+    canvas.drawRect(const Rect.fromLTWH(70, 220, 60, 40), paint);
+
+    final picture = recorder.endRecording();
+    final image = await picture.toImage(200, 300);
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    return byteData!.buffer.asUint8List();
   }
 
   void _togglePage(int pageIndex) {
@@ -46,17 +162,10 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
     });
   }
 
-
-
-
-
-
   void _onSplitPressed() {
     final anySelected = selectedPages.any((s) => s);
     if (!anySelected) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one page')),
-      );
+      AppSnackBar.show(context, message: 'Please select at least one page');
       return;
     }
 
@@ -71,12 +180,93 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
     );
   }
 
+  Widget _buildPagePreview(int index) {
+    if (_isPdfFile) {
+      // PDF file handling
+      if (_isLoadingPreviews) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      // If we have a page image, show it
+      if (_pageImages[index] != null) {
+        return Padding(
+          padding: const EdgeInsets.all(3.5),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              image: DecorationImage(
+                image: MemoryImage(_pageImages[index]!),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Fallback to PDF icon
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.picture_as_pdf,
+              size: 40,
+              color: Colors.grey.shade600,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Page ${index + 1}',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // DOCX file handling - show DOCX icon
+      return Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: Image.asset(
+                'assets/images/doc.png',
+                fit: BoxFit.cover,
+                height: 110,
+                width: 110,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset(
+                    'assets/images/doc.png',
+                    color: Colors.grey.shade400,
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const CustomAppBar(title: 'Split'),
+      appBar: CustomAppBar(title: ('split'.tr)),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -108,25 +298,9 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Column(
-                              children: [
-                                Expanded(
-                                  child: Center(
-                                    child: Image.asset(
-                                      'assets/images/doc.png',
-                                      fit: BoxFit.cover,
-                                      height: 110,
-                                      width: 110,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Image.asset(
-                                          'assets/images/doc.png',
-                                          color: Colors.grey.shade400,
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: _buildPagePreview(index),
                             ),
                           ),
                           // Checkbox in the corner
@@ -192,7 +366,7 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
               SizedBox(
                 width: double.infinity,
                 child: CustomGradientButton(
-                  text: 'Split',
+                  text: ('split'.tr),
                   onPressed: _onSplitPressed,
                 ),
               ),
@@ -202,5 +376,4 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
       ),
     );
   }
-
 }

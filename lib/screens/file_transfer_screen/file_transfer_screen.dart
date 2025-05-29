@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
@@ -15,8 +16,8 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const ToolsAppBar(
-        title: 'File Transfer',
+      appBar: ToolsAppBar(
+        title: ('file_transfer'.tr),
       ),
       body: Column(
         children: [
@@ -30,10 +31,10 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
 
                   const CustomSvgImage(imagePath: 'assets/images/file_transfer_image.svg'),
                   const SizedBox(height: 30),
-                  const InfoCard(
-                    title: 'Easy Transfer File',
+                  InfoCard(
+                    title: ('easy_transfer_file'.tr),
                     description:
-                    'Transfer files instantly while keeping quality, resolution, and clarity intact.',
+                    ('easy_file_transfer_description'.tr),
                   ),
                   const SizedBox(height: 24),
                   // Combined container with shadow

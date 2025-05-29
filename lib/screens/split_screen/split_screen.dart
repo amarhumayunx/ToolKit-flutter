@@ -3,17 +3,19 @@ import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart' as syncfusion;
 import 'package:toolkit/screens/split_screen/page_selection_screen.dart';
 import 'package:toolkit/screens/split_screen/split_progress_screen.dart';
+import 'package:toolkit/utils/app_snackbar.dart';
 import 'package:toolkit/widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
 import 'document_item.dart';
 import 'docxService.dart';
-import 'file_drop.dart'; // <- Ensure this is imported
+import 'file_drop.dart';
 
 class SplitScreen extends StatefulWidget {
   const SplitScreen({super.key});
@@ -68,12 +70,12 @@ class _SplitScreenState extends State<SplitScreen> {
           _selectedDocuments.addAll(validFiles);
           _documentErrorText = validFiles.length == pickedFiles.length
               ? ''
-              : 'Please select only PDF, DOC or DOCX files';
+              : ('select_pdf_doc_docx'.tr);
         });
       }
     } catch (e) {
       setState(() {
-        _documentErrorText = 'Error selecting documents: ${e.toString()}';
+        AppSnackBar.show(context, message: 'error_selecting_documents ${e.toString()}'.tr);
       });
       print('Error in file picker: $e');
     }
@@ -81,9 +83,7 @@ class _SplitScreenState extends State<SplitScreen> {
 
   Future<bool> _processAndSplitDocuments() async {
     if (_selectedDocuments.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one document')),
-      );
+      AppSnackBar.show(context, message: 'please select document');
       return false;
     }
 
@@ -97,10 +97,7 @@ class _SplitScreenState extends State<SplitScreen> {
         );
 
         if (!allSameType) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Please select files of the same type (all PDF, all DOCX, or all DOC)')),
-          );
+          AppSnackBar.show(context, message: 'select_same_type_files'.tr);
           return false;
         }
 
@@ -176,9 +173,7 @@ class _SplitScreenState extends State<SplitScreen> {
           );
           return true;
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Unsupported file type')),
-          );
+          AppSnackBar.show(context, message: 'unsupported_file_type'.tr);
           return false;
         }
       } else {
@@ -208,9 +203,8 @@ class _SplitScreenState extends State<SplitScreen> {
           final pages = await _docxService.extractPages(firstFile);
 
           if (pages.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No pages found in Word document')),
-            );
+
+            AppSnackBar.show(context, message: 'No_pages_found'.tr);
             return false;
           }
 
@@ -226,17 +220,13 @@ class _SplitScreenState extends State<SplitScreen> {
           );
           return true;
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Unsupported file type')),
-          );
+          AppSnackBar.show(context, message: 'Unsupported file type');
           return false;
         }
       }
     } catch (e) {
       print('Error processing documents: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error processing files: ${e.toString()}')),
-      );
+      AppSnackBar.show(context, message: 'Error processing files: ${e.toString()}');
       return false;
     }
   }
@@ -292,7 +282,7 @@ class _SplitScreenState extends State<SplitScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const ToolsAppBar(title: 'Split'),
+      appBar: ToolsAppBar(title: ('split'.tr)),
       body: Column(
         children: [
           Expanded(
@@ -309,10 +299,9 @@ class _SplitScreenState extends State<SplitScreen> {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  const InfoCard(
-                    title: 'Split Pages In File',
-                    description:
-                    'Effortlessly separate pages from files while keeping everything clear and intact.',
+                  InfoCard(
+                    title: ('split_pages'.tr),
+                    description: ('split_description'.tr),
                   ),
                   const SizedBox(height: 24),
                   // Styled file selection container
@@ -335,7 +324,7 @@ class _SplitScreenState extends State<SplitScreen> {
                           child: Align(
                             alignment: Alignment.topLeft,
                             child: Text(
-                              'Select File',
+                              ('Select File'),
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -380,7 +369,7 @@ class _SplitScreenState extends State<SplitScreen> {
                 _isProcessing
                     ? const CircularProgressIndicator()
                     : CustomGradientButton(
-                  text: 'Split Document',
+                  text: ('split_document'.tr),
                   onPressed: _processAndSplitDocuments,
                 ),
                 if (_processedResult.isNotEmpty)

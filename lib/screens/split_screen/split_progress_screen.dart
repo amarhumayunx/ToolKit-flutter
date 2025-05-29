@@ -1,9 +1,8 @@
 import 'dart:io';
-
-
 import 'package:archive/archive.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
@@ -11,7 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart' as syncfusion;
 import 'package:toolkit/widgets/tools/document_container.dart';
 import 'package:path/path.dart' as path;
-
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/save_document_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
@@ -168,28 +167,23 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
       await destinationFile.writeAsBytes(bytes);
 
       // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('File saved successfully as $fileName'),
-        duration: const Duration(seconds: 3),
-      ));
+      AppSnackBar.show(context, message: 'File saved successfully as $fileName');
 
     } catch (e) {
       print('Error saving file: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Error saving file: ${e.toString()}'),
-      ));
+      AppSnackBar.show(context, message: 'Error saving file: ${e.toString()}');
     }
   }
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
+  // void _showSnackBar(String message) {
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(
+  //       content: Text(message),
+  //       behavior: SnackBarBehavior.floating,
+  //       duration: const Duration(seconds: 2),
+  //     ),
+  //   );
+  // }
 
   Future<void> _startSplitting() async {
     // Simulate initial progress updates
@@ -322,12 +316,12 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
   Future<void> _openFile() async {
     try {
       if (_outputFile == null) {
-        _showSnackBar('No document available to open');
+        AppSnackBar.show(context, message: 'No document available to open');
         return;
       }
 
       if (!await _outputFile!.exists()) {
-        _showSnackBar('File not found');
+        AppSnackBar.show(context, message: 'File not found');
         return;
       }
 
@@ -336,28 +330,29 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
 
       if (result.type != ResultType.done) {
         // If opening fails, show error message
-        _showSnackBar('Cannot open file: ${result.message}');
+        AppSnackBar.show(context, message: 'Cannot open file: ${result.message}');
 
         // For zip files, we might need to tell the user
         if (_outputFile!.path.toLowerCase().endsWith('.zip')) {
-          _showSnackBar('This is a ZIP file. You may need a ZIP extractor app to view its contents.');
+          AppSnackBar.show(context, message: 'This is a ZIP file. You may need a ZIP extractor app to view its contents.');
         }
       }
     } catch (e) {
       print('Error opening file: $e');
-      _showSnackBar('Error opening document');
+      AppSnackBar.show(context, message: 'Error opening document');
     }
   }
 
   void _handleFileDeleted() {
-    // First pop back to the first screen
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    // Just go back to the previous screen (split screen)
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
 
-    // Wait for the screen to rebuild, then show the SnackBar
+    // Show success message
     Future.delayed(const Duration(milliseconds: 100), () {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('File deleted successfully')),
-      );
+      if (mounted) {
+        AppSnackBar.show(context, message: 'File deleted successfully!');
+      }
     });
   }
 
@@ -407,39 +402,36 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const CustomAppBar(title: 'Split Document'),
+      appBar: CustomAppBar(title: ('split_document'.tr)),
       body: Stack(
         children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(20.0),
-            child: Padding(
-              padding: const EdgeInsets.all(14.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  _buildLoadingContainer(),
-                  if (_animationCompleted) ...[
-                    const SizedBox(height: 36),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Split File:',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
+          Padding(
+            padding: const EdgeInsets.all(14.0),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                _buildLoadingContainer(),
+                if (_animationCompleted) ...[
+                  const SizedBox(height: 36),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      ('split_file_progress_screen'.tr),
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    DocumentContainer(
-                      filePath: _outputFile!.path,
-                      onTap: _openFile,
-                      onDelete: _handleFileDeleted,
-                    ),
-                  ],
-                  SizedBox(height: MediaQuery.of(context).padding.bottom + 300),
+                  ),
+                  const SizedBox(height: 10),
+                  DocumentContainer(
+                    filePath: _outputFile!.path,
+                    onTap: _openFile,
+                    onDelete: _handleFileDeleted,
+                  ),
                 ],
-              ),
+                SizedBox(height: MediaQuery.of(context).padding.bottom + 250),
+              ],
             ),
           ),
           if (_animationCompleted)

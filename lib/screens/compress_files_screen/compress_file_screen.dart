@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:get/get.dart';
 import 'package:toolkit/screens/compress_files_screen/file_drop_compress.dart';
 import 'package:toolkit/utils/app_colors.dart';
+import 'package:toolkit/utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
 import 'compress_file_result_screen.dart';
-import 'file_compression_service.dart'; // Import our file compressor
+import 'file_compression_service.dart';
 
 class CompressFileScreen extends StatefulWidget {
   const CompressFileScreen({super.key});
@@ -28,10 +30,7 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         allowMultiple: true,
-        type: FileType.custom,
-        allowedExtensions: [
-          'pdf', 'doc', 'docx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png'
-        ],
+        type: FileType.media,
       );
 
       if (result != null && result.paths.isNotEmpty) {
@@ -60,15 +59,9 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
       });
     }
   }
-
-
-
-
   Future<void> _compressFiles() async {
     if (_selectedFiles.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one file first')),
-      );
+      AppSnackBar.show(context, message: 'Please select at least one file first');
       return;
     }
 
@@ -109,10 +102,7 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
       setState(() {
         _isCompressing = false;
       });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error compressing files: $e')),
-      );
+      AppSnackBar.show(context, message: 'Error compressing files: $e');
     }
   }
 
@@ -127,7 +117,7 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: const ToolsAppBar(
-        title: 'Compress File',
+        title: ('Compress File'),
       ),
       body: Column(
         children: [
@@ -140,10 +130,10 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                   const CustomSvgImage(
                       imagePath: 'assets/images/compress_file_image.svg'),
                   const SizedBox(height: 30),
-                  const InfoCard(
-                    title: 'Reduce file size',
+                  InfoCard(
+                    title: ('Reduce File Size'),
                     description:
-                    'Reduce the size of PDFs, documents, and images while preserving original quality.',
+                    ('reduce_file_size_description'.tr),
                   ),
                   const SizedBox(height: 24),
                   // Combined container with shadow
@@ -162,13 +152,13 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                     ),
                     child: Column(
                       children: [
-                        const Padding(
+                        Padding(
                           padding: EdgeInsets.only(top: 10, left: 16, bottom: 10),
                           child: Align(
                             alignment: Alignment.topLeft,
                             child: Text(
-                              'Select File',
-                              style: TextStyle(
+                              ('select_file'.tr),
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.black,
