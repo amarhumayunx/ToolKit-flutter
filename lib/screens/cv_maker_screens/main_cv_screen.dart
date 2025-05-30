@@ -37,12 +37,12 @@ class MainCVScreen extends StatefulWidget {
   final GlobalKey<PersonalInfoPageState> personalInfoKey = GlobalKey();
 
   MainCVScreen({
-    super.key,
+    Key? key,
     required this.templateId,
     required this.templateName,
     this.editData,
     this.isEditing = false,
-  });
+  }) : super(key: key);
 
   @override
   State<MainCVScreen> createState() => _MainCVScreenState();
@@ -125,7 +125,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
     }
   }
   Future<void> _loadEducationData(Map<String, dynamic> convertedData) async {
-    await Future.delayed(const Duration(milliseconds: 50));
+    await Future.delayed(Duration(milliseconds: 50));
     if (!mounted) return;
 
     final educationData = _getNestedListData('education');
@@ -150,7 +150,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
   }
 
   Future<void> _loadWorkExperienceData(Map<String, dynamic> convertedData) async {
-    await Future.delayed(const Duration(milliseconds: 50));
+    await Future.delayed(Duration(milliseconds: 50));
     if (!mounted) return;
 
     final workExpData = _getNestedListData('workExperience');
@@ -181,7 +181,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
 
     try {
       // Add a small delay to ensure the widget tree is ready
-      await Future.delayed(const Duration(milliseconds: 50));
+      await Future.delayed(Duration(milliseconds: 50));
 
       if (!mounted) return;
 
@@ -234,7 +234,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
     if (_isLoadingEditData) return;
 
     try {
-      await Future.delayed(const Duration(milliseconds: 50));
+      await Future.delayed(Duration(milliseconds: 50));
       if (!mounted) return;
 
       debugPrint('Loading skills data...');
@@ -273,7 +273,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
 
     try {
       // Add a small delay to ensure the widget tree is ready
-      await Future.delayed(const Duration(milliseconds: 50));
+      await Future.delayed(Duration(milliseconds: 50));
       if (!mounted) return;
 
       debugPrint('Loading languages data...');
@@ -315,7 +315,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
   }
 
   Future<void> _loadWebsitesData(Map<String, dynamic> convertedData) async {
-    await Future.delayed(const Duration(milliseconds: 50));
+    await Future.delayed(Duration(milliseconds: 50));
     if (!mounted) return;
 
     debugPrint('Loading websites data...');
@@ -383,7 +383,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
       final result = nestedData.map<Map<String, dynamic>>((item) {
         debugPrint('Processing item: $item (${item.runtimeType})');
         if (item is Map) {
-          final converted = Map<String, dynamic>.from(item);
+          final converted = Map<String, dynamic>.from(item as Map);
           debugPrint('Converted item: $converted');
           return converted;
         }
@@ -434,7 +434,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
       _saveCurrentPageData();
 
       _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
+        duration: Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     }
@@ -446,7 +446,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
       _saveCurrentPageData();
 
       _pageController.previousPage(
-        duration: const Duration(milliseconds: 300),
+        duration: Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     }
@@ -526,7 +526,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
             Expanded(
               child: PageView(
                 controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(),
+                physics: NeverScrollableScrollPhysics(),
                 onPageChanged: (index) {
                   setState(() {
                     currentStep = index + 1;
@@ -539,7 +539,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
                     templateName: widget.templateName,
                     initialData: _getNestedData('personalInfo'),
                   ),
-                  const CareerObjectivesPage(),
+                  CareerObjectivesPage(),
                   EducationDetailPage(
                     initialData: _getNestedListData('education'),
                   ),
@@ -564,7 +564,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
           ],
         ),
         bottomNavigationBar: Padding(
-          padding: const EdgeInsets.only(
+          padding: EdgeInsets.only(
             bottom: 28.0,
             left: 28.0,
             right: 28.0,

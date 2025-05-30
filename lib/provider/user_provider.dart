@@ -9,7 +9,6 @@ class UserProvider extends ChangeNotifier {
   UserModel get userData => _userData;
   List<Website> get websites => _websites;
 
-  // Load all user data at once
   void loadUserData({
     required UserModel userData,
     List<Website>? websites,
@@ -27,12 +26,14 @@ class UserProvider extends ChangeNotifier {
     _userData.websiteUrl = userData.websiteUrl;
 
     if (websites != null) {
-      _websites = List<Website>.from(websites); // Create a new list
+      _websites = List<Website>.from(websites);
       debugPrint('Websites loaded: ${_websites.length} items');
     }
 
-    notifyListeners();
-    debugPrint('UserProvider: loadUserData completed, notifyListeners called');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+      debugPrint('UserProvider: loadUserData completed, notifyListeners called');
+    });
   }
 
   void updateUserData({
@@ -55,33 +56,39 @@ class UserProvider extends ChangeNotifier {
     if (careerObjective != null) _userData.careerObjective = careerObjective;
     if (websiteUrl != null) _userData.websiteUrl = websiteUrl;
 
-    notifyListeners();
-    debugPrint('UserProvider: updateUserData completed');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+      debugPrint('UserProvider: updateUserData completed');
+    });
   }
 
   void updateCareerObjective(String objective) {
     debugPrint('UserProvider: updateCareerObjective called with: $objective');
     _userData.careerObjective = objective;
-    notifyListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 
   void updateWebsite(String? url) {
     debugPrint('UserProvider: updateWebsite called with: $url');
     _userData.websiteUrl = url;
-    notifyListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 
   void updateWebsites(List<Website> websites) {
     debugPrint('Updating websites with ${websites.length} items');
     _websites = List<Website>.from(websites);
-    notifyListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 
-  // Add method to get websites as maps
   List<Map<String, dynamic>> getWebsitesAsMaps() {
     return _websites.map((website) => website.toMap()).toList();
   }
-
 
   void clearUserData() {
     debugPrint('UserProvider: clearUserData called');
@@ -93,7 +100,9 @@ class UserProvider extends ChangeNotifier {
     _userData.careerObjective = null;
     _userData.websiteUrl = null;
     _websites = [];
-    notifyListeners();
-    debugPrint('UserProvider: clearUserData completed');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+      debugPrint('UserProvider: clearUserData completed');
+    });
   }
 }

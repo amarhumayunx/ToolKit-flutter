@@ -11,11 +11,11 @@ class FileOptionsMenu extends StatelessWidget {
   final Function(String)? onFileRenamed;
 
   const FileOptionsMenu({
-    super.key,
+    Key? key,
     required this.filePath,
     this.onDelete,
     this.onFileRenamed,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -65,13 +65,13 @@ class FileOptionsMenu extends StatelessWidget {
             text: 'Share',
           ),
           // Custom divider with padding and custom color
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             enabled: false,
             height: 10,
             padding: EdgeInsets.zero,
             child: Center(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Divider(
                   height: 1,
                   thickness: 1,
@@ -106,7 +106,7 @@ class FileOptionsMenu extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 12,
             fontWeight: FontWeight.w300,
-            color: const Color(0xFF8E8E93),
+            color: Color(0xFF8E8E93),
           ),
         ),
       ),

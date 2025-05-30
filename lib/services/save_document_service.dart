@@ -2,12 +2,29 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce_flutter/adapters.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+import '../models/file_model.dart';
+
+import '../models/file_model_adapter.dart';
 import '../utils/app_snackbar.dart';
 
 class SaveDocumentService {
+  static const String _filesBoxName = 'filesBox';
+  static const String toolkitFolderName = 'Toolkit';
+
+  /// Initialize Hive box for files
+  static Future<Box<FileModel>> initFilesBox() async {
+    if (!Hive.isAdapterRegistered(1)) { // Match the typeId
+      Hive.registerAdapter(FileModelAdapter());
+    }
+    return await Hive.openBox<FileModel>(_filesBoxName);
+  }
+
   /// Checks if storage permission is available or needed
   /// For Android 10+ (API 29+), we don't need explicit storage permission
   static Future<bool> checkAndRequestStoragePermission(
@@ -51,7 +68,7 @@ class SaveDocumentService {
           title: const Text('Permission Issue'),
           content: const Text(
               'Unable to save document. This might be due to permission restrictions on your device.\n\n'
-              'For Android 11+ users: Please allow the app to manage all files in your device settings.'),
+                  'For Android 11+ users: Please allow the app to manage all files in your device settings.'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancel'),
@@ -72,54 +89,137 @@ class SaveDocumentService {
     );
   }
 
-  /// Main method to save a document file
-  static Future<bool?> saveDocument(
+  /// Creates Toolkit folder if it doesn't exist
+  static Future<Directory?> _createToolkitFolder() async {
+    try {
+      Directory? baseDir;
+
+      if (Platform.isAndroid) {
+        // For Android, we'll use the Downloads directory
+        baseDir = Directory('/storage/emulated/0/Download');
+        if (!await baseDir.exists()) {
+          // Fallback to app documents directory if Downloads not accessible
+          baseDir = await getApplicationDocumentsDirectory();
+        }
+      } else if (Platform.isIOS) {
+        // For iOS, use the app's documents directory
+        baseDir = await getApplicationDocumentsDirectory();
+      } else {
+        // Unsupported platform
+        return null;
+      }
+
+      // Create the Toolkit directory
+      final toolkitDir = Directory('${baseDir.path}/$toolkitFolderName');
+      if (!await toolkitDir.exists()) {
+        await toolkitDir.create(recursive: true);
+      }
+
+      return toolkitDir;
+    } catch (e) {
+      debugPrint('Error creating Toolkit folder: $e');
+      return null;
+    }
+  }
+
+  /// Fallback method to save files using system dialog if Toolkit folder creation fails
+  static Future<String?> _saveFileWithDialog(
       BuildContext context, File documentFile) async {
     try {
-      // Check if we can access storage (either with permission or on Android 10+)
+      String baseFileName = path.basename(documentFile.path);
+      if (!baseFileName.toLowerCase().endsWith('.docx')) {
+        baseFileName = 'Document.docx';
+      }
+
+      final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      String uniqueFileName =
+          '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
+
+      final params = SaveFileDialogParams(
+        sourceFilePath: documentFile.path,
+        fileName: uniqueFileName,
+      );
+
+      final savedFilePath = await FlutterFileDialog.saveFile(params: params);
+
+      if (savedFilePath != null) {
+        AppSnackBar.show(context, message: 'Document saved successfully');
+        return savedFilePath;
+      } else {
+        AppSnackBar.show(context, message: 'Document saving canceled');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('Error in _saveFileWithDialog: $e');
+      AppSnackBar.show(context, message: 'Failed to save document: ${e.toString()}');
+      return null;
+    }
+  }
+
+  /// Main method to save a document file to Toolkit folder
+  static Future<bool?> saveDocument(BuildContext context, File documentFile) async {
+    try {
       bool canAccessStorage = await checkAndRequestStoragePermission(context);
 
       if (canAccessStorage) {
-        // Generate a unique filename
-        String baseFileName = path.basename(documentFile.path);
-        if (!baseFileName.toLowerCase().endsWith('.docx')) {
-          baseFileName =
-              'Document.docx'; // Default name if file doesn't have proper extension
-        }
+        // Try to create the Toolkit folder
+        final toolkitDir = await _createToolkitFolder();
+        String? savedFilePath;
 
-        final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-        String uniqueFileName =
-            '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
+        if (toolkitDir != null) {
+          // Save to Toolkit folder
+          String baseFileName = path.basename(documentFile.path);
+          if (!baseFileName.toLowerCase().endsWith('.docx')) {
+            baseFileName = 'Document.docx';
+          }
 
-        // Use the FlutterFileDialog directly (this handles permissions internally)
-        final params = SaveFileDialogParams(
-          sourceFilePath: documentFile.path,
-          fileName: uniqueFileName,
-        );
+          final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+          String uniqueFileName = '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
 
-        final savedFilePath = await FlutterFileDialog.saveFile(params: params);
+          // Create destination file path in Toolkit folder
+          final destinationPath = '${toolkitDir.path}/$uniqueFileName';
 
-        if (savedFilePath != null) {
-          AppSnackBar.show(context, message: 'Document saved successfully');
-          return true; // Successful save
+          // Copy the file to the Toolkit folder
+          await documentFile.copy(destinationPath);
+          savedFilePath = destinationPath;
+
+          AppSnackBar.show(context, message: 'Document saved to ${toolkitDir.path}');
         } else {
-          AppSnackBar.show(context, message: 'Document saving canceled');
-          return false; // Save was canceled
+          // If folder creation failed, use default save mechanism
+          savedFilePath = await _saveFileWithDialog(context, documentFile);
+          if (savedFilePath == null) {
+            return false; // User canceled or error occurred
+          }
         }
+
+        // Save to Hive if we have a saved file path
+        if (savedFilePath != null) {
+          final filesBox = await initFilesBox();
+          final fileSize = (await documentFile.length()) / (1024 * 1024); // MB
+
+          await filesBox.add(FileModel(
+            name: path.basename(savedFilePath),
+            path: savedFilePath,
+            date: DateTime.now(),
+            size: '${fileSize.toStringAsFixed(1)} MB',
+          ));
+
+          return true;
+        }
+
+        return false;
       } else {
-        // Show a dialog with a more helpful message about permission issues
         showPermissionHelperDialog(context);
-        return null; // Permission issue
+        return null;
       }
     } on PlatformException catch (e) {
       print('Platform Exception in saving file: ${e.message}');
-      AppSnackBar.show(context,
-          message: 'Failed to save document: ${e.message}');
-      return null; // Error
+      AppSnackBar.show(context, message: 'Failed to save document: ${e.message}');
+      return null;
     } catch (e) {
       print('Error saving file: $e');
       AppSnackBar.show(context, message: 'Failed to save document: $e');
-      return null; // Error
+      return null;
     }
   }
 }

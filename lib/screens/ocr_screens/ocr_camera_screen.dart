@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../utils/app_colors.dart';
+
 // Updated OcrCameraScreen with image preview and proper done button functionality
 class OcrCameraScreen extends StatefulWidget {
   const OcrCameraScreen({super.key});
@@ -23,7 +24,7 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
   String _errorMessage = '';
   bool _isLoading = true;
   String _selectedScanType = 'Single'; // default to Single
-  final List<File> _capturedImages = [];
+  List<File> _capturedImages = [];
   final ImagePicker _imagePicker = ImagePicker();
   bool _isFlashOn = false;
   bool _isGridVisible = true;
@@ -121,8 +122,8 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
 
   Future<void> _pickImageFromGallery() async {
     try {
-      final List<XFile> pickedFiles = await _imagePicker.pickMultiImage();
-      if (pickedFiles.isNotEmpty) {
+      final List<XFile>? pickedFiles = await _imagePicker.pickMultiImage();
+      if (pickedFiles != null && pickedFiles.isNotEmpty) {
         setState(() {
           _capturedImages
               .addAll(pickedFiles.map((file) => File(file.path)).toList());
@@ -191,9 +192,9 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: Colors.white,
-        body: Center(
+        body: const Center(
           child: CircularProgressIndicator(),
         ),
       );
@@ -227,9 +228,9 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
     }
 
     if (!_isCameraInitialized) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: Colors.white,
-        body: Center(
+        body: const Center(
           child: Text('Initializing camera...'),
         ),
       );
@@ -286,9 +287,9 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
             child: Container(
               height: 150,
               padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.white,
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),
@@ -356,8 +357,8 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
                         GestureDetector(
                           onTap: _capturedImages.isNotEmpty
                               ? () {
-                            // Optionally show a larger preview or do something
-                          }
+                                  // Optionally show a larger preview or do something
+                                }
                               : null,
                           child: Stack(
                             alignment: Alignment.center,

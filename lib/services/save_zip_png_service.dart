@@ -7,7 +7,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:toolkit/services/save_document_service.dart';
 
+import '../models/file_model.dart';
 import '../utils/app_snackbar.dart';
 
 class SaveFileService {
@@ -190,7 +192,21 @@ class SaveFileService {
       AppSnackBar.show(context, message: 'Failed to save ZIP file: ${e.toString()}');
     }
   }
-
+  static Future<void> _saveFileToHive(File file, String fileType) async {
+    try {
+      final filesBox = await SaveDocumentService.initFilesBox();
+      final fileModel = FileModel(
+        name: path.basename(file.path),
+        path: file.path,
+        date: DateTime.now(),
+        size: '${(file.lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB',
+        isFavorite: false,
+      );
+      await filesBox.add(fileModel);
+    } catch (e) {
+      debugPrint('Error saving file to Hive: $e');
+    }
+  }
   /// Main method to save any file based on its type to Toolkit folder
   static Future<void> saveFile(
       BuildContext context, File file, String fileType) async {
@@ -215,6 +231,9 @@ class SaveFileService {
         default:
           await _saveGenericFile(context, file);
       }
+
+      // Add file to Hive after successful save
+      await _saveFileToHive(file, fileType);
     } catch (e) {
       debugPrint('Error in saveFile: $e');
       AppSnackBar.show(context, message: 'Failed to save file: ${e.toString()}');

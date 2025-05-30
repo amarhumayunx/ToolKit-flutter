@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:toolkit/screens/settings_screens/phone_recovery_screen.dart';
 import 'package:toolkit/utils/app_colors.dart';
+import '../../controllers/language_controller.dart';
 import '../../services/notification_service.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/gradient_background.dart';
 import '../../widgets/settings_widgets/settings_tile.dart';
 import '../../widgets/settings_widgets/settings_toggle_tile.dart';
-import '../controllers/language_controller.dart';
+import 'email_recovery_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -41,7 +43,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _loadNotificationStatus();
-    _initializeLanguageController(); // Add this line
+    _initializeLanguageController();
   }
 
   void _initializeLanguageController() {
@@ -66,6 +68,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _notificationsEnabled = false;
       });
     }
+  }
+
+  // Navigate to email recovery screen
+  void _navigateToEmailRecovery() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const EmailRecoveryScreen(email: 'abc@gmail.com'),
+      ),
+    );
+  }
+
+  // Navigate to phone recovery screen
+  void _navigateToPhoneRecovery() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+        const PhoneRecoveryScreen(phone: '+1 234 567 8900'),
+      ),
+    );
   }
 
   // Handle notification toggle
@@ -114,8 +137,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
     }
   }
-
-  // Navigate to email recovery screen
 
   @override
   Widget build(BuildContext context) {
@@ -282,6 +303,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+
   Widget _buildConfidentialDocumentsSection() {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -308,9 +330,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
             child: Padding(
               padding: const EdgeInsets.all(10.0),
-              child:
-
-              Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
@@ -332,7 +352,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ],
               ),
-
             ),
           ),
 
@@ -369,7 +388,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 12),
 
                     // Dropdown for recovery options
-                    // In _buildConfidentialDocumentsSection(), update the DropdownButton:
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
@@ -397,6 +415,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             setState(() {
                               _selectedRecoveryOption = value;
                             });
+
+                            // Add navigation logic here
+                            if (value == 'Email') {
+                              _navigateToEmailRecovery();
+                            } else if (value == 'Phone Number') {
+                              _navigateToPhoneRecovery();
+                            }
                           }
                         },
                         items: _recoveryOptions
@@ -492,5 +517,3 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 }
-
-

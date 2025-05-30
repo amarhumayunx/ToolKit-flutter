@@ -20,7 +20,7 @@ class OcrScreen extends StatefulWidget {
 }
 
 class _OcrScreenState extends State<OcrScreen> {
-  final List<File> _selectedImages = [];
+  List<File> _selectedImages = [];
   final ImagePicker _picker = ImagePicker();
   String _extractedText = '';
   bool _shouldClearImages = false;
@@ -31,7 +31,7 @@ class _OcrScreenState extends State<OcrScreen> {
         final List<File>? capturedImages = await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const OcrCameraScreen(),
+            builder: (context) => OcrCameraScreen(),
           ),
         );
 
@@ -130,7 +130,7 @@ class _OcrScreenState extends State<OcrScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const ToolsAppBar(
+      appBar: ToolsAppBar(
         title: 'OCR',
       ),
       body: Column(
@@ -141,9 +141,9 @@ class _OcrScreenState extends State<OcrScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const CustomSvgImage(imagePath: 'assets/images/ocr_image.svg'),
+                  CustomSvgImage(imagePath: 'assets/images/ocr_image.svg'),
                   const SizedBox(height: 30),
-                  const InfoCard(
+                  InfoCard(
                     title: 'Extract text from files',
                     description:
                     'Seamlessly extract text copy from multiple images or documents instantly.',

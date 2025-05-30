@@ -1,16 +1,13 @@
 // extracted_text_screen.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_file/open_file.dart';
 import 'package:toolkit/widgets/custom_appbar.dart';
-
 import '../../services/word_document_service.dart';
-
 import '../../utils/app_snackbar.dart';
-
 import '../../widgets/buttons/save_document_btn.dart';
-
 import '../../widgets/tools/animated_loaded_container.dart';
 import '../../widgets/tools/document_container.dart';
 
@@ -83,7 +80,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
       });
 
       final filePath =
-      await _wordDocumentService.createWordDocument(_textController.text);
+          await _wordDocumentService.createWordDocument(_textController.text);
 
       setState(() {
         _isSaving = false;
@@ -236,7 +233,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
                   documentFile: File(_savedFilePath!),
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   onSaveCompleted: () {
-                    // This will be called after successful save
+                    Navigator.of(context).pop(true);
                   },
                 ),
               ),
@@ -271,7 +268,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           border: InputBorder.none,
         ),
       ),
