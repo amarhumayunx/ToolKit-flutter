@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -9,7 +8,6 @@ import 'package:toolkit/screens/split_screen/split_progress_screen.dart';
 import 'package:toolkit/utils/app_snackbar.dart';
 import 'package:toolkit/widgets/buttons/gradient_btn.dart';
 import 'package:toolkit/widgets/custom_appbar.dart';
-import 'package:pdf/widgets.dart' as pw;
 
 import 'document_item.dart';
 
@@ -48,7 +46,7 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
     selectedPages = List.generate(totalPages, (index) => false);
 
     // Get the file path from DocumentItem
-    _filePath = widget.selectedDocument.file?.path;
+    _filePath = widget.selectedDocument.file.path;
 
     if (_filePath != null) {
       // Check if the document is a PDF
@@ -274,6 +272,7 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Page grid only (Removed heading and page count input)
+              const SizedBox(height: 15,),
               Expanded(
                 child: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

@@ -74,6 +74,23 @@ class Language extends Translations {
       'rearrange_pages': 'Rearrange Pages',
       'selected': 'Selected:',
       'easy_file_transfer': 'Easy Transfer File',
+
+      //new Settings Secreen lines
+      'notification_enabled': 'Notifications Enabled Successfully',
+      'notification_permission': 'Notification permission denied',
+      'notification_error': 'Error enabling notifications',
+      'notification_disabled': 'Notifications Disabled',
+      'notification_error_disabled': 'Error disabling notifications',
+      'notifications_and_alerts': 'Notifications & Alerts',
+      'support_and_feedback': 'Support & Feedback',
+      'privacy_and_policy': 'Privacy Policy',
+      'rate_us': 'Rate Us',
+      'share': 'Share',
+      'general': 'General',
+      'confidential_document': 'Confidential Documents',
+      'code_recovery_options': 'Code Recovery Options',
+      'email': 'Email',
+      'settings': 'Settings',
     },
 
     'en_GB': {
@@ -150,6 +167,23 @@ class Language extends Translations {
       'rearrange_pages': 'Rearrange Pages',
       'selected': 'Selected:',
       'easy_file_transfer': 'Easy Transfer File',
+
+      //Settings Screen Lines
+      "notification_enabled": "Notifications enabled successfully",
+      "notification_permission": "Notification permission denied",
+      "notification_error": "Error enabling notifications",
+      "notification_disabled": "Notifications disabled",
+      "notification_error_disabled": "Error disabling notifications",
+      "notifications_and_alerts": "Notifications & Alerts",
+      "support_and_feedback": "Support & Feedback",
+      "privacy_and_policy": "Privacy Policy",
+      "rate_us": "Rate Us",
+      "share": "Share",
+      "general": "General",
+      "confidential_document": "Confidential Documents",
+      "code_recovery_options": "Code Recovery Options",
+      "email": "Email",
+      "settings": "Settings"
     },
 
     'ur_PK': {
@@ -224,6 +258,23 @@ class Language extends Translations {
       'rearrange_pages': 'صفحات کی ترتیب تبدیل کریں',
       'selected': 'منتخب شدہ:',
       'easy_file_transfer': 'آسان فائل ٹرانسفر',
+
+      //Settings Screen Lines
+      "notification_enabled": "اطلاعات کامیابی سے فعال ہو گئیں",
+      "notification_permission": "اطلاعات کی اجازت مسترد کر دی گئی",
+      "notification_error": "اطلاعات کو فعال کرتے وقت خرابی",
+      "notification_disabled": "اطلاعات غیر فعال کر دی گئی ہیں",
+      "notification_error_disabled": "اطلاعات کو غیر فعال کرتے وقت خرابی",
+      "notifications_and_alerts": "اطلاعات اور الرٹس",
+      "support_and_feedback": "مدد اور آراء",
+      "privacy_and_policy": "رازداری کی پالیسی",
+      "rate_us": "ہمیں ریٹنگ دیں",
+      "share": "شیئر کریں",
+      "general": "عمومی",
+      "confidential_document": "خفیہ دستاویزات",
+      "code_recovery_options": "کوڈ بازیابی کے اختیارات",
+      "email": "ای میل",
+      "settings": "ترتیبات"
     },
 
     'zh_CN': {
@@ -298,6 +349,24 @@ class Language extends Translations {
       'rearrange_pages': '重新排列页面',
       'selected': '已选择：',
       'easy_file_transfer': '轻松文件传输',
+
+      //Settings Screen Lines
+      "notification_enabled": "通知已成功启用",
+      "notification_permission": "通知权限被拒绝",
+      "notification_error": "启用通知时出错",
+      "notification_disabled": "通知已禁用",
+      "notification_error_disabled": "禁用通知时出错",
+      "notifications_and_alerts": "通知和提醒",
+      "support_and_feedback": "支持与反馈",
+      "privacy_and_policy": "隐私政策",
+      "rate_us": "评价我们",
+      "share": "分享",
+      "general": "常规",
+      "confidential_document": "机密文件",
+      "code_recovery_options": "恢复码选项",
+      "email": "电子邮件",
+      "settings": "设置"
+
     },
 
     'de_DE': {
@@ -372,6 +441,24 @@ class Language extends Translations {
       'rearrange_pages': 'Seiten neu anordnen',
       'selected': 'Ausgewählt:',
       'easy_file_transfer': 'Einfacher Dateitransfer',
+
+      //Settings Screen Lines
+      'notification_enabled': 'Benachrichtigungen erfolgreich aktiviert',
+      'notification_permission': 'Benachrichtigungsberechtigung verweigert',
+      'notification_error': 'Fehler beim Aktivieren der Benachrichtigungen',
+      'notification_disabled': 'Benachrichtigungen deaktiviert',
+      'notification_error_disabled': 'Fehler beim Deaktivieren der Benachrichtigungen',
+      'notifications_and_alerts': 'Benachrichtigungen & Alarme',
+      'support_and_feedback': 'Support & Feedback',
+      'privacy_and_policy': 'Datenschutzrichtlinie',
+      'rate_us': 'Bewerten Sie uns',
+      'share': 'Teilen',
+      'general': 'Allgemein',
+      'confidential_document': 'Vertrauliche Dokumente',
+      'code_recovery_options': 'Wiederherstellungsoptionen für Codes',
+      'email': 'E-Mail',
+      'settings': 'Einstellungen'
+
     },
   };
 }

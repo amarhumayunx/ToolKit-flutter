@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:get/get.dart'; // Updated import for Get
 import 'package:hive_ce_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 import 'package:toolkit/provider/certification_provider.dart';
@@ -15,8 +14,7 @@ import 'package:toolkit/provider/user_provider.dart';
 import 'package:toolkit/provider/work_experience_provider.dart';
 import 'package:toolkit/screens/home_screen.dart';
 import 'package:toolkit/services/notification_service.dart';
-import 'controllers/language_controller.dart';
-import 'localization/language.dart';
+import 'localization/language.dart'; // Add your languages file
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +26,7 @@ void main() async {
 
   // Initialize Hive
   await Hive.initFlutter();
+
 
   runApp(
     MultiProvider(
@@ -53,7 +52,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'ToolKit',
+      title: 'Toolkit App',
       debugShowCheckedModeBanner: false,
 
       // Localization setup

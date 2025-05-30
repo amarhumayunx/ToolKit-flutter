@@ -2,25 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'package:open_file/open_file.dart';
+import 'package:toolkit/screens/compress_files_screen/compression_result_class.dart';
 import 'package:toolkit/widgets/tools/document_container.dart';
 import '../../widgets/buttons/save_document_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
+import 'compress_file_screen.dart';
 import 'file_compression_service.dart';
 
 class CompressedFileResultScreen extends StatefulWidget {
   final List<File> originalFiles;
   final List<File> compressedFiles;
+  final List<CompressionResult>? compressionResults;
 
   const CompressedFileResultScreen({
     super.key,
     required this.originalFiles,
     required this.compressedFiles,
+    this.compressionResults,
   });
 
   @override
-  State<CompressedFileResultScreen> createState() =>
-      _CompressedFileResultScreenState();
+  State<CompressedFileResultScreen> createState() => _CompressedFileResultScreenState();
 }
 
 class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
@@ -66,16 +69,9 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
     double originalSize = 0;
     double compressedSize = 0;
 
-    for (var file in widget.originalFiles) {
-      if (file.existsSync()) {
-        originalSize += file.lengthSync().toDouble();
-      }
-    }
-
-    for (var file in widget.compressedFiles) {
-      if (file.existsSync()) {
-        compressedSize += file.lengthSync().toDouble();
-      }
+    for (var result in widget.compressionResults ?? []) {
+      originalSize += result.originalSize.toDouble();
+      compressedSize += result.compressedSize.toDouble();
     }
 
     if (originalSize > 0) {
@@ -84,21 +80,13 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
     return 0;
   }
 
-  // Calculate total saved space
   String get totalSpaceSaved {
     double originalSize = 0;
     double compressedSize = 0;
 
-    for (var file in widget.originalFiles) {
-      if (file.existsSync()) {
-        originalSize += file.lengthSync().toDouble();
-      }
-    }
-
-    for (var file in widget.compressedFiles) {
-      if (file.existsSync()) {
-        compressedSize += file.lengthSync().toDouble();
-      }
+    for (var result in widget.compressionResults ?? []) {
+      originalSize += result.originalSize.toDouble();
+      compressedSize += result.compressedSize.toDouble();
     }
 
     double savedBytes = originalSize - compressedSize;
@@ -139,9 +127,67 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
     );
   }
 
+  Widget _buildCompressionStatus() {
+    if (widget.compressionResults == null) return const SizedBox.shrink();
+
+    final notCompressedFiles = widget.compressionResults!
+        .where((result) => !result.wasCompressed)
+        .toList();
+
+    if (notCompressedFiles.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.only(bottom: 5),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.amber[50],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.amber[200]!),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    "Compression Summary",
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: Colors.amber[800],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              ...notCompressedFiles.map((result) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                child: Text(
+                  "File is not able to compress Because it already compressed or not supported.",
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: Colors.amber[800],
+                  ),
+                ),
+              )),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async {
+      // Replace below with actual navigation to your CompressFilesScreen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const CompressFileScreen()),
+      );
+      return false; // prevent default back behavior
+    },
+    child: Scaffold(
       backgroundColor: Colors.white,
       appBar: const CustomAppBar(title: 'Compression Results'),
       body: Stack(
@@ -153,7 +199,7 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
                 const SizedBox(height: 20),
                 _buildLoadingContainer(),
                 if (_animationCompleted) ...[
-                  const SizedBox(height: 36),
+                  const SizedBox(height: 25),
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -213,7 +259,8 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
+                  _buildCompressionStatus(),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
@@ -254,6 +301,7 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
             ),
         ],
       ),
+    ),
     );
   }
 
