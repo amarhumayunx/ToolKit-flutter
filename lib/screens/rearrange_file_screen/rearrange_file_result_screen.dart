@@ -4,6 +4,7 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:toolkit/screens/rearrange_file_screen/pdf_rearrange_service.dart';
+import 'package:toolkit/screens/rearrange_file_screen/rearrange_file_screen.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/save_document_btn.dart';
 import '../../widgets/custom_appbar.dart';
@@ -309,7 +310,15 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async {
+      // Replace below with actual navigation to your CompressFilesScreen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const RearrangeFileScreen()),
+      );
+      return false; // prevent default back behavior
+    },
+    child: Scaffold(
       backgroundColor: Colors.white,
       appBar: const CustomAppBar(title: 'Rearrange Results'),
       body: Stack(
@@ -405,7 +414,7 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
             ),
         ],
       ),
-    );
+    ));
   }
 
   @override

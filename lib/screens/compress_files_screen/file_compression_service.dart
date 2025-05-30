@@ -9,10 +9,12 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:image/image.dart' as img;
 import 'package:pdfx/pdfx.dart' as pdfx;
 
+import 'compression_result_class.dart';
+
 class FileCompressor {
 
   // Main compression function that handles different file types
-  static Future<File?> compressFile(File file, {int quality = 85}) async {
+  static Future<CompressionResult> compressFileWithStatus(File file, {int quality = 85}) async {
     final extension = path.extension(file.path).toLowerCase();
 
     try {
@@ -20,25 +22,64 @@ class FileCompressor {
         case '.jpg':
         case '.jpeg':
         case '.png':
-          return await _compressImageforimg(file, quality: quality);
+          final result = await _compressImageWithStatus(file, quality: quality);
+          return result;
         case '.pdf':
-          return await compressPdf(file, quality: quality);
+          final result = await compressPdfWithStatus(file, quality: quality);
+          return result;
         case '.doc':
         case '.docx':
-          return await _compressWordDocument(file);
+          final result = await _compressWordDocumentWithStatus(file);
+          return result;
         case '.ppt':
         case '.pptx':
-          return await _compressPptx(file, file.path);
+          final result = await _compressPptxWithStatus(file);
+          return result;
         default:
-          return file;
+          return CompressionResult(
+              file: file,
+              wasCompressed: false,
+              message: 'File type not supported for compression',
+              originalSize: 0,
+              compressedSize: 0
+          );
       }
     } catch (e) {
       print('Error compressing file: $e');
-      return null;
+      return CompressionResult(
+          file: file,
+          wasCompressed: false,
+          message: 'Error occurred during compression',
+        compressedSize: 0,
+        originalSize: 0
+      );
     }
   }
 
-  // Compress batch of files and return results
+  // Batch compression with status tracking
+  static Future<List<CompressionResult>> compressBatchWithStatus(List<File> files, {int quality = 85}) async {
+    List<CompressionResult> results = [];
+
+    for (var file in files) {
+      try {
+        CompressionResult result = await compressFileWithStatus(file, quality: quality);
+        results.add(result);
+      } catch (e) {
+        print('Error processing file ${file.path}: $e');
+        results.add(CompressionResult(
+            file: file,
+            wasCompressed: false,
+            message: 'Processing failed',
+            compressedSize: 0,
+            originalSize: 0
+        ));
+      }
+    }
+
+    return results;
+  }
+
+  // Compress batch of files and return results (legacy method)
   static Future<List<File>> compressBatch(List<File> files, {int quality = 85}) async {
     List<File> compressedFiles = [];
 
@@ -61,12 +102,24 @@ class FileCompressor {
     return compressedFiles;
   }
 
-  // Image compression using flutter_image_compress
-  static Future<File> _compressImageforimg(File file, {int quality = 85}) async {
+  // Legacy method for backward compatibility
+  static Future<File?> compressFile(File file, {int quality = 85}) async {
+    final result = await compressFileWithStatus(file, quality: quality);
+    return result.file;
+  }
+
+  // Image compression with status tracking
+  static Future<CompressionResult> _compressImageWithStatus(File file, {int quality = 85}) async {
     // First check if file exists
     if (!file.existsSync()) {
       print('File does not exist: ${file.path}');
-      throw FileSystemException('File not found', file.path);
+      return CompressionResult(
+          file: file,
+          wasCompressed: false,
+          message: 'File not found',
+          originalSize: 0,
+          compressedSize: 0,
+      );
     }
 
     // Generate a unique filename to avoid conflicts
@@ -94,77 +147,153 @@ class FileCompressor {
 
       if (result == null) {
         print('Compression returned null result for: ${file.path}');
-        return file; // Return original if compression fails
+        return CompressionResult(
+            file: file,
+            wasCompressed: false,
+            message: 'Compression failed',
+            originalSize: 0,
+            compressedSize: 0,
+        );
       }
 
       // Verify the compressed file exists and has content
       final resultFile = File(result.path);
       if (!resultFile.existsSync() || resultFile.lengthSync() <= 0) {
         print('Compressed file is empty or does not exist: ${result.path}');
-        return file;
+        return CompressionResult(
+            file: file,
+            wasCompressed: false,
+            message: 'Compression failed',
+            originalSize: 0,
+            compressedSize: 0
+        );
       }
 
-      // Compare sizes and return the smaller one
-      if (resultFile.lengthSync() < file.lengthSync()) {
+      // Compare sizes and return appropriate result
+      final originalSize = file.lengthSync();
+      final compressedSize = resultFile.lengthSync();
+      final reduction = ((originalSize - compressedSize) / originalSize * 100);
+
+      if (reduction > 5) { // Only consider as compressed if reduction > 5%
         print('Successfully compressed: ${file.path}');
-        print('Original: ${getReadableFileSize(file.lengthSync())} → Compressed: ${getReadableFileSize(resultFile.lengthSync())}');
-        return resultFile;
+        print('Original: ${getReadableFileSize(originalSize)} → Compressed: ${getReadableFileSize(compressedSize)}');
+        return CompressionResult(
+            file: resultFile,
+            wasCompressed: true,
+            message: 'Successfully compressed',
+            compressedSize: compressedSize,
+            originalSize: originalSize
+        );
       } else {
-        print('Compression did not reduce file size for: ${file.path}');
-        // Remove the compressed file since it's larger
+        print('Image is already compressed: ${file.path}');
         await resultFile.delete();
-        return file;
+        return CompressionResult(
+            file: file,
+            wasCompressed: false,
+            message: 'File is already compressed',
+            compressedSize: compressedSize,
+          originalSize: originalSize
+        );
       }
     } catch (e) {
       print('Error compressing image: $e');
-      // More detailed error logging
-      if (e is FileSystemException) {
-        print('File system error: ${e.message}, ${e.path}');
-      }
-      return file; // Return original on error
+      return CompressionResult(
+          file: file,
+          wasCompressed: false,
+          message: 'Error occurred during compression',
+        compressedSize: 0,
+        originalSize: 0
+      );
     }
   }
 
-  // PDF compression functionality while preserving original content
-  static Future<File> compressPdf(File file, {int quality = 85}) async {
+  // Image compression using flutter_image_compress (legacy method)
+  static Future<File> _compressImageforimg(File file, {int quality = 85}) async {
+    final result = await _compressImageWithStatus(file, quality: quality);
+    return result.file;
+  }
+
+  // PDF compression with status tracking
+  static Future<CompressionResult> compressPdfWithStatus(File file, {int quality = 85}) async {
     if (!file.existsSync()) {
       print('PDF file does not exist: ${file.path}');
-      throw FileSystemException('File not found', file.path);
+      return CompressionResult(
+          file: file,
+          wasCompressed: false,
+          message: 'File not found',
+          compressedSize: 0,
+          originalSize: 0
+      );
     }
 
     final dir = await getTemporaryDirectory();
     final filename = path.basenameWithoutExtension(file.path);
     final targetPath = path.join(dir.path, 'compressed_${filename}_$quality.pdf');
 
+    pdfx.PdfDocument? pdfDocument;
+
     try {
-      // Open the PDF document using pdfx
-      final pdfDocument = await pdfx.PdfDocument.openFile(file.path);
+      pdfDocument = await pdfx.PdfDocument.openFile(file.path);
 
-      // Create a new PDF document with compression settings
-      final pdf = pw.Document();
+      // Create a new PDF document with maximum compression
+      final pdf = pw.Document(compress: true);
 
-      // Process each page of the original document
+      final originalSize = file.lengthSync();
+
+      // Aggressive scaling for all file sizes
+      double scale;
+      int imageQuality;
+
+      if (originalSize < 50 * 1024) { // < 50KB
+        scale = 0.6; // More aggressive scaling
+        imageQuality = (quality * 0.5).round(); // Much lower quality
+      } else if (originalSize < 200 * 1024) { // < 200KB
+        scale = 0.7;
+        imageQuality = (quality * 0.6).round();
+      } else if (originalSize < 1024 * 1024) { // < 1MB
+        scale = 0.8;
+        imageQuality = (quality * 0.7).round();
+      } else {
+        scale = quality / 100.0;
+        imageQuality = quality;
+      }
+
+      // Ensure minimum quality values
+      imageQuality = imageQuality.clamp(25, 95);
+
+      print('Compressing with scale: $scale, quality: $imageQuality');
+
+      // Process each page with aggressive compression
       for (int i = 0; i < pdfDocument.pagesCount; i++) {
         final page = await pdfDocument.getPage(i + 1);
+
+        // Calculate render dimensions with aggressive scaling
+        final renderWidth = (page.width * scale).round().clamp(200, 2000);
+        final renderHeight = (page.height * scale).round().clamp(200, 2000);
+
         final pageImage = await page.render(
-          width: page.width,
-          height: page.height,
-          format: pdfx.PdfPageImageFormat.jpeg,
+          width: renderWidth.toDouble(),
+          height: renderHeight.toDouble(),
+          format: pdfx.PdfPageImageFormat.jpeg, // Always use JPEG for better compression
           backgroundColor: '#FFFFFF',
-          // quality is between 0 and 100 in pdfx
-          quality: quality,
+          quality: imageQuality,
         );
 
+        await page.close();
+
         if (pageImage != null) {
-          // Create a page from the compressed image
-          final image = pw.MemoryImage(pageImage.bytes);
+          // Further compress the image bytes if needed
+          Uint8List compressedImageBytes = pageImage.bytes;
+
+          // For very small files, apply additional image compression
+          if (originalSize < 100 * 1024) {
+            compressedImageBytes = await _aggressiveImageCompression(pageImage.bytes, imageQuality);
+          }
+
+          final image = pw.MemoryImage(compressedImageBytes);
           pdf.addPage(
             pw.Page(
-              pageFormat: PdfPageFormat(
-                page.width,
-                page.height,
-                marginAll: 0,
-              ),
+              pageFormat: PdfPageFormat(page.width, page.height, marginAll: 0),
               build: (pw.Context context) {
                 return pw.Center(
                   child: pw.Image(image, fit: pw.BoxFit.contain),
@@ -175,31 +304,262 @@ class FileCompressor {
         }
       }
 
-      // Save the compressed PDF
       final compressedPdfBytes = await pdf.save();
       final resultFile = File(targetPath);
       await resultFile.writeAsBytes(compressedPdfBytes);
 
-      // Compare file sizes
-      final originalSize = file.lengthSync();
       final compressedSize = resultFile.lengthSync();
+      final reduction = ((originalSize - compressedSize) / originalSize * 100);
 
       print('PDF compression results:');
       print('Original: ${getReadableFileSize(originalSize)}');
       print('Compressed: ${getReadableFileSize(compressedSize)}');
+      print('Reduction: ${reduction.toStringAsFixed(2)}%');
 
-      // Check if compression was effective
-      if (compressedSize < originalSize) {
-        print('Successfully compressed PDF: ${((originalSize - compressedSize) / originalSize * 100).toStringAsFixed(2)}% reduction');
-        return resultFile;
+      // Check if compression was significant
+
+      if (compressedSize >= originalSize)
+        {
+          print('Compression increased file size, using original');
+          await resultFile.delete();
+          return CompressionResult(
+              file: file,
+              wasCompressed: false,
+              message: 'File is already optimized',
+              originalSize: originalSize,
+              compressedSize: originalSize
+          );
+        }
+      else if (reduction > 5) { // Only consider as compressed if reduction > 5%
+        print('Successfully compressed PDF');
+        return CompressionResult(
+            file: resultFile,
+            wasCompressed: true,
+            message: 'Successfully compressed',
+          originalSize: originalSize,
+          compressedSize: compressedSize,
+        );
       } else {
-        print('Compression did not reduce file size, using original');
+        print('PDF is already optimized');
         await resultFile.delete();
-        return file;
+        return CompressionResult(
+            file: file,
+            wasCompressed: false,
+            message: 'PDF is already optimized',
+          originalSize: originalSize,
+          compressedSize: compressedSize,
+        );
       }
     } catch (e) {
       print('Error compressing PDF: $e');
-      return file; // Return original on error
+      return CompressionResult(
+          file: file,
+          wasCompressed: false,
+          message: 'Error occurred during compression',
+          originalSize: 0,
+          compressedSize: 0,
+      );
+    } finally {
+      await pdfDocument?.close();
+    }
+  }
+
+  // PDF compression functionality while preserving original content (legacy method)
+  static Future<File> compressPdf(File file, {int quality = 85}) async {
+    final result = await compressPdfWithStatus(file, quality: quality);
+    return result.file;
+  }
+
+  // Word document compression with status tracking
+  static Future<CompressionResult> _compressWordDocumentWithStatus(File file) async {
+    final dir = await getTemporaryDirectory();
+    final filename = path.basenameWithoutExtension(file.path);
+    final extension = path.extension(file.path).toLowerCase();
+    final targetPath = path.join(dir.path, 'compressed_$filename$extension');
+
+    try {
+      // 1. Read the original file
+      final bytes = await file.readAsBytes();
+
+      // 2. Unzip the DOCX
+      final archive = ZipDecoder().decodeBytes(bytes);
+
+      // 3. Create a new archive for modified content
+      final newArchive = Archive();
+
+      // 4. Process each file in the DOCX
+      for (final fileEntry in archive.files) {
+        if (fileEntry.isFile) {
+          var content = fileEntry.content as List<int>;
+
+          // 5. Compress images (default quality 75)
+          if (fileEntry.name.toLowerCase().contains('media/') ||
+              _isImageFile(fileEntry.name)) {
+            content = _compressImagefordocx(Uint8List.fromList(content), quality: 75);
+          }
+
+          // Add file to new archive with modified content
+          newArchive.addFile(ArchiveFile(
+            fileEntry.name,
+            fileEntry.size,
+            content,
+          ));
+        } else {
+          // Add directories as-is
+          newArchive.addFile(fileEntry);
+        }
+      }
+
+      // 6. Re-zip with maximum compression
+      final compressed = ZipEncoder().encode(newArchive, level: 9);
+
+      // 7. Save the compressed file
+      final resultFile = File(targetPath);
+      await resultFile.writeAsBytes(compressed!);
+
+      // Verify compression results
+      final originalSize = file.lengthSync();
+      final compressedSize = resultFile.lengthSync();
+      final reduction = ((originalSize - compressedSize) / originalSize * 100);
+
+      print('Word document compression results:');
+      print('Original: ${_formatSizefordocx(originalSize)}');
+      print('Compressed: ${_formatSizefordocx(compressedSize)}');
+      print('Reduction: ${reduction.toStringAsFixed(1)}%');
+
+      if (reduction > 5) { // Only consider as compressed if reduction > 5%
+        return CompressionResult(
+            file: resultFile,
+            wasCompressed: true,
+            message: 'Successfully compressed',
+          compressedSize: compressedSize,
+          originalSize: originalSize,
+        );
+      } else {
+        await resultFile.delete();
+        return CompressionResult(
+            file: file,
+            wasCompressed: false,
+            message: 'Document is already optimized',
+          originalSize: originalSize,
+          compressedSize: compressedSize
+        );
+      }
+    } catch (e) {
+      print('Error compressing Word document: $e');
+      return CompressionResult(
+          file: file,
+          wasCompressed: false,
+          message: 'Error occurred during compression',
+        compressedSize: 0,
+        originalSize: 0
+      );
+    }
+  }
+
+  // Word document compression (legacy method)
+  static Future<File> _compressWordDocument(File file) async {
+    final result = await _compressWordDocumentWithStatus(file);
+    return result.file;
+  }
+
+  // PPTX compression with status tracking
+  static Future<CompressionResult> _compressPptxWithStatus(File file) async {
+    final dir = await getTemporaryDirectory();
+    final filename = path.basenameWithoutExtension(file.path);
+    final extension = path.extension(file.path).toLowerCase();
+    final targetPath = path.join(dir.path, 'compressed_$filename$extension');
+
+    try {
+      // Read the PPTX file
+      final bytes = await file.readAsBytes();
+      final archive = ZipDecoder().decodeBytes(bytes);
+      final optimized = Archive();
+
+      // Process each file in the PPTX archive
+      for (final archiveFile in archive.files) {
+        if (archiveFile.isFile) {
+          // Compress images within the presentation
+          if (archiveFile.name.startsWith('ppt/media/')) {
+            final compressed = await _compressImageBytes(archiveFile.content as Uint8List);
+            optimized.addFile(ArchiveFile(archiveFile.name, compressed.length, compressed));
+          } else {
+            // Add other files as-is
+            optimized.addFile(archiveFile);
+          }
+        }
+      }
+
+      // Save the optimized PPTX
+      final compressedBytes = ZipEncoder().encode(optimized);
+      final resultFile = File(targetPath);
+      await resultFile.writeAsBytes(compressedBytes!);
+
+      // Check compression results
+      final originalSize = file.lengthSync();
+      final compressedSize = resultFile.lengthSync();
+      final reduction = ((originalSize - compressedSize) / originalSize * 100);
+
+      print('PPTX compression results:');
+      print('Original: ${getReadableFileSize(originalSize)}');
+      print('Compressed: ${getReadableFileSize(compressedSize)}');
+      print('Reduction: ${reduction.toStringAsFixed(1)}%');
+
+      if (reduction > 5) { // Only consider as compressed if reduction > 5%
+        return CompressionResult(
+            file: resultFile,
+            wasCompressed: true,
+            message: 'Successfully compressed',
+            compressedSize: compressedSize,
+            originalSize: originalSize
+        );
+      } else {
+        await resultFile.delete();
+        return CompressionResult(
+            file: file,
+            wasCompressed: false,
+            message: 'Presentation is already optimized',
+            compressedSize: compressedSize,
+            originalSize: originalSize
+        );
+      }
+    } catch (e) {
+      print('PPTX compression error: $e');
+      return CompressionResult(
+          file: file,
+          wasCompressed: false,
+          message: 'Error occurred during compression',
+          compressedSize: 0,
+          originalSize: 0
+      );
+    }
+  }
+
+  // PPTX Compression (legacy method)
+  static Future<File> _compressPptx(File file, String targetPath) async {
+    final result = await _compressPptxWithStatus(file);
+    return result.file;
+  }
+
+  // Additional aggressive image compression for very small files
+  static Future<Uint8List> _aggressiveImageCompression(Uint8List imageBytes, int quality) async {
+    try {
+      final image = img.decodeImage(imageBytes);
+      if (image == null) return imageBytes;
+
+      // Resize image more aggressively for small files
+      final resizedImage = img.copyResize(
+        image,
+        width: (image.width * 0.7).round(),
+        height: (image.height * 0.7).round(),
+        interpolation: img.Interpolation.average,
+      );
+
+      // Encode with very low quality
+      return Uint8List.fromList(img.encodeJpg(resizedImage, quality: quality.clamp(20, 60)));
+    } catch (e) {
+      print('Error in aggressive image compression: $e');
+      return imageBytes;
     }
   }
 
@@ -257,112 +617,10 @@ class FileCompressor {
     }
   }
 
-  // Helper function to format file sizes
-
-  static Future<File> _compressWordDocument(File file) async {
-    final dir = await getTemporaryDirectory();
-    final filename = path.basenameWithoutExtension(file.path);
-    final extension = path.extension(file.path).toLowerCase();
-    final targetPath = path.join(dir.path, 'compressed_$filename$extension');
-
-    try {
-      // 1. Read the original file
-      final bytes = await file.readAsBytes();
-
-      // 2. Unzip the DOCX
-      final archive = ZipDecoder().decodeBytes(bytes);
-
-      // 3. Create a new archive for modified content
-      final newArchive = Archive();
-
-      // 4. Process each file in the DOCX
-      for (final fileEntry in archive.files) {
-        if (fileEntry.isFile) {
-          var content = fileEntry.content as List<int>;
-
-          // 5. Compress images (default quality 75)
-          if (fileEntry.name.toLowerCase().contains('media/') ||
-              _isImageFile(fileEntry.name)) {
-            content = _compressImagefordocx(Uint8List.fromList(content), quality: 75);
-          }
-
-          // Add file to new archive with modified content
-          newArchive.addFile(ArchiveFile(
-            fileEntry.name,
-            fileEntry.size,
-            content,
-          ));
-        } else {
-          // Add directories as-is
-          newArchive.addFile(fileEntry);
-        }
-      }
-
-      // 6. Re-zip with maximum compression
-      final compressed = ZipEncoder().encode(newArchive, level: 9);
-
-      // 7. Save the compressed file
-      final resultFile = File(targetPath);
-      await resultFile.writeAsBytes(compressed!);
-
-      // Verify compression results
-      final originalSize = file.lengthSync();
-      final compressedSize = resultFile.lengthSync();
-
-      print('Word document compression results:');
-      print('Original: ${_formatSizefordocx(originalSize)}');
-      print('Compressed: ${_formatSizefordocx(compressedSize)}');
-      print('Reduction: ${((originalSize - compressedSize) / originalSize * 100).toStringAsFixed(1)}%');
-
-      if (compressedSize < originalSize) {
-        return resultFile;
-      } else {
-        await resultFile.delete();
-        return file;
-      }
-    } catch (e) {
-      print('Error compressing Word document: $e');
-      return file;
-    }
-  }
-
   static String _formatSizefordocx(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-  }
-
-  // PPTX Compression
-  static Future<File> _compressPptx(File file, String targetPath) async {
-    try {
-      // Read the PPTX file
-      final bytes = await file.readAsBytes();
-      final archive = ZipDecoder().decodeBytes(bytes);
-      final optimized = Archive();
-
-      // Process each file in the PPTX archive
-      for (final file in archive.files) {
-        if (file.isFile) {
-          // Compress images within the presentation
-          if (file.name.startsWith('ppt/media/')) {
-            final compressed = await _compressImageBytes(file.content as Uint8List);
-            optimized.addFile(ArchiveFile(file.name, compressed.length, compressed));
-          } else {
-            // Add other files as-is
-            optimized.addFile(file);
-          }
-        }
-      }
-
-      // Save the optimized PPTX
-      final compressedBytes = ZipEncoder().encode(optimized);
-      final resultFile = File(targetPath);
-      await resultFile.writeAsBytes(compressedBytes!);
-      return resultFile;
-    } catch (e) {
-      print('PPTX compression error: $e');
-      return file;
-    }
   }
 
   static String getReadableFileSize(int bytes) {

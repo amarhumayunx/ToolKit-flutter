@@ -14,7 +14,6 @@ import 'package:toolkit/provider/user_provider.dart';
 import 'package:toolkit/provider/work_experience_provider.dart';
 import 'package:toolkit/screens/home_screen.dart';
 import 'package:toolkit/services/notification_service.dart';
-import 'controllers/language_controller.dart';
 import 'localization/language.dart'; // Add your languages file
 
 void main() async {

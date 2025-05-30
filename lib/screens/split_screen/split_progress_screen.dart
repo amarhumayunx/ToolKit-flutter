@@ -8,6 +8,7 @@ import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart' as syncfusion;
+import 'package:toolkit/screens/split_screen/split_screen.dart';
 import 'package:toolkit/widgets/tools/document_container.dart';
 import 'package:path/path.dart' as path;
 import '../../utils/app_snackbar.dart';
@@ -400,7 +401,15 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async {
+      // Replace below with actual navigation to your CompressFilesScreen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const SplitScreen()),
+      );
+      return false; // prevent default back behavior
+    },
+    child: Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(title: ('split_document'.tr)),
       body: Stack(
@@ -446,6 +455,7 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
             ),
         ],
       ),
+    ),
     );
   }
 

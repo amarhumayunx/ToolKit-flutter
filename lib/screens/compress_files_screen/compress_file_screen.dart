@@ -10,6 +10,7 @@ import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
 import 'compress_file_result_screen.dart';
+import 'compression_result_class.dart';
 import 'file_compression_service.dart';
 
 class CompressFileScreen extends StatefulWidget {
@@ -71,10 +72,11 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
 
     try {
       // Perform actual compression using our FileCompressor utility
-      List<File> compressedFiles = await FileCompressor.compressBatch(
+      List<CompressionResult> compressionResults = await FileCompressor.compressBatchWithStatus(
         _selectedFiles,
         quality: _compressionQuality.round(),
       );
+      List<File> compressedFiles = compressionResults.map((result) => result.file).toList();
 
       // Close the loading dialog
       Navigator.of(context).pop();
@@ -90,6 +92,7 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
           builder: (context) => CompressedFileResultScreen(
             originalFiles: _selectedFiles,
             compressedFiles: compressedFiles,
+            compressionResults: compressionResults,
           ),
         ),
       );
@@ -153,7 +156,7 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                     child: Column(
                       children: [
                         Padding(
-                          padding: EdgeInsets.only(top: 10, left: 16, bottom: 10),
+                          padding: const EdgeInsets.only(top: 10, left: 16, bottom: 10),
                           child: Align(
                             alignment: Alignment.topLeft,
                             child: Text(

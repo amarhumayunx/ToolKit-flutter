@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:toolkit/utils/app_colors.dart';
 import '../../services/notification_service.dart';
@@ -22,7 +21,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = false;
   bool _isGeneralExpanded = false;
   bool _isConfidentialExpanded = false;
-  String _selectedLanguage = 'English';
+  final String _selectedLanguage = 'English';
   String _selectedRecoveryOption = 'Email';
 
   // List of available languages
@@ -84,14 +83,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _notificationsEnabled = true;
           });
           AppSnackBar.show(context,
-              message: 'Notifications enabled successfully');
+              message: 'notifications_enabled'.tr);
         } else {
           // Permission denied, keep notifications disabled
           await NotificationService.setNotificationEnabled(false);
           setState(() {
             _notificationsEnabled = false;
           });
-          AppSnackBar.show(context, message: 'Notification permission denied');
+          AppSnackBar.show(context, message: 'notification_permission'.tr);
         }
       } catch (e) {
         // Error occurred, keep notifications disabled
@@ -108,10 +107,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         setState(() {
           _notificationsEnabled = false;
         });
-        AppSnackBar.show(context, message: 'Notifications disabled');
+        AppSnackBar.show(context, message: 'notifications_disabled'.tr);
       } catch (e) {
         debugPrint('Error disabling notifications: $e');
-        AppSnackBar.show(context, message: 'Error disabling notifications');
+        AppSnackBar.show(context, message: 'notifications_error_disabling'.tr);
       }
     }
   }
@@ -144,32 +143,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       // General section with expandable content
                       _buildGeneralSection(),
-                      SizedBox(
+                      const SizedBox(
                         height: 4,
                       ),
                       // Confidential Documents section with expandable content
                       _buildConfidentialDocumentsSection(),
-                      SizedBox(
+                      const SizedBox(
                         height: 4,
                       ),
                       SettingToggleTile(
-                        title: 'Notifications & Alerts',
+                        title: 'notifications_and_alerts'.tr,
                         value: _notificationsEnabled,
                         onChanged: _handleNotificationToggle,
                       ),
-                      SettingTile(title: 'Support & Feedback', onTap: () {}),
-                      SizedBox(
+                      SettingTile(title: 'support_and_feedback'.tr, onTap: () {}),
+                      const SizedBox(
                         height: 4,
                       ),
-                      SettingTile(title: 'Privacy Policy', onTap: () {}),
-                      SizedBox(
+                      SettingTile(title: 'privacy_policy'.tr, onTap: () {}),
+                      const SizedBox(
                         height: 4,
                       ),
-                      SettingTile(title: 'Rate US', onTap: () {}),
-                      SizedBox(
+                      SettingTile(title: 'rate_us'.tr, onTap: () {}),
+                      const SizedBox(
                         height: 4,
                       ),
-                      SettingTile(title: 'Share', onTap: () {}),
+                      SettingTile(title: 'share'.tr, onTap: () {}),
                     ],
                   ),
                 ),
@@ -212,7 +211,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'General',
+                    'general'.tr,
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -447,7 +446,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                 ),
                                 IconButton(
-                                  icon: Icon(
+                                  icon: const Icon(
                                     Icons.add,
                                     color: AppColors.primary,
                                     size: 16,
