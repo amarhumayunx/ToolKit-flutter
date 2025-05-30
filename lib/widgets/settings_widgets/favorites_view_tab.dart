@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:intl/intl.dart';
 import 'package:toolkit/widgets/settings_widgets/sort_btn.dart';
+import '../../models/file_model.dart';
+import '../../services/save_document_service.dart';
+
 class FavoritesView extends StatefulWidget {
   final String searchQuery;
 
@@ -10,46 +15,86 @@ class FavoritesView extends StatefulWidget {
   @override
   State<FavoritesView> createState() => _FavoritesViewState();
 }
-class _FavoritesViewState extends State<FavoritesView> {
-  String _sortBy = 'Recent';
-  Set<String> _favorites = {'Important Document'}; // Track favorite documents
 
-  void _toggleFavorite(String documentName) {
+class _FavoritesViewState extends State<FavoritesView> {
+  late Box<FileModel> filesBox;
+  String _sortBy = 'Recent';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _initHive();
+  }
+
+  Future<void> _initHive() async {
+    filesBox = await SaveDocumentService.initFilesBox();
+    setState(() => _isLoading = false);
+  }
+
+  void _toggleFavorite(int index) {
     setState(() {
-      if (_favorites.contains(documentName)) {
-        _favorites.remove(documentName);
-      } else {
-        _favorites.add(documentName);
+      final file = filesBox.getAt(index);
+      if (file != null) {
+        filesBox.putAt(
+            index,
+            FileModel(
+              name: file.name,
+              path: file.path,
+              date: file.date,
+              size: file.size,
+              isFavorite: !file.isFavorite,
+            ));
       }
     });
   }
 
+  void _deleteFile(int index) {
+    setState(() {
+      filesBox.deleteAt(index);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('File deleted')),
+    );
+  }
+
+  List<MapEntry<int, FileModel>> _getFavoriteFiles() {
+    if (_isLoading || filesBox.isEmpty) return [];
+
+    // Get all favorite files with their indices
+    List<MapEntry<int, FileModel>> favoriteFilesWithIndex = [];
+    for (int i = 0; i < filesBox.length; i++) {
+      final file = filesBox.getAt(i);
+      if (file != null && file.isFavorite) {
+        favoriteFilesWithIndex.add(MapEntry(i, file));
+      }
+    }
+
+    return favoriteFilesWithIndex;
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Filter and sort favorites based on search query and sort option
-    var favorites = [
-      {
-        'name': 'Important Document',
-        'date': '20/02/25',
-        'time': '3:45pm',
-        'size': '4.7 MB',
-      },
-    ]
-        .where((fav) => fav['name']!
-        .toLowerCase()
-        .contains(widget.searchQuery.toLowerCase()))
+    // Get all favorite files
+    final favoriteFilesWithIndex = _getFavoriteFiles();
+
+    // Filter files based on search query
+    final filteredFiles = favoriteFilesWithIndex
+        .where((entry) => entry.value.name
+            .toLowerCase()
+            .contains(widget.searchQuery.toLowerCase()))
         .toList();
 
-    // Sort favorites
+    // Sort files based on selected option
     if (_sortBy == 'Name') {
-      favorites.sort((a, b) => a['name']!.compareTo(b['name']!));
+      filteredFiles.sort((a, b) => a.value.name.compareTo(b.value.name));
     } else if (_sortBy == 'Date') {
-      favorites.sort((a, b) => b['date']!.compareTo(a['date']!));
+      filteredFiles.sort((a, b) => b.value.date.compareTo(a.value.date));
     }
+    // Default 'Recent' keeps the original order (sorted by date)
 
     return Column(
       children: [
-        // Sort button with container and custom icon
         Row(
           children: [
             Padding(
@@ -68,53 +113,61 @@ class _FavoritesViewState extends State<FavoritesView> {
         ),
         const SizedBox(height: 10),
         Expanded(
-          child: ListView(
-            children: [
-              if (favorites.isEmpty)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 100),
-                    child: Text(
-                      'No favorites found',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ),
-                )
-              else
-                ...favorites.map((fav) => Column(
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : ListView(
                   children: [
-                    _buildFavoriteItem(
-                      context,
-                      documentName: fav['name']!,
-                      date: fav['date']!,
-                      time: fav['time']!,
-                      size: fav['size']!,
-                      isFavorite: _favorites.contains(fav['name']!),
-                      onFavoriteToggle: () => _toggleFavorite(fav['name']!),
-                    ),
-                    const SizedBox(height: 12),
+                    if (filteredFiles.isEmpty)
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 100),
+                          child: Text(
+                            'No favorites found',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      ...filteredFiles.map((entry) {
+                        final index = entry.key;
+                        final file = entry.value;
+                        return Column(
+                          children: [
+                            _buildFavoriteItem(
+                              context,
+                              index: index,
+                              documentName: file.name,
+                              date: DateFormat('yy/MM/dd').format(file.date),
+                              time: DateFormat('h:mma').format(file.date),
+                              size: file.size,
+                              isFavorite: file.isFavorite,
+                              onFavoriteToggle: () => _toggleFavorite(index),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                        );
+                      }),
+                    const SizedBox(height: 100),
                   ],
-                )),
-              const SizedBox(height: 100), // Extra space for nav bar
-            ],
-          ),
+                ),
         ),
       ],
     );
   }
 
   Widget _buildFavoriteItem(
-      BuildContext context, {
-        required String documentName,
-        required String date,
-        required String time,
-        required String size,
-        required bool isFavorite,
-        required VoidCallback onFavoriteToggle,
-      }) {
+    BuildContext context, {
+    required int index,
+    required String documentName,
+    required String date,
+    required String time,
+    required String size,
+    required bool isFavorite,
+    required VoidCallback onFavoriteToggle,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -187,10 +240,23 @@ class _FavoritesViewState extends State<FavoritesView> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: SvgPicture.asset(
-                'assets/icons/more_icon.svg',
-                height: 20,
-                width: 20,
+              child: PopupMenuButton<String>(
+                icon: SvgPicture.asset(
+                  'assets/icons/more_icon.svg',
+                  height: 20,
+                  width: 20,
+                ),
+                onSelected: (value) {
+                  if (value == 'delete') {
+                    _deleteFile(index);
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  const PopupMenuItem<String>(
+                    value: 'delete',
+                    child: Text('Delete'),
+                  ),
+                ],
               ),
             )
           ],
