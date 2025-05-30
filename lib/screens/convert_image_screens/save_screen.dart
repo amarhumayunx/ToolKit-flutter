@@ -34,10 +34,17 @@ class _SaveScreenState extends State<SaveScreen>
   late Animation<double> _progressAnimation;
   File? convertedFile;
   String currentFileName = '';
+  late String _currentFilePath; // Track current file path
 
   @override
   void initState() {
     super.initState();
+    // Use the first image's name as the base name
+    final originalName =
+        widget.selectedImages.first.path.split('/').last.split('.').first;
+    currentFileName = originalName;
+    _currentFilePath = ''; // Initialize empty, will be set in _convertFile
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
@@ -51,11 +58,6 @@ class _SaveScreenState extends State<SaveScreen>
         _handleLoadingComplete();
       }
     });
-
-    // Use the first image's name as the base name
-    final originalName =
-        widget.selectedImages.first.path.split('/').last.split('.').first;
-    currentFileName = originalName;
 
     _convertFile();
     _animationController.forward();
@@ -77,9 +79,10 @@ class _SaveScreenState extends State<SaveScreen>
     try {
       if (widget.selectedFormat == 'Word') {
         final wordFile =
-        await WordImagesService.createWordDocument(widget.selectedImages);
+            await WordImagesService.createWordDocument(widget.selectedImages);
         setState(() {
           convertedFile = wordFile;
+          _currentFilePath = wordFile.path;
         });
       } else if (widget.selectedFormat == 'PDF') {
         await _createPDFWithMultipleImages();
@@ -88,6 +91,7 @@ class _SaveScreenState extends State<SaveScreen>
         await Future.delayed(const Duration(seconds: 2));
         setState(() {
           convertedFile = widget.selectedImages.first;
+          _currentFilePath = widget.selectedImages.first.path;
         });
       }
     } catch (e) {
@@ -118,18 +122,18 @@ class _SaveScreenState extends State<SaveScreen>
                 crossAxisAlignment: pw.CrossAxisAlignment.center,
                 children: images
                     .map((image) => pw.Container(
-                  margin: const pw.EdgeInsets.symmetric(vertical: 20),
-                  width: 400, // Increased width
-                  height: 300, // Increased height
-                  child: pw.Center(
-                    child: pw.Image(
-                      image,
-                      fit: pw.BoxFit.contain,
-                      width: 400,
-                      height: 300,
-                    ),
-                  ),
-                ))
+                          margin: const pw.EdgeInsets.symmetric(vertical: 20),
+                          width: 400,
+                          height: 300,
+                          child: pw.Center(
+                            child: pw.Image(
+                              image,
+                              fit: pw.BoxFit.contain,
+                              width: 400,
+                              height: 300,
+                            ),
+                          ),
+                        ))
                     .toList(),
               ),
             );
@@ -145,8 +149,8 @@ class _SaveScreenState extends State<SaveScreen>
             build: (pw.Context context) {
               return pw.Center(
                 child: pw.Container(
-                  width: 500, // Large width for single image
-                  height: 400, // Large height for single image
+                  width: 500,
+                  height: 400,
                   child: pw.Center(
                     child: pw.Image(
                       image,
@@ -170,6 +174,7 @@ class _SaveScreenState extends State<SaveScreen>
 
     setState(() {
       convertedFile = file;
+      _currentFilePath = file.path;
     });
   }
 
@@ -193,7 +198,7 @@ class _SaveScreenState extends State<SaveScreen>
   Future<void> _openFile() async {
     if (convertedFile != null && convertedFile!.existsSync()) {
       try {
-        final result = await OpenFile.open(convertedFile!.path);
+        final result = await OpenFile.open(_currentFilePath);
         if (result.type != ResultType.done && mounted) {
           AppSnackBar.show(context,
               message: 'Cannot open file: ${result.message}');
@@ -212,17 +217,22 @@ class _SaveScreenState extends State<SaveScreen>
   void _handleFileDeleted() {
     Navigator.of(context).pop(true);
     Navigator.of(context).pop(true);
-
     AppSnackBar.show(context, message: 'File deleted successfully');
   }
 
-  // New method to handle saving the file
+  void _handleFileRenamed(String newPath) {
+    setState(() {
+      _currentFilePath = newPath;
+      convertedFile = File(newPath);
+    });
+  }
+
   Future<void> _handleSaveFile() async {
     if (convertedFile != null) {
       try {
         await SaveFileService.saveFile(
           context,
-          convertedFile!,
+          File(_currentFilePath),
           _getFormatExtension(),
         );
         // Navigate back to home after saving
@@ -263,9 +273,10 @@ class _SaveScreenState extends State<SaveScreen>
                     ),
                     const SizedBox(height: 10),
                     DocumentContainer(
-                      filePath: convertedFile!.path,
+                      filePath: _currentFilePath,
                       onTap: _openFile,
                       onDelete: _handleFileDeleted,
+                      onFileRenamed: _handleFileRenamed,
                     ),
                   ],
                   SizedBox(height: MediaQuery.of(context).padding.bottom + 300),
@@ -275,13 +286,14 @@ class _SaveScreenState extends State<SaveScreen>
           ),
           if (_animationCompleted && convertedFile != null)
             Positioned(
-                left: 20,
-                right: 20,
-                bottom: MediaQuery.of(context).padding.bottom + 20,
-                child: CustomGradientButton(
-                  text: 'Save',
-                  onPressed: _handleSaveFile,
-                )),
+              left: 20,
+              right: 20,
+              bottom: MediaQuery.of(context).padding.bottom + 20,
+              child: CustomGradientButton(
+                text: 'Save',
+                onPressed: _handleSaveFile,
+              ),
+            ),
         ],
       ),
     );

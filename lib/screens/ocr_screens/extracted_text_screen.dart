@@ -1,4 +1,4 @@
-// extracted_text_screen.dart
+// extracted_text_screen.dart (updated)
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,6 +27,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
   bool _animationCompleted = false;
   bool _isSaving = false;
   String? _savedFilePath;
+  bool _fileRenamed = false; // Track if file was renamed
   late AnimationController _animationController;
   late Animation<double> _progressAnimation;
   final WordDocumentService _wordDocumentService = WordDocumentService();
@@ -80,7 +81,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
       });
 
       final filePath =
-          await _wordDocumentService.createWordDocument(_textController.text);
+      await _wordDocumentService.createWordDocument(_textController.text);
 
       setState(() {
         _isSaving = false;
@@ -102,7 +103,6 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
           await file.delete();
         }
       }
-      // Navigate back with true flag to indicate images should be cleared
       if (mounted) {
         Navigator.of(context).pop(true);
         Navigator.of(context).pop(true);
@@ -129,6 +129,13 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
     }
   }
 
+  void _handleFileRenamed(String newPath) {
+    setState(() {
+      _savedFilePath = newPath;
+      _fileRenamed = true; // Mark that file was renamed
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -136,7 +143,6 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
       appBar: CustomAppBar(
         title: 'OCR',
         onBackPressed: () {
-          // Just pop without any data clearing flag (false)
           Navigator.of(context).pop(false);
         },
       ),
@@ -174,6 +180,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
                           filePath: _savedFilePath!,
                           onTap: _openDocument,
                           onDelete: _handleFileDeleted,
+                          onFileRenamed: _handleFileRenamed,
                         ),
                       if (_savedFilePath == null)
                         Container(
@@ -232,6 +239,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
                 child: SaveDocumentButton(
                   documentFile: File(_savedFilePath!),
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  skipTimestamp: _fileRenamed, // Pass skipTimestamp if file was renamed
                   onSaveCompleted: () {
                     Navigator.of(context).pop(true);
                   },
@@ -258,7 +266,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
             color: Colors.black.withOpacity(0.10),
             blurRadius: 10,
             offset: const Offset(0, 1),
-          ),
+          )
         ],
       ),
       child: TextField(
@@ -268,7 +276,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           border: InputBorder.none,
         ),
       ),

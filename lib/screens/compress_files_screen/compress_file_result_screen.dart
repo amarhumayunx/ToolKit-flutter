@@ -19,7 +19,8 @@ class CompressedFileResultScreen extends StatefulWidget {
   });
 
   @override
-  State<CompressedFileResultScreen> createState() => _CompressedFileResultScreenState();
+  State<CompressedFileResultScreen> createState() =>
+      _CompressedFileResultScreenState();
 }
 
 class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
@@ -83,7 +84,6 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
     return 0;
   }
 
-
   // Calculate total saved space
   String get totalSpaceSaved {
     double originalSize = 0;
@@ -104,7 +104,6 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
     double savedBytes = originalSize - compressedSize;
     return FileCompressor.getReadableFileSize(savedBytes.toInt());
   }
-
 
   Future<void> _openFile(File file) async {
     try {

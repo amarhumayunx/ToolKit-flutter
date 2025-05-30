@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import '../../services/save_document_service.dart';
 import 'gradient_btn.dart';
 
+// save_document_btn.dart (updated)
 class SaveDocumentButton extends StatelessWidget {
   final File documentFile;
   final String buttonText;
   final double? width;
   final EdgeInsetsGeometry? padding;
   final VoidCallback? onSaveCompleted;
+  final bool skipTimestamp; // Add this parameter
 
   const SaveDocumentButton({
     super.key,
@@ -17,6 +19,7 @@ class SaveDocumentButton extends StatelessWidget {
     this.width,
     this.padding,
     this.onSaveCompleted,
+    this.skipTimestamp = true, // Change default to true for original filename
   });
 
   @override
@@ -35,19 +38,15 @@ class SaveDocumentButton extends StatelessWidget {
   }
 
   Future<void> _handleSave(BuildContext context) async {
-    final result =
-        await SaveDocumentService.saveDocument(context, documentFile);
+    final result = await SaveDocumentService.saveDocument(
+      context,
+      documentFile,
+      skipTimestamp: skipTimestamp, // Pass the parameter
+    );
 
-    // If save was successful or canceled, navigate back to OCR screen
-    if (result != null) {
-      // Call the callback if provided
-      if (onSaveCompleted != null) {
-        onSaveCompleted!();
-      }
-
-      // Navigate back to OCR screen and pass true to indicate data should be cleared
+    if (result != null && onSaveCompleted != null) {
+      onSaveCompleted!();
       Navigator.of(context).pop(true);
-
     }
   }
 }

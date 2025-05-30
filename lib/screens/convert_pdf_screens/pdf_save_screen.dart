@@ -5,7 +5,7 @@ import 'dart:async';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:archive/archive.dart';
-import '../../utils/app_snackbar.dart'; // Added import
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/save_zip_png_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
@@ -41,10 +41,12 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
   bool _isZipFile = false;
   bool _isSinglePageImage = false;
   int _currentImageIndex = 0;
+  late String _currentFilePath; // Track current file path
 
   @override
   void initState() {
     super.initState();
+    _currentFilePath = widget.convertedFile.path; // Initialize with original path
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
@@ -73,14 +75,14 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
   void _determineFileType() {
     if (widget.selectedFormat == 'Image') {
       _isSinglePageImage =
-      !widget.convertedFile.path.toLowerCase().endsWith('.zip');
-      _isZipFile = widget.convertedFile.path.toLowerCase().endsWith('.zip');
+      !_currentFilePath.toLowerCase().endsWith('.zip');
+      _isZipFile = _currentFilePath.toLowerCase().endsWith('.zip');
 
       if (_isZipFile) {
         _extractZipFile();
       }
     } else {
-      _isZipFile = widget.convertedFile.path.toLowerCase().endsWith('.zip');
+      _isZipFile = _currentFilePath.toLowerCase().endsWith('.zip');
       if (_isZipFile) {
         _extractZipFile();
       }
@@ -104,11 +106,12 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
 
   Future<void> _extractZipFile() async {
     try {
-      if (!widget.convertedFile.existsSync()) {
+      final file = File(_currentFilePath);
+      if (!file.existsSync()) {
         return;
       }
 
-      final bytes = await widget.convertedFile.readAsBytes();
+      final bytes = await file.readAsBytes();
       final archive = ZipDecoder().decodeBytes(bytes);
       final tempDir = await getTemporaryDirectory();
 
@@ -158,8 +161,8 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
   }
 
   String get fileSize {
-    return (widget.convertedFile.lengthSync() / (1024 * 1024))
-        .toStringAsFixed(2);
+    final file = File(_currentFilePath);
+    return (file.lengthSync() / (1024 * 1024)).toStringAsFixed(2);
   }
 
   String get formattedDate {
@@ -173,18 +176,19 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
   }
 
   Future<void> _openFile() async {
-    if (widget.convertedFile.existsSync()) {
+    final file = File(_currentFilePath);
+    if (file.existsSync()) {
       try {
         if (_isZipFile) {
           _showImagePreviewDialog();
         } else if (_isSinglePageImage) {
-          final result = await OpenFile.open(widget.convertedFile.path);
+          final result = await OpenFile.open(_currentFilePath);
           if (result.type != ResultType.done && mounted) {
             AppSnackBar.show(context,
                 message: 'Cannot open image: ${result.message}');
           }
         } else {
-          final result = await OpenFile.open(widget.convertedFile.path);
+          final result = await OpenFile.open(_currentFilePath);
           if (result.type != ResultType.done && mounted) {
             AppSnackBar.show(context,
                 message: 'Cannot open file: ${result.message}');
@@ -315,13 +319,16 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
 
   void _handleFileDeleted() {
     widget.onFileDeleted?.call();
-    // Pop twice to go back two screens
-    Navigator.of(context).pop(); // First pop (current screen)
     Navigator.of(context).pop();
-    Navigator.of(context).pop(true);// Second pop (previous screen)
-
-    // Show a success message
+    Navigator.of(context).pop();
+    Navigator.of(context).pop(true);
     AppSnackBar.show(context, message: 'File deleted successfully');
+  }
+
+  void _handleFileRenamed(String newPath) {
+    setState(() {
+      _currentFilePath = newPath;
+    });
   }
 
   String get fileTypeForSaving {
@@ -348,7 +355,6 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
       appBar: CustomAppBar(
         title: 'Convert PDF',
         onBackPressed: () {
-          // Just pop without any data clearing flag (false)
           Navigator.of(context).pop(false);
         },
       ),
@@ -376,9 +382,10 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
                     ),
                     const SizedBox(height: 10),
                     DocumentContainer(
-                      filePath: widget.convertedFile.path,
+                      filePath: _currentFilePath,
                       onTap: _openFile,
                       onDelete: _handleFileDeleted,
+                      onFileRenamed: _handleFileRenamed,
                     ),
                   ],
                   SizedBox(height: MediaQuery.of(context).padding.bottom + 300),
@@ -392,11 +399,10 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
               right: 20,
               bottom: MediaQuery.of(context).padding.bottom + 20,
               child: SaveFileButton(
-                file: widget.convertedFile,
+                filePath: _currentFilePath,
                 fileType: fileTypeForSaving,
                 buttonText: 'Save',
                 onSaveCompleted: () {
-                  // Navigate back to ConvertPdfMainScreen
                   Navigator.of(context).popUntil((route) => route.isFirst);
                 },
               ),
