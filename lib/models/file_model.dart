@@ -19,6 +19,8 @@ class FileModel {
 
   @HiveField(4)
   bool isFavorite;
+  @HiveField(5)
+  final bool isLocked;
 
   FileModel({
     required this.name,
@@ -26,5 +28,6 @@ class FileModel {
     required this.date,
     required this.size,
     this.isFavorite = false,
+    this.isLocked = false,
   });
 }

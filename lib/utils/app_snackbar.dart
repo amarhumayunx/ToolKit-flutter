@@ -14,7 +14,7 @@ class AppSnackBar {
           fontWeight: FontWeight.bold,
         ),
       ),
-      backgroundColor: Colors.red.withOpacity(0.9),
+      backgroundColor: AppColors.primary.withOpacity(0.7),
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),

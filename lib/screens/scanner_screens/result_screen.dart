@@ -27,9 +27,15 @@ class _ResultScreenState extends State<ResultScreen>
   late AnimationController _animationController;
   late Animation<double> _progressAnimation;
 
+  // Add this to track the current file path
+  late String _currentFilePath;
+
   @override
   void initState() {
     super.initState();
+    // Initialize with the original file path
+    _currentFilePath = widget.wordDocument.path;
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
@@ -66,7 +72,8 @@ class _ResultScreenState extends State<ResultScreen>
 
   Future<void> _openDocument() async {
     try {
-      await OpenFile.open(widget.wordDocument.path);
+      // Use the current file path instead of the original path
+      await OpenFile.open(_currentFilePath);
     } catch (e) {
       AppSnackBar.show(context, message: 'Failed to open document: $e');
     }
@@ -114,6 +121,13 @@ class _ResultScreenState extends State<ResultScreen>
     AppSnackBar.show(context, message: 'File deleted successfully');
   }
 
+  // Add this method to handle file rename
+  void _handleFileRenamed(String newFilePath) {
+    setState(() {
+      _currentFilePath = newFilePath;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,9 +159,10 @@ class _ResultScreenState extends State<ResultScreen>
                     ),
                     const SizedBox(height: 10),
                     DocumentContainer(
-                      filePath: widget.wordDocument.path,
+                      filePath: _currentFilePath, // Use current file path
                       onTap: _openDocument,
-                      onDelete: _handleFileDeleted, // This will now clear the provider
+                      onDelete: _handleFileDeleted,
+                      onFileRenamed: _handleFileRenamed, // Add this callback
                     ),
                   ],
                   SizedBox(height: MediaQuery.of(context).padding.bottom + 300),
@@ -161,8 +176,11 @@ class _ResultScreenState extends State<ResultScreen>
               right: 20,
               bottom: MediaQuery.of(context).padding.bottom + 20,
               child: SaveDocumentButton(
-                documentFile: widget.wordDocument,
+                documentFile: File(_currentFilePath), // Use current file path
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                onSaveCompleted: () {
+                  Navigator.of(context).pop(true);
+                },
               ),
             ),
         ],

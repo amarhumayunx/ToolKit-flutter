@@ -115,6 +115,21 @@ class SaveFileService {
     }
   }
 
+  /// Generate unique filename if file already exists in destination
+  static Future<String> _generateUniqueFileName(String directoryPath, String fileName) async {
+    String baseFileName = path.basenameWithoutExtension(fileName);
+    String extension = path.extension(fileName);
+    String finalFileName = fileName;
+    int counter = 1;
+
+    while (await File(path.join(directoryPath, finalFileName)).exists()) {
+      finalFileName = '${baseFileName}_$counter$extension';
+      counter++;
+    }
+
+    return finalFileName;
+  }
+
   /// Save PNG file to Toolkit folder
   static Future<void> savePngFile(BuildContext context, File imageFile) async {
     try {
@@ -131,9 +146,11 @@ class SaveFileService {
           return;
         }
 
-        // Generate a unique filename
-        String baseFileName = path.basenameWithoutExtension(imageFile.path);
-        String uniqueFileName = '${baseFileName}_${DateTime.now().millisecondsSinceEpoch}.png';
+        // Use the actual filename from the file path
+        String fileName = path.basename(imageFile.path);
+
+        // Generate unique filename if it already exists
+        String uniqueFileName = await _generateUniqueFileName(toolkitDir.path, fileName);
 
         // Create destination file path in Toolkit folder
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
@@ -170,9 +187,11 @@ class SaveFileService {
           return;
         }
 
-        // Generate a unique filename
-        String baseFileName = path.basenameWithoutExtension(zipFile.path);
-        String uniqueFileName = '${baseFileName}_${DateTime.now().millisecondsSinceEpoch}.zip';
+        // Use the actual filename from the file path
+        String fileName = path.basename(zipFile.path);
+
+        // Generate unique filename if it already exists
+        String uniqueFileName = await _generateUniqueFileName(toolkitDir.path, fileName);
 
         // Create destination file path in Toolkit folder
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
@@ -192,6 +211,7 @@ class SaveFileService {
       AppSnackBar.show(context, message: 'Failed to save ZIP file: ${e.toString()}');
     }
   }
+
   static Future<void> _saveFileToHive(File file, String fileType) async {
     try {
       final filesBox = await SaveDocumentService.initFilesBox();
@@ -207,6 +227,7 @@ class SaveFileService {
       debugPrint('Error saving file to Hive: $e');
     }
   }
+
   /// Main method to save any file based on its type to Toolkit folder
   static Future<void> saveFile(
       BuildContext context, File file, String fileType) async {
@@ -256,9 +277,11 @@ class SaveFileService {
           return;
         }
 
-        // Generate a unique filename
-        String baseFileName = path.basenameWithoutExtension(docFile.path);
-        String uniqueFileName = '${baseFileName}_${DateTime.now().millisecondsSinceEpoch}.docx';
+        // Use the actual filename from the file path
+        String fileName = path.basename(docFile.path);
+
+        // Generate unique filename if it already exists
+        String uniqueFileName = await _generateUniqueFileName(toolkitDir.path, fileName);
 
         // Create destination file path in Toolkit folder
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
@@ -295,9 +318,11 @@ class SaveFileService {
           return;
         }
 
-        // Generate a unique filename
-        String baseFileName = path.basenameWithoutExtension(pdfFile.path);
-        String uniqueFileName = '${baseFileName}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+        // Use the actual filename from the file path
+        String fileName = path.basename(pdfFile.path);
+
+        // Generate unique filename if it already exists
+        String uniqueFileName = await _generateUniqueFileName(toolkitDir.path, fileName);
 
         // Create destination file path in Toolkit folder
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
@@ -333,11 +358,11 @@ class SaveFileService {
           return;
         }
 
-        // Generate a unique filename
-        String baseFileName = path.basename(file.path);
-        final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-        String uniqueFileName =
-            '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
+        // Use the actual filename from the file path
+        String fileName = path.basename(file.path);
+
+        // Generate unique filename if it already exists
+        String uniqueFileName = await _generateUniqueFileName(toolkitDir.path, fileName);
 
         // Create destination file path in Toolkit folder
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
@@ -359,14 +384,12 @@ class SaveFileService {
   static Future<void> _saveFileWithDialog(
       BuildContext context, File file, String fileType) async {
     try {
-      String baseFileName = path.basename(file.path);
-      final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-      String uniqueFileName =
-          '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
+      // Use the actual filename from the file path
+      String fileName = path.basename(file.path);
 
       final params = SaveFileDialogParams(
         sourceFilePath: file.path,
-        fileName: uniqueFileName,
+        fileName: fileName, // Use actual filename instead of adding timestamp
       );
 
       final savedFilePath = await FlutterFileDialog.saveFile(params: params);

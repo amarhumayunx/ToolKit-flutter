@@ -1,11 +1,14 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' as path;
 import 'package:toolkit/widgets/settings_widgets/sort_btn.dart';
+import 'package:toolkit/widgets/settings_widgets/result_document_container.dart';
 import '../../models/file_model.dart';
 import '../../services/save_document_service.dart';
+import '../../utils/app_snackbar.dart';
 
 class RecentsViewTab extends StatefulWidget {
   final String searchQuery;
@@ -44,24 +47,77 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
               date: file.date,
               size: file.size,
               isFavorite: !file.isFavorite,
+              isLocked: file.isLocked,
             ));
       }
     });
+  }
+
+  void _toggleLock(int index) {
+    setState(() {
+      final file = filesBox.getAt(index);
+      if (file != null) {
+        filesBox.putAt(
+            index,
+            FileModel(
+              name: file.name,
+              path: file.path,
+              date: file.date,
+              size: file.size,
+              isFavorite: file.isFavorite,
+              isLocked: !file.isLocked,
+            ));
+      }
+    });
+    AppSnackBar.show(context,
+        message: filesBox.getAt(index)?.isLocked == true ? 'File locked' : 'File unlocked');
+  }
+
+  Future<void> _renameFile(int index, String newPath) async {
+    try {
+      final file = filesBox.getAt(index);
+      if (file == null) return;
+
+      final oldFile = File(file.path);
+      final newFile = File(newPath);
+
+      // Rename the actual file
+      if (await oldFile.exists()) {
+        await oldFile.rename(newPath);
+      }
+
+      // Update the database entry
+      final newFileName = path.basename(newPath);
+      setState(() {
+        filesBox.putAt(
+            index,
+            FileModel(
+              name: newFileName,
+              path: newPath,
+              date: file.date,
+              size: file.size,
+              isFavorite: file.isFavorite,
+              isLocked: file.isLocked,
+            ));
+      });
+
+      AppSnackBar.show(context, message: 'File renamed successfully');
+    } catch (e) {
+      AppSnackBar.show(context, message: 'Error renaming file: $e');
+    }
   }
 
   void _deleteFile(int index) {
     setState(() {
       filesBox.deleteAt(index);
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('File deleted')),
-    );
+
+    AppSnackBar.show(context, message: 'File deleted');
   }
 
   List<MapEntry<int, FileModel>> _getRecentFiles() {
     if (_isLoading || filesBox.isEmpty) return [];
 
-    // Get all files with their indices
     List<MapEntry<int, FileModel>> allFilesWithIndex = [];
     for (int i = 0; i < filesBox.length; i++) {
       final file = filesBox.getAt(i);
@@ -70,32 +126,26 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
       }
     }
 
-    // Sort by date (most recent first)
     allFilesWithIndex.sort((a, b) => b.value.date.compareTo(a.value.date));
 
-    // Take only the first 10 (most recent)
     return allFilesWithIndex.take(10).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get the 10 most recent files
     final recentFilesWithIndex = _getRecentFiles();
 
-    // Filter files based on search query
     final filteredFiles = recentFilesWithIndex
         .where((entry) => entry.value.name
-            .toLowerCase()
-            .contains(widget.searchQuery.toLowerCase()))
+        .toLowerCase()
+        .contains(widget.searchQuery.toLowerCase()))
         .toList();
 
-    // Sort files based on selected option
     if (_sortBy == 'Name') {
       filteredFiles.sort((a, b) => a.value.name.compareTo(b.value.name));
     } else if (_sortBy == 'Date') {
       filteredFiles.sort((a, b) => b.value.date.compareTo(a.value.date));
     }
-    // Default 'Recent' keeps the original order (already sorted by date)
 
     return Column(
       children: [
@@ -120,152 +170,48 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : ListView(
-                  children: [
-                    if (filteredFiles.isEmpty)
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 100),
-                          child: Text(
-                            'No recent documents found',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ),
-                      )
-                    else
-                      ...filteredFiles.map((entry) {
-                        final index = entry.key;
-                        final file = entry.value;
-                        return Column(
-                          children: [
-                            _buildDocumentItem(
-                              context,
-                              index: index,
-                              documentName: file.name,
-                              date: DateFormat('yy/MM/dd').format(file.date),
-                              time: DateFormat('h:mma').format(file.date),
-                              size: file.size,
-                              isFavorite: file.isFavorite,
-                              onFavoriteToggle: () => _toggleFavorite(index),
-                            ),
-                            const SizedBox(height: 12),
-                          ],
-                        );
-                      }),
-                    const SizedBox(height: 100),
-                  ],
-                ),
+            children: [
+              if (filteredFiles.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 100),
+                    child: Text(
+                      'No recent documents found',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+                )
+              else
+                ...filteredFiles.map((entry) {
+                  final index = entry.key;
+                  final file = entry.value;
+                  return Column(
+                    children: [
+                      ResultDocumentContainer(
+                        documentName: file.name,
+                        date: DateFormat('yy/MM/dd').format(file.date),
+                        time: DateFormat('h:mma').format(file.date),
+                        size: file.size,
+                        isFavorite: file.isFavorite,
+                        isLocked: file.isLocked,
+                        filePath: file.path,
+                        onFavoriteToggle: () => _toggleFavorite(index),
+                        onDelete: () => _deleteFile(index),
+                        onFileRenamed: (newPath) => _renameFile(index, newPath),
+                        onLockToggle: () => _toggleLock(index),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  );
+                }),
+              const SizedBox(height: 100),
+            ],
+          ),
         ),
       ],
-    );
-  }
-
-  Widget _buildDocumentItem(
-    BuildContext context, {
-    required int index,
-    required String documentName,
-    required String date,
-    required String time,
-    required String size,
-    required bool isFavorite,
-    required VoidCallback onFavoriteToggle,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.16),
-            blurRadius: 4,
-            offset: const Offset(0, 0),
-          ),
-        ],
-      ),
-      child: IntrinsicHeight(
-        child: Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                width: 50,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Center(
-                  child: Image.asset(
-                    'assets/images/doc.png',
-                    fit: BoxFit.fill,
-                  ),
-                ),
-              ),
-            ),
-            Container(
-              width: 1,
-              color: Colors.grey.shade300,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    documentName,
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '$date | $time | $size',
-                    style: GoogleFonts.inter(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            GestureDetector(
-              onTap: onFavoriteToggle,
-              child: Icon(
-                isFavorite ? Icons.star : Icons.star_border,
-                color: isFavorite ? Colors.amber : Colors.grey,
-                size: 24,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: PopupMenuButton<String>(
-                icon: SvgPicture.asset(
-                  'assets/icons/more_icon.svg',
-                  height: 20,
-                  width: 20,
-                ),
-                onSelected: (value) {
-                  if (value == 'delete') {
-                    _deleteFile(index);
-                  }
-                },
-                itemBuilder: (BuildContext context) => [
-                  const PopupMenuItem<String>(
-                    value: 'delete',
-                    child: Text('Delete'),
-                  ),
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
     );
   }
 }

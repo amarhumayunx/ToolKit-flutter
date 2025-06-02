@@ -6,7 +6,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
@@ -98,9 +97,9 @@ class _MergeFileMainScreenState extends State<MergeFileMainScreen> {
 
         for (int i = 0; i < inputDocument.pages.count; i++) {
           outputDocument.pages.add().graphics.drawPdfTemplate(
-                inputDocument.pages[i].createTemplate(),
-                const Offset(0, 0),
-              );
+            inputDocument.pages[i].createTemplate(),
+            const Offset(0, 0),
+          );
         }
 
         inputDocument.dispose();
@@ -151,7 +150,7 @@ class _MergeFileMainScreenState extends State<MergeFileMainScreen> {
                   const InfoCard(
                     title: 'Merge PDF Files',
                     description:
-                        'Effortlessly merge PDF Files for easier sharing, storage, and organization.',
+                    'Effortlessly merge PDF Files for easier sharing, storage, and organization.',
                   ),
                   const SizedBox(height: 24),
                   _buildPdfSelectionContainer(),
@@ -172,7 +171,7 @@ class _MergeFileMainScreenState extends State<MergeFileMainScreen> {
           ),
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+            const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
             child: CustomGradientButton(
               text: 'Merge Files',
               onPressed: _mergePdfs,
@@ -304,7 +303,7 @@ class _MergeFileMainScreenState extends State<MergeFileMainScreen> {
                 ),
                 child: ListTile(
                   contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(

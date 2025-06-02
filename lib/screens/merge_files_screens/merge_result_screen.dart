@@ -30,10 +30,12 @@ class _MergeResultScreenState extends State<MergeResultScreen>
   bool _animationCompleted = false;
   late AnimationController _animationController;
   late Animation<double> _progressAnimation;
+  late String _currentFilePath; // Track current file path
 
   @override
   void initState() {
     super.initState();
+    _currentFilePath = widget.mergedFilePath; // Initialize with original path
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
@@ -64,11 +66,11 @@ class _MergeResultScreenState extends State<MergeResultScreen>
   }
 
   String get fileName {
-    return widget.mergedFilePath.split('/').last;
+    return _currentFilePath.split('/').last;
   }
 
   String get fileSize {
-    final file = File(widget.mergedFilePath);
+    final file = File(_currentFilePath);
     return (file.lengthSync() / (1024 * 1024)).toStringAsFixed(2);
   }
 
@@ -83,10 +85,10 @@ class _MergeResultScreenState extends State<MergeResultScreen>
   }
 
   Future<void> _openFile() async {
-    final file = File(widget.mergedFilePath);
+    final file = File(_currentFilePath);
     if (file.existsSync()) {
       try {
-        final result = await OpenFile.open(widget.mergedFilePath);
+        final result = await OpenFile.open(_currentFilePath);
         if (result.type != ResultType.done && mounted) {
           AppSnackBar.show(context,
               message: 'Cannot open file: ${result.message}');
@@ -104,21 +106,26 @@ class _MergeResultScreenState extends State<MergeResultScreen>
 
   void _handleFileDeleted() {
     if (widget.onSaveAndReturn != null) {
-      widget.onSaveAndReturn!(); // Call the callback to clear selected PDFs
+      widget.onSaveAndReturn!();
     }
     Navigator.of(context).pop();
-    Navigator.of(context).pop();// Navigate back
+    Navigator.of(context).pop();
     AppSnackBar.show(context, message: 'File deleted successfully');
   }
 
   void _handleSaveCompleted() {
     if (widget.onSaveAndReturn != null) {
-      widget.onSaveAndReturn!(); // Call the callback if provided
+      widget.onSaveAndReturn!();
     }
     Navigator.of(context).pop();
-
-    Navigator.of(context).pop();// Navigate back
+    Navigator.of(context).pop();
     AppSnackBar.show(context, message: 'File saved successfully');
+  }
+
+  void _handleFileRenamed(String newPath) {
+    setState(() {
+      _currentFilePath = newPath;
+    });
   }
 
   @override
@@ -155,9 +162,10 @@ class _MergeResultScreenState extends State<MergeResultScreen>
                     ),
                     const SizedBox(height: 10),
                     DocumentContainer(
-                      filePath: widget.mergedFilePath,
+                      filePath: _currentFilePath, // Use the current path
                       onTap: _openFile,
                       onDelete: _handleFileDeleted,
+                      onFileRenamed: _handleFileRenamed, // Pass the handler
                     ),
                   ],
                   SizedBox(height: MediaQuery.of(context).padding.bottom + 300),
@@ -171,7 +179,7 @@ class _MergeResultScreenState extends State<MergeResultScreen>
               right: 20,
               bottom: MediaQuery.of(context).padding.bottom + 20,
               child: SaveFileButton(
-                file: File(widget.mergedFilePath),
+                filePath: _currentFilePath, // Use the current path
                 fileType: 'pdf',
                 buttonText: 'Save',
                 onSaveCompleted: _handleSaveCompleted,

@@ -6,15 +6,15 @@ import '../../services/save_zip_png_service.dart';
 import '../../utils/app_colors.dart';
 
 class SaveFileButton extends StatelessWidget {
-  final File file;
-  final String fileType; // 'png', 'zip', 'docx', 'pdf', etc.
+  final String filePath;  // Changed from File to String path
+  final String fileType;
   final String buttonText;
   final double? width;
   final VoidCallback? onSaveCompleted;
 
   const SaveFileButton({
     super.key,
-    required this.file,
+    required this.filePath,  // Updated parameter
     required this.fileType,
     this.buttonText = 'Save',
     this.width,
@@ -40,7 +40,7 @@ class SaveFileButton extends StatelessWidget {
         ),
         child: ElevatedButton(
           onPressed: () async {
-            await SaveFileService.saveFile(context, file, fileType);
+            await SaveFileService.saveFile(context, File(filePath), fileType);
             if (onSaveCompleted != null) {
               onSaveCompleted!();
             }

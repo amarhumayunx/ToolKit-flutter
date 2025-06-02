@@ -124,16 +124,21 @@ class SaveDocumentService {
 
   /// Fallback method to save files using system dialog if Toolkit folder creation fails
   static Future<String?> _saveFileWithDialog(
-      BuildContext context, File documentFile) async {
+      BuildContext context, File documentFile, {bool skipTimestamp = false}) async {
     try {
       String baseFileName = path.basename(documentFile.path);
       if (!baseFileName.toLowerCase().endsWith('.docx')) {
         baseFileName = 'Document.docx';
       }
 
-      final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-      String uniqueFileName =
-          '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
+      String uniqueFileName;
+      if (skipTimestamp) {
+        uniqueFileName = baseFileName;
+      } else {
+        final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+        uniqueFileName =
+        '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
+      }
 
       final params = SaveFileDialogParams(
         sourceFilePath: documentFile.path,
@@ -156,46 +161,71 @@ class SaveDocumentService {
     }
   }
 
+  /// Check if file already exists in the toolkit folder
+  static Future<bool> _fileExistsInToolkitFolder(String fileName) async {
+    try {
+      final toolkitDir = await _createToolkitFolder();
+      if (toolkitDir != null) {
+        final filePath = '${toolkitDir.path}/$fileName';
+        return await File(filePath).exists();
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error checking file existence: $e');
+      return false;
+    }
+  }
+
   /// Main method to save a document file to Toolkit folder
-  static Future<bool?> saveDocument(BuildContext context, File documentFile) async {
+  static Future<bool?> saveDocument(
+      BuildContext context,
+      File documentFile, {
+        bool skipTimestamp = false,
+      }) async {
     try {
       bool canAccessStorage = await checkAndRequestStoragePermission(context);
 
       if (canAccessStorage) {
-        // Try to create the Toolkit folder
         final toolkitDir = await _createToolkitFolder();
         String? savedFilePath;
 
         if (toolkitDir != null) {
-          // Save to Toolkit folder
           String baseFileName = path.basename(documentFile.path);
           if (!baseFileName.toLowerCase().endsWith('.docx')) {
             baseFileName = 'Document.docx';
           }
 
-          final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-          String uniqueFileName = '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
+          String uniqueFileName;
+          if (skipTimestamp) {
+            // Use the filename as-is if skipping timestamp
+            uniqueFileName = baseFileName;
 
-          // Create destination file path in Toolkit folder
+            // Check if file already exists
+            if (await _fileExistsInToolkitFolder(uniqueFileName)) {
+              AppSnackBar.show(context, message: 'File name already exists. Please choose a different name.');
+              return false;
+            }
+          } else {
+            // Add timestamp only if not skipping
+            final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+            uniqueFileName = '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
+          }
+
           final destinationPath = '${toolkitDir.path}/$uniqueFileName';
-
-          // Copy the file to the Toolkit folder
           await documentFile.copy(destinationPath);
           savedFilePath = destinationPath;
 
           AppSnackBar.show(context, message: 'Document saved to ${toolkitDir.path}');
         } else {
-          // If folder creation failed, use default save mechanism
-          savedFilePath = await _saveFileWithDialog(context, documentFile);
+          savedFilePath = await _saveFileWithDialog(context, documentFile, skipTimestamp: skipTimestamp);
           if (savedFilePath == null) {
-            return false; // User canceled or error occurred
+            return false;
           }
         }
 
-        // Save to Hive if we have a saved file path
         if (savedFilePath != null) {
           final filesBox = await initFilesBox();
-          final fileSize = (await documentFile.length()) / (1024 * 1024); // MB
+          final fileSize = (await documentFile.length()) / (1024 * 1024);
 
           await filesBox.add(FileModel(
             name: path.basename(savedFilePath),
@@ -213,11 +243,9 @@ class SaveDocumentService {
         return null;
       }
     } on PlatformException catch (e) {
-      print('Platform Exception in saving file: ${e.message}');
       AppSnackBar.show(context, message: 'Failed to save document: ${e.message}');
       return null;
     } catch (e) {
-      print('Error saving file: $e');
       AppSnackBar.show(context, message: 'Failed to save document: $e');
       return null;
     }
