@@ -178,6 +178,9 @@ class _ResultScreenState extends State<ResultScreen>
               child: SaveDocumentButton(
                 documentFile: File(_currentFilePath), // Use current file path
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                onSaveCompleted: () {
+                  Navigator.of(context).pop(true);
+                },
               ),
             ),
         ],

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../provider/file_provider.dart';
@@ -24,20 +23,19 @@ class EditFileScreen extends StatefulWidget {
 class _EditFileScreenState extends State<EditFileScreen> {
   final ImagePicker _picker = ImagePicker();
 
-  Future<void> _pickFiles() async {
+  Future<void> _pickImages() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
-        allowMultiple: true, // Allow multiple file selection
+      final List<XFile>? pickedFiles = await _picker.pickMultiImage(
+        imageQuality: 85,
       );
 
-      if (result != null && result.files.isNotEmpty) {
+      if (pickedFiles != null && pickedFiles.isNotEmpty) {
         final fileProvider = Provider.of<FileProvider>(context, listen: false);
-        final newFiles = result.files.map((file) => File(file.path!)).toList();
+        final newFiles = pickedFiles.map((file) => File(file.path)).toList();
         fileProvider.addFiles(newFiles);
       }
     } catch (e) {
-      AppSnackBar.show(context, message: 'Error selecting files: $e');
+      AppSnackBar.show(context, message: 'Error selecting images: $e');
     }
   }
 
@@ -56,7 +54,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
         fileProvider.addFiles(capturedImages);
       }
     } catch (e) {
-      AppSnackBar.show(context, message:'Error capturing document: $e');
+      AppSnackBar.show(context, message: 'Error capturing document: $e');
     }
   }
 
@@ -69,7 +67,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
     final fileProvider = Provider.of<FileProvider>(context, listen: false);
 
     if (!fileProvider.hasFiles) {
-      AppSnackBar.show(context, message:'Please select at least one file');
+      AppSnackBar.show(context, message: 'Please select at least one image');
       return;
     }
 
@@ -106,10 +104,10 @@ class _EditFileScreenState extends State<EditFileScreen> {
                   InfoCard(
                     title: 'Edit Files',
                     description:
-                    'Make changes to your files easily. Upload and modify multiple PDFs, images, and documents for a seamless experience.',
+                        'Make changes to your images easily. Upload and modify multiple images for a seamless experience.',
                   ),
                   const SizedBox(height: 24),
-                  // Combined container with shadow (same as OCR screen)
+                  // Combined container with shadow
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -126,8 +124,8 @@ class _EditFileScreenState extends State<EditFileScreen> {
                       children: [
                         // File selection section
                         FileSelectionSection(
-                          sectionTitle: 'Choose Files',
-                          onSelectFiles: _pickFiles,
+                          sectionTitle: 'Choose Images',
+                          onSelectFiles: _pickImages,
                           onScanNew: _scanNewDocument,
                         ),
                         // Dotted file drop zone - Now using Consumer to listen to provider changes
@@ -138,9 +136,10 @@ class _EditFileScreenState extends State<EditFileScreen> {
                             builder: (context, fileProvider, child) {
                               return DottedFileDropZone(
                                 selectedImages: fileProvider.selectedFiles,
-                                onTap: _pickFiles,
+                                onTap: _pickImages,
                                 onRemoveImage: _removeFile,
-                                emptyStateText: 'Click to choose files or drag and drop',
+                                emptyStateText:
+                                    'Click to choose images from gallery',
                               );
                             },
                           ),
@@ -154,7 +153,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
           ),
           Padding(
             padding:
-            const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+                const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
             child: CustomGradientButton(
               text: 'Next',
               onPressed: _editFiles,

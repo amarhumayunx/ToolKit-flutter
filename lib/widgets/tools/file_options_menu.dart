@@ -1,6 +1,7 @@
 // file_options_menu.dart (updated)
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path/path.dart' as path;
 import 'package:share_plus/share_plus.dart';
@@ -286,31 +287,51 @@ class FileOptionsMenu extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextField(
-                      controller: controller,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(
-                            color: errorMessage != null
-                                ? Colors.red
-                                : AppColors.dividerColor,
-                          ),
+                    Theme(
+                      data: Theme.of(context).copyWith(
+                        // Override the text selection theme
+                        textSelectionTheme: TextSelectionThemeData(
+                          cursorColor: AppColors.primary,
+                          selectionColor: AppColors.primary.withOpacity(0.2),
+                          selectionHandleColor: AppColors.primary,
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(
-                            color: errorMessage != null
-                                ? Colors.red
-                                : AppColors.primary,
-                          ),
+                        // Override the primary color for the input decoration
+                        primaryColor: AppColors.primary,
+                        colorScheme: Theme.of(context).colorScheme.copyWith(
+                              primary: AppColors.primary,
+                            ),
+                      ),
+                      child: TextField(
+                        controller: controller,
+                        cursorColor: AppColors.primary,
+                        selectionControls: MaterialTextSelectionControls(),
+                        style: GoogleFonts.inter(
+                          color: Colors.black,
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(
-                            color: errorMessage != null
-                                ? Colors.red
-                                : AppColors.dividerColor,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: errorMessage != null
+                                  ? Colors.red
+                                  : AppColors.dividerColor,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: errorMessage != null
+                                  ? Colors.red
+                                  : AppColors.primary,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: errorMessage != null
+                                  ? Colors.red
+                                  : AppColors.dividerColor,
+                            ),
                           ),
                         ),
                       ),
@@ -356,17 +377,14 @@ class FileOptionsMenu extends StatelessWidget {
                                 return;
                               }
 
-                              // Clear any previous error messages
                               setDialogState(() {
                                 errorMessage = null;
                               });
 
                               final file = File(filePath);
-                              final newFileName =
-                                  '$newName$fileExtension'; // Ensure extension is preserved
+                              final newFileName = '$newName$fileExtension';
                               final directoryPath = path.dirname(filePath);
 
-                              // Check if file with new name already exists
                               final fileExists = await _fileExistsInDirectory(
                                   directoryPath, newFileName);
 
@@ -379,8 +397,6 @@ class FileOptionsMenu extends StatelessWidget {
 
                               final newPath =
                                   path.join(directoryPath, newFileName);
-
-                              // Rename the file
                               await file.rename(newPath);
 
                               if (onFileRenamed != null) {
