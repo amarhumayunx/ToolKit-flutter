@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/buttons/gradient_btn.dart';
@@ -76,7 +77,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(
-        title: 'Phone verify',
+        title: 'phone_verify'.tr,
         onBackPressed: () {
           Navigator.of(context).pop(false);
         },
@@ -88,17 +89,17 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const AuthTitleWidget(title: 'Enter your\nPhone number'),
+              AuthTitleWidget(title: 'enter_your_phone'.tr),
               const SizedBox(height: 44),
-              const AuthSubtitleWidget(
-                normalText: 'Please enter your ',
-                highlightedText: 'phone number',
+              AuthSubtitleWidget(
+                normalText: 'please_enter_your'.tr,
+                highlightedText: 'phone_number'.tr,
               ),
               const SizedBox(height: 32),
               AuthInputField(
                 controller: _phoneController,
-                labelText: 'Enter mobile no.*',
-                hintText: '01774',
+                labelText: 'enter_mobile_label'.tr,
+                hintText: 'mobile_hint'.tr,
                 keyboardType: TextInputType.phone,
                 isPhoneField: true,
                 countryCode: _selectedCountryCode,
@@ -112,17 +113,17 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your phone number';
+                    return 'enter_phone_error'.tr;
                   }
                   if (value.length < 5) {
-                    return 'Please enter a valid phone number';
+                    return 'valid_phone_error'.tr;
                   }
                   return null;
                 },
               ),
               const Spacer(),
               CustomGradientButton(
-                text: 'Enter',
+                text: 'enter'.tr,
                 onPressed: _navigateToOtpScreen,
               ),
               const SizedBox(height: 24),

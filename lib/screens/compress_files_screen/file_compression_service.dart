@@ -174,6 +174,19 @@ class FileCompressor {
       final compressedSize = resultFile.lengthSync();
       final reduction = ((originalSize - compressedSize) / originalSize * 100);
 
+      // Check if compression actually made the file smaller
+      if (compressedSize >= originalSize) {
+        print('Compression increased file size or no change: ${file.path}');
+        await resultFile.delete(); // Delete the larger compressed file
+        return CompressionResult(
+            file: file, // Return original file
+            wasCompressed: false,
+            message: 'File is already compressed or optimized',
+            compressedSize: originalSize, // Use original size for both
+            originalSize: originalSize
+        );
+      }
+
       if (reduction > 5) { // Only consider as compressed if reduction > 5%
         print('Successfully compressed: ${file.path}');
         print('Original: ${getReadableFileSize(originalSize)} → Compressed: ${getReadableFileSize(compressedSize)}');
@@ -206,13 +219,6 @@ class FileCompressor {
       );
     }
   }
-
-  // Image compression using flutter_image_compress (legacy method)
-  static Future<File> _compressImageforimg(File file, {int quality = 85}) async {
-    final result = await _compressImageWithStatus(file, quality: quality);
-    return result.file;
-  }
-
   // PDF compression with status tracking
   static Future<CompressionResult> compressPdfWithStatus(File file, {int quality = 85}) async {
     if (!file.existsSync()) {

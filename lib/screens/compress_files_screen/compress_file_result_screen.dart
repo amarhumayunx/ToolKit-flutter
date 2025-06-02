@@ -3,7 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'package:open_file/open_file.dart';
 import 'package:toolkit/screens/compress_files_screen/compression_result_class.dart';
+import 'package:toolkit/screens/home_screen.dart';
 import 'package:toolkit/widgets/tools/document_container.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/save_document_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
@@ -75,7 +77,8 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
     }
 
     if (originalSize > 0) {
-      return ((originalSize - compressedSize) / originalSize) * 100;
+      double reduction = ((originalSize - compressedSize) / originalSize) * 100;
+      return reduction < 0 ? 0 : reduction; // Return 0 if negative
     }
     return 0;
   }
@@ -90,42 +93,62 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
     }
 
     double savedBytes = originalSize - compressedSize;
-    return FileCompressor.getReadableFileSize(savedBytes.toInt());
+    return FileCompressor.getReadableFileSize(savedBytes < 0 ? 0 : savedBytes.toInt());
+
   }
 
   Future<void> _openFile(File file) async {
     try {
       if (!await file.exists()) {
-        _showSnackBar('File not found');
+
+        AppSnackBar.show(context, message: 'File not Found');
         return;
       }
 
       final result = await OpenFile.open(file.path);
       if (result.type != ResultType.done) {
-        _showSnackBar('Cannot open file: ${result.message}');
+        AppSnackBar.show(context, message: 'Cannot open file: ${result.message}');
       }
     } catch (e) {
-      print('Error opening file: $e');
-      _showSnackBar('Error opening document');
+      AppSnackBar.show(context, message: 'Error opening document');
     }
   }
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+  void _handleFileDeleted() async {
+    // Early return if widget is not mounted
+    if (!mounted) return;
+
+    try {
+      // Store references to avoid accessing context multiple times
+      final navigator = Navigator.of(context);
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+      // Check mounted status again before navigation
+      if (!mounted) return;
+
+      // Navigate back
+      navigator.pop();
+
+      // Check mounted status before showing snackbar
+      if (mounted) {
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(
+            content: Text('File deleted successfully!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      // Always check mounted status before showing error
+      if (mounted) {
+        AppSnackBar.show(
+            context,
+            message: 'Error during deletion: ${e.toString()}'
+        );
+      }
+    }
   }
 
-  void _handleFileDeleted() {
-    Navigator.of(context).popUntil((route) => route.isFirst);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('File deleted successfully')),
-    );
-  }
 
   Widget _buildCompressionStatus() {
     if (widget.compressionResults == null) return const SizedBox.shrink();

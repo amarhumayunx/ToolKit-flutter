@@ -35,19 +35,27 @@ class SaveDocumentButton extends StatelessWidget {
   }
 
   Future<void> _handleSave(BuildContext context) async {
-    final result =
-        await SaveDocumentService.saveDocument(context, documentFile);
+    try {
+      final result = await SaveDocumentService.saveDocument(context, documentFile);
 
-    // If save was successful or canceled, navigate back to OCR screen
-    if (result != null) {
-      // Call the callback if provided
-      if (onSaveCompleted != null) {
-        onSaveCompleted!();
+      if (!context.mounted) return;
+
+      if (result != null) {
+        if (onSaveCompleted != null) {
+          onSaveCompleted!();
+        }
+
+        Navigator.of(context).pop(true);
       }
-
-      // Navigate back to OCR screen and pass true to indicate data should be cleared
-      Navigator.of(context).pop(true);
-
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving document: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 }
