@@ -1,97 +1,228 @@
-// file_options_menu.dart (updated)
 import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path/path.dart' as path;
 import 'package:share_plus/share_plus.dart';
+
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 
-class FileOptionsMenu extends StatelessWidget {
+class ResultDocumentContainer extends StatelessWidget {
+  final String documentName;
+  final String date;
+  final String time;
+  final String size;
+  final bool isFavorite;
+  final bool isLocked;
   final String filePath;
-  final Function()? onDelete;
+  final VoidCallback onFavoriteToggle;
+  final VoidCallback? onDelete;
   final Function(String)? onFileRenamed;
+  final Function()? onLockToggle;
+  final String documentImage;
 
-  const FileOptionsMenu({
-    Key? key,
+  const ResultDocumentContainer({
+    super.key,
+    required this.documentName,
+    required this.date,
+    required this.time,
+    required this.size,
+    required this.isFavorite,
+    required this.isLocked,
     required this.filePath,
+    required this.onFavoriteToggle,
     this.onDelete,
     this.onFileRenamed,
-  }) : super(key: key);
+    this.onLockToggle,
+    this.documentImage = 'assets/images/doc.png',
+  });
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton<String>(
-      icon: const Icon(
-        Icons.more_vert,
-        color: AppColors.t3SubHeading,
-        size: 18,
-      ),
-      onSelected: (value) async {
-        switch (value) {
-          case 'edit':
-            await _showRenameDialog(context);
-            break;
-          case 'share':
-            await _shareFile(context);
-            break;
-          case 'delete':
-            _showDeleteConfirmation(context);
-            break;
-        }
-      },
-      itemBuilder: (BuildContext context) {
-        return [
-          _buildMenuItem(
-            value: 'edit',
-            text: 'Rename',
-          ),
-          const PopupMenuItem<String>(
-            enabled: false,
-            height: 10,
-            padding: EdgeInsets.zero,
-            child: Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: AppColors.dividerColor,
-                ),
-              ),
-            ),
-          ),
-          _buildMenuItem(
-            value: 'share',
-            text: 'Share',
-          ),
-          const PopupMenuItem<String>(
-            enabled: false,
-            height: 10,
-            padding: EdgeInsets.zero,
-            child: Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: AppColors.dividerColor,
-                ),
-              ),
-            ),
-          ),
-          _buildMenuItem(
-            value: 'delete',
-            text: 'Delete',
-          ),
-        ];
-      },
-      shape: RoundedRectangleBorder(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.16),
+            blurRadius: 4,
+            offset: const Offset(0, 0),
+          ),
+        ],
       ),
-      color: Colors.white,
-      elevation: 0.4,
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                width: 50,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Center(
+                  child: Stack(
+                    children: [
+                      Image.asset(
+                        documentImage,
+                        fit: BoxFit.fill,
+                      ),
+                      if (isLocked)
+                        const Positioned(
+                          bottom: 2,
+                          right: 2,
+                          child: Icon(
+                            Icons.lock,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              width: 1,
+              color: Colors.grey.shade300,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    documentName,
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '$date | $time | $size',
+                    style: GoogleFonts.inter(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: onFavoriteToggle,
+              child: Icon(
+                isFavorite ? Icons.star : Icons.star_border,
+                color: isFavorite ? Colors.amber : Colors.grey,
+                size: 24,
+              ),
+            ),
+            PopupMenuButton<String>(
+              padding: EdgeInsets.zero,
+              // Remove default padding
+              icon: SvgPicture.asset(
+                'assets/icons/more_icon.svg',
+                height: 20,
+                width: 20,
+              ),
+              onSelected: (value) async {
+                switch (value) {
+                  case 'edit':
+                    await _showRenameDialog(context);
+                    break;
+                  case 'share':
+                    await _shareFile(context);
+                    break;
+                  case 'lock':
+                    if (onLockToggle != null) onLockToggle!();
+                    break;
+                  case 'delete':
+                    if (onDelete != null) onDelete!();
+                    break;
+                }
+              },
+              itemBuilder: (BuildContext context) {
+                return [
+                  _buildMenuItem(
+                    value: 'edit',
+                    text: 'Rename',
+                  ),
+                  const PopupMenuItem<String>(
+                    enabled: false,
+                    height: 10,
+                    padding: EdgeInsets.zero,
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: AppColors.dividerColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  _buildMenuItem(
+                    value: 'share',
+                    text: 'Share',
+                  ),
+                  const PopupMenuItem<String>(
+                    enabled: false,
+                    height: 10,
+                    padding: EdgeInsets.zero,
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: AppColors.dividerColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  _buildMenuItem(
+                    value: 'lock',
+                    text: isLocked ? 'Unlock' : 'Lock',
+                  ),
+                  const PopupMenuItem<String>(
+                    enabled: false,
+                    height: 10,
+                    padding: EdgeInsets.zero,
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: AppColors.dividerColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  _buildMenuItem(
+                    value: 'delete',
+                    text: 'Delete',
+                  ),
+                ];
+              },
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              color: Colors.white,
+              elevation: 0.4,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -132,106 +263,9 @@ class FileOptionsMenu extends StatelessWidget {
     }
   }
 
-  void _showDeleteConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 15,
-                spreadRadius: 5,
-                offset: const Offset(0, 5),
-              )
-            ],
-          ),
-          child: AlertDialog(
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Delete File',
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
-                  ),
-                ),
-                const SizedBox(height: 10),
-              ],
-            ),
-            content: Text(
-              'Are you sure you want to delete this file?',
-              style: GoogleFonts.inter(),
-            ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text(
-                        'Cancel',
-                        style: GoogleFonts.inter(color: Colors.grey[700]),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () async {
-                        try {
-                          final file = File(filePath);
-                          if (await file.exists()) {
-                            await file.delete();
-
-                            if (onDelete != null) {
-                              onDelete!();
-                            }
-                          }
-                          Navigator.of(context).pop();
-                        } catch (e) {
-                          Navigator.of(context).pop();
-                          AppSnackBar.show(context,
-                              message: 'Error deleting file: $e');
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 2,
-                      ),
-                      child: Text(
-                        'Delete',
-                        style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   /// Check if a file with the new name already exists in the same directory
-  Future<bool> _fileExistsInDirectory(
-      String directoryPath, String fileName) async {
+  Future<bool> _fileExistsInDirectory(String directoryPath,
+      String fileName) async {
     try {
       final newFilePath = path.join(directoryPath, fileName);
       return await File(newFilePath).exists();
@@ -241,6 +275,8 @@ class FileOptionsMenu extends StatelessWidget {
   }
 
   Future<void> _showRenameDialog(BuildContext context) async {
+    if (onFileRenamed == null) return;
+
     final fileName = File(filePath).uri.pathSegments.last;
     final fileNameWithoutExt = path.basenameWithoutExtension(fileName);
     final fileExtension = path.extension(fileName);
@@ -297,9 +333,12 @@ class FileOptionsMenu extends StatelessWidget {
                         ),
                         // Override the primary color for the input decoration
                         primaryColor: AppColors.primary,
-                        colorScheme: Theme.of(context).colorScheme.copyWith(
-                              primary: AppColors.primary,
-                            ),
+                        colorScheme: Theme
+                            .of(context)
+                            .colorScheme
+                            .copyWith(
+                          primary: AppColors.primary,
+                        ),
                       ),
                       child: TextField(
                         controller: controller,
@@ -352,7 +391,7 @@ class FileOptionsMenu extends StatelessWidget {
                 actions: [
                   Padding(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -396,7 +435,7 @@ class FileOptionsMenu extends StatelessWidget {
                               }
 
                               final newPath =
-                                  path.join(directoryPath, newFileName);
+                              path.join(directoryPath, newFileName);
                               await file.rename(newPath);
 
                               if (onFileRenamed != null) {
