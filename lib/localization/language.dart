@@ -30,6 +30,7 @@ class Language extends Translations {
       'split_pages': 'Split Pages In File',
       'split_description': 'Effortlessly separate pages from files while keeping everything clear and intact.',
       'split_document': 'Split Document',
+      'save': 'Save',
 
       'notifications_alerts': 'Notifications & Alerts',
       'support_feedback': 'Support & Feedback',
@@ -91,6 +92,40 @@ class Language extends Translations {
       'code_recovery_options': 'Code Recovery Options',
       'email': 'Email',
       'settings': 'Settings',
+
+      // Email Recovery Screen
+      'enter_your_email': 'Enter your\nEmail',
+      'please_enter_your': 'Please enter your ',
+      'enter': 'Enter',
+      "email_verify": "Email Verify",
+      "enter_email_label": "Enter email*",
+      "email_hint": "abc@abc.com",
+      "enter_email_error": "Please enter your email",
+      "valid_email_error": "Please enter a valid email address",
+      "enter_your_email": "Enter Your Email",
+
+      //Phone Recovery Screen
+      "phone_verify": "Phone verify",
+      "enter_your_phone": "Enter your\nPhone number",
+      "please_enter_your": "Please enter your ",
+      "phone_number": "phone number",
+      "enter_mobile_label": "Enter mobile no.*",
+      "mobile_hint": "01774",
+      "enter_phone_error": "Please enter your phone number",
+      "valid_phone_error": "Please enter a valid phone number",
+      "enter": "Enter",
+
+      //OTP Screen
+      "otp_verify": "OTP Verify",
+      "verify_your_email": "Verify your\nEmail",
+      "verify_your_phone": "Verify your\nPhone number",
+      "enter_code_email": "Enter the code from the email we sent\nto ",
+      "enter_code_sms": "Enter the code from the SMS we sent\nto ",
+      "did_not_receive_code": "Didn't receive any code? ",
+      "resend": "RESEND",
+      "verify": "Verify",
+      "otp_verified_successfully": "OTP Verified Successfully!",
+
     },
 
     'en_GB': {
@@ -183,7 +218,41 @@ class Language extends Translations {
       "confidential_document": "Confidential Documents",
       "code_recovery_options": "Code Recovery Options",
       "email": "Email",
-      "settings": "Settings"
+      "settings": "Settings",
+
+      //Email Recovery Screen
+
+      "enter_your_email": "Enter your\nEmail",
+      "please_enter_your": "Please enter your ",
+      "enter": "Enter",
+      "email_verify": "Email Verification",
+      "enter_email_label": "Enter email*",
+      "email_hint": "abc@abc.com",
+      "enter_email_error": "Please enter your email",
+      "valid_email_error": "Please enter a valid email address",
+
+      //Phone Recovery Screen
+      "phone_verify": "Phone verify",
+      "enter_your_phone": "Enter your\nPhone number",
+      "please_enter_your": "Please enter your ",
+      "phone_number": "phone number",
+      "enter_mobile_label": "Enter mobile no.*",
+      "mobile_hint": "01774",
+      "enter_phone_error": "Please enter your phone number",
+      "valid_phone_error": "Please enter a valid phone number",
+      "enter": "Enter",
+
+      //OTP Screen
+      "otp_verify": "OTP Verification",
+      "verify_your_email": "Verify your\nEmail",
+      "verify_your_phone": "Verify your\nPhone number",
+      "enter_code_email": "Enter the code from the email we sent to",
+      "enter_code_sms": "Enter the code from the SMS we sent to",
+      "did_not_receive_code": "Didn't receive any code?",
+      "resend": "RESEND",
+      "verify": "Verify",
+      "otp_verified_successfully": "OTP Verified Successfully!",
+
     },
 
     'ur_PK': {
@@ -274,7 +343,41 @@ class Language extends Translations {
       "confidential_document": "خفیہ دستاویزات",
       "code_recovery_options": "کوڈ بازیابی کے اختیارات",
       "email": "ای میل",
-      "settings": "ترتیبات"
+      "settings": "ترتیبات",
+
+      // Email Recovery Screen
+      "enter_your_email": "اپنی\nای میل درج کریں",
+      "please_enter_your": " براہ کرم اپنی",
+      "enter": "درج کریں",
+      "email_verify": "ای میل کی تصدیق",
+      "enter_email_label": "ای میل درج کریں*",
+      "email_hint": "abc@abc.com",
+      "enter_email_error": "براہ کرم اپنی ای میل درج کریں",
+      "valid_email_error": "براہ کرم درست ای میل پتہ درج کریں",
+
+      //Phone Recovery Screen
+      "phone_verify": "فون کی تصدیق",
+      "enter_your_phone": "اپنا\nفون نمبر درج کریں",
+      "please_enter_your": "براہ کرم اپنا ",
+      "phone_number": "فون نمبر",
+      "enter_mobile_label": "موبائل نمبر درج کریں*",
+      "mobile_hint": "01774",
+      "enter_phone_error": "براہ کرم اپنا فون نمبر درج کریں",
+      "valid_phone_error": "براہ کرم درست فون نمبر درج کریں",
+      "enter": "درج کریں",
+
+      //OTP Screen
+      "otp_verify": "او ٹی پی کی تصدیق",
+      "verify_your_email": "اپنی\nای میل کی تصدیق کریں",
+      "verify_your_phone": "اپنے\nفون نمبر کی تصدیق کریں",
+      "enter_code_email": "ہم نے جو ای میل بھیجی ہے اس کا کوڈ درج کریں",
+      "enter_code_sms": "ہم نے جو ایس ایم ایس بھیجا ہے اس کا کوڈ درج کریں",
+      "did_not_receive_code": "کوئی کوڈ موصول نہیں ہوا؟",
+      "resend": "دوبارہ بھیجیں",
+      "verify": "تصدیق کریں",
+      "otp_verified_successfully": "او ٹی پی کی کامیاب تصدیق ہو گئی!",
+
+
     },
 
     'zh_CN': {
@@ -365,7 +468,39 @@ class Language extends Translations {
       "confidential_document": "机密文件",
       "code_recovery_options": "恢复码选项",
       "email": "电子邮件",
-      "settings": "设置"
+      "settings": "设置",
+
+      //Email Recovery Screen
+      "enter_your_email": "请输入您的\n电子邮件",
+      "please_enter_your": "请输入您的 ",
+      "enter": "输入",
+      "email_verify": "电子邮件验证",
+      "enter_email_label": "输入电子邮件*",
+      "email_hint": "abc@abc.com",
+      "enter_email_error": "请输入您的电子邮件",
+      "valid_email_error": "请输入有效的电子邮件地址",
+
+      //Phone Recovery Screen
+      "phone_verify": "手机验证",
+      "enter_your_phone": "请输入您的\n手机号码",
+      "please_enter_your": "请输入您的 ",
+      "phone_number": "手机号码",
+      "enter_mobile_label": "输入手机号码*",
+      "mobile_hint": "01774",
+      "enter_phone_error": "请输入您的手机号码",
+      "valid_phone_error": "请输入有效的手机号码",
+      "enter": "输入",
+
+      //OTP Screen
+      "otp_verify": "验证码验证",
+      "verify_your_email": "验证您的\n邮箱",
+      "verify_your_phone": "验证您的\n手机号",
+      "enter_code_email": "请输入我们发送到您的邮箱的验证码",
+      "enter_code_sms": "请输入我们发送到您手机的验证码",
+      "did_not_receive_code": "未收到验证码？",
+      "resend": "重新发送",
+      "verify": "验证",
+      "otp_verified_successfully": "验证码验证成功！",
 
     },
 
@@ -457,7 +592,39 @@ class Language extends Translations {
       'confidential_document': 'Vertrauliche Dokumente',
       'code_recovery_options': 'Wiederherstellungsoptionen für Codes',
       'email': 'E-Mail',
-      'settings': 'Einstellungen'
+      'settings': 'Einstellungen',
+
+      //Email Recovery Screen
+      "enter_your_email": "Geben Sie Ihre\nE-Mail ein",
+      "please_enter_your": "Bitte geben Sie Ihre ",
+      "enter": "Eingeben",
+      "email_verify": "E-Mail-Verifizierung",
+      "enter_email_label": "E-Mail eingeben*",
+      "email_hint": "abc@abc.com",
+      "enter_email_error": "Bitte geben Sie Ihre E-Mail ein",
+      "valid_email_error": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+
+      //Phone Recovery Screen
+      "phone_verify": "Telefonverifizierung",
+      "enter_your_phone": "Geben Sie Ihre\nTelefonnummer ein",
+      "please_enter_your": "Bitte geben Sie Ihre ",
+      "phone_number": "Telefonnummer",
+      "enter_mobile_label": "Mobilnummer eingeben*",
+      "mobile_hint": "01774",
+      "enter_phone_error": "Bitte geben Sie Ihre Telefonnummer ein",
+      "valid_phone_error": "Bitte geben Sie eine gültige Telefonnummer ein",
+      "enter": "Eingeben",
+
+      //OTP Screen
+      "otp_verify": "OTP-Verifizierung",
+      "verify_your_email": "Bestätigen Sie Ihre\nE-Mail",
+      "verify_your_phone": "Bestätigen Sie Ihre\nTelefonnummer",
+      "enter_code_email": "Geben Sie den Code aus der E-Mail ein, die wir gesendet haben an",
+      "enter_code_sms": "Geben Sie den Code aus der SMS ein, die wir gesendet haben an",
+      "did_not_receive_code": "Keinen Code erhalten?",
+      "resend": "ERNEUT SENDEN",
+      "verify": "Verifizieren",
+      "otp_verified_successfully": "OTP erfolgreich verifiziert!",
 
     },
   };

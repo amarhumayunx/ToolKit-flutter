@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
@@ -83,7 +84,7 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(
-        title: 'Otp Verify',
+        title: 'otp_verify'.tr,
         onBackPressed: () {
           Navigator.of(context).pop();
         },
@@ -95,14 +96,14 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
           children: [
             // Title
             AuthTitleWidget(
-              title: _isPhoneNumber ? 'Verify your\nPhone number' : 'Verify your\nEmail',
+              title: _isPhoneNumber ? 'verify_your_phone'.tr : 'verify_your_email'.tr,
             ),
             const SizedBox(height: 44),
 
             AuthSubtitleWidget(
               normalText: _isPhoneNumber
-                  ? 'Enter the code from the sms we sent\nto '
-                  : 'Enter the code from the email we sent\nto ',
+                  ? 'enter_code_sms'.tr
+                  : 'enter_code_email'.tr,
               highlightedText: widget.email,
             ),
             const SizedBox(height: 32),
@@ -116,7 +117,7 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
                   height: 48,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         color: Color(0xFFFEF1E8),
                         blurRadius: 2,
@@ -141,14 +142,14 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
                       counterText: '',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: AppColors.primary,
                           width: 1,
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: AppColors.primary,
                           width: 1,
                         ),
@@ -188,7 +189,7 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
             Row(
               children: [
                 Text(
-                  "Didn't receive any code? ",
+                  "did_not_receive_code".tr,
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -198,7 +199,7 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
                 GestureDetector(
                   onTap: _resendOtp,
                   child: Text(
-                    'RESEND',
+                    'resend'.tr,
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -213,7 +214,7 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
 
             // Verify button
             CustomGradientButton(
-              text: 'Verify',
+              text: 'verify'.tr,
               onPressed: _isOtpComplete()
                   ? () {
                 String otpCode = _getOtpCode();
@@ -221,7 +222,7 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
                 print('${_isPhoneNumber ? 'Phone' : 'Email'}: ${widget.email}');
 
 
-                AppSnackBar.show(context, message: 'OTP Verified Successfully!');
+                AppSnackBar.show(context, message: 'otp_verified_successfully'.tr);
 
               }
                   : null,

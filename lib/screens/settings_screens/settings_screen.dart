@@ -24,7 +24,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isGeneralExpanded = false;
   bool _isConfidentialExpanded = false;
   final String _selectedLanguage = 'English';
-  String _selectedRecoveryOption = 'Email';
+  String _selectedRecoveryOption = 'email'.tr;
 
   // List of available languages
   final List<String> _languages = [
@@ -63,7 +63,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _notificationsEnabled = enabled;
       });
     } catch (e) {
-      debugPrint('Error loading notification status: $e');
       setState(() {
         _notificationsEnabled = false;
       });
@@ -75,7 +74,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const EmailRecoveryScreen(email: 'abc@gmail.com'),
+        builder: (context) => EmailRecoveryScreen(email: 'email_hint'.tr),
       ),
     );
   }
@@ -106,7 +105,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _notificationsEnabled = true;
           });
           AppSnackBar.show(context,
-              message: 'notifications_enabled'.tr);
+              message: 'notification_enabled'.tr);
         } else {
           // Permission denied, keep notifications disabled
           await NotificationService.setNotificationEnabled(false);
@@ -130,10 +129,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         setState(() {
           _notificationsEnabled = false;
         });
-        AppSnackBar.show(context, message: 'notifications_disabled'.tr);
+        AppSnackBar.show(context, message: 'notification_disabled');
       } catch (e) {
-        debugPrint('Error disabling notifications: $e');
-        AppSnackBar.show(context, message: 'notifications_error_disabling'.tr);
+        AppSnackBar.show(context, message: 'notification_error_disabling'.tr);
       }
     }
   }
@@ -334,7 +332,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Confidential Documents',
+                    'confidential_documents'.tr,
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -378,7 +376,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Code Recovery Options',
+                      'code_recovery_options'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -441,7 +439,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Email',
+                          'email'.tr,
                           style: GoogleFonts.inter(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
@@ -505,7 +503,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           Text(
-            'Settings',
+            'settings'.tr,
             style: GoogleFonts.inter(
               color: Colors.white,
               fontSize: 20,

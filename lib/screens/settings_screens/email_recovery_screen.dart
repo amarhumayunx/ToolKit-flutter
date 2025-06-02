@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/buttons/gradient_btn.dart';
@@ -40,7 +41,7 @@ class _EmailRecoveryScreenState extends State<EmailRecoveryScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(
-        title: 'Email Verify',
+        title: 'email_verify'.tr,
         onBackPressed: () {
           Navigator.of(context).pop(false);
         },
@@ -52,32 +53,32 @@ class _EmailRecoveryScreenState extends State<EmailRecoveryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const AuthTitleWidget(title: 'Enter your\nEmail'),
+              AuthTitleWidget(title: 'enter_your_email'.tr),
               const SizedBox(height: 44),
-              const AuthSubtitleWidget(
-                normalText: 'Please enter your ',
-                highlightedText: 'Email',
+              AuthSubtitleWidget(
+                normalText: 'please_enter_your'.tr,
+                highlightedText: 'email'.tr,
               ),
               const SizedBox(height: 32),
               AuthInputField(
                 controller: _emailController,
-                labelText: 'Enter email*',
-                hintText: 'abc@abc.com',
+                labelText: 'enter_email_label'.tr,
+                hintText: 'email_hint'.tr,
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
+                    return 'enter_email_error'.tr;
                   }
                   if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
                       .hasMatch(value)) {
-                    return 'Please enter a valid email address';
+                    return 'valid_email_error'.tr;
                   }
                   return null;
                 },
               ),
               const Spacer(),
               CustomGradientButton(
-                text: 'Enter',
+                text: 'enter'.tr,
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     Navigator.of(context).push(

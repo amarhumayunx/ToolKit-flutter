@@ -25,7 +25,19 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
 
   final List<File> _selectedFiles = [];
   bool _isCompressing = false;
-  double _compressionQuality = 85; // Default compression quality
+  double _compressionQuality = 85;
+
+
+  // Helper method to format file size
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) {
+      return '$bytes B';
+    } else if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    } else {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    }
+  }
 
   Future<void> _pickFiles() async {
     try {
@@ -36,35 +48,84 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
 
       if (result != null && result.paths.isNotEmpty) {
         final validExtensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png'];
+        const int minFileSizeMB = 1;
+        const int minFileSizeBytes = minFileSizeMB * 1024 * 1024; // 1MB in bytes
 
         List<File> pickedFiles = result.paths
             .where((path) => path != null)
             .map((path) => File(path!))
             .toList();
 
-        List<File> validFiles = pickedFiles.where((file) {
-          final ext = file.path.split('.').last.toLowerCase();
-          return validExtensions.contains(ext);
-        }).toList();
+        List<File> validFiles = [];
+        List<String> rejectedFiles = [];
+        List<String> invalidExtensionFiles = [];
 
-        setState(() {
-          _selectedFiles.addAll(validFiles);
-          _fileErrorText = validFiles.length == pickedFiles.length
-              ? null
-              : 'Please Select a Documents and Image Files';
-        });
+        for (File file in pickedFiles) {
+          final ext = file.path.split('.').last.toLowerCase();
+
+          // Check if file extension is valid
+          if (!validExtensions.contains(ext)) {
+            invalidExtensionFiles.add(file.path.split('/').last);
+            continue;
+          }
+
+          // Check file size - now files must be LARGER than 1MB
+          try {
+            final fileSize = await file.length();
+            if (fileSize < minFileSizeBytes) {
+              rejectedFiles.add('${file.path.split('/').last} (${_formatFileSize(fileSize)})');
+            } else {
+              validFiles.add(file);
+            }
+          } catch (e) {
+            // If we can't read file size, treat it as invalid
+            invalidExtensionFiles.add(file.path.split('/').last);
+          }
+        }
+
+        if (mounted) {
+          setState(() {
+            _selectedFiles.addAll(validFiles);
+
+            // Set appropriate error message
+            _fileErrorText = rejectedFiles.isNotEmpty && invalidExtensionFiles.isNotEmpty
+                ? 'Invalid: Small files ${minFileSizeMB}MB & wrong formats'
+                : rejectedFiles.isNotEmpty
+                ? 'File must be larger than ${minFileSizeMB}MB'
+                : invalidExtensionFiles.isNotEmpty
+                ? 'Invalid file formats'
+                : validFiles.isEmpty && pickedFiles.isNotEmpty
+                ? 'No valid files selected'
+                : null;
+          });
+
+          // Show snackbar for rejected files
+          if (rejectedFiles.isNotEmpty) {
+            AppSnackBar.show(
+              context,
+              message: '${rejectedFiles.length} file(s) skipped - File size must be larger than ${minFileSizeMB}MB',
+            );
+          }
+        }
       }
     } catch (e) {
-      setState(() {
-        _fileErrorText = 'Error selecting files: $e';
-      });
+      if (mounted) {
+        setState(() {
+          _fileErrorText = 'Error selecting files: $e';
+        });
+      }
     }
   }
+
   Future<void> _compressFiles() async {
     if (_selectedFiles.isEmpty) {
-      AppSnackBar.show(context, message: 'Please select at least one file first');
+      if (mounted) {
+        AppSnackBar.show(context, message: 'Please select at least one file first');
+      }
       return;
     }
+
+    if (!mounted) return;
 
     setState(() {
       _isCompressing = true;
@@ -78,16 +139,16 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
       );
       List<File> compressedFiles = compressionResults.map((result) => result.file).toList();
 
-      // Close the loading dialog
-      Navigator.of(context).pop();
+      // Check if widget is still mounted before proceeding
+      if (!mounted) return;
 
+      // Update state first
       setState(() {
         _isCompressing = false;
       });
 
-      // Navigate to results screen with compressed files
-      Navigator.push(
-        context,
+      // Navigate to results screen
+      Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => CompressedFileResultScreen(
             originalFiles: _selectedFiles,
@@ -96,23 +157,25 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
           ),
         ),
       );
+
     } catch (e) {
-      // Close the loading dialog if open
-      if (Navigator.canPop(context)) {
-        Navigator.of(context).pop();
-      }
+      // Check if widget is still mounted before updating state or showing messages
+      if (!mounted) return;
 
       setState(() {
         _isCompressing = false;
       });
+
       AppSnackBar.show(context, message: 'Error compressing files: $e');
     }
   }
 
   void _removeFile(int index) {
-    setState(() {
-      _selectedFiles.removeAt(index);
-    });
+    if (mounted) {
+      setState(() {
+        _selectedFiles.removeAt(index);
+      });
+    }
   }
 
   @override
@@ -177,22 +240,21 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                             onRemoveFile: _removeFile,
                           ),
                         ),
-
                       ],
                     ),
                   ),
 
                   if (_fileErrorText != null)
                     Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Center(
+                      padding: const EdgeInsets.only(top: 12.0),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
                         child: Text(
                           _fileErrorText!,
                           style: const TextStyle(
                             fontSize: 12,
-                            color: Colors.red,
+                            color: AppColors.primary,
                           ),
-                          textAlign: TextAlign.center,
                         ),
                       ),
                     ),
@@ -236,9 +298,11 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                                   label: _compressionQuality.round().toString(),
                                   activeColor: AppColors.primary,
                                   onChanged: (double value) {
-                                    setState(() {
-                                      _compressionQuality = value;
-                                    });
+                                    if (mounted) {
+                                      setState(() {
+                                        _compressionQuality = value;
+                                      });
+                                    }
                                   },
                                 ),
                               ),

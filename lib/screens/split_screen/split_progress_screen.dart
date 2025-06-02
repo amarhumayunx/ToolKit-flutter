@@ -363,7 +363,6 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
       _updateStatus("Splitting DOCX into individual files...");
 
       final pages = await _docxService.extractPages(widget.document.file);
-      final tempDir = await getTemporaryDirectory();
       final archive = Archive();
       final baseName = path.basenameWithoutExtension(widget.document.name);
 
