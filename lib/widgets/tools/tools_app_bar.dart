@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ToolsAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -28,10 +29,10 @@ class ToolsAppBar extends StatelessWidget implements PreferredSizeWidget {
         padding: const EdgeInsets.only(top: 20),
         child: Text(
           title,
-          style: const TextStyle(
+          style: GoogleFonts.inter(
             color: Colors.black,
             fontWeight: FontWeight.w600,
-            fontSize: 18,
+            fontSize: 20,
           ),
         ),
       ),

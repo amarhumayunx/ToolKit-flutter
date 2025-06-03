@@ -264,8 +264,8 @@ class ResultDocumentContainer extends StatelessWidget {
   }
 
   /// Check if a file with the new name already exists in the same directory
-  Future<bool> _fileExistsInDirectory(String directoryPath,
-      String fileName) async {
+  Future<bool> _fileExistsInDirectory(
+      String directoryPath, String fileName) async {
     try {
       final newFilePath = path.join(directoryPath, fileName);
       return await File(newFilePath).exists();
@@ -333,12 +333,9 @@ class ResultDocumentContainer extends StatelessWidget {
                         ),
                         // Override the primary color for the input decoration
                         primaryColor: AppColors.primary,
-                        colorScheme: Theme
-                            .of(context)
-                            .colorScheme
-                            .copyWith(
-                          primary: AppColors.primary,
-                        ),
+                        colorScheme: Theme.of(context).colorScheme.copyWith(
+                              primary: AppColors.primary,
+                            ),
                       ),
                       child: TextField(
                         controller: controller,
@@ -391,7 +388,7 @@ class ResultDocumentContainer extends StatelessWidget {
                 actions: [
                   Padding(
                     padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -435,7 +432,7 @@ class ResultDocumentContainer extends StatelessWidget {
                               }
 
                               final newPath =
-                              path.join(directoryPath, newFileName);
+                                  path.join(directoryPath, newFileName);
                               await file.rename(newPath);
 
                               if (onFileRenamed != null) {

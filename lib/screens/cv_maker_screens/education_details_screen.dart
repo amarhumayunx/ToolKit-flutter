@@ -28,6 +28,11 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
   DateTime? startDate;
   DateTime? endDate;
   String? dateError;
+  final FocusNode _degreeFocus = FocusNode();
+  final FocusNode _instituteFocus = FocusNode();
+  final FocusNode _startDateFocus = FocusNode();
+  final FocusNode _endDateFocus = FocusNode();
+  final FocusNode _descriptionFocus = FocusNode();
 
   @override
   void initState() {
@@ -41,12 +46,9 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
     if (widget.initialData != null && widget.initialData!.isNotEmpty) {
       final educationProvider = Provider.of<EducationProvider>(context, listen: false);
 
-      // Schedule the updates in a post-frame callback to be safe
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Clear any existing data
         educationProvider.clearEducationItems();
 
-        // Load the initial data into the provider
         for (var item in widget.initialData!) {
           educationProvider.addEducationItem(EducationItem(
             degree: item['degree'] ?? '',
@@ -68,12 +70,18 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
     _startDateController.dispose();
     _endDateController.dispose();
     _descriptionController.dispose();
+    _degreeFocus.dispose();
+    _instituteFocus.dispose();
+    _startDateFocus.dispose();
+    _endDateFocus.dispose();
+    _descriptionFocus.dispose();
     super.dispose();
   }
 
-  void _selectDate(BuildContext context, TextEditingController controller,
-      bool isStartDate) async {
-    FocusScope.of(context).unfocus();
+  Future<void> _selectDate(BuildContext context, TextEditingController controller,
+      FocusNode focusNode, bool isStartDate) async {
+    focusNode.unfocus();
+    await Future.delayed(const Duration(milliseconds: 100));
 
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -110,6 +118,17 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
         controller.text =
         "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString().substring(2)}";
       });
+    }
+
+    // After date selection, move focus to the next field or remove focus
+    if (isStartDate) {
+      if (!isCompleted) {
+        FocusScope.of(context).requestFocus(_endDateFocus);
+      } else {
+        FocusScope.of(context).requestFocus(_descriptionFocus);
+      }
+    } else {
+      FocusScope.of(context).requestFocus(_descriptionFocus);
     }
   }
 
@@ -215,6 +234,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
     startDate = null;
     endDate = null;
     dateError = null;
+    FocusScope.of(context).unfocus();
   }
 
   @override
@@ -243,6 +263,11 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                       descriptionController: _descriptionController,
                       isCompleted: isCompleted,
                       dateError: dateError,
+                      degreeFocus: _degreeFocus,
+                      instituteFocus: _instituteFocus,
+                      startDateFocus: _startDateFocus,
+                      endDateFocus: _endDateFocus,
+                      descriptionFocus: _descriptionFocus,
                       onCompletedChanged: (value) {
                         setState(() {
                           isCompleted = value;
@@ -253,7 +278,10 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
                           }
                         });
                       },
-                      onDateSelected: _selectDate,
+                      onDateSelected: (context, controller, isStartDate) {
+                        final focusNode = isStartDate ? _startDateFocus : _endDateFocus;
+                        _selectDate(context, controller, focusNode, isStartDate);
+                      },
                       onSavePressed: _saveEducation,
                     ),
                   if (!showForm && hasEducation) ...[

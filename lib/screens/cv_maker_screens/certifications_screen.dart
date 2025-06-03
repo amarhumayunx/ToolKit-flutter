@@ -10,6 +10,7 @@ import '../../widgets/custom_text_field.dart';
 
 class CertificationPage extends StatefulWidget {
   final List<Map<String, dynamic>>? initialData;
+
   const CertificationPage({
     super.key,
     this.initialData,
@@ -30,6 +31,7 @@ class _CertificationPageState extends State<CertificationPage> {
   bool hasCertification = false;
   bool showForm = false;
   int? editingIndex;
+
   @override
   void initState() {
     super.initState();
@@ -40,7 +42,8 @@ class _CertificationPageState extends State<CertificationPage> {
 
   void _loadInitialData() {
     if (widget.initialData != null && widget.initialData!.isNotEmpty) {
-      final certProvider = Provider.of<CertificationProvider>(context, listen: false);
+      final certProvider =
+          Provider.of<CertificationProvider>(context, listen: false);
 
       // Clear any existing data
       certProvider.clearCertificationItems();
@@ -84,6 +87,19 @@ class _CertificationPageState extends State<CertificationPage> {
       initialDate: DateTime.now(),
       firstDate: DateTime(1950),
       lastDate: DateTime(2100),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+                  primary: AppColors.primary,
+                  onPrimary: Colors.white,
+                  surface: Colors.white,
+                  onSurface: Colors.black,
+                ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {

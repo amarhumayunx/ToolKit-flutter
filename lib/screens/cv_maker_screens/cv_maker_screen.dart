@@ -6,6 +6,7 @@ import '../../provider/template_provider.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
 import 'main_cv_screen.dart';
+
 class CvMakerScreen extends StatefulWidget {
   const CvMakerScreen({super.key});
 
@@ -67,7 +68,7 @@ class _CvMakerScreenState extends State<CvMakerScreen> {
                 child: InfoCard(
                   title: 'Make your CV',
                   description:
-                  'Quickly craft a professional, eye-catching CV tailored to your career goals.',
+                      'Quickly craft a professional, eye-catching CV tailored to your career goals.',
                 ),
               ),
               const SizedBox(height: 8),
@@ -128,20 +129,20 @@ class _CvMakerScreenState extends State<CvMakerScreen> {
                                     child: SvgPicture.asset(
                                       'assets/images/templates/Template_$templateId.svg',
                                       fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) {
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
                                         return Container(
                                           color: Colors.grey[200],
                                           child: const Center(
-                                            child: Icon(Icons.broken_image, color: Colors.grey),
+                                            child: Icon(Icons.broken_image,
+                                                color: Colors.grey),
                                           ),
                                         );
                                       },
                                     ),
                                   ),
-
                                 ],
                               ),
-
                             ),
                           );
                         },

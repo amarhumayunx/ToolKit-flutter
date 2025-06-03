@@ -83,13 +83,29 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
     super.dispose();
   }
 
-  void _selectDate(BuildContext context, TextEditingController controller,
-      bool isStartDate) async {
+  void _selectDate(BuildContext context, TextEditingController controller, bool isStartDate) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: isStartDate ? DateTime.now() : (startDate ?? DateTime.now()),
       firstDate: DateTime(1950),
       lastDate: DateTime(2100),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primary, // Purple header
+              onPrimary: Colors.white, // Header text color
+              onSurface: Colors.black, // Body text color
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary, // Button text color
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null) {
@@ -121,7 +137,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
       // Format date as DD/MM/YY to match the UI design
       setState(() {
         controller.text =
-            "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString().substring(2)}";
+        "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString().substring(2)}";
       });
     }
   }
@@ -479,6 +495,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
             const SizedBox(height: 16),
 
             // Dates row
+            // In the _buildWorkExperienceForm method:
             Row(
               children: [
                 // Start date
@@ -486,8 +503,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                   child: DateField(
                     label: 'Start date',
                     controller: _startDateController,
-                    onTap: () =>
-                        _selectDate(context, _startDateController, true),
+                    onTap: () => _selectDate(context, _startDateController, true),
                   ),
                 ),
                 const SizedBox(width: 20),
@@ -497,12 +513,10 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                     child: DateField(
                       label: 'End Date',
                       controller: _endDateController,
-                      onTap: () =>
-                          _selectDate(context, _endDateController, false),
+                      onTap: () => _selectDate(context, _endDateController, false),
                       errorText: dateError,
                     ),
                   ),
-                // Add a placeholder widget when 'Current' is checked
                 if (isCurrent) const Expanded(child: SizedBox()),
               ],
             ),

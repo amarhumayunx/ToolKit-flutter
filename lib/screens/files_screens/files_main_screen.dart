@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/settings_widgets/all_files_tab.dart';
 import '../../widgets/settings_widgets/favorites_view_tab.dart';
-import '../../widgets/settings_widgets/locked_files_tab.dart';
 import '../../widgets/settings_widgets/recent_view_tab.dart';
 
 class FilesMainScreen extends StatefulWidget {
@@ -23,7 +21,7 @@ class _FilesMainScreenState extends State<FilesMainScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 3, vsync: this); // Changed from 4 to 3
   }
 
   @override
@@ -58,38 +56,38 @@ class _FilesMainScreenState extends State<FilesMainScreen>
                   Expanded(
                     child: _isSearching
                         ? TextField(
-                            controller: _searchController,
-                            autofocus: true,
-                            cursorColor: AppColors.primary,
-                            decoration: InputDecoration(
-                              hintText: 'Search files...',
-                              hintStyle: GoogleFonts.inter(
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                              ),
-                              border: InputBorder.none,
-                            ),
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            onChanged: (value) {
-                              setState(() {});
-                            },
-                          )
+                      controller: _searchController,
+                      autofocus: true,
+                      cursorColor: AppColors.primary,
+                      decoration: InputDecoration(
+                        hintText: 'Search files...',
+                        hintStyle: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: Colors.grey[500],
+                        ),
+                        border: InputBorder.none,
+                      ),
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      onChanged: (value) {
+                        setState(() {});
+                      },
+                    )
                         : Row(
-                            children: [
-                              const SizedBox(width: 8),
-                              Text(
-                                'Files',
-                                style: GoogleFonts.inter(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
+                      children: [
+                        const SizedBox(width: 8),
+                        Text(
+                          'Files',
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
                           ),
+                        ),
+                      ],
+                    ),
                   ),
                   IconButton(
                     icon: Icon(
@@ -103,6 +101,7 @@ class _FilesMainScreenState extends State<FilesMainScreen>
               ),
             ),
 
+            // Tab Bar
             // Tab Bar
             TabBar(
               controller: _tabController,
@@ -118,18 +117,33 @@ class _FilesMainScreenState extends State<FilesMainScreen>
               labelColor: AppColors.primary,
               unselectedLabelColor: Colors.grey[600],
               labelStyle: GoogleFonts.inter(
-                fontSize: 10,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
               unselectedLabelStyle: GoogleFonts.inter(
-                fontSize: 10,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
+              ),
+              // Custom touch effect properties
+              splashFactory: InkRipple.splashFactory,
+              overlayColor: MaterialStateProperty.resolveWith<Color?>(
+                    (Set<MaterialState> states) {
+                  if (states.contains(MaterialState.pressed)) {
+                    return AppColors.primary.withOpacity(0.12);
+                  }
+                  if (states.contains(MaterialState.hovered)) {
+                    return AppColors.primary.withOpacity(0.08);
+                  }
+                  if (states.contains(MaterialState.focused)) {
+                    return AppColors.primary.withOpacity(0.08);
+                  }
+                  return null;
+                },
               ),
               tabs: const [
                 Tab(text: 'RECENTS'),
                 Tab(text: 'FAVOURITES'),
-                Tab(text: 'LOCKED'),
-                Tab(text: 'ALL'),
+                Tab(text: 'ALL'), // Removed 'LOCKED' tab
               ],
             ),
 
@@ -146,18 +160,12 @@ class _FilesMainScreenState extends State<FilesMainScreen>
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child:
-                          RecentsViewTab(searchQuery: _searchController.text),
+                      RecentsViewTab(searchQuery: _searchController.text),
                     ),
                     // Favorites Tab
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: FavoritesView(searchQuery: _searchController.text),
-                    ),
-                    // Locked Tab
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child:
-                          LockedFilesView(searchQuery: _searchController.text),
                     ),
                     // All Files Tab
                     Padding(

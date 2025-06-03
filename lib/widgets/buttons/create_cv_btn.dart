@@ -20,7 +20,7 @@ class CreateCVButton extends StatelessWidget {
       );
     },
       child: Container(
-        height: 60,
+        height: 58,
         decoration: BoxDecoration(
           color: AppColors.primary,
           borderRadius: BorderRadius.circular(16),
@@ -32,7 +32,6 @@ class CreateCVButton extends StatelessWidget {
             SvgPicture.asset(
               'assets/icons/pencil_cv.svg',
             ),
-            const SizedBox(width: 12),
             Text(
               'Create Your CV',
               style: GoogleFonts.inter(

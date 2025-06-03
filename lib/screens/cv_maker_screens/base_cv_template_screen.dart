@@ -54,17 +54,24 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
 
   Future<Map<String, dynamic>> _collectAllFormData() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final workExpProvider = Provider.of<WorkExperienceProvider>(context, listen: false);
-    final educationProvider = Provider.of<EducationProvider>(context, listen: false);
-    final certificationProvider = Provider.of<CertificationProvider>(context, listen: false);
+    final workExpProvider =
+        Provider.of<WorkExperienceProvider>(context, listen: false);
+    final educationProvider =
+        Provider.of<EducationProvider>(context, listen: false);
+    final certificationProvider =
+        Provider.of<CertificationProvider>(context, listen: false);
     final skillsProvider = Provider.of<SkillsProvider>(context, listen: false);
-    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
-    final templateProvider = Provider.of<TemplateProvider>(context, listen: false);
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
+    final templateProvider =
+        Provider.of<TemplateProvider>(context, listen: false);
 
-    final websites = userProvider.websites.map((website) => {
-      'name': website.name,
-      'url': website.url,
-    }).toList();
+    final websites = userProvider.websites
+        .map((website) => {
+              'name': website.name,
+              'url': website.url,
+            })
+        .toList();
 
     return {
       'personalInfo': {
@@ -75,9 +82,13 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
         'profileImagePath': userProvider.userData.profileImagePath,
       },
       'careerObjective': userProvider.userData.careerObjective,
-      'education': educationProvider.educationItems.map((e) => e.toMap()).toList(),
-      'workExperience': workExpProvider.workExperienceItems.map((e) => e.toMap()).toList(),
-      'certifications': certificationProvider.certificationItems.map((e) => e.toMap()).toList(),
+      'education':
+          educationProvider.educationItems.map((e) => e.toMap()).toList(),
+      'workExperience':
+          workExpProvider.workExperienceItems.map((e) => e.toMap()).toList(),
+      'certifications': certificationProvider.certificationItems
+          .map((e) => e.toMap())
+          .toList(),
       'skills': skillsProvider.skillItems.map((e) => e.toMap()).toList(),
       'languages': languageProvider.languages.map((e) => e.toMap()).toList(),
       'websites': websites,
@@ -92,7 +103,8 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
     try {
       _showLoadingDialog();
 
-      bool notificationsEnabled = await NotificationService.areNotificationsEnabled();
+      bool notificationsEnabled =
+          await NotificationService.areNotificationsEnabled();
       if (notificationsEnabled) {
         await NotificationService.showExportStartNotification();
       }
@@ -136,7 +148,8 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
         debugPrint('Error creating thumbnail: $e');
       }
 
-      final savedCVProvider = Provider.of<SavedCVProvider>(context, listen: false);
+      final savedCVProvider =
+          Provider.of<SavedCVProvider>(context, listen: false);
       await savedCVProvider.addSavedCV(
         fileName: fileName,
         filePath: filePath,
@@ -161,13 +174,14 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
         _clearAllData();
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const CreateCvScreen()),
-              (Route<dynamic> route) => false,
+          (Route<dynamic> route) => false,
         );
       }
     } catch (e) {
       debugPrint('Export error: $e');
 
-      bool notificationsEnabled = await NotificationService.areNotificationsEnabled();
+      bool notificationsEnabled =
+          await NotificationService.areNotificationsEnabled();
       if (notificationsEnabled) {
         await NotificationService.cancelExportProgressNotification();
         await NotificationService.showErrorNotification(e.toString());
@@ -190,7 +204,9 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
         return const AlertDialog(
           content: Row(
             children: [
-              CircularProgressIndicator(),
+              CircularProgressIndicator(
+                color: AppColors.primary,
+              ),
               SizedBox(width: 20),
               Text("Exporting CV..."),
             ],
@@ -208,7 +224,6 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
   Future<Directory?> _getToolkitDirectory() async {
     try {
       Directory? baseDir;
-
       if (Platform.isAndroid) {
         baseDir = Directory('/storage/emulated/0/Download');
         if (!await baseDir.exists()) {
@@ -242,9 +257,11 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
 
   Future<Uint8List?> _capturePageAsImage(GlobalKey key) async {
     try {
-      final RenderRepaintBoundary boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final RenderRepaintBoundary boundary =
+          key.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
       return byteData?.buffer.asUint8List();
     } catch (e) {
       debugPrint('Error capturing page as image: $e');
@@ -254,9 +271,11 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
 
   Future<Uint8List> _createThumbnail(Uint8List imageBytes) async {
     try {
-      final codec = await ui.instantiateImageCodec(imageBytes, targetWidth: 200);
+      final codec =
+          await ui.instantiateImageCodec(imageBytes, targetWidth: 200);
       final frame = await codec.getNextFrame();
-      final byteData = await frame.image.toByteData(format: ui.ImageByteFormat.png);
+      final byteData =
+          await frame.image.toByteData(format: ui.ImageByteFormat.png);
       return byteData!.buffer.asUint8List();
     } catch (e) {
       debugPrint('Error creating thumbnail: $e');
@@ -301,11 +320,13 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
           actions: [
             TextButton(
               onPressed: () => _handleExportAction(false),
-              child: const Text("Export PDF", style: TextStyle(color: AppColors.primary)),
+              child: const Text("Export PDF",
+                  style: TextStyle(color: AppColors.primary)),
             ),
             TextButton(
               onPressed: () => _handleExportAction(true),
-              child: const Text("Open PDF", style: TextStyle(color: AppColors.primary)),
+              child: const Text("Open PDF",
+                  style: TextStyle(color: AppColors.primary)),
             ),
           ],
         );
@@ -325,7 +346,8 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
   }
 
   void _changeTemplate(int templateId) {
-    final templateProvider = Provider.of<TemplateProvider>(context, listen: false);
+    final templateProvider =
+        Provider.of<TemplateProvider>(context, listen: false);
     templateProvider.setTemplate(templateId, 'Template $templateId');
 
     final websites = Provider.of<UserProvider>(context, listen: false).websites;
