@@ -105,8 +105,8 @@ class _FilesMainScreenState extends State<FilesMainScreen>
             // Tab Bar
             TabBar(
               controller: _tabController,
-              indicator: UnderlineTabIndicator(
-                borderSide: const BorderSide(
+              indicator: const UnderlineTabIndicator(
+                borderSide: BorderSide(
                   width: 2.0,
                   color: AppColors.primary,
                 ),

@@ -44,7 +44,10 @@ class DottedFileDropZoneone extends StatelessWidget {
       dashPattern: const [5, 4],
       borderType: BorderType.RRect,
       radius: const Radius.circular(8),
-      child: Container(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+          child: Container(
         width: double.infinity,
         constraints: BoxConstraints(
           minHeight: 128,
@@ -146,6 +149,6 @@ class DottedFileDropZoneone extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }

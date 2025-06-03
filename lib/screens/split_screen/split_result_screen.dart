@@ -1,18 +1,16 @@
 import 'dart:io';
 import 'package:archive/archive.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart' as syncfusion;
-import 'package:toolkit/screens/split_screen/split_screen.dart';
 import 'package:toolkit/widgets/tools/document_container.dart';
 import 'package:path/path.dart' as path;
+import '../../services/save_zip_png_service.dart';
 import '../../utils/app_snackbar.dart';
-import '../../widgets/buttons/save_document_btn.dart';
+import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import 'document_item.dart';
@@ -21,15 +19,15 @@ import 'docxService.dart';
 class SplitProgressScreen extends StatefulWidget {
   final DocumentItem document;
   final List<bool> selectedPages;
-  final bool isMultipleFiles; // Add this property
-  final List<DocumentItem> documents; // Add this property
+  final bool isMultipleFiles;
+  final List<DocumentItem> documents;
 
   const SplitProgressScreen({
     super.key,
     required this.document,
     required this.selectedPages,
-    this.isMultipleFiles = false, // Default to false
-    this.documents = const [], // Default to empty list
+    this.isMultipleFiles = false,
+    this.documents = const [],
   });
 
   @override
@@ -45,6 +43,12 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
   double _progress = 0.0;
   File? _outputFile;
   final String _resultText = '';
+  bool _fileRenamed = false;
+  String _saveButtonKey = 'initial';
+  bool _isSaving = false;
+
+  File? convertedFile;
+  String _currentFilePath = '';
 
   // DocxSplitterService to handle DOCX processing
   final DocxSplitterService _docxService = DocxSplitterService();
@@ -78,116 +82,59 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
     _startSplitting();
   }
 
-  Future<void> requestPermissionAndSaveFile(BuildContext context) async {
-    try {
-      // Check if output file exists
-      if (_outputFile == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No document available to save'))
+  Future<void> _handleSaveFile() async {
+    if (convertedFile != null) {
+      try {
+        await SaveFileService.saveFile(
+          context,
+          File(_currentFilePath),
+          _getFormatExtension(),
         );
-        return;
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      } catch (e) {
+        AppSnackBar.show(context,
+            message: 'Failed to save file: ${e.toString()}');
       }
-
-      if (!await _outputFile!.exists()) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Output file not found'))
-        );
-        return;
-      }
-
-      // Request appropriate permissions
-      if (Platform.isAndroid) {
-        // For Android 11+ (API 30+), we need MANAGE_EXTERNAL_STORAGE
-        // For older versions, WRITE_EXTERNAL_STORAGE is sufficient
-        bool hasPermission = false;
-
-        if (await Permission.manageExternalStorage.isGranted) {
-          hasPermission = true;
-        } else if (await Permission.storage.isGranted) {
-          hasPermission = true;
-        } else {
-          // Request permissions
-          PermissionStatus status = await Permission.storage.request();
-          if (status.isGranted) {
-            hasPermission = true;
-          } else {
-            // Try for manage external storage on newer Android
-            status = await Permission.manageExternalStorage.request();
-            hasPermission = status.isGranted;
-          }
-        }
-
-        if (!hasPermission) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: const Text('Storage permission is required to save files'),
-            action: SnackBarAction(
-              label: 'Settings',
-              onPressed: () => openAppSettings(),
-            ),
-          ));
-          return;
-        }
-      }
-
-      // Pick destination folder using FilePicker
-      String? directory = await FilePicker.platform.getDirectoryPath();
-      if (directory == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No folder selected'))
-        );
-        return;
-      }
-
-      // Create a meaningful filename that avoids conflicts
-      final originalFileName = path.basename(_outputFile!.path);
-      String fileName = originalFileName;
-
-      // Check if file already exists and add a number if needed
-      int counter = 1;
-      File destinationFile = File('$directory/$fileName');
-      while (await destinationFile.exists()) {
-        final extension = path.extension(originalFileName);
-        final nameWithoutExtension = path.basenameWithoutExtension(originalFileName);
-        fileName = '$nameWithoutExtension($counter)$extension';
-        destinationFile = File('$directory/$fileName');
-        counter++;
-      }
-
-      // Ensure directory exists
-      final saveDir = Directory(directory);
-      if (!await saveDir.exists()) {
-        await saveDir.create(recursive: true);
-      }
-
-      // Copy the file
-      print('Copying from: ${_outputFile!.path}');
-      print('Copying to: ${destinationFile.path}');
-
-      // Use alternative method for copying to ensure it works correctly
-      final bytes = await _outputFile!.readAsBytes();
-      await destinationFile.writeAsBytes(bytes);
-
-      // Show success message
-      AppSnackBar.show(context, message: 'File saved successfully as $fileName');
-
-    } catch (e) {
-      print('Error saving file: $e');
-      AppSnackBar.show(context, message: 'Error saving file: ${e.toString()}');
     }
   }
 
-  // void _showSnackBar(String message) {
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Text(message),
-  //       behavior: SnackBarBehavior.floating,
-  //       duration: const Duration(seconds: 2),
-  //     ),
-  //   );
-  // }
+  String _getFormatExtension() {
+    if (_currentFilePath.isNotEmpty) {
+      return _currentFilePath.split('.').last;
+    }
+    return 'pdf';
+  }
+
+  Future<void> _handleFileRenamed(String newPath) async {
+    try {
+      final oldFile = _outputFile;
+      final newFile = File(newPath);
+
+      if (oldFile != null && oldFile.path != newPath) {
+        if (await oldFile.exists()) {
+          await oldFile.rename(newPath);
+        }
+      }
+
+      setState(() {
+        _outputFile = newFile;
+        convertedFile = newFile;
+        _currentFilePath = newPath;
+        _fileRenamed = true;
+        _saveButtonKey = 'renamed_${DateTime.now().millisecondsSinceEpoch}';
+      });
+
+      if (mounted) {
+        AppSnackBar.show(context, message: 'File renamed successfully');
+      }
+    } catch (e) {
+      if (mounted) {
+        AppSnackBar.show(context, message: 'Error renaming file: ${e.toString()}');
+      }
+    }
+  }
 
   Future<void> _startSplitting() async {
-    // Simulate initial progress updates
     for (int i = 0; i <= 10; i += 5) {
       if (mounted) {
         setState(() {
@@ -198,25 +145,20 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
     }
 
     try {
-      // Get temporary directory for output file
       final tempDir = await getTemporaryDirectory();
       final fileName = widget.document.name;
       final outputPath = '${tempDir.path}/split_$fileName';
 
-      // Check if the file is PDF
       if (fileName.toLowerCase().endsWith('.pdf')) {
         await _processPdfFile(outputPath);
       }
-      // Check if the file is DOCX
       else if (fileName.toLowerCase().endsWith('.docx')) {
         await _processDocxFile(outputPath);
       } else {
         _updateStatus("Processing generic document...");
-        // For other file types, just copy the original for demo
         _outputFile = File(outputPath);
         await widget.document.file.copy(_outputFile!.path);
 
-        // Update progress for file copy operation
         for (int i = 30; i <= 100; i += 10) {
           if (mounted) {
             setState(() {
@@ -226,16 +168,25 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
           await Future.delayed(const Duration(milliseconds: 100));
         }
       }
+
+      if (_outputFile != null) {
+        convertedFile = _outputFile;
+        _currentFilePath = _outputFile!.path;
+      }
+
     } catch (e) {
       print('Error processing file: $e');
       _updateStatus("Error encountered, using fallback method...");
 
-      // Fallback to simple file copy if processing fails
       final tempDir = await getTemporaryDirectory();
       _outputFile = File('${tempDir.path}/split_${widget.document.name}');
       await widget.document.file.copy(_outputFile!.path);
 
-      // Update progress for fallback operation
+      if (_outputFile != null) {
+        convertedFile = _outputFile;
+        _currentFilePath = _outputFile!.path;
+      }
+
       for (int i = _progress.toInt() * 100; i <= 100; i += 10) {
         if (mounted) {
           setState(() {
@@ -259,14 +210,12 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
     }
   }
 
-// This is your original function modified to support the new approach
   Future<void> _processPdfFile(String outputPath) async {
     _updateStatus("Creating PDF with selected pages...");
 
     final pdfData = await widget.document.file.readAsBytes();
     final originalDoc = syncfusion.PdfDocument(inputBytes: pdfData);
 
-    // Get selected page indices (0-based)
     final selectedIndices = <int>[];
     for (int i = 0; i < widget.selectedPages.length; i++) {
       if (widget.selectedPages[i]) {
@@ -279,7 +228,6 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
       throw Exception("No pages selected");
     }
 
-    // Create a new PDF with all selected pages
     final mergedDoc = syncfusion.PdfDocument();
 
     for (int i = 0; i < selectedIndices.length; i++) {
@@ -289,11 +237,9 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
       final page = originalDoc.pages[pageIndex];
       final pageTemplate = page.createTemplate();
 
-      // Add new page and draw the template
       final newPage = mergedDoc.pages.add();
       newPage.graphics.drawPdfTemplate(pageTemplate, const Offset(0, 0));
 
-      // Update progress
       if (mounted) {
         setState(() => _progress = (i + 1) / selectedIndices.length * 0.9);
       }
@@ -301,7 +247,6 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
 
     originalDoc.dispose();
 
-    // Save the single output PDF
     _outputFile = File(outputPath);
     final bytes = mergedDoc.saveSync();
     await _outputFile!.writeAsBytes(bytes);
@@ -312,7 +257,6 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
     }
     _updateStatus("PDF with selected pages created successfully!");
   }
-
 
   Future<void> _openFile() async {
     try {
@@ -326,14 +270,11 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
         return;
       }
 
-      // Use OpenFile package to open the file with the default app
       final result = await OpenFile.open(_outputFile!.path);
 
       if (result.type != ResultType.done) {
-        // If opening fails, show error message
         AppSnackBar.show(context, message: 'Cannot open file: ${result.message}');
 
-        // For zip files, we might need to tell the user
         if (_outputFile!.path.toLowerCase().endsWith('.zip')) {
           AppSnackBar.show(context, message: 'This is a ZIP file. You may need a ZIP extractor app to view its contents.');
         }
@@ -344,19 +285,39 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
     }
   }
 
-  void _handleFileDeleted() {
-    // Just go back to the previous screen (split screen)
-    Navigator.of(context).pop();
-    Navigator.of(context).pop();
+  void _handleFileDeleted() async {
+    if (!mounted) return;
 
-    // Show success message
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (mounted) {
-        AppSnackBar.show(context, message: 'File deleted successfully!');
+    try {
+      if (_outputFile != null && await _outputFile!.exists()) {
+        await _outputFile!.delete();
+        print('File deleted: ${_outputFile!.path}');
       }
-    });
-  }
 
+      setState(() {
+        _outputFile = null;
+        convertedFile = null;
+        _currentFilePath = '';
+        _saveButtonKey = 'deleted_${DateTime.now().millisecondsSinceEpoch}';
+      });
+
+      if (_outputFile == null && mounted) {
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
+        return;
+      }
+
+      if (mounted) {
+        AppSnackBar.show(context, message: 'File deleted successfully');
+      }
+
+    } catch (e) {
+      print('Error deleting file: $e');
+      if (mounted) {
+        AppSnackBar.show(context, message: 'Error during deletion: ${e.toString()}');
+      }
+    }
+  }
 
   Future<void> _processDocxFile(String outputPath) async {
     try {
@@ -398,64 +359,75 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
       await widget.document.file.copy(outputPath);
     }
   }
+
+  bool get hasValidFile {
+    return _outputFile != null && _outputFile!.existsSync();
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _animationController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-        onWillPop: () async {
-      // Replace below with actual navigation to your CompressFilesScreen
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const SplitScreen()),
-      );
-      return false; // prevent default back behavior
-    },
-    child: Scaffold(
-      backgroundColor: Colors.white,
-      appBar: CustomAppBar(title: ('split_document'.tr)),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(14.0),
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                _buildLoadingContainer(),
-                if (_animationCompleted) ...[
-                  const SizedBox(height: 36),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      ('split_file_progress_screen'.tr),
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
+    return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: CustomAppBar(title: ('split_document'.tr)),
+        resizeToAvoidBottomInset: true,
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 100.0),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      _buildLoadingContainer(),
+                      if (_animationCompleted) ...[
+                        const SizedBox(height: 36),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            ('split_file_progress_screen'.tr),
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        if (_outputFile != null)
+                          DocumentContainer(
+                            filePath: _outputFile!.path,
+                            onTap: _openFile,
+                            onDelete: _handleFileDeleted,
+                            onFileRenamed: _handleFileRenamed,
+                          ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+
+              if (_animationCompleted && hasValidFile)
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                    child: CustomGradientButton(
+                      key: ValueKey(_saveButtonKey),
+                      text: _isSaving ? 'Saving...' : 'Save',
+                      onPressed: _isSaving ? null : _handleSaveFile,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  DocumentContainer(
-                    filePath: _outputFile!.path,
-                    onTap: _openFile,
-                    onDelete: _handleFileDeleted,
-                  ),
-                ],
-                SizedBox(height: MediaQuery.of(context).padding.bottom + 250),
-              ],
-            ),
+                ),
+            ],
           ),
-          if (_animationCompleted)
-            Positioned(
-              left: 20,
-              right: 20,
-              bottom: MediaQuery.of(context).padding.bottom + 20,
-              child: SaveDocumentButton(
-                documentFile: _outputFile!,
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              ),
-            ),
-        ],
-      ),
-    ),
-    );
+        ),
+      );
   }
 
   Widget _buildLoadingContainer() {

@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
 import 'package:pdfx/pdfx.dart';
-import 'package:toolkit/screens/split_screen/split_progress_screen.dart';
+import 'package:toolkit/screens/split_screen/split_result_screen.dart';
 import 'package:toolkit/utils/app_snackbar.dart';
 import 'package:toolkit/widgets/buttons/gradient_btn.dart';
 import 'package:toolkit/widgets/custom_appbar.dart';
 
+import '../../utils/app_colors.dart';
 import 'document_item.dart';
 
 class PageSelectionScreen extends StatefulWidget {
@@ -32,10 +33,9 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
   late List<bool> selectedPages;
   final TextEditingController _pageCountController = TextEditingController(text: '6');
 
-  // PDF preview related variables
   bool _isLoadingPreviews = false;
-  List<Uint8List?> _pageImages = []; // Store page preview images (only for PDF)
-  PdfDocument? _pdfDocument; // Keep reference to PDF document
+  List<Uint8List?> _pageImages = [];
+  PdfDocument? _pdfDocument;
   bool _isPdfFile = false;
   String? _filePath;
 
@@ -45,11 +45,9 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
     totalPages = widget.initialPageCount;
     selectedPages = List.generate(totalPages, (index) => false);
 
-    // Get the file path from DocumentItem
     _filePath = widget.selectedDocument.file.path;
 
     if (_filePath != null) {
-      // Check if the document is a PDF
       final fileExtension = path.extension(_filePath!).toLowerCase();
       _isPdfFile = fileExtension == '.pdf';
 
@@ -75,10 +73,8 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
         _pageImages = List<Uint8List?>.filled(totalPages, null);
       });
 
-      // Open PDF document using pdfx package
       _pdfDocument = await PdfDocument.openFile(_filePath!);
 
-      // Generate preview for each page
       for (int i = 0; i < totalPages; i++) {
         try {
           final page = await _pdfDocument!.getPage(i + 1);
@@ -96,13 +92,11 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
           }
         } catch (pageError) {
           print('Error rendering page ${i + 1}: $pageError');
-          // Generate placeholder for failed pages
           _pageImages[i] = await _generatePlaceholderImage(i + 1, 'PDF');
         }
       }
     } catch (e) {
       print('Error generating PDF previews: $e');
-      // Fallback to placeholder images
       for (int i = 0; i < totalPages; i++) {
         _pageImages[i] = await _generatePlaceholderImage(i + 1, 'PDF');
       }
@@ -115,23 +109,19 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
     }
   }
 
-  // Generate a placeholder image with page information (only for PDF when rendering fails)
   Future<Uint8List> _generatePlaceholderImage(int pageNumber, String fileType) async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
     final paint = Paint();
 
-    // Draw background
     paint.color = Colors.white;
     canvas.drawRect(const Rect.fromLTWH(0, 0, 200, 300), paint);
 
-    // Draw border
     paint.color = Colors.grey.shade300;
     paint.style = PaintingStyle.stroke;
     paint.strokeWidth = 2;
     canvas.drawRect(const Rect.fromLTWH(0, 0, 200, 300), paint);
 
-    // Draw page content mockup lines
     paint.color = Colors.grey.shade400;
     paint.strokeWidth = 1;
     for (int i = 0; i < 8; i++) {
@@ -142,7 +132,6 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
       );
     }
 
-    // Draw file type icon area
     paint.color = Colors.grey.shade200;
     paint.style = PaintingStyle.fill;
     canvas.drawRect(const Rect.fromLTWH(70, 220, 60, 40), paint);
@@ -180,7 +169,6 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
 
   Widget _buildPagePreview(int index) {
     if (_isPdfFile) {
-      // PDF file handling
       if (_isLoadingPreviews) {
         return Container(
           decoration: BoxDecoration(
@@ -188,12 +176,12 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator(
+                color: AppColors.primary),
           ),
         );
       }
 
-      // If we have a page image, show it
       if (_pageImages[index] != null) {
         return Padding(
           padding: const EdgeInsets.all(3.5),
@@ -209,7 +197,6 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
         );
       }
 
-      // Fallback to PDF icon
       return Container(
         decoration: BoxDecoration(
           color: Colors.grey.shade100,
@@ -236,7 +223,6 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
         ),
       );
     } else {
-      // DOCX file handling - show DOCX icon
       return Column(
         children: [
           Expanded(
@@ -271,7 +257,6 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Page grid only (Removed heading and page count input)
               const SizedBox(height: 15,),
               Expanded(
                 child: GridView.builder(
@@ -302,7 +287,6 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
                               child: _buildPagePreview(index),
                             ),
                           ),
-                          // Checkbox in the corner
                           Positioned(
                             bottom: 8,
                             right: 8,
@@ -330,7 +314,6 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
                                   : null,
                             ),
                           ),
-                          // Selected number indicator
                           if (selectedPages[index])
                             Positioned(
                               top: 8,
@@ -361,7 +344,6 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
               ),
 
               const SizedBox(height: 16),
-              // Split button using the full width
               SizedBox(
                 width: double.infinity,
                 child: CustomGradientButton(
