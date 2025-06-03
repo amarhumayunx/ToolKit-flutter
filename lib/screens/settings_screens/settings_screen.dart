@@ -26,7 +26,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final String _selectedLanguage = 'English';
   String _selectedRecoveryOption = 'email'.tr;
 
-  // List of available languages
   final List<String> _languages = [
     'English',
     'UK',
@@ -36,7 +35,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     'Urdu'
   ];
 
-  // List of recovery options
   final List<String> _recoveryOptions = ['Email', 'Phone Number'];
 
   @override
@@ -50,12 +48,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       Get.find<LanguageController>();
     } catch (e) {
-      // Controller not found, initialize it
       Get.put(LanguageController());
     }
   }
 
-  // Load notification status from shared preferences
   void _loadNotificationStatus() async {
     try {
       bool enabled = await NotificationService.areNotificationsEnabled();
@@ -69,7 +65,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  // Navigate to email recovery screen
   void _navigateToEmailRecovery() {
     Navigator.push(
       context,
@@ -79,7 +74,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // Navigate to phone recovery screen
   void _navigateToPhoneRecovery() {
     Navigator.push(
       context,
@@ -90,16 +84,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // Handle notification toggle
   Future<void> _handleNotificationToggle(bool newValue) async {
     if (newValue) {
-      // User is trying to enable notifications - request permission
       try {
         await NotificationService.initialize(context);
         bool permissionGranted = await NotificationService.requestPermissions();
 
         if (permissionGranted) {
-          // Save the enabled state
           await NotificationService.setNotificationEnabled(true);
           setState(() {
             _notificationsEnabled = true;
@@ -107,7 +98,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           AppSnackBar.show(context,
               message: 'notification_enabled'.tr);
         } else {
-          // Permission denied, keep notifications disabled
           await NotificationService.setNotificationEnabled(false);
           setState(() {
             _notificationsEnabled = false;
@@ -115,7 +105,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           AppSnackBar.show(context, message: 'notification_permission'.tr);
         }
       } catch (e) {
-        // Error occurred, keep notifications disabled
         await NotificationService.setNotificationEnabled(false);
         setState(() {
           _notificationsEnabled = false;
@@ -123,7 +112,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         AppSnackBar.show(context, message: 'Error enabling notifications: $e');
       }
     } else {
-      // User is disabling notifications - save the disabled state
       try {
         await NotificationService.setNotificationEnabled(false);
         setState(() {
@@ -160,12 +148,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: ListView(
                     physics: const BouncingScrollPhysics(),
                     children: [
-                      // General section with expandable content
                       _buildGeneralSection(),
                       const SizedBox(
                         height: 4,
                       ),
-                      // Confidential Documents section with expandable content
                       _buildConfidentialDocumentsSection(),
                       const SizedBox(
                         height: 4,
@@ -319,7 +305,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       child: Column(
         children: [
-          // Header row for Confidential Documents
           InkWell(
             onTap: () {
               setState(() {
@@ -340,7 +325,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                   Transform.rotate(
-                    angle: _isConfidentialExpanded ? 1.5708 : 0, // 90 degrees in radians
+                    angle: _isConfidentialExpanded ? 1.5708 : 0,
                     child: SvgPicture.asset(
                       'assets/icons/next_page_icon.svg',
                       height: 12,
@@ -353,7 +338,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          // Expandable content for Code Recovery Options
           if (_isConfidentialExpanded)
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
@@ -385,7 +369,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const SizedBox(height: 12),
 
-                    // Dropdown for recovery options
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
@@ -413,8 +396,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             setState(() {
                               _selectedRecoveryOption = value;
                             });
-
-                            // Add navigation logic here
                             if (value == 'Email') {
                               _navigateToEmailRecovery();
                             } else if (value == 'Phone Number') {
@@ -434,7 +415,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                     const SizedBox(height: 16),
 
-                    // Static email field (always shows regardless of selection)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

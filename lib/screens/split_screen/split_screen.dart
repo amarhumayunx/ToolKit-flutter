@@ -8,14 +8,14 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart' as syncfusion;
 import 'package:toolkit/screens/split_screen/page_selection_screen.dart';
-import 'package:toolkit/screens/split_screen/split_progress_screen.dart';
+import 'package:toolkit/screens/split_screen/split_result_screen.dart';
 import 'package:toolkit/utils/app_snackbar.dart';
 import 'package:toolkit/widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
 import 'document_item.dart';
 import 'docxService.dart';
-import 'file_drop.dart';
+import 'file_drop_split.dart';
 
 class SplitScreen extends StatefulWidget {
   const SplitScreen({super.key});
@@ -29,7 +29,7 @@ class _SplitScreenState extends State<SplitScreen> {
   final String _processedResult = '';
   final bool _isProcessing = false;
   String _documentErrorText = '';
-  final DocxSplitterService _docxService = DocxSplitterService(); // <- Added
+  final DocxSplitterService _docxService = DocxSplitterService();
 
   void _removeDocument(int index) {
     setState(() {
@@ -41,36 +41,27 @@ class _SplitScreenState extends State<SplitScreen> {
 
   Future<void> _pickLocalDocuments() async {
     try {
-      // Reset error text when trying to pick new files
       setState(() {
         _documentErrorText = "";
       });
 
       FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx'],
         allowMultiple: true,
         withData: false,
         withReadStream: true,
       );
 
       if (result != null && result.files.isNotEmpty) {
-        final validExtensions = ['pdf', 'doc', 'docx'];
-
         List<File> pickedFiles = result.files
             .where((file) => file.path != null)
             .map((file) => File(file.path!))
             .toList();
 
-        List<File> validFiles = pickedFiles.where((file) {
-          final ext = file.path.split('.').last.toLowerCase();
-          return validExtensions.contains(ext);
-        }).toList();
-
         setState(() {
-          _selectedDocuments.addAll(validFiles);
-          _documentErrorText = validFiles.length == pickedFiles.length
-              ? ''
-              : ('select_pdf_doc_docx'.tr);
+          _selectedDocuments.addAll(pickedFiles);
+          _documentErrorText = '';
         });
       }
     } catch (e) {
@@ -102,7 +93,6 @@ class _SplitScreenState extends State<SplitScreen> {
         }
 
         if (extension == '.pdf') {
-          // For multiple PDFs, create a merged document and go directly to progress screen
           final tempDir = await getTemporaryDirectory();
           final mergedFileName = 'merged_${DateTime.now().millisecondsSinceEpoch}.pdf';
           final mergedFilePath = path.join(tempDir.path, mergedFileName);
@@ -118,8 +108,8 @@ class _SplitScreenState extends State<SplitScreen> {
           final document = DocumentItem(
             name: path.basename(mergedFilePath),
             date: DateTime.now(),
-            sizeInMB: await firstFile.length() / (1024 * 1024), // Approximate size
-            file: firstFile, // Temporary - actual file will be created in progress screen
+            sizeInMB: await firstFile.length() / (1024 * 1024),
+            file: firstFile,
           );
 
           await Navigator.push(
@@ -140,7 +130,6 @@ class _SplitScreenState extends State<SplitScreen> {
           );
           return true;
         } else if (extension == '.docx' || extension == '.doc') {
-          // Existing DOCX merging logic remains the same
           final documents = _selectedDocuments.map((file) => DocumentItem(
             name: path.basename(file.path),
             date: DateTime.now(),
@@ -177,7 +166,6 @@ class _SplitScreenState extends State<SplitScreen> {
           return false;
         }
       } else {
-        // Single File Case remains unchanged
         final document = DocumentItem(
           name: path.basename(firstFile.path),
           date: DateTime.now(),
@@ -390,5 +378,4 @@ class _SplitScreenState extends State<SplitScreen> {
       ),
     );
   }
-
 }

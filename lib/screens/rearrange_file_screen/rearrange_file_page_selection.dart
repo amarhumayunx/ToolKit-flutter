@@ -7,6 +7,7 @@ import 'package:path/path.dart' as path;
 import 'package:pdfx/pdfx.dart';
 import 'package:toolkit/screens/rearrange_file_screen/pdf_rearrange_service.dart';
 import 'package:toolkit/utils/app_snackbar.dart';
+import '../../utils/app_colors.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../split_screen/docxService.dart';
@@ -32,9 +33,9 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
   String _fileName = '';
   bool _isPdfFile = false;
   List<pw.Document> _pdfPages = [];
-  List<Uint8List?> _pageImages = []; // Store page preview images (only for PDF)
+  List<Uint8List?> _pageImages = [];
   bool _isLoadingPreviews = false;
-  PdfDocument? _pdfDocument; // Keep reference to PDF document
+  PdfDocument? _pdfDocument;
 
   @override
   void initState() {
@@ -44,7 +45,6 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
 
   @override
   void dispose() {
-    // Close PDF document when widget is disposed
     _pdfDocument?.close();
     super.dispose();
   }
@@ -81,7 +81,6 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
       _isLoadingPreviews = true;
     });
 
-    // Generate PDF page previews
     await _generatePdfPreviews();
   }
 
@@ -92,17 +91,14 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
     setState(() {
       _selectedPages = List<bool>.filled(pages.length, true);
       _pageSelectionOrder = List.generate(pages.length, (index) => index);
-      // No need to initialize _pageImages for DOCX files
-      _isLoadingPreviews = false; // No loading needed for DOCX
+      _isLoadingPreviews = false;
     });
   }
 
   Future<void> _generatePdfPreviews() async {
     try {
-      // Open PDF document using pdfx package
       _pdfDocument = await PdfDocument.openFile(_docxFile!.path);
 
-      // Generate preview for each page
       for (int i = 0; i < _pdfDocument!.pagesCount; i++) {
         try {
           final page = await _pdfDocument!.getPage(i + 1);
@@ -120,7 +116,6 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
           }
         } catch (pageError) {
           print('Error rendering page ${i + 1}: $pageError');
-          // Generate placeholder for failed pages
           _pageImages[i] = await _generatePlaceholderImage(i + 1, 'PDF');
         }
       }
@@ -133,7 +128,6 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
     } catch (e) {
       print('Error generating PDF previews: $e');
 
-      // Fallback to placeholder images
       for (int i = 0; i < _pdfPages.length; i++) {
         _pageImages[i] = await _generatePlaceholderImage(i + 1, 'PDF');
       }
@@ -146,23 +140,19 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
     }
   }
 
-  // Generate a placeholder image with page information (only for PDF when rendering fails)
   Future<Uint8List> _generatePlaceholderImage(int pageNumber, String fileType) async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
     final paint = Paint();
 
-    // Draw background
     paint.color = Colors.white;
     canvas.drawRect(const Rect.fromLTWH(0, 0, 200, 300), paint);
 
-    // Draw border
     paint.color = Colors.grey.shade300;
     paint.style = PaintingStyle.stroke;
     paint.strokeWidth = 2;
     canvas.drawRect(const Rect.fromLTWH(0, 0, 200, 300), paint);
 
-    // Draw page content mockup lines
     paint.color = Colors.grey.shade400;
     paint.strokeWidth = 1;
     for (int i = 0; i < 8; i++) {
@@ -173,7 +163,6 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
       );
     }
 
-    // Draw file type icon area
     paint.color = Colors.grey.shade200;
     paint.style = PaintingStyle.fill;
     canvas.drawRect(const Rect.fromLTWH(70, 220, 60, 40), paint);
@@ -227,7 +216,6 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
 
   Widget _buildPagePreview(int index) {
     if (_isPdfFile) {
-      // PDF file handling
       if (_isLoadingPreviews) {
         return Container(
           decoration: BoxDecoration(
@@ -235,12 +223,11 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator(color: AppColors.primary,),
           ),
         );
       }
 
-      // If we have a page image, show it
       if (_pageImages[index] != null) {
         return Padding(
           padding: const EdgeInsets.all(3.5),
@@ -256,7 +243,6 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
         );
       }
 
-      // Fallback to PDF icon
       return Container(
         decoration: BoxDecoration(
           color: Colors.grey.shade100,
@@ -283,7 +269,6 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
         ),
       );
     } else {
-      // DOCX file handling - show SVG icon
       return Column(
         children: [
           Expanded(
@@ -368,7 +353,6 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
                               child: _buildPagePreview(index),
                             ),
                           ),
-                          // Selection indicator (bottom right)
                           Positioned(
                             bottom: 8,
                             right: 8,

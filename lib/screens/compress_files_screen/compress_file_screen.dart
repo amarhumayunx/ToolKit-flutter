@@ -28,7 +28,6 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
   double _compressionQuality = 85;
 
 
-  // Helper method to format file size
   String _formatFileSize(int bytes) {
     if (bytes < 1024) {
       return '$bytes B';
@@ -43,13 +42,14 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         allowMultiple: true,
-        type: FileType.media,
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png'],
       );
 
       if (result != null && result.paths.isNotEmpty) {
         final validExtensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png'];
         const int minFileSizeMB = 1;
-        const int minFileSizeBytes = minFileSizeMB * 1024 * 1024; // 1MB in bytes
+        const int minFileSizeBytes = minFileSizeMB * 1024 * 1024;
 
         List<File> pickedFiles = result.paths
             .where((path) => path != null)
@@ -59,27 +59,36 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
         List<File> validFiles = [];
         List<String> rejectedFiles = [];
         List<String> invalidExtensionFiles = [];
+        List<String> duplicateFiles = [];
+
+        final existingFileNames = _selectedFiles.map((f) => f.path.split('/').last).toSet();
 
         for (File file in pickedFiles) {
-          final ext = file.path.split('.').last.toLowerCase();
+          final fileName = file.path.split('/').last;
+          final ext = fileName.split('.').last.toLowerCase();
 
-          // Check if file extension is valid
+          // Extension check
           if (!validExtensions.contains(ext)) {
-            invalidExtensionFiles.add(file.path.split('/').last);
+            invalidExtensionFiles.add(fileName);
             continue;
           }
 
-          // Check file size - now files must be LARGER than 1MB
+          // Duplicate file name check
+          if (existingFileNames.contains(fileName)) {
+            duplicateFiles.add(fileName);
+            continue;
+          }
+
           try {
             final fileSize = await file.length();
+
             if (fileSize < minFileSizeBytes) {
-              rejectedFiles.add('${file.path.split('/').last} (${_formatFileSize(fileSize)})');
+              rejectedFiles.add('$fileName (too small: ${_formatFileSize(fileSize)})');
             } else {
               validFiles.add(file);
             }
           } catch (e) {
-            // If we can't read file size, treat it as invalid
-            invalidExtensionFiles.add(file.path.split('/').last);
+            invalidExtensionFiles.add(fileName);
           }
         }
 
@@ -87,23 +96,25 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
           setState(() {
             _selectedFiles.addAll(validFiles);
 
-            // Set appropriate error message
-            _fileErrorText = rejectedFiles.isNotEmpty && invalidExtensionFiles.isNotEmpty
-                ? 'Invalid: Small files ${minFileSizeMB}MB & wrong formats'
-                : rejectedFiles.isNotEmpty
-                ? 'File must be larger than ${minFileSizeMB}MB'
-                : invalidExtensionFiles.isNotEmpty
-                ? 'Invalid file formats'
-                : validFiles.isEmpty && pickedFiles.isNotEmpty
-                ? 'No valid files selected'
-                : null;
+            _fileErrorText = [
+              if (invalidExtensionFiles.isNotEmpty) 'Invalid file formats',
+              if (rejectedFiles.isNotEmpty) 'Files must be at least $minFileSizeMB MB',
+              if (duplicateFiles.isNotEmpty) 'Duplicate files skipped',
+              if (validFiles.isEmpty && pickedFiles.isNotEmpty) 'No valid files selected',
+            ].join(' | ');
           });
 
-          // Show snackbar for rejected files
-          if (rejectedFiles.isNotEmpty) {
+          // Show warning message if any file is rejected
+          final warnings = [
+            if (duplicateFiles.isNotEmpty) '${duplicateFiles.length} duplicate(s)',
+            if (rejectedFiles.isNotEmpty) '${rejectedFiles.length} rejected (too small)',
+            if (invalidExtensionFiles.isNotEmpty) '${invalidExtensionFiles.length} invalid format(s)',
+          ];
+
+          if (warnings.isNotEmpty) {
             AppSnackBar.show(
               context,
-              message: '${rejectedFiles.length} file(s) skipped - File size must be larger than ${minFileSizeMB}MB',
+              message: 'Some files were skipped: ${warnings.join(', ')}',
             );
           }
         }
@@ -132,23 +143,19 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
     });
 
     try {
-      // Perform actual compression using our FileCompressor utility
       List<CompressionResult> compressionResults = await FileCompressor.compressBatchWithStatus(
         _selectedFiles,
         quality: _compressionQuality.round(),
       );
       List<File> compressedFiles = compressionResults.map((result) => result.file).toList();
 
-      // Check if widget is still mounted before proceeding
       if (!mounted) return;
 
-      // Update state first
       setState(() {
         _isCompressing = false;
       });
 
-      // Navigate to results screen
-      Navigator.of(context).pushReplacement(
+      Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => CompressedFileResultScreen(
             originalFiles: _selectedFiles,
@@ -159,7 +166,6 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
       );
 
     } catch (e) {
-      // Check if widget is still mounted before updating state or showing messages
       if (!mounted) return;
 
       setState(() {
@@ -202,7 +208,6 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                     ('reduce_file_size_description'.tr),
                   ),
                   const SizedBox(height: 24),
-                  // Combined container with shadow
 
                   Container(
                     decoration: BoxDecoration(
@@ -259,7 +264,6 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                       ),
                     ),
 
-                  // Add compression quality slider
                   if (_selectedFiles.isNotEmpty) ...[
                     const SizedBox(height: 24),
                     Container(

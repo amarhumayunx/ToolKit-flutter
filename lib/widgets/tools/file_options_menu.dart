@@ -1,7 +1,6 @@
 // file_options_menu.dart (updated)
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path/path.dart' as path;
 import 'package:share_plus/share_plus.dart';
@@ -14,11 +13,11 @@ class FileOptionsMenu extends StatelessWidget {
   final Function(String)? onFileRenamed;
 
   const FileOptionsMenu({
-    Key? key,
+    super.key,
     required this.filePath,
     this.onDelete,
     this.onFileRenamed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

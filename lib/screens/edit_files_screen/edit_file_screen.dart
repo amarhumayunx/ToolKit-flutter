@@ -25,11 +25,11 @@ class _EditFileScreenState extends State<EditFileScreen> {
 
   Future<void> _pickImages() async {
     try {
-      final List<XFile>? pickedFiles = await _picker.pickMultiImage(
+      final List<XFile> pickedFiles = await _picker.pickMultiImage(
         imageQuality: 85,
       );
 
-      if (pickedFiles != null && pickedFiles.isNotEmpty) {
+      if (pickedFiles.isNotEmpty) {
         final fileProvider = Provider.of<FileProvider>(context, listen: false);
         final newFiles = pickedFiles.map((file) => File(file.path)).toList();
         fileProvider.addFiles(newFiles);
@@ -45,7 +45,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
       final List<File>? capturedImages = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => OcrCameraScreen(),
+          builder: (context) => const OcrCameraScreen(),
         ),
       );
 
@@ -86,7 +86,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: ToolsAppBar(
+      appBar: const ToolsAppBar(
         title: 'Edit Files',
       ),
       body: Column(
@@ -97,11 +97,11 @@ class _EditFileScreenState extends State<EditFileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CustomSvgImage(
+                  const CustomSvgImage(
                     imagePath: 'assets/images/edit_file_img.svg',
                   ),
                   const SizedBox(height: 30),
-                  InfoCard(
+                  const InfoCard(
                     title: 'Edit Files',
                     description:
                         'Make changes to your images easily. Upload and modify multiple images for a seamless experience.',

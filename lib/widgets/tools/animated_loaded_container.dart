@@ -59,38 +59,71 @@ class _AnimatedLoadingContainerState extends State<AnimatedLoadingContainer> {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  SizedBox(
+                  // Background circle
+                  const SizedBox(
                     height: 150,
                     width: 150,
                     child: CircularProgressIndicator(
-                      value: _progressAnimation.value,
-                      strokeWidth: 8,
-                      backgroundColor: Colors.grey.withOpacity(0.2),
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        AppColors.primary,
+                      value: 1.0, // Full circle for background
+                      strokeWidth: 7,
+                      backgroundColor: Colors.transparent,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFFD9D9D9), // Light gray background
                       ),
                     ),
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '$percentage%',
-                        style: GoogleFonts.inter(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                  // Progress circle
+                  SizedBox(
+                    height: 150,
+                    width: 150,
+                    child: Transform.rotate(
+                      angle: 6.2832, // Start from top (12 o'clock position)
+                      child: CircularProgressIndicator(
+                        value: _progressAnimation.value,
+                        strokeWidth: 7,
+                        backgroundColor: Colors.transparent,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          AppColors.primary, // Teal green color matching image
                         ),
+                        strokeCap: StrokeCap.round, // Rounded ends
                       ),
-                      Text(
-                        'Completed',
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
+                  // Inner white circle (optional - for cleaner look)
+                  Container(
+                    height: 126, // Slightly smaller than outer circle
+                    width: 126,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  // Rounded container for percentage text
+                  Container(
+                    width: 130, // Set width
+                    height: 130, // Set height to match width
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle, // Make it a circle
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    alignment: Alignment.center, // Center the text inside the circle
+                    child: Text(
+                      '$percentage%',
+                      style: GoogleFonts.inter(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                    ),
+                  )
+
                 ],
               ),
             ),
@@ -98,7 +131,7 @@ class _AnimatedLoadingContainerState extends State<AnimatedLoadingContainer> {
             Text(
               widget.animationCompleted ? 'Completed!' : 'Please Wait!',
               style: GoogleFonts.inter(
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: FontWeight.w500,
                 color: widget.animationCompleted
                     ? AppColors.primary

@@ -9,6 +9,7 @@ class SaveDocumentButton extends StatelessWidget {
   final double? width;
   final EdgeInsetsGeometry? padding;
   final VoidCallback? onSaveCompleted;
+  final bool skipTimestamp;
 
   const SaveDocumentButton({
     super.key,
@@ -17,6 +18,7 @@ class SaveDocumentButton extends StatelessWidget {
     this.width,
     this.padding,
     this.onSaveCompleted,
+    this.skipTimestamp = true,
   });
 
   @override
@@ -36,15 +38,22 @@ class SaveDocumentButton extends StatelessWidget {
 
   Future<void> _handleSave(BuildContext context) async {
     try {
-      final result = await SaveDocumentService.saveDocument(context, documentFile);
+      // Debug: Print current file path
+      print('Saving file: ${documentFile.path}');
+      print('File exists: ${await documentFile.exists()}');
+
+      final result = await SaveDocumentService.saveDocument(
+        context,
+        documentFile,
+        skipTimestamp: skipTimestamp,
+      );
 
       if (!context.mounted) return;
 
-      if (result != null) {
+      if (result == true) {
         if (onSaveCompleted != null) {
           onSaveCompleted!();
         }
-
         Navigator.of(context).pop(true);
       }
     } catch (e) {
@@ -57,5 +66,4 @@ class SaveDocumentButton extends StatelessWidget {
         );
       }
     }
-  }
-}
+  }}

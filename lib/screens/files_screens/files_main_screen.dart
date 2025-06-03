@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/settings_widgets/all_files_tab.dart';
@@ -106,8 +105,8 @@ class _FilesMainScreenState extends State<FilesMainScreen>
             // Tab Bar
             TabBar(
               controller: _tabController,
-              indicator: UnderlineTabIndicator(
-                borderSide: const BorderSide(
+              indicator: const UnderlineTabIndicator(
+                borderSide: BorderSide(
                   width: 2.0,
                   color: AppColors.primary,
                 ),

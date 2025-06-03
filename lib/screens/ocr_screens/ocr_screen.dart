@@ -20,7 +20,7 @@ class OcrScreen extends StatefulWidget {
 }
 
 class _OcrScreenState extends State<OcrScreen> {
-  List<File> _selectedImages = [];
+  final List<File> _selectedImages = [];
   final ImagePicker _picker = ImagePicker();
   String _extractedText = '';
   bool _shouldClearImages = false;
@@ -31,7 +31,7 @@ class _OcrScreenState extends State<OcrScreen> {
         final List<File>? capturedImages = await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => OcrCameraScreen(),
+            builder: (context) => const OcrCameraScreen(),
           ),
         );
 

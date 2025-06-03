@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:hive_ce/hive.dart';
 
 import 'file_model.dart';

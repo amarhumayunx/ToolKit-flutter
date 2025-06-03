@@ -12,6 +12,6 @@ class DocumentItem {
     required this.date,
     required this.sizeInMB,
     required this.file,
-    List<bool>? selectedPages, // Make it optional
-  }) : selectedPages = selectedPages ?? []; // Default to empty list if not provided
+    List<bool>? selectedPages,
+  }) : selectedPages = selectedPages ?? [];
 }

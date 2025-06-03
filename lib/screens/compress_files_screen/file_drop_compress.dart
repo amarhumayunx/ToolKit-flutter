@@ -43,8 +43,6 @@ class DottedFileDropZoneCompress extends StatelessWidget {
   }
 
   @override
-// Add this debug code to your DottedFileDropZoneCompress build method
-  @override
   Widget build(BuildContext context) {
     return DottedBorder(
       color: AppColors.primary,
@@ -59,20 +57,19 @@ class DottedFileDropZoneCompress extends StatelessWidget {
           width: double.infinity,
           constraints: BoxConstraints(
             minHeight: 128,
-            maxHeight: (selectedFiles.isNotEmpty) ? 300 : 128, // Fixed condition
+            maxHeight: (selectedFiles.isNotEmpty) ? 300 : 128,
           ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             color: const Color(0xFF00BCD4).withOpacity(0.05),
           ),
-          // FIXED: Change && isEmpty to && !isEmpty
           child: (selectedFiles.isNotEmpty)
               ? SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 children: [
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -142,7 +139,7 @@ class DottedFileDropZoneCompress extends StatelessWidget {
               : Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               SvgPicture.asset(
                 'assets/icons/upload_file_icon.svg',
                 height: 28,

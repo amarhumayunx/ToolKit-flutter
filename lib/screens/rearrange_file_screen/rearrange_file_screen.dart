@@ -1,4 +1,3 @@
-// FIRST FILE: rearrange_file_screen.dart (Updated)
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -19,11 +18,9 @@ class RearrangeFileScreen extends StatefulWidget {
 }
 
 class _RearrangeFileScreenState extends State<RearrangeFileScreen> {
-  // Use List<File> instead of List<String>
   List<File> selectedFiles = [];
   String _documentErrorText = '';
 
-  // Trigger file picker or any file input method
   Future<void> _pickLocalDocuments() async {
     try {
       setState(() {
@@ -31,7 +28,8 @@ class _RearrangeFileScreenState extends State<RearrangeFileScreen> {
       });
 
       FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx'],
         allowMultiple: true,
         withData: false,
         withReadStream: true,
@@ -43,16 +41,9 @@ class _RearrangeFileScreenState extends State<RearrangeFileScreen> {
             .map((file) => File(file.path!))
             .toList();
 
-        List<File> validFiles = pickedFiles.where((file) {
-          final ext = file.path.split('.').last.toLowerCase();
-          return ['pdf', 'doc', 'docx'].contains(ext);
-        }).toList();
-
         setState(() {
-          selectedFiles.addAll(validFiles);
-          _documentErrorText = validFiles.length == pickedFiles.length
-              ? ''
-              : 'Please select only PDF, DOC or DOCX files';
+          selectedFiles.addAll(pickedFiles);
+          _documentErrorText = '';
         });
       }
     } catch (e) {
@@ -63,7 +54,6 @@ class _RearrangeFileScreenState extends State<RearrangeFileScreen> {
     }
   }
 
-  // Remove file by index
   void _removeDocument(int index) {
     setState(() {
       if (index >= 0 && index < selectedFiles.length) {
@@ -133,7 +123,6 @@ class _RearrangeFileScreenState extends State<RearrangeFileScreen> {
                             onRemoveFile: _removeDocument,
                           ),
                         ),
-
                       ],
                     ),
                   ),
@@ -147,7 +136,6 @@ class _RearrangeFileScreenState extends State<RearrangeFileScreen> {
               text: 'Rearrange File',
               onPressed: selectedFiles.isNotEmpty
                   ? () {
-                // Pass the selected file to the page selection screen
                 if (selectedFiles.isNotEmpty) {
                   Navigator.push(
                     context,

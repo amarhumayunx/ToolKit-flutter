@@ -223,20 +223,18 @@ class SaveDocumentService {
           }
         }
 
-        if (savedFilePath != null) {
-          final filesBox = await initFilesBox();
-          final fileSize = (await documentFile.length()) / (1024 * 1024);
+        final filesBox = await initFilesBox();
+        final fileSize = (await documentFile.length()) / (1024 * 1024);
 
-          await filesBox.add(FileModel(
-            name: path.basename(savedFilePath),
-            path: savedFilePath,
-            date: DateTime.now(),
-            size: '${fileSize.toStringAsFixed(1)} MB',
-          ));
+        await filesBox.add(FileModel(
+          name: path.basename(savedFilePath),
+          path: savedFilePath,
+          date: DateTime.now(),
+          size: '${fileSize.toStringAsFixed(1)} MB',
+        ));
 
-          return true;
-        }
-
+        return true;
+      
         return false;
       } else {
         showPermissionHelperDialog(context);

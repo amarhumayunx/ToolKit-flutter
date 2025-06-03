@@ -34,11 +34,11 @@ class BaseCVTemplateScreen extends StatefulWidget {
   final int totalPages;
 
   const BaseCVTemplateScreen({
-    Key? key,
+    super.key,
     required this.cvContent,
     required this.pageKeys,
     required this.totalPages,
-  }) : super(key: key);
+  });
 
   @override
   State<BaseCVTemplateScreen> createState() => _BaseCVTemplateScreenState();
@@ -214,9 +214,7 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
         if (!await baseDir.exists()) {
           baseDir = await getExternalStorageDirectory();
         }
-        if (baseDir == null) {
-          baseDir = await getApplicationDocumentsDirectory();
-        }
+        baseDir ??= await getApplicationDocumentsDirectory();
       } else if (Platform.isIOS) {
         baseDir = await getApplicationDocumentsDirectory();
       } else {
@@ -260,7 +258,7 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
       return byteData!.buffer.asUint8List();
     } catch (e) {
       debugPrint('Error creating thumbnail: $e');
-      throw e;
+      rethrow;
     }
   }
 

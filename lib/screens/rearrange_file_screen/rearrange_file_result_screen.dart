@@ -1,29 +1,31 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:toolkit/screens/rearrange_file_screen/pdf_rearrange_service.dart';
 import 'package:toolkit/screens/rearrange_file_screen/rearrange_file_screen.dart';
 import '../../utils/app_snackbar.dart';
-import '../../widgets/buttons/save_document_btn.dart';
+import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import '../../widgets/tools/document_container.dart';
+import '../../services/save_zip_png_service.dart';
 import '../split_screen/docxService.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 class RearrangeFileResultScreen extends StatefulWidget {
   final File originalFile;
   final List<int> newPageOrder;
-  final bool isPdfFile; // Add this
-  final List<pw.Document>? pdfPages; // Add this
+  final bool isPdfFile;
+  final List<pw.Document>? pdfPages;
 
   const RearrangeFileResultScreen({
     super.key,
     required this.originalFile,
     required this.newPageOrder,
-    this.isPdfFile = false, // Default to false
+    this.isPdfFile = false,
     this.pdfPages,
   });
 
@@ -43,6 +45,11 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
   bool _errorOccurred = false;
   String _statusMessage = 'Processing document...';
   final List<File?> _rearrangedFiles = [];
+  bool _fileRenamed = false;
+  String _saveButtonKey = 'initial';
+  bool _isSaving = false;
+  File? convertedFile;
+  String _currentFilePath = '';
 
   @override
   void initState() {
@@ -51,7 +58,6 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
       vsync: this,
       duration: const Duration(seconds: 2),
     );
-
     _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
@@ -70,9 +76,31 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
     _rearrangeDocument();
   }
 
+  Future<void> _handleSaveFile() async {
+    if (convertedFile != null) {
+      try {
+        await SaveFileService.saveFile(
+          context,
+          File(_currentFilePath),
+          _getFormatExtension(),
+        );
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      } catch (e) {
+        AppSnackBar.show(context,
+            message: 'Failed to save file: ${e.toString()}');
+      }
+    }
+  }
+
+  String _getFormatExtension() {
+    if (_currentFilePath.isNotEmpty) {
+      return _currentFilePath.split('.').last;
+    }
+    return widget.isPdfFile ? 'pdf' : 'docx';
+  }
+
   Future<void> _rearrangeDocument() async {
     try {
-      // Validate inputs first
       if (!await widget.originalFile.exists()) {
         throw Exception('Original file does not exist');
       }
@@ -90,7 +118,6 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
       _updateProgress(0.2);
 
       if (widget.isPdfFile) {
-        // Handle PDF rearrangement
         final pdfService = PdfRearrangeService();
 
         List<pw.Document> allPages;
@@ -104,7 +131,6 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
           throw Exception('No pages found in PDF document');
         }
 
-        // Validate page indices
         for (int index in widget.newPageOrder) {
           if (index < 0 || index >= allPages.length) {
             throw Exception('Invalid page index: $index. Document has ${allPages.length} pages.');
@@ -115,7 +141,6 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
 
         setState(() => _statusMessage = 'Rearranging PDF pages...');
 
-        // Select pages in the new order
         final reorderedPages = widget.newPageOrder.map((index) => allPages[index]).toList();
 
         if (reorderedPages.isEmpty) {
@@ -126,7 +151,6 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
 
         setState(() => _statusMessage = 'Creating new PDF document...');
 
-        // Create output path
         final fileNameWithoutExt = path.basenameWithoutExtension(widget.originalFile.path);
         final timestamp = DateTime.now().millisecondsSinceEpoch;
 
@@ -136,16 +160,13 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
             '${fileNameWithoutExt}_rearranged_$timestamp.pdf'
         );
 
-        // Ensure the directory exists
         await Directory(path.dirname(outputPath)).create(recursive: true);
 
-        // Create new PDF with rearranged pages
         _outputFile = await pdfService.createPdfFromPages(reorderedPages, outputPath);
 
         _updateProgress(0.8);
 
       } else {
-        // Handle DOCX rearrangement (existing logic)
         final docxService = DocxSplitterService();
 
         final allPages = await docxService.extractPages(widget.originalFile);
@@ -154,7 +175,6 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
           throw Exception('No pages found in document');
         }
 
-        // Validate page indices
         for (int index in widget.newPageOrder) {
           if (index < 0 || index >= allPages.length) {
             throw Exception('Invalid page index: $index. Document has ${allPages.length} pages.');
@@ -164,7 +184,6 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
         _updateProgress(0.4);
 
         setState(() => _statusMessage = 'Rearranging pages...');
-        // Select pages in the new order
         final reorderedPages = widget.newPageOrder.map((index) => allPages[index]).toList();
 
         if (reorderedPages.isEmpty) {
@@ -175,7 +194,6 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
 
         setState(() => _statusMessage = 'Creating new document...');
 
-        // Create a unique filename to avoid conflicts
         final fileNameWithoutExt = path.basenameWithoutExtension(widget.originalFile.path);
         final fileExt = path.extension(widget.originalFile.path);
         final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -186,10 +204,8 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
             '${fileNameWithoutExt}_rearranged_$timestamp$fileExt'
         );
 
-        // Ensure the directory exists
         await Directory(path.dirname(outputPath)).create(recursive: true);
 
-        // Create DOCX from pages
         _outputFile = await docxService.createDocumentFromPages(
             reorderedPages,
             outputPath
@@ -198,7 +214,6 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
         _updateProgress(0.8);
       }
 
-      // Validate the created file (common for both PDF and DOCX)
       if (_outputFile == null) {
         throw Exception('Failed to create output file');
       }
@@ -215,6 +230,10 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
       print('Created ${widget.isPdfFile ? "PDF" : "DOCX"} file: ${_outputFile!.path}, size: $outputSize bytes');
 
       _rearrangedFiles.add(_outputFile);
+
+      convertedFile = _outputFile;
+      _currentFilePath = _outputFile!.path;
+
       _updateProgress(0.9);
 
       setState(() {
@@ -239,7 +258,6 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
     });
   }
 
-
   Widget _buildLoadingContainer() {
     return AnimatedLoadingContainer(
       animationController: _animationController,
@@ -258,11 +276,36 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
         throw Exception('File is empty');
       }
 
-      // Add logic to open file if needed
+      // Show loading message
       if (mounted) {
-        AppSnackBar.show(context, message: 'Opening file: ${file.path} ($fileSize bytes)');
+        AppSnackBar.show(context, message: 'Opening file...');
       }
+
+      // Actually open the file
+      final result = await OpenFile.open(file.path);
+
+      if (result.type == ResultType.done) {
+        // File opened successfully
+        print('File opened successfully: ${file.path}');
+      } else if (result.type == ResultType.noAppToOpen) {
+        if (mounted) {
+          AppSnackBar.show(context,
+              message: 'No application found to open this file type');
+        }
+      } else if (result.type == ResultType.permissionDenied) {
+        if (mounted) {
+          AppSnackBar.show(context,
+              message: 'Permission denied to open file');
+        }
+      } else {
+        if (mounted) {
+          AppSnackBar.show(context,
+              message: 'Failed to open file: ${result.message}');
+        }
+      }
+
     } catch (e) {
+      print('Error opening file: $e');
       if (mounted) {
         AppSnackBar.show(context, message: 'Cannot open file: ${e.toString()}');
       }
@@ -271,27 +314,25 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
 
   void _handleFileDeleted() async {
     try {
-      // Actually delete the file
       if (_outputFile != null && await _outputFile!.exists()) {
         await _outputFile!.delete();
         print('File deleted: ${_outputFile!.path}');
       }
 
-      // Remove from the list
       _rearrangedFiles.clear();
 
-      // Update UI state
       setState(() {
         _outputFile = null;
+        convertedFile = null;
+        _currentFilePath = '';
         _processingComplete = false;
+        _saveButtonKey = 'deleted_${DateTime.now().millisecondsSinceEpoch}';
       });
 
-      // Show success message
       if (mounted) {
         AppSnackBar.show(context, message: 'File deleted successfully!');
       }
 
-      // Navigate back with a small delay
       Future.delayed(const Duration(milliseconds: 100), () {
         if (mounted) {
           Navigator.of(context).pop();
@@ -307,114 +348,157 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
     }
   }
 
+  Future<void> _handleFileRenamed(String newPath) async {
+    try {
+      final oldFile = _outputFile;
+      final newFile = File(newPath);
+
+      if (oldFile != null && oldFile.path != newPath) {
+        if (await oldFile.exists()) {
+          await oldFile.rename(newPath);
+        }
+      }
+
+      setState(() {
+        _outputFile = newFile;
+        convertedFile = newFile;
+        _currentFilePath = newPath;
+        _fileRenamed = true;
+        _saveButtonKey = 'renamed_${DateTime.now().millisecondsSinceEpoch}';
+
+        final index = _rearrangedFiles.indexWhere((file) => file?.path == oldFile?.path);
+        if (index != -1) {
+          _rearrangedFiles[index] = newFile;
+        }
+      });
+
+      if (mounted) {
+        AppSnackBar.show(context, message: 'File renamed successfully');
+      }
+    } catch (e) {
+      if (mounted) {
+        AppSnackBar.show(context, message: 'Error renaming file: ${e.toString()}');
+      }
+    }
+  }
+
+  bool get hasValidFiles {
+    return _outputFile != null && _outputFile!.existsSync();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-        onWillPop: () async {
-      // Replace below with actual navigation to your CompressFilesScreen
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const RearrangeFileScreen()),
-      );
-      return false; // prevent default back behavior
-    },
-    child: Scaffold(
-      backgroundColor: Colors.white,
-      appBar: const CustomAppBar(title: 'Rearrange Results'),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(14.0),
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                _buildLoadingContainer(),
-                if (_animationCompleted) ...[
-                  const SizedBox(height: 36),
-                  if (_errorOccurred) ...[
-                    const Icon(
-                      Icons.error_outline,
-                      color: Colors.red,
-                      size: 64,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Error occurred',
-                      style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _statusMessage,
-                      style: GoogleFonts.inter(fontSize: 16),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _errorOccurred = false;
-                          _processingComplete = false;
-                          _progress = 0.0;
-                          _statusMessage = 'Processing document...';
-                          _rearrangedFiles.clear();
-                          _outputFile = null;
-                        });
-                        _rearrangeDocument();
-                      },
-                      child: const Text('Try Again'),
-                    ),
-                  ] else ...[
-                    const SizedBox(height: 24),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Rearranged Files:',
-                        style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    if (_rearrangedFiles.isNotEmpty)
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _rearrangedFiles.length,
-                        itemBuilder: (context, index) {
-                          final file = _rearrangedFiles[index];
-                          if (file == null) return const SizedBox.shrink();
-                          return DocumentContainer(
-                            filePath: file.path,
-                            onTap: () => _openFile(file),
-                            onDelete: _handleFileDeleted,
-                          );
-                        },
-                      )
-                    else if (!_processingComplete)
-                      Center(
-                        child: Text(
-                          'Processing document...',
-                          style: GoogleFonts.inter(fontSize: 16),
-                        ),
-                      ),
-                  ],
-                  SizedBox(height: MediaQuery.of(context).padding.bottom + 250),
-                ],
-              ],
-            ),
-          ),
-          if (_animationCompleted && _outputFile != null && !_errorOccurred && _processingComplete)
-            Positioned(
-              left: 20,
-              right: 20,
-              bottom: MediaQuery.of(context).padding.bottom + 20,
-              child: SaveDocumentButton(
-                documentFile: _outputFile!,
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+    return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: const CustomAppBar(title: 'Rearrange Results'),
+        resizeToAvoidBottomInset: true,
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 100.0),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      _buildLoadingContainer(),
+                      if (_animationCompleted) ...[
+                        const SizedBox(height: 36),
+                        if (_errorOccurred) ...[
+                          const Icon(
+                            Icons.error_outline,
+                            color: Colors.red,
+                            size: 64,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Error occurred',
+                            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _statusMessage,
+                            style: GoogleFonts.inter(fontSize: 16),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                _errorOccurred = false;
+                                _processingComplete = false;
+                                _progress = 0.0;
+                                _statusMessage = 'Processing document...';
+                                _rearrangedFiles.clear();
+                                _outputFile = null;
+                                convertedFile = null;
+                                _currentFilePath = '';
+                                _fileRenamed = false;
+                                _saveButtonKey = 'retry_${DateTime.now().millisecondsSinceEpoch}';
+                              });
+                              _rearrangeDocument();
+                            },
+                            child: const Text('Try Again'),
+                          ),
+                        ] else ...[
+                          const SizedBox(height: 24),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Rearranged Files:',
+                              style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          if (_rearrangedFiles.isNotEmpty)
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: _rearrangedFiles.length,
+                              itemBuilder: (context, index) {
+                                final file = _rearrangedFiles[index];
+                                if (file == null) return const SizedBox.shrink();
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: DocumentContainer(
+                                    filePath: file.path,
+                                    onTap: () => _openFile(file),
+                                    onDelete: _handleFileDeleted,
+                                    onFileRenamed: _handleFileRenamed,
+                                  ),
+                                );
+                              },
+                            )
+                          else if (!_processingComplete)
+                            Center(
+                              child: Text(
+                                'Processing document...',
+                                style: GoogleFonts.inter(fontSize: 16),
+                              ),
+                            ),
+                        ],
+                      ],
+                    ],
+                  ),
+                ),
               ),
-            ),
-        ],
-      ),
-    ));
+
+              if (_animationCompleted && hasValidFiles && !_errorOccurred && _processingComplete)
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
+                    child: CustomGradientButton(
+                      key: Key(_saveButtonKey),
+                      text: _isSaving ? 'Saving...' : 'Save',
+                      onPressed: _isSaving ? null : _handleSaveFile,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
   }
 
   @override

@@ -1,7 +1,6 @@
 // extracted_text_screen.dart (updated)
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_file/open_file.dart';
 import 'package:toolkit/widgets/custom_appbar.dart';

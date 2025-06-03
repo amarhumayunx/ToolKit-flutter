@@ -14,7 +14,7 @@ class LockedFilesView extends StatefulWidget {
 
 class _LockedFilesViewState extends State<LockedFilesView> {
   String _sortBy = 'Recent';
-  Set<String> _favorites = {'Confidential Report'}; // Track favorite documents
+  final Set<String> _favorites = {'Confidential Report'}; // Track favorite documents
 
   void _toggleFavorite(String documentName) {
     setState(() {
