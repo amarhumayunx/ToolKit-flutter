@@ -10,6 +10,10 @@ class CustomTextField extends StatelessWidget {
   final Function(String)? onChanged;
   final String? Function(String?)? validator;
   final bool isRequired;
+  final FocusNode? focusNode;
+  final FocusNode? nextFocus;
+  final TextInputAction? textInputAction;
+  final bool autofocus;
 
   const CustomTextField({
     super.key,
@@ -20,6 +24,10 @@ class CustomTextField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.validator,
     this.isRequired = false,
+    this.focusNode,
+    this.nextFocus,
+    this.textInputAction,
+    this.autofocus = false,
   });
 
   @override
@@ -37,7 +45,18 @@ class CustomTextField extends StatelessWidget {
                 color: AppColors.black,
               ),
             ),
-
+            if (isRequired)
+              Padding(
+                padding: const EdgeInsets.only(left: 4.0),
+                child: Text(
+                  '*',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
           ],
         ),
         const SizedBox(height: 8),
@@ -54,11 +73,22 @@ class CustomTextField extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: TextFormField(
+            autofocus: autofocus,
+            focusNode: focusNode,
+            textInputAction: textInputAction ??
+                (nextFocus != null ? TextInputAction.next : TextInputAction.done),
+            onFieldSubmitted: (_) {
+              if (nextFocus != null) {
+                FocusScope.of(context).requestFocus(nextFocus);
+              } else {
+                FocusScope.of(context).unfocus();
+              }
+            },
             onChanged: onChanged,
             controller: controller,
             keyboardType: keyboardType,
             validator: validator,
-            textCapitalization: TextCapitalization.sentences, // Add this line
+            textCapitalization: TextCapitalization.sentences,
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.inter(

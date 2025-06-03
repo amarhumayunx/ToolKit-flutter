@@ -213,8 +213,9 @@ class _ScannerScreenState extends State<ScannerScreen>
             _batchImages.addAll(selectedImages);
           });
 
-
-          AppSnackBar.show(context, message:'Added ${selectedImages.length} images to batch. Total: ${_batchImages.length}');
+          AppSnackBar.show(context,
+              message:
+                  'Added ${selectedImages.length} images to batch. Total: ${_batchImages.length}');
         } else {
           setState(() {
             _batchImages = selectedImages;
@@ -361,10 +362,8 @@ class _ScannerScreenState extends State<ScannerScreen>
       }
     } catch (e) {
       print('Error capturing image: $e');
-      AppSnackBar.show(context, message: 'Failed to capture image: ${e.toString()}');
-    }
+     }
   }
-
   Future<void> _captureIdCardImage() async {
     if (_controller == null || !_controller!.value.isInitialized) {
       return;

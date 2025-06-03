@@ -17,18 +17,25 @@ class NavBarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => onTap(index),
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: SvgPicture.asset(
-          iconPath,
-          width: 26,
-          height: 26,
-          colorFilter: ColorFilter.mode(
-            isActive ? const Color(0xFF00B4BE) : Colors.black,
-            BlendMode.srcIn,
+    return Material(
+      color: Colors.transparent,
+      child: InkResponse(
+        onTap: () => onTap(index),
+        radius: 20, // Very small ripple radius
+        containedInkWell: true, // Constrains ripple to container bounds
+        highlightShape: BoxShape.circle, // Circular highlight effect
+        splashColor: const Color(0xFF00B4BE).withOpacity(0.1),
+        highlightColor: const Color(0xFF00B4BE).withOpacity(0.05),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: SvgPicture.asset(
+            iconPath,
+            width: 26,
+            height: 26,
+            colorFilter: ColorFilter.mode(
+              isActive ? const Color(0xFF00B4BE) : Colors.black,
+              BlendMode.srcIn,
+            ),
           ),
         ),
       ),

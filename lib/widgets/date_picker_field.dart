@@ -8,6 +8,9 @@ class DateField extends StatelessWidget {
   final VoidCallback onTap;
   final String? errorText;
   final bool isEnabled;
+  final FocusNode? focusNode;
+  final FocusNode? nextFocus;
+  final bool autofocus;
 
   const DateField({
     super.key,
@@ -16,6 +19,9 @@ class DateField extends StatelessWidget {
     required this.onTap,
     this.errorText,
     this.isEnabled = true,
+    this.focusNode,
+    this.nextFocus,
+    this.autofocus = false,
   });
 
   @override
@@ -33,7 +39,10 @@ class DateField extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         GestureDetector(
-          onTap: isEnabled ? onTap : null,
+          onTap: isEnabled ? () {
+            FocusScope.of(context).unfocus();
+            onTap();
+          } : null,
           child: Container(
             decoration: BoxDecoration(
               boxShadow: [
@@ -43,15 +52,29 @@ class DateField extends StatelessWidget {
                   offset: const Offset(0, 0),
                 ),
               ],
-              color: AppColors.bgBoxColor,
+              color: isEnabled ? AppColors.bgBoxColor : AppColors.bgBoxColor.withOpacity(0.5),
               borderRadius: BorderRadius.circular(8),
             ),
             child: AbsorbPointer(
               child: TextFormField(
                 controller: controller,
                 enabled: false,
+                focusNode: focusNode,
+                autofocus: autofocus,
+                textInputAction: nextFocus != null ? TextInputAction.next : TextInputAction.done,
+                onFieldSubmitted: (_) {
+                  if (nextFocus != null) {
+                    FocusScope.of(context).requestFocus(nextFocus);
+                  } else {
+                    FocusScope.of(context).unfocus();
+                  }
+                },
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: isEnabled ? AppColors.black : AppColors.fieldHintColor,
+                ),
                 decoration: InputDecoration(
-                  hintText: '00/00/00',
+                  hintText: 'DD/MM/YY',
                   hintStyle: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w300,
@@ -62,28 +85,25 @@ class DateField extends StatelessWidget {
                     horizontal: 16,
                     vertical: 12,
                   ),
+
                 ),
               ),
             ),
           ),
         ),
-        // Create a fixed-height container for error text that's always present
         Container(
-          height: 20, // Fixed height to accommodate the error text
-          padding: const EdgeInsets.only(
-            top: 4,
-          ),
-          alignment: Alignment.topLeft,
+          height: 20,
+          padding: const EdgeInsets.only(top: 4),
           child: errorText != null
               ? Text(
-                  errorText!,
-                  style: GoogleFonts.inter(
-                    color: Colors.red,
-                    fontSize: 8,
-                    fontWeight: FontWeight.w400,
-                  ),
-                )
-              : null, // When no error, container still takes up space but is empty
+            errorText!,
+            style: GoogleFonts.inter(
+              color: Colors.red,
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+            ),
+          )
+              : null,
         ),
       ],
     );

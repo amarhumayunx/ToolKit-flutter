@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:intl/intl.dart';
+import 'package:toolkit/models/file_model.dart';
+import 'package:toolkit/services/save_document_service.dart';
 import 'package:toolkit/widgets/settings_widgets/sort_btn.dart';
 
 class LockedFilesView extends StatefulWidget {
@@ -13,78 +17,105 @@ class LockedFilesView extends StatefulWidget {
 }
 
 class _LockedFilesViewState extends State<LockedFilesView> {
+  late Box<FileModel> filesBox;
   String _sortBy = 'Recent';
-  final Set<String> _favorites = {'Confidential Report'}; // Track favorite documents
+  bool _isLoading = true;
 
-  void _toggleFavorite(String documentName) {
+  @override
+  void initState() {
+    super.initState();
+    _initHive();
+  }
+
+  Future<void> _initHive() async {
+    filesBox = await SaveDocumentService.initFilesBox();
+    setState(() => _isLoading = false);
+  }
+
+  void _toggleFavorite(int index) {
     setState(() {
-      if (_favorites.contains(documentName)) {
-        _favorites.remove(documentName);
-      } else {
-        _favorites.add(documentName);
+      final file = filesBox.getAt(index);
+      if (file != null) {
+        filesBox.putAt(
+            index,
+            FileModel(
+              name: file.name,
+              path: file.path,
+              date: file.date,
+              size: file.size,
+              isFavorite: !file.isFavorite,
+              isLocked: file.isLocked,
+            ));
+      }
+    });
+  }
+
+  void _toggleLock(int index) {
+    setState(() {
+      final file = filesBox.getAt(index);
+      if (file != null) {
+        filesBox.putAt(
+            index,
+            FileModel(
+              name: file.name,
+              path: file.path,
+              date: file.date,
+              size: file.size,
+              isFavorite: file.isFavorite,
+              isLocked: !file.isLocked,
+            ));
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Filter and sort files based on search query and sort option
-    var files = [
-      {
-        'name': 'Confidential Report',
-        'date': '20/02/25',
-        'time': '11:30am',
-        'size': '4.5 MB',
-      },
-      {
-        'name': 'Private Notes',
-        'date': '19/02/25',
-        'time': '9:45am',
-        'size': '1.8 MB',
-      },
-      {
-        'name': 'Secret Project',
-        'date': '18/02/25',
-        'time': '3:20pm',
-        'size': '6.7 MB',
-      },
-    ]
-        .where((file) => file['name']!
+    // Get all locked files
+    final lockedFiles = _isLoading
+        ? []
+        : filesBox.values
+        .where((file) => file.isLocked)
+        .where((file) => file.name
         .toLowerCase()
         .contains(widget.searchQuery.toLowerCase()))
         .toList();
 
     // Sort files
     if (_sortBy == 'Name') {
-      files.sort((a, b) => a['name']!.compareTo(b['name']!));
+      lockedFiles.sort((a, b) => a.name.compareTo(b.name));
     } else if (_sortBy == 'Date') {
-      files.sort((a, b) => b['date']!.compareTo(a['date']!));
+      lockedFiles.sort((a, b) => b.date.compareTo(a.date));
     }
 
     return Column(
       children: [
         // Sort button with container and custom icon
         Padding(
-          padding: const EdgeInsets.all(2.0),
+          padding: const EdgeInsets.only(top: 40),
           child: Row(
             children: [
-              SortButton(
-                currentSort: _sortBy,
-                onSortSelected: (sortOption) {
-                  setState(() {
-                    _sortBy = sortOption;
-                  });
-                },
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: SortButton(
+                  currentSort: _sortBy,
+                  onSortSelected: (sortOption) {
+                    setState(() {
+                      _sortBy = sortOption;
+                    });
+                  },
+                ),
               ),
               const Spacer(),
             ],
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         Expanded(
-          child: ListView(
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : ListView(
             children: [
-              if (files.isEmpty)
+              if (lockedFiles.isEmpty)
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 100),
@@ -98,21 +129,40 @@ class _LockedFilesViewState extends State<LockedFilesView> {
                   ),
                 )
               else
-                ...files.map((file) => Column(
-                  children: [
-                    _buildFileItem(
-                      context,
-                      documentName: file['name']!,
-                      date: file['date']!,
-                      time: file['time']!,
-                      size: file['size']!,
-                      isFavorite: _favorites.contains(file['name']!),
-                      onFavoriteToggle: () =>
-                          _toggleFavorite(file['name']!),
+                ...lockedFiles.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final file = entry.value;
+
+                  // Find the actual index in the box
+                  int actualIndex = -1;
+                  for (int i = 0; i < filesBox.length; i++) {
+                    final boxFile = filesBox.getAt(i);
+                    if (boxFile != null && boxFile.path == file.path) {
+                      actualIndex = i;
+                      break;
+                    }
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
+                        _buildFileItem(
+                          context,
+                          documentName: file.name,
+                          date: DateFormat('yy/MM/dd').format(file.date),
+                          time: DateFormat('h:mma').format(file.date),
+                          size: file.size,
+                          isFavorite: file.isFavorite,
+                          onFavoriteToggle: () =>
+                              _toggleFavorite(actualIndex),
+                          onLockToggle: () => _toggleLock(actualIndex),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                  ],
-                )),
+                  );
+                }),
               const SizedBox(height: 100), // Extra space for nav bar
             ],
           ),
@@ -129,6 +179,7 @@ class _LockedFilesViewState extends State<LockedFilesView> {
         required String size,
         required bool isFavorite,
         required VoidCallback onFavoriteToggle,
+        required VoidCallback onLockToggle,
       }) {
     return Container(
       decoration: BoxDecoration(
@@ -213,14 +264,10 @@ class _LockedFilesViewState extends State<LockedFilesView> {
                 size: 24,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SvgPicture.asset(
-                'assets/icons/more_icon.svg',
-                height: 20,
-                width: 20,
-              ),
-            )
+            IconButton(
+              icon: const Icon(Icons.lock_open),
+              onPressed: onLockToggle,
+            ),
           ],
         ),
       ),

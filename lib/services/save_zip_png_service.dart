@@ -61,7 +61,7 @@ class SaveFileService {
           title: const Text('Permission Issue'),
           content: const Text(
               'Unable to save file. This might be due to permission restrictions on your device.\n\n'
-                  'For Android 11+ users: Please allow the app to manage files and photos in your device settings.'),
+              'For Android 11+ users: Please allow the app to manage files and photos in your device settings.'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancel'),
@@ -116,7 +116,8 @@ class SaveFileService {
   }
 
   /// Generate unique filename if file already exists in destination
-  static Future<String> _generateUniqueFileName(String directoryPath, String fileName) async {
+  static Future<String> _generateUniqueFileName(
+      String directoryPath, String fileName) async {
     String baseFileName = path.basenameWithoutExtension(fileName);
     String extension = path.extension(fileName);
     String finalFileName = fileName;
@@ -150,7 +151,8 @@ class SaveFileService {
         String fileName = path.basename(imageFile.path);
 
         // Generate unique filename if it already exists
-        String uniqueFileName = await _generateUniqueFileName(toolkitDir.path, fileName);
+        String uniqueFileName =
+            await _generateUniqueFileName(toolkitDir.path, fileName);
 
         // Create destination file path in Toolkit folder
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
@@ -167,7 +169,8 @@ class SaveFileService {
       AppSnackBar.show(context, message: 'Failed to save image: ${e.message}');
     } catch (e) {
       debugPrint('Error saving PNG file: $e');
-      AppSnackBar.show(context, message: 'Failed to save image: ${e.toString()}');
+      AppSnackBar.show(context,
+          message: 'Failed to save image: ${e.toString()}');
     }
   }
 
@@ -191,7 +194,8 @@ class SaveFileService {
         String fileName = path.basename(zipFile.path);
 
         // Generate unique filename if it already exists
-        String uniqueFileName = await _generateUniqueFileName(toolkitDir.path, fileName);
+        String uniqueFileName =
+            await _generateUniqueFileName(toolkitDir.path, fileName);
 
         // Create destination file path in Toolkit folder
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
@@ -199,16 +203,19 @@ class SaveFileService {
         // Copy the file to the Toolkit folder
         await zipFile.copy(destinationPath);
 
-        AppSnackBar.show(context, message: 'ZIP file saved to ${toolkitDir.path}');
+        AppSnackBar.show(context,
+            message: 'ZIP file saved to ${toolkitDir.path}');
       } else {
         await showPermissionHelperDialog(context);
       }
     } on PlatformException catch (e) {
       debugPrint('Platform Exception in saving ZIP file: ${e.message}');
-      AppSnackBar.show(context, message: 'Failed to save ZIP file: ${e.message}');
+      AppSnackBar.show(context,
+          message: 'Failed to save ZIP file: ${e.message}');
     } catch (e) {
       debugPrint('Error saving ZIP file: $e');
-      AppSnackBar.show(context, message: 'Failed to save ZIP file: ${e.toString()}');
+      AppSnackBar.show(context,
+          message: 'Failed to save ZIP file: ${e.toString()}');
     }
   }
 
@@ -257,12 +264,14 @@ class SaveFileService {
       await _saveFileToHive(file, fileType);
     } catch (e) {
       debugPrint('Error in saveFile: $e');
-      AppSnackBar.show(context, message: 'Failed to save file: ${e.toString()}');
+      AppSnackBar.show(context,
+          message: 'Failed to save file: ${e.toString()}');
     }
   }
 
   /// Save DOCX document file to Toolkit folder
-  static Future<void> _saveDocumentFile(BuildContext context, File docFile) async {
+  static Future<void> _saveDocumentFile(
+      BuildContext context, File docFile) async {
     try {
       // Check if we can access storage
       bool hasPermission = await checkAndRequestStoragePermission(context);
@@ -281,7 +290,8 @@ class SaveFileService {
         String fileName = path.basename(docFile.path);
 
         // Generate unique filename if it already exists
-        String uniqueFileName = await _generateUniqueFileName(toolkitDir.path, fileName);
+        String uniqueFileName =
+            await _generateUniqueFileName(toolkitDir.path, fileName);
 
         // Create destination file path in Toolkit folder
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
@@ -289,16 +299,19 @@ class SaveFileService {
         // Copy the file to the Toolkit folder
         await docFile.copy(destinationPath);
 
-        AppSnackBar.show(context, message: 'Document saved to ${toolkitDir.path}');
+        AppSnackBar.show(context,
+            message: 'Document saved to ${toolkitDir.path}');
       } else {
         await showPermissionHelperDialog(context);
       }
     } on PlatformException catch (e) {
       debugPrint('Platform Exception in saving document file: ${e.message}');
-      AppSnackBar.show(context, message: 'Failed to save document: ${e.message}');
+      AppSnackBar.show(context,
+          message: 'Failed to save document: ${e.message}');
     } catch (e) {
       debugPrint('Error saving document file: $e');
-      AppSnackBar.show(context, message: 'Failed to save document: ${e.toString()}');
+      AppSnackBar.show(context,
+          message: 'Failed to save document: ${e.toString()}');
     }
   }
 
@@ -322,7 +335,8 @@ class SaveFileService {
         String fileName = path.basename(pdfFile.path);
 
         // Generate unique filename if it already exists
-        String uniqueFileName = await _generateUniqueFileName(toolkitDir.path, fileName);
+        String uniqueFileName =
+            await _generateUniqueFileName(toolkitDir.path, fileName);
 
         // Create destination file path in Toolkit folder
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
@@ -354,7 +368,8 @@ class SaveFileService {
 
         if (toolkitDir == null) {
           // If folder creation failed, use default save mechanism
-          await _saveFileWithDialog(context, file, path.extension(file.path).replaceAll('.', ''));
+          await _saveFileWithDialog(
+              context, file, path.extension(file.path).replaceAll('.', ''));
           return;
         }
 
@@ -362,7 +377,8 @@ class SaveFileService {
         String fileName = path.basename(file.path);
 
         // Generate unique filename if it already exists
-        String uniqueFileName = await _generateUniqueFileName(toolkitDir.path, fileName);
+        String uniqueFileName =
+            await _generateUniqueFileName(toolkitDir.path, fileName);
 
         // Create destination file path in Toolkit folder
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
@@ -376,7 +392,8 @@ class SaveFileService {
       }
     } catch (e) {
       debugPrint('Error saving generic file: $e');
-      AppSnackBar.show(context, message: 'Failed to save file: ${e.toString()}');
+      AppSnackBar.show(context,
+          message: 'Failed to save file: ${e.toString()}');
     }
   }
 
@@ -401,7 +418,8 @@ class SaveFileService {
       }
     } catch (e) {
       debugPrint('Error in _saveFileWithDialog: $e');
-      AppSnackBar.show(context, message: 'Failed to save file: ${e.toString()}');
+      AppSnackBar.show(context,
+          message: 'Failed to save file: ${e.toString()}');
     }
   }
 }

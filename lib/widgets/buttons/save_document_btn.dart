@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import '../../services/save_document_service.dart';
 import 'gradient_btn.dart';
 
+// save_document_btn.dart (updated)
 class SaveDocumentButton extends StatelessWidget {
   final File documentFile;
   final String buttonText;
   final double? width;
   final EdgeInsetsGeometry? padding;
   final VoidCallback? onSaveCompleted;
-  final bool skipTimestamp;
+  final bool skipTimestamp; // Add this parameter
 
   const SaveDocumentButton({
     super.key,
@@ -18,7 +19,7 @@ class SaveDocumentButton extends StatelessWidget {
     this.width,
     this.padding,
     this.onSaveCompleted,
-    this.skipTimestamp = true,
+    this.skipTimestamp = true, // Change default to true for original filename
   });
 
   @override
@@ -37,33 +38,15 @@ class SaveDocumentButton extends StatelessWidget {
   }
 
   Future<void> _handleSave(BuildContext context) async {
-    try {
-      // Debug: Print current file path
-      print('Saving file: ${documentFile.path}');
-      print('File exists: ${await documentFile.exists()}');
+    final result = await SaveDocumentService.saveDocument(
+      context,
+      documentFile,
+      skipTimestamp: skipTimestamp, // Pass the parameter
+    );
 
-      final result = await SaveDocumentService.saveDocument(
-        context,
-        documentFile,
-        skipTimestamp: skipTimestamp,
-      );
-
-      if (!context.mounted) return;
-
-      if (result == true) {
-        if (onSaveCompleted != null) {
-          onSaveCompleted!();
-        }
-        Navigator.of(context).pop(true);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error saving document: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+    if (result != null && onSaveCompleted != null) {
+      onSaveCompleted!();
+      Navigator.of(context).pop(true);
     }
-  }}
+  }
+}

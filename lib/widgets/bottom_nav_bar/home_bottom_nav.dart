@@ -59,7 +59,6 @@ class HomeBottomNavBar extends StatelessWidget {
             ],
           ),
         ),
-
         // Center Scanner Button
         Positioned(
           top: -30,
