@@ -1,10 +1,12 @@
-// extracted_text_screen.dart (updated)
+// extracted_text_screen.dart (updated with copy functionality)
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Add this import for clipboard
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_file/open_file.dart';
 import 'package:toolkit/widgets/custom_appbar.dart';
 import '../../services/word_document_service.dart';
+import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/save_document_btn.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
@@ -12,8 +14,13 @@ import '../../widgets/tools/document_container.dart';
 
 class ExtractedTextScreen extends StatefulWidget {
   final String extractedText;
+  final String? detectedLanguage;
 
-  const ExtractedTextScreen({super.key, required this.extractedText});
+  const ExtractedTextScreen({
+    super.key,
+    required this.extractedText,
+    this.detectedLanguage,
+  });
 
   @override
   State<ExtractedTextScreen> createState() => _ExtractedTextScreenState();
@@ -131,8 +138,21 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
   void _handleFileRenamed(String newPath) {
     setState(() {
       _savedFilePath = newPath;
-      _fileRenamed = true; // Mark that file was renamed
+      _fileRenamed = true;
     });
+  }
+
+  Future<void> _copyToClipboard() async {
+    try {
+      await Clipboard.setData(ClipboardData(text: _textController.text));
+      if (mounted) {
+        AppSnackBar.show(context, message: 'Text copied to clipboard');
+      }
+    } catch (e) {
+      if (mounted) {
+        AppSnackBar.show(context, message: 'Error copying text: $e');
+      }
+    }
   }
 
   @override
@@ -201,15 +221,19 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
                           ),
                         ),
                       const SizedBox(height: 20),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Extracted Text:',
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
+                      // Updated section with copy button
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Extracted Text:',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
+
+                        ],
                       ),
                       const SizedBox(height: 10),
                       ConstrainedBox(
@@ -268,16 +292,36 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
           )
         ],
       ),
-      child: TextField(
-        controller: _textController,
-        maxLines: null,
-        style: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
-        ),
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-        ),
+      child: Stack(
+        children: [
+          TextField(
+            controller: _textController,
+            maxLines: null,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+            ),
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.only(right: 40),
+            ),
+          ),
+          Positioned(
+            top: -2,
+            right: 0,
+            child: IconButton(
+              onPressed: _copyToClipboard,
+              icon: const Icon(
+                Icons.content_copy,
+                size: 25,
+              ),
+              style: IconButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                animationDuration: const Duration(milliseconds: 300),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

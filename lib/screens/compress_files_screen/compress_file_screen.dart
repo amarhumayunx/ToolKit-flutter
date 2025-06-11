@@ -195,7 +195,7 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(30.0),
+              padding: const EdgeInsets.all(28.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -323,7 +323,7 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
           ),
           Padding(
             padding:
-            const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+            const EdgeInsets.symmetric(horizontal: 30.0, vertical: 26.0),
             child: CustomGradientButton(
               text: _isCompressing ? 'Compressing...' : 'Compress',
               onPressed: _isCompressing ? null : _compressFiles,

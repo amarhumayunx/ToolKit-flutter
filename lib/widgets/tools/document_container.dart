@@ -1,4 +1,3 @@
-// document_container.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -33,6 +32,23 @@ class _DocumentContainerState extends State<DocumentContainer> {
     _currentFilePath = widget.filePath;
   }
 
+  // Function to get the appropriate icon based on file extension
+  String _getFileIcon(String filePath) {
+    String extension = filePath.toLowerCase().split('.').last;
+
+    switch (extension) {
+      case 'docx':
+      case 'doc':
+        return 'assets/icons/word_icon.svg';
+      case 'pdf':
+        return 'assets/icons/convert_pdf.svg';
+      case 'zip':
+        return 'assets/icons/zip.svg';
+      default:
+        return 'assets/icons/file.svg';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -58,14 +74,14 @@ class _DocumentContainerState extends State<DocumentContainer> {
                   width: 50,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: Colors.transparent,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Center(
                     child: SvgPicture.asset(
-                      'assets/icons/word_icon.svg',
-                      width: 20,
-                      height: 20,
+                      _getFileIcon(_currentFilePath), // Dynamic icon based on file extension
+                      width: 30,
+                      height: 30,
                     ),
                   ),
                 ),

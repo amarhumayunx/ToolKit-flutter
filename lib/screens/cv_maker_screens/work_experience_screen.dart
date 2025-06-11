@@ -92,7 +92,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
+            colorScheme: const ColorScheme.light(
               primary: AppColors.primary, // Purple header
               onPrimary: Colors.white, // Header text color
               onSurface: Colors.black, // Body text color
@@ -597,6 +597,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                       ),
                       child: TextFormField(
                         controller: _projectController,
+                        cursorColor: AppColors.primary,
                         decoration: InputDecoration(
                           hintText: 'Project name',
                           hintStyle: GoogleFonts.inter(
@@ -633,6 +634,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                             ),
                             child: TextFormField(
                               controller: _projectUrlController,
+                              cursorColor: AppColors.primary,
                               decoration: InputDecoration(
                                 hintText: 'Project URL (optional)',
                                 hintStyle: GoogleFonts.inter(
@@ -790,6 +792,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                   ),
                   child: TextFormField(
                     controller: _descriptionController,
+                    cursorColor: AppColors.primary,
                     maxLines: 5,
                     maxLength: 150,
                     decoration: InputDecoration(

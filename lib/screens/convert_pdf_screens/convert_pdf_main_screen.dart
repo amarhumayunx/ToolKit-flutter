@@ -126,7 +126,7 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
           ),
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+                const EdgeInsets.symmetric(horizontal: 30.0, vertical: 26.0),
             child: CustomGradientButton(
               text: 'Next',
               onPressed: _convertPdf,

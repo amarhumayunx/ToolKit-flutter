@@ -131,11 +131,12 @@ class _TagInputWidgetState<T> extends State<TagInputWidget<T>> {
                   child: TextFormField(
                     controller: widget.controller,
                     focusNode: widget.focusNode,
-                    enabled: canAddMore, // Disable text field when limit reached
+                    cursorColor: AppColors.primary,
+                    enabled: canAddMore,
                     decoration: InputDecoration(
                       hintText: canAddMore
                           ? widget.hintText
-                          : 'Maximum ${widget.inputLabel.toLowerCase()}s reached', // Dynamic message
+                          : 'Maximum ${widget.inputLabel.toLowerCase()}s reached',
                       hintStyle: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w300,
@@ -152,7 +153,7 @@ class _TagInputWidgetState<T> extends State<TagInputWidget<T>> {
               ),
               const SizedBox(width: 12),
               GestureDetector(
-                onTap: canAddMore ? _addItem : null, // Disable button when limit reached
+                onTap: canAddMore ? _addItem : null,
                 child: Container(
                   width: 50,
                   height: 50,
@@ -184,8 +185,6 @@ class _TagInputWidgetState<T> extends State<TagInputWidget<T>> {
               ),
             ],
           ),
-
-
         ],
       ),
     );
@@ -220,7 +219,6 @@ class _TagInputWidgetState<T> extends State<TagInputWidget<T>> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-
               ],
             ),
             const SizedBox(height: 16),
@@ -273,7 +271,6 @@ class _TagInputWidgetState<T> extends State<TagInputWidget<T>> {
           ),
         ),
 
-        // Close Button (X) in circular overlay at top-right
         Positioned(
           top: -6,
           right: -4,

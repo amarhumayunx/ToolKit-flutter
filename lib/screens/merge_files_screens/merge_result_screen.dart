@@ -162,13 +162,13 @@ class _MergeResultScreenState extends State<MergeResultScreen>
                     ),
                     const SizedBox(height: 10),
                     DocumentContainer(
-                      filePath: _currentFilePath, // Use the current path
+                      filePath: _currentFilePath,
                       onTap: _openFile,
                       onDelete: _handleFileDeleted,
-                      onFileRenamed: _handleFileRenamed, // Pass the handler
+                      onFileRenamed: _handleFileRenamed,
                     ),
                   ],
-                  SizedBox(height: MediaQuery.of(context).padding.bottom + 300),
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 320),
                 ],
               ),
             ),
@@ -177,12 +177,15 @@ class _MergeResultScreenState extends State<MergeResultScreen>
             Positioned(
               left: 20,
               right: 20,
-              bottom: MediaQuery.of(context).padding.bottom + 20,
-              child: SaveFileButton(
-                filePath: _currentFilePath, // Use the current path
-                fileType: 'pdf',
-                buttonText: 'Save',
-                onSaveCompleted: _handleSaveCompleted,
+              bottom: MediaQuery.of(context).padding.bottom,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: SaveFileButton(
+                  filePath: _currentFilePath,
+                  fileType: 'pdf',
+                  buttonText: 'Save',
+                  onSaveCompleted: _handleSaveCompleted,
+                ),
               ),
             ),
         ],

@@ -279,7 +279,7 @@ class _SaveScreenState extends State<SaveScreen>
                       onFileRenamed: _handleFileRenamed,
                     ),
                   ],
-                  SizedBox(height: MediaQuery.of(context).padding.bottom + 300),
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 320),
                 ],
               ),
             ),
@@ -288,7 +288,7 @@ class _SaveScreenState extends State<SaveScreen>
             Positioned(
               left: 20,
               right: 20,
-              bottom: MediaQuery.of(context).padding.bottom + 20,
+              bottom: MediaQuery.of(context).padding.bottom,
               child: CustomGradientButton(
                 text: 'Save',
                 onPressed: _handleSaveFile,

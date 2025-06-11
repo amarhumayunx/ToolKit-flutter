@@ -19,7 +19,7 @@ class AppSnackBar {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      margin: const EdgeInsets.only(bottom: 60, right: 20, left: 20),
+      margin: const EdgeInsets.only(bottom: 70, right: 20, left: 20),
       elevation: 6,
     );
 

@@ -1,3 +1,4 @@
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -83,7 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PasswordVerificationScreen(
+          builder: (context) => const PasswordVerificationScreen(
             destinationScreen: LockedFilesScreen(),
             title: 'Enter Password',
           ),
@@ -94,7 +95,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => SetPasswordScreen(
+          builder: (context) => const SetPasswordScreen(
             isChangingPassword: false,
           ),
         ),
@@ -107,7 +108,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PasswordVerificationScreen(
+            builder: (context) => const PasswordVerificationScreen(
               destinationScreen: LockedFilesScreen(),
               title: 'Enter Password',
             ),
@@ -224,9 +225,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Expanded(
               child: Container(
                 width: double.infinity,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: const BorderRadius.only(
+                  borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(30),
                     topRight: Radius.circular(30),
                   ),
@@ -347,20 +348,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Colors.grey.withOpacity(0.1)),
                 ),
-                child: Obx(() => DropdownButton<String>(
+                child: Obx(() => DropdownButton2<String>(
                   value: languageController.currentLanguage.value,
-                  icon: SvgPicture.asset(
-                    'assets/icons/arrow_up_down_icon.svg',
-                    height: 16,
-                    width: 16,
+                  iconStyleData: IconStyleData(
+                    icon: SvgPicture.asset(
+                      'assets/icons/arrow_up_down_icon.svg',
+                      height: 16,
+                      width: 16,
+                    ),
                   ),
-                  elevation: 16,
+                  dropdownStyleData: DropdownStyleData(
+                    elevation: 16,
+                    width: MediaQuery.of(context).size.width * 0.79,
+                    useSafeArea: true,
+                    offset: const Offset(-10, 0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white,
+                    ),
+                  ),
                   isExpanded: true,
                   underline: Container(),
                   style: GoogleFonts.inter(
-                    fontSize: 12,
+                    fontSize: 16,
                     fontWeight: FontWeight.w400,
-                    color: AppColors.gradientEnd,
+                    color: Colors.black,
                   ),
                   onChanged: (String? newValue) {
                     if (newValue != null) {
@@ -377,7 +389,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       .map<DropdownMenuItem<String>>((lang) {
                     return DropdownMenuItem<String>(
                       value: lang['name'],
-                      child: Text(lang['name']!),
+                      child: Text(lang['name']!,),
+
                     );
                   }).toList(),
                 )),
@@ -387,7 +400,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
-
   Widget _buildConfidentialDocumentsSection() {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),

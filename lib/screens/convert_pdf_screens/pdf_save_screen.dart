@@ -388,7 +388,7 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
                       onFileRenamed: _handleFileRenamed,
                     ),
                   ],
-                  SizedBox(height: MediaQuery.of(context).padding.bottom + 300),
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 320),
                 ],
               ),
             ),
@@ -397,7 +397,7 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
             Positioned(
               left: 20,
               right: 20,
-              bottom: MediaQuery.of(context).padding.bottom + 20,
+              bottom: MediaQuery.of(context).padding.bottom,
               child: SaveFileButton(
                 filePath: _currentFilePath,
                 fileType: fileTypeForSaving,

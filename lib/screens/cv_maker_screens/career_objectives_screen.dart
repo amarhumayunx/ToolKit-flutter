@@ -190,6 +190,7 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
             controller: _objectiveController,
             maxLines: 8,
             maxLength: 200,
+            cursorColor: AppColors.primary,
             decoration: InputDecoration(
               hintText: 'Type your career objectives / Profile Summary',
               hintStyle: GoogleFonts.inter(

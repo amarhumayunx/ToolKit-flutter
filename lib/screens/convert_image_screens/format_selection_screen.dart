@@ -113,12 +113,9 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
               ],
             ),
             const Spacer(),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: CustomGradientButton(
-                text: 'Convert',
-                onPressed: _convertImages,
-              ),
+            CustomGradientButton(
+              text: 'Convert',
+              onPressed: _convertImages,
             ),
           ],
         ),

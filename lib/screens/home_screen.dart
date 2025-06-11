@@ -17,6 +17,7 @@ import '../widgets/home_app_bar.dart';
 import '../widgets/home_section_heading.dart';
 import '../widgets/tools_list_view.dart';
 import 'files_screens/files_main_screen.dart';
+import 'package:flutter/services.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,11 +29,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   final TextEditingController _searchController = TextEditingController();
+  DateTime? _lastPressedAt;
 
-  // Screens for each tab
   final List<Widget> _screens = [
     const HomeContentView(),
-    const Placeholder(), // Scanner screen placeholder
+    const Placeholder(),
     const FilesMainScreen(),
   ];
 
@@ -48,14 +49,39 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  Future<bool> _onWillPop() async {
+    final now = DateTime.now();
+    const maxDuration = Duration(seconds: 2);
+
+    if (_lastPressedAt == null || now.difference(_lastPressedAt!) > maxDuration) {
+      _lastPressedAt = now;
+
+      // Show toast message
+      AppSnackBar.show(
+        context,
+        message: 'press_again_to_exit'.tr, // or "Press again to exit"
+      );
+
+      return false; // Don't exit yet
+    }
+
+    // Exit the app
+    SystemNavigator.pop();
+    return true;
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true, // Important for transparent bottom nav overlay
-      body: _screens[_currentIndex],
-      bottomNavigationBar: HomeBottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _handleNavigation,
+    return WillPopScope( // Wrap Scaffold with WillPopScope
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        extendBody: true,
+        body: _screens[_currentIndex],
+        bottomNavigationBar: HomeBottomNavBar(
+          currentIndex: _currentIndex,
+          onTap: _handleNavigation,
+        ),
       ),
     );
   }

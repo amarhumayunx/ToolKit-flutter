@@ -74,16 +74,18 @@ class ThumbnailGallery extends StatelessWidget {
             ),
           ),
 
-          // Right arrow
+          // Right arrow - FIXED THIS PART
           IconButton(
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
             icon: Icon(
               Icons.chevron_right,
-              color: canScrollRight ? AppColors.primary : Colors.grey.shade400,
+              // CHANGE THIS LINE: Add images.length > 1 condition
+              color: (images.length > 1 && canScrollRight) ? AppColors.primary : Colors.grey.shade400,
               size: 30,
             ),
-            onPressed: canScrollRight ? onScrollRight : null,
+            // CHANGE THIS LINE: Add images.length > 1 condition
+            onPressed: (images.length > 1 && canScrollRight) ? onScrollRight : null,
           ),
         ],
       ),

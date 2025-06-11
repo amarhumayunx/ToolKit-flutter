@@ -89,6 +89,7 @@ class CustomTextField extends StatelessWidget {
             keyboardType: keyboardType,
             validator: validator,
             textCapitalization: TextCapitalization.sentences,
+            cursorColor: AppColors.primary,
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.inter(

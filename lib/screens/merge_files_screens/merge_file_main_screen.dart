@@ -137,44 +137,53 @@ class _MergeFileMainScreenState extends State<MergeFileMainScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: const ToolsAppBar(title: 'Merge PDFs'),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(30.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const CustomSvgImage(imagePath: 'assets/images/merge_file_img.svg'),
-                  const SizedBox(height: 30),
-                  const InfoCard(
-                    title: 'Merge PDF Files',
-                    description:
-                    'Effortlessly merge PDF Files for easier sharing, storage, and organization.',
-                  ),
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(30.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const CustomSvgImage(imagePath: 'assets/images/merge_file_img.svg'),
+                const SizedBox(height: 30),
+                const InfoCard(
+                  title: 'Merge PDF Files',
+                  description:
+                  'Effortlessly merge PDF Files for easier sharing, storage, and organization.',
+                ),
+                const SizedBox(height: 24),
+                _buildPdfSelectionContainer(),
+                if (_selectedPdfs.isNotEmpty) ...[
                   const SizedBox(height: 24),
-                  _buildPdfSelectionContainer(),
-                  if (_selectedPdfs.isNotEmpty) ...[
-                    const SizedBox(height: 24),
-                    _buildSelectedPdfsList(),
-                  ],
-                  if (_errorMessage != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      _errorMessage!,
-                      style: const TextStyle(color: Colors.red, fontSize: 10),
-                    ),
-                  ],
+                  _buildSelectedPdfsList(),
                 ],
-              ),
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red, fontSize: 10),
+                  ),
+                ],
+                const SizedBox(height: 270),
+              ],
             ),
           ),
-          Padding(
-            padding:
-            const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
-            child: CustomGradientButton(
-              text: 'Merge Files',
-              onPressed: _mergePdfs,
+
+          Positioned(
+            left: 30,
+            right: 30,
+            bottom: MediaQuery.of(context).padding.bottom,
+            child: SafeArea(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: CustomGradientButton(
+                  text: 'Merge Files',
+                  onPressed: _mergePdfs,
+                ),
+              ),
             ),
           ),
         ],
@@ -305,15 +314,11 @@ class _MergeFileMainScreenState extends State<MergeFileMainScreen> {
                   contentPadding:
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.picture_as_pdf,
-                      color: Colors.red,
-                      size: 24,
+                    padding: const EdgeInsets.only(left: 8,right: 8),
+                    child: SvgPicture.asset(
+                      'assets/icons/convert_pdf.svg',
+                      width: 24,
+                      height: 24,
                     ),
                   ),
                   title: Text(

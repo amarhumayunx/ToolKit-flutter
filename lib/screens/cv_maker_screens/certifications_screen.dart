@@ -419,6 +419,7 @@ class _CertificationPageState extends State<CertificationPage> {
                   ),
                   child: TextFormField(
                     controller: _descriptionController,
+                    cursorColor: AppColors.primary,
                     maxLines: 7,
                     maxLength: 150,
                     decoration: InputDecoration(

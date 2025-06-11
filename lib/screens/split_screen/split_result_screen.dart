@@ -45,7 +45,7 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
   final String _resultText = '';
   bool _fileRenamed = false;
   String _saveButtonKey = 'initial';
-  bool _isSaving = false;
+  final bool _isSaving = false;
 
   File? convertedFile;
   String _currentFilePath = '';

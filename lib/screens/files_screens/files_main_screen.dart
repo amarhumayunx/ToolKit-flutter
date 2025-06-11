@@ -126,15 +126,15 @@ class _FilesMainScreenState extends State<FilesMainScreen>
               ),
               // Custom touch effect properties
               splashFactory: InkRipple.splashFactory,
-              overlayColor: MaterialStateProperty.resolveWith<Color?>(
-                    (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.pressed)) {
+              overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                    (Set<WidgetState> states) {
+                  if (states.contains(WidgetState.pressed)) {
                     return AppColors.primary.withOpacity(0.12);
                   }
-                  if (states.contains(MaterialState.hovered)) {
+                  if (states.contains(WidgetState.hovered)) {
                     return AppColors.primary.withOpacity(0.08);
                   }
-                  if (states.contains(MaterialState.focused)) {
+                  if (states.contains(WidgetState.focused)) {
                     return AppColors.primary.withOpacity(0.08);
                   }
                   return null;

@@ -170,7 +170,6 @@ class PersonalInfoPageState extends State<PersonalInfoPage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // Save current data when user navigates back
         saveCurrentDataToProvider();
         return true;
       },

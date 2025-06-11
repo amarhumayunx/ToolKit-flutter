@@ -36,8 +36,8 @@ class _AnimatedLoadingContainerState extends State<AnimatedLoadingContainer> {
     final percentage = (_progressAnimation.value * 100).toInt();
     return Center(
       child: Container(
-        width: 262,
-        height: 248,
+        width: 265,
+        height: 250,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,

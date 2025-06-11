@@ -59,7 +59,7 @@ class _EducationFormWidgetState extends State<EducationFormWidget> {
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
+            colorScheme: const ColorScheme.light(
               primary: AppColors.primary, // Purple header
               onPrimary: Colors.white, // Header text color
               onSurface: Colors.black, // Body text color
@@ -239,6 +239,7 @@ class _EducationFormWidgetState extends State<EducationFormWidget> {
             focusNode: widget.descriptionFocus,
             maxLines: 5,
             maxLength: 100,
+            cursorColor: AppColors.primary,
             decoration: InputDecoration(
               hintText: 'e.g cgpa/grade',
               hintStyle: GoogleFonts.inter(

@@ -165,7 +165,7 @@ class _ResultScreenState extends State<ResultScreen>
                       onFileRenamed: _handleFileRenamed, // Add this callback
                     ),
                   ],
-                  SizedBox(height: MediaQuery.of(context).padding.bottom + 300),
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 320),
                 ],
               ),
             ),
@@ -174,9 +174,9 @@ class _ResultScreenState extends State<ResultScreen>
             Positioned(
               left: 20,
               right: 20,
-              bottom: MediaQuery.of(context).padding.bottom + 20,
+              bottom: MediaQuery.of(context).padding.bottom,
               child: SaveDocumentButton(
-                documentFile: File(_currentFilePath), // Use current file path
+                documentFile: File(_currentFilePath),
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 onSaveCompleted: () {
                   Navigator.of(context).pop(true);

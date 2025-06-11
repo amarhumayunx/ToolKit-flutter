@@ -18,7 +18,7 @@ class LockedFilesScreen extends StatelessWidget {
           Navigator.of(context).pop(false);
         },
       ),
-      body: LockedFilesView(searchQuery: ''),
+      body: const LockedFilesView(searchQuery: ''),
     );
   }
 }

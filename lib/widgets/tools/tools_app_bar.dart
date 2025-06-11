@@ -17,6 +17,8 @@ class ToolsAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.white,
+      surfaceTintColor: Colors.white,
+      scrolledUnderElevation: 0,
       elevation: 0,
       leading: Padding(
         padding: const EdgeInsets.only(top: 20,left: 18),

@@ -239,12 +239,9 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
               ],
             ),
             const Spacer(),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: CustomGradientButton(
-                text: _isConverting ? 'Converting...' : 'Convert',
-                onPressed: _isConverting ? null : _convertFile,
-              ),
+            CustomGradientButton(
+              text: _isConverting ? 'Converting...' : 'Convert',
+              onPressed: _isConverting ? null : _convertFile,
             ),
           ],
         ),

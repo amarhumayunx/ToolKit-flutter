@@ -357,8 +357,8 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
                         GestureDetector(
                           onTap: _capturedImages.isNotEmpty
                               ? () {
-                                  // Optionally show a larger preview or do something
-                                }
+                            // Optionally show a larger preview or do something
+                          }
                               : null,
                           child: Stack(
                             alignment: Alignment.center,

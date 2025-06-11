@@ -5,7 +5,6 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:toolkit/screens/rearrange_file_screen/pdf_rearrange_service.dart';
-import 'package:toolkit/screens/rearrange_file_screen/rearrange_file_screen.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
@@ -47,7 +46,7 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
   final List<File?> _rearrangedFiles = [];
   bool _fileRenamed = false;
   String _saveButtonKey = 'initial';
-  bool _isSaving = false;
+  final bool _isSaving = false;
   File? convertedFile;
   String _currentFilePath = '';
 
@@ -487,7 +486,7 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
               if (_animationCompleted && hasValidFiles && !_errorOccurred && _processingComplete)
                 SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
                     child: CustomGradientButton(
                       key: Key(_saveButtonKey),
                       text: _isSaving ? 'Saving...' : 'Save',
