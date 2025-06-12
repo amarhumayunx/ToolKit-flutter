@@ -195,7 +195,7 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
       return const Scaffold(
         backgroundColor: Colors.white,
         body: Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(color: AppColors.primary),
         ),
       );
     }

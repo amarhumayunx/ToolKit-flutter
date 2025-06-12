@@ -213,50 +213,56 @@ class _CreateCvScreenState extends State<CreateCvScreen> {
                                               itemCount: savedCVs.length,
                                               itemBuilder: (context, index) {
                                                 final cv = savedCVs[index];
-                                                return Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
+                                                return Stack(
                                                   children: [
-                                                    GestureDetector(
-                                                      onTap: () {
-                                                        Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                MainCVScreen(
-                                                              templateId:
-                                                                  cv.templateId,
-                                                              templateName:
-                                                                  'Template ${cv.templateId}',
-                                                              editData:
-                                                                  cv.formData,
-                                                              isEditing: true,
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        GestureDetector(
+                                                          onTap: () {
+                                                            Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                builder:
+                                                                    (context) =>
+                                                                        MainCVScreen(
+                                                                  templateId: cv
+                                                                      .templateId,
+                                                                  templateName:
+                                                                      'Template ${cv.templateId}',
+                                                                  editData: cv
+                                                                      .formData,
+                                                                  isEditing:
+                                                                      true,
+                                                                ),
+                                                              ),
+                                                            );
+                                                          },
+                                                          child: Container(
+                                                            width: 130,
+                                                            height: 190,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .grey[100],
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          8),
+                                                              border: Border.all(
+                                                                  color: Colors
+                                                                          .grey[
+                                                                      300]!,
+                                                                  width: 1),
                                                             ),
-                                                          ),
-                                                        );
-                                                      },
-                                                      child: Container(
-                                                        width: 130,
-                                                        height: 190,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color:
-                                                              Colors.grey[100],
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(8),
-                                                          border: Border.all(
-                                                            color: Colors
-                                                                .grey[300]!,
-                                                            width: 1,
-                                                          ),
-                                                        ),
-                                                        child: ClipRRect(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(8),
-                                                          child:
-                                                              cv.thumbnailBytes !=
+                                                            child: ClipRRect(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          8),
+                                                              child: cv.thumbnailBytes !=
                                                                       null
                                                                   ? Image
                                                                       .memory(
@@ -267,49 +273,133 @@ class _CreateCvScreenState extends State<CreateCvScreen> {
                                                                           error,
                                                                           stackTrace) {
                                                                         return const Center(
-                                                                          child:
-                                                                              Icon(
-                                                                            Icons.picture_as_pdf,
-                                                                            size:
-                                                                                40,
-                                                                            color:
-                                                                                Colors.grey,
-                                                                          ),
+                                                                          child: Icon(
+                                                                              Icons.picture_as_pdf,
+                                                                              size: 40,
+                                                                              color: Colors.grey),
                                                                         );
                                                                       },
                                                                     )
                                                                   : const Center(
-                                                                      child:
-                                                                          Icon(
-                                                                        Icons
-                                                                            .picture_as_pdf,
-                                                                        size:
-                                                                            40,
-                                                                        color: Colors
-                                                                            .grey,
-                                                                      ),
+                                                                      child: Icon(
+                                                                          Icons
+                                                                              .picture_as_pdf,
+                                                                          size:
+                                                                              40,
+                                                                          color:
+                                                                              Colors.grey),
                                                                     ),
+                                                            ),
+                                                          ),
                                                         ),
-                                                      ),
+                                                        const SizedBox(
+                                                            height: 8),
+                                                        Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal:
+                                                                      4),
+                                                          child: Text(
+                                                            '${cv.dateTime} | ${cv.fileSize}',
+                                                            style: GoogleFonts
+                                                                .inter(
+                                                              fontSize: 8,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w400,
+                                                              color: Colors
+                                                                  .grey[600],
+                                                            ),
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
-                                                    const SizedBox(height: 8),
-                                                    Padding(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          horizontal: 4),
-                                                      child: Text(
-                                                        '${cv.dateTime} | ${cv.fileSize}',
-                                                        style:
-                                                            GoogleFonts.inter(
-                                                          fontSize: 8,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Colors.grey[600],
+                                                    Positioned(
+                                                      right: 34,
+                                                      top: 10,
+                                                      child: GestureDetector(
+                                                        onTap: () async {
+                                                          final confirm =
+                                                              await showDialog<
+                                                                  bool>(
+                                                            context: context,
+                                                            builder:
+                                                                (context) =>
+                                                                    AlertDialog(
+                                                              title: Text(
+                                                                  'Delete Resume',
+                                                                  style: GoogleFonts
+                                                                      .inter()),
+                                                              content: Text(
+                                                                  'Are you sure you want to delete this resume?',
+                                                                  style: GoogleFonts
+                                                                      .inter()),
+                                                              actions: [
+                                                                TextButton(
+                                                                  onPressed: () =>
+                                                                      Navigator.of(
+                                                                              context)
+                                                                          .pop(
+                                                                              false),
+                                                                  child: Text(
+                                                                      'Cancel',
+                                                                      style: GoogleFonts.inter(
+                                                                          color:
+                                                                              AppColors.primary)),
+                                                                ),
+                                                                TextButton(
+                                                                  onPressed: () =>
+                                                                      Navigator.of(
+                                                                              context)
+                                                                          .pop(
+                                                                              true),
+                                                                  child: Text(
+                                                                    'Delete',
+                                                                    style: GoogleFonts.inter(
+                                                                        color: AppColors
+                                                                            .primary),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          );
+
+                                                          if (confirm == true) {
+                                                            savedCVProvider
+                                                                .deleteSavedCV(
+                                                                    cv.id);
+                                                          }
+                                                        },
+                                                        child: Container(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(4),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Colors.white,
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            boxShadow: [
+                                                              BoxShadow(
+                                                                color: Colors
+                                                                    .black
+                                                                    .withOpacity(
+                                                                        0.2),
+                                                                blurRadius: 4,
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          child: const Icon(
+                                                              Icons.close,
+                                                              size: 14,
+                                                              color:
+                                                                  Colors.red),
                                                         ),
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
                                                       ),
                                                     ),
                                                   ],

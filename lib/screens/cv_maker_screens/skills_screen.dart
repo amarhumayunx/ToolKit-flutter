@@ -18,7 +18,10 @@ class SkillsPage extends StatefulWidget {
 class _SkillsPageState extends State<SkillsPage> {
   final TextEditingController _skillController = TextEditingController();
   final FocusNode _skillFocusNode = FocusNode();
-
+  bool validate() {
+    final provider = Provider.of<SkillsProvider>(context, listen: false);
+    return provider.skillItems.isNotEmpty;
+  }
   @override
   void initState() {
     super.initState();
@@ -94,6 +97,7 @@ class _SkillsPageState extends State<SkillsPage> {
                 emptyMessage: 'No skills added yet',
                 controller: _skillController,
                 focusNode: _skillFocusNode,
+                minItemsRequired: 1, // Add this parameter
               ),
             ),
           ),

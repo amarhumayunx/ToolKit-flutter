@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../models/language_model.dart';
 import '../../provider/language_provider.dart';
 import '../../widgets/tags_input_widget.dart';
-
 class LanguagesPage extends StatefulWidget {
   final List<Map<String, dynamic>>? initialData;
   const LanguagesPage({
@@ -18,7 +17,10 @@ class LanguagesPage extends StatefulWidget {
 class _LanguagesPageState extends State<LanguagesPage> {
   final TextEditingController _languageController = TextEditingController();
   final FocusNode _languageFocusNode = FocusNode();
-
+  bool validate() {
+    final provider = Provider.of<LanguageProvider>(context, listen: false);
+    return provider.languages.isNotEmpty;
+  }
   // Set maximum number of languages
   final int _maxLanguages = 3;
 
@@ -90,7 +92,8 @@ class _LanguagesPageState extends State<LanguagesPage> {
                 emptyMessage: 'No languages added yet',
                 controller: _languageController,
                 focusNode: _languageFocusNode,
-                maxItems: _maxLanguages, // Pass the maximum limit to TagInputWidget
+                maxItems: _maxLanguages,
+                minItemsRequired: 1, // Add this parameter
               ),
             ),
           ),

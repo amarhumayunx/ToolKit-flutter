@@ -31,6 +31,10 @@ class _CertificationPageState extends State<CertificationPage> {
   bool hasCertification = false;
   bool showForm = false;
   int? editingIndex;
+  bool validate() {
+    final provider = Provider.of<CertificationProvider>(context, listen: false);
+    return provider.certificationItems.isNotEmpty;
+  }
 
   @override
   void initState() {
@@ -184,7 +188,6 @@ class _CertificationPageState extends State<CertificationPage> {
       }
     });
   }
-
   @override
   Widget build(BuildContext context) {
     final certificationProvider = Provider.of<CertificationProvider>(context);
@@ -234,6 +237,8 @@ class _CertificationPageState extends State<CertificationPage> {
       ],
     );
   }
+
+
 
   Widget _buildSavedCertification(CertificationItem item, int index) {
     return Container(

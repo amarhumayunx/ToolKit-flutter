@@ -12,6 +12,7 @@ import '../../widgets/date_picker_field.dart';
 
 class WorkExperiencePage extends StatefulWidget {
   final List<Map<String, dynamic>>? initialData;
+
   const WorkExperiencePage({
     this.initialData,
     super.key,
@@ -29,7 +30,10 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
   final TextEditingController _projectController = TextEditingController();
   final TextEditingController _projectUrlController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-
+  bool validate() {
+    final provider = Provider.of<WorkExperienceProvider>(context, listen: false);
+    return provider.workExperienceItems.isNotEmpty;
+  }
   bool isCurrent = false;
   bool showForm = false;
   List<String> projectsList = [];

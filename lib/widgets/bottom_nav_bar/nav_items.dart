@@ -21,9 +21,11 @@ class NavBarItem extends StatelessWidget {
       color: Colors.transparent,
       child: InkResponse(
         onTap: () => onTap(index),
-        radius: 20, // Very small ripple radius
-        containedInkWell: true, // Constrains ripple to container bounds
-        highlightShape: BoxShape.circle, // Circular highlight effect
+        radius: 20,        // Very small ripple radius
+        containedInkWell: true,
+        // Constrains ripple to container bounds
+        highlightShape: BoxShape.circle,
+        // Circular highlight effect
         splashColor: const Color(0xFF00B4BE).withOpacity(0.1),
         highlightColor: const Color(0xFF00B4BE).withOpacity(0.05),
         child: Container(

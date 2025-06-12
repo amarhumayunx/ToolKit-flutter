@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/education_item_model.dart';
 import '../../provider/education_provider.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/add_another_button.dart';
 import '../../widgets/cv_widgets/education_form_widget.dart';
 import '../../widgets/cv_widgets/saved_education_item.dart';
@@ -12,10 +13,10 @@ class EducationDetailPage extends StatefulWidget {
   const EducationDetailPage({super.key, this.initialData});
 
   @override
-  State<EducationDetailPage> createState() => _EducationDetailPageState();
+  State<EducationDetailPage> createState() => EducationDetailPageState();
 }
 
-class _EducationDetailPageState extends State<EducationDetailPage> {
+class EducationDetailPageState extends State<EducationDetailPage> {
   final TextEditingController _degreeController = TextEditingController();
   final TextEditingController _instituteController = TextEditingController();
   final TextEditingController _startDateController = TextEditingController();
@@ -120,7 +121,6 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
       });
     }
 
-    // After date selection, move focus to the next field or remove focus
     if (isStartDate) {
       if (!isCompleted) {
         FocusScope.of(context).requestFocus(_endDateFocus);
@@ -143,21 +143,43 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
       return;
     }
 
+    if (_degreeController.text.trim().isEmpty) {
+      AppSnackBar.show(context, message: 'Please enter degree title');
+      return;
+    }
+
+    if (_instituteController.text.trim().isEmpty) {
+      AppSnackBar.show(context, message: 'Please enter institute name');
+      return;
+    }
+
+    if (_startDateController.text.trim().isEmpty) {
+      AppSnackBar.show(context, message: 'Please select start date');
+      return;
+    }
+
+    if (!isCompleted && _endDateController.text.trim().isEmpty) {
+      AppSnackBar.show(context, message: 'Please select end date');
+      return;
+    }
+
     final educationProvider =
     Provider.of<EducationProvider>(context, listen: false);
     final newEducation = EducationItem(
-      degree: _degreeController.text,
-      institute: _instituteController.text,
-      startDate: _startDateController.text,
-      endDate: isCompleted ? '' : _endDateController.text,
-      description: _descriptionController.text,
+      degree: _degreeController.text.trim(),
+      institute: _instituteController.text.trim(),
+      startDate: _startDateController.text.trim(),
+      endDate: isCompleted ? '' : _endDateController.text.trim(),
+      description: _descriptionController.text.trim(),
       isCompleted: isCompleted,
     );
 
     if (editingIndex != null) {
       educationProvider.updateEducationItem(editingIndex!, newEducation);
+      AppSnackBar.show(context, message: 'Education updated successfully');
     } else {
       educationProvider.addEducationItem(newEducation);
+      AppSnackBar.show(context, message: 'Education added successfully');
     }
 
     _clearForm();
@@ -205,6 +227,7 @@ class _EducationDetailPageState extends State<EducationDetailPage> {
     final educationProvider =
     Provider.of<EducationProvider>(context, listen: false);
     educationProvider.deleteEducationItem(index);
+    AppSnackBar.show(context, message: 'Education deleted successfully');
   }
 
   void _toggleForm() {

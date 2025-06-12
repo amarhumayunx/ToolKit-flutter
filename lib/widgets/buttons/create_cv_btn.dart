@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import '../../screens/cv_maker_screens/create_cv_screen.dart';
 import '../../utils/app_colors.dart';
 
@@ -13,12 +12,12 @@ class CreateCVButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap:  () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) =>  const CreateCvScreen()),
-      );
-    },
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const CreateCvScreen()),
+        );
+      },
       child: Container(
         height: 58,
         decoration: BoxDecoration(
@@ -35,7 +34,7 @@ class CreateCVButton extends StatelessWidget {
             Text(
               'Create Your CV',
               style: GoogleFonts.inter(
-                color:AppColors.white,
+                color: AppColors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),

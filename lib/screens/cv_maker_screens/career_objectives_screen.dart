@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart'; // Import provider
+import 'package:provider/provider.dart';
 
 import '../../utils/app_colors.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/save_edit_delete_btns.dart';
 import '../../provider/user_provider.dart';
-import '../../widgets/cv_widgets/custom_divider.dart'; // Import UserProvider
+import '../../widgets/cv_widgets/custom_divider.dart';
 
 class CareerObjectivesPage extends StatefulWidget {
   const CareerObjectivesPage({
@@ -13,10 +14,10 @@ class CareerObjectivesPage extends StatefulWidget {
   });
 
   @override
-  State<CareerObjectivesPage> createState() => _CareerObjectivesPageState();
+  State<CareerObjectivesPage> createState() => CareerObjectivesPageState();
 }
 
-class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
+class CareerObjectivesPageState extends State<CareerObjectivesPage> {
   final TextEditingController _objectiveController = TextEditingController();
 
   bool hasObjective = false;
@@ -44,9 +45,32 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
     super.dispose();
   }
 
+  // Add validation method
+  bool validate() {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    // Check if user has saved objective
+    if (hasObjective && savedObjective.isNotEmpty) {
+      return true;
+    }
+
+    // Check if there's objective in provider (in case it was loaded from edit data)
+    if (userProvider.userData.careerObjective != null &&
+        userProvider.userData.careerObjective!.isNotEmpty) {
+      return true;
+    }
+
+    AppSnackBar.show(context,
+        message: 'Please add your career objective before proceeding');
+
+    return false;
+  }
+
   void _saveObjective() {
-    if (_objectiveController.text.isEmpty) {
-      // Show some validation message if needed
+    if (_objectiveController.text.trim().isEmpty) {
+      // Show validation message for empty field
+
+      AppSnackBar.show(context, message: 'Please enter your career objective');
       return;
     }
 
@@ -54,7 +78,7 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     setState(() {
-      savedObjective = _objectiveController.text;
+      savedObjective = _objectiveController.text.trim();
       hasObjective = true;
 
       // Update provider with new objective
@@ -63,6 +87,8 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
       // Clear form field
       _objectiveController.clear();
     });
+
+
   }
 
   void _editObjective() {
@@ -84,6 +110,10 @@ class _CareerObjectivesPageState extends State<CareerObjectivesPage> {
       // Update provider with empty objective
       userProvider.updateCareerObjective('');
     });
+
+    // Show delete confirmation message
+
+    AppSnackBar.show(context, message:   'Career objective deleted');
   }
 
   @override

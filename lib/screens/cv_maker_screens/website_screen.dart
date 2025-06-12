@@ -26,7 +26,10 @@ class _WebsitePageState extends State<WebsitePage> {
   final FocusNode _linkFocusNode = FocusNode();
   List<Website> links = [];
   bool _isInitialized = false;
-
+  bool validate() {
+    final provider = Provider.of<UserProvider>(context, listen: false);
+    return provider.websites.isNotEmpty;
+  }
   // Set maximum number of websites
   final int _maxWebsites = 2;
 
@@ -140,6 +143,7 @@ class _WebsitePageState extends State<WebsitePage> {
         'Remaining links: ${links.map((w) => '${w.name}: ${w.url}').toList()}');
   }
 
+
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {
@@ -176,6 +180,7 @@ class _WebsitePageState extends State<WebsitePage> {
                     controller: _linkController,
                     focusNode: _linkFocusNode,
                     maxItems: _maxWebsites,
+                    minItemsRequired: 1, // Add this parameter
                   ),
                 ],
               ),

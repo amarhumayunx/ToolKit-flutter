@@ -15,6 +15,7 @@ class TagInputWidget<T> extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final int maxItems; // Add maxItems parameter
+  final int  minItemsRequired;
 
   const TagInputWidget({
     super.key,
@@ -28,6 +29,7 @@ class TagInputWidget<T> extends StatefulWidget {
     required this.emptyMessage,
     required this.controller,
     required this.focusNode,
+    required this.minItemsRequired,
     this.maxItems = 6, // Default max items to 6 for backward compatibility
   });
 

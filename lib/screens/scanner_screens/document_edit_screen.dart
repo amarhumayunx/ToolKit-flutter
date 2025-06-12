@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -160,28 +161,38 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
         uiSettings: [
           AndroidUiSettings(
             toolbarTitle: 'Crop Document',
-            toolbarWidgetColor: AppColors.black,
+            toolbarColor: AppColors.primary,
+            toolbarWidgetColor: Colors.white,
+            statusBarColor: AppColors.primary,
             initAspectRatio: CropAspectRatioPreset.original,
             lockAspectRatio: false,
             hideBottomControls: false,
-            backgroundColor: Colors.white,
+            backgroundColor: Colors.black,
             activeControlsWidgetColor: AppColors.primary,
-            dimmedLayerColor: AppColors.scannerBackground,
+            dimmedLayerColor: Colors.black.withOpacity(0.6),
             cropFrameColor: AppColors.primary,
-            cropFrameStrokeWidth: 4,
-            showCropGrid: false,
+            cropFrameStrokeWidth: 3,
+            cropGridColor: AppColors.primary.withOpacity(0.5),
+            cropGridStrokeWidth: 1,
+            showCropGrid: true,
+            cropGridRowCount: 3,
+            cropGridColumnCount: 3,
           ),
           IOSUiSettings(
             title: 'Crop Document',
             aspectRatioLockEnabled: false,
-            resetAspectRatioEnabled: true,
+            resetAspectRatioEnabled: false,
             aspectRatioPickerButtonHidden: true,
             doneButtonTitle: 'Done',
             cancelButtonTitle: 'Cancel',
-            rotateButtonsHidden: false,
-            rotateClockwiseButtonHidden: false,
-            hidesNavigationBar: false,
-            minimumAspectRatio: 0.5,
+            rotateButtonsHidden: true,
+            rotateClockwiseButtonHidden: true,
+            hidesNavigationBar: true,
+            minimumAspectRatio: 0.1,
+            rectX: 0.0,
+            rectY: 0.0,
+            rectWidth: 1.0,
+            rectHeight: 1.0,
           ),
         ],
       );
@@ -443,7 +454,11 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(child: CircularProgressIndicator()),
+        builder: (context) => Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+          ),
+        ),
       );
 
       try {
@@ -525,190 +540,201 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: _filterProvider,
-      child: Scaffold(
-        backgroundColor: AppColors.scannerBackground,
-        appBar: BatchAppBar(
-          onNextPressed: _handleSave,
-          onBackPressed: () {
-            if (_isFiltering) {
-              setState(() {
-                _isFiltering = false;
-              });
-            } else {
-              Navigator.pop(context);
-            }
-          },
-          actionText: 'Done',
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+          systemNavigationBarColor: Colors.white,
+          systemNavigationBarIconBrightness: Brightness.dark,
         ),
-        body: Column(
-          children: [
-            // Document preview area
-            Expanded(
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Document image with rotation
-                  if (_processedImage != null)
-                    Center(
-                      child: DocumentPreview(
-                        image: _processedImage!,
+        child: Scaffold(
+          backgroundColor: AppColors.scannerBackground,
+          appBar: BatchAppBar(
+            onNextPressed: _handleSave,
+            onBackPressed: () {
+              if (_isFiltering) {
+                setState(() {
+                  _isFiltering = false;
+                });
+              } else {
+                Navigator.pop(context);
+              }
+            },
+            actionText: 'Done',
+          ),
+          body: Column(
+            children: [
+              // Document preview area
+              Expanded(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Document image with rotation
+                    if (_processedImage != null)
+                      Center(
+                        child: DocumentPreview(
+                          image: _processedImage!,
+                        ),
                       ),
-                    ),
 
-                  // Undo/Redo buttons under the image
-                  Positioned(
-                    bottom: 38,
-                    child: Container(
-                      height: 32,
-                      width: 100,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          GestureDetector(
-                            onTap: _currentHistoryIndex > 0 ? _undo : null,
-                            child: SvgPicture.asset(
-                              'assets/icons/undo_icon.svg',
-                              width: 16,
-                              height: 16,
-                              color: _currentHistoryIndex > 0
-                                  ? AppColors.primary
-                                  : Colors.grey.shade400,
+                    // Undo/Redo buttons under the image
+                    Positioned(
+                      bottom: 38,
+                      child: Container(
+                        height: 32,
+                        width: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
-                          GestureDetector(
-                            onTap:
-                            _currentHistoryIndex < _editHistory.length - 1
-                                ? _redo
-                                : null,
-                            child: SvgPicture.asset(
-                              'assets/icons/redo_icon.svg',
-                              width: 16,
-                              height: 16,
-                              color:
-                              _currentHistoryIndex < _editHistory.length - 1
-                                  ? AppColors.primary
-                                  : Colors.grey.shade400,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Filter animation overlay
-                  if (_isApplyingFilter)
-                    Positioned.fill(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          return AnimatedContainer(
-                            duration: const Duration(milliseconds: 100),
-                            height: constraints.maxHeight * 0.03,
-                            width: constraints.maxWidth,
-                            margin: EdgeInsets.only(
-                              top: constraints.maxHeight * (_animation.value),
-                            ),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  AppColors.primary.withOpacity(0.8),
-                                  AppColors.primary.withOpacity(0.0),
-                                ],
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            GestureDetector(
+                              onTap: _currentHistoryIndex > 0 ? _undo : null,
+                              child: SvgPicture.asset(
+                                'assets/icons/undo_icon.svg',
+                                width: 16,
+                                height: 16,
+                                color: _currentHistoryIndex > 0
+                                    ? AppColors.primary
+                                    : Colors.grey.shade400,
                               ),
                             ),
-                          );
-                        },
+                            GestureDetector(
+                              onTap:
+                              _currentHistoryIndex < _editHistory.length - 1
+                                  ? _redo
+                                  : null,
+                              child: SvgPicture.asset(
+                                'assets/icons/redo_icon.svg',
+                                width: 16,
+                                height: 16,
+                                color:
+                                _currentHistoryIndex < _editHistory.length - 1
+                                    ? AppColors.primary
+                                    : Colors.grey.shade400,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
 
-                  // Loading indicator for rotation
-                  if (_isRotating)
-                    Container(
-                      color: Colors.black26,
-                      child: const Center(
-                        child: CircularProgressIndicator(),
+                    // Filter animation overlay
+                    if (_isApplyingFilter)
+                      Positioned.fill(
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 100),
+                              height: constraints.maxHeight * 0.03,
+                              width: constraints.maxWidth,
+                              margin: EdgeInsets.only(
+                                top: constraints.maxHeight * (_animation.value),
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    AppColors.primary.withOpacity(0.8),
+                                    AppColors.primary.withOpacity(0.0),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                ],
-              ),
-            ),
 
-            // Edit tools area
-            Container(
-              height: 100,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
+                    // Loading indicator for rotation
+                    if (_isRotating)
+                      Container(
+                        color: Colors.black26,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 6,
-                    offset: const Offset(0, -4),
+              ),
+
+              // Edit tools area
+              Container(
+                height: 100,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
                   ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  // Conditional content - show either filters or edit tools
-                  if (_isFiltering)
-                    Expanded(
-                      child: FilterSelector(
-                        filterOptions: _filterOptions,
-                        onFilterSelected: _applyFilter,
-                        filterPreviews: _filterPreviews,
-                        previewsReady: _previewsReady,
-                      ),
-                    )
-                  else
-                  // Default edit tool buttons
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildEditToolButton(
-                            assetPath: 'assets/icons/retake_icon.svg',
-                            label: 'Retake',
-                            onTap: _retakePhoto,
-                          ),
-                          _buildEditToolButton(
-                            assetPath: 'assets/icons/filters_icon.svg',
-                            label: 'Filters',
-                            isActive: _isFiltering,
-                            onTap: _toggleFilterView,
-                          ),
-                          _buildEditToolButton(
-                            assetPath: 'assets/icons/crop_icon.svg',
-                            label: 'Crop',
-                            onTap: _cropImage,
-                          ),
-                          _buildEditToolButton(
-                            assetPath: 'assets/icons/rotate_icon.svg',
-                            label: 'Rotate',
-                            onTap: _rotateImage,
-                          ),
-                        ],
-                      ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 6,
+                      offset: const Offset(0, -4),
                     ),
-                ],
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    // Conditional content - show either filters or edit tools
+                    if (_isFiltering)
+                      Expanded(
+                        child: FilterSelector(
+                          filterOptions: _filterOptions,
+                          onFilterSelected: _applyFilter,
+                          filterPreviews: _filterPreviews,
+                          previewsReady: _previewsReady,
+                        ),
+                      )
+                    else
+                    // Default edit tool buttons
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _buildEditToolButton(
+                              assetPath: 'assets/icons/retake_icon.svg',
+                              label: 'Retake',
+                              onTap: _retakePhoto,
+                            ),
+                            _buildEditToolButton(
+                              assetPath: 'assets/icons/filters_icon.svg',
+                              label: 'Filters',
+                              isActive: _isFiltering,
+                              onTap: _toggleFilterView,
+                            ),
+                            _buildEditToolButton(
+                              assetPath: 'assets/icons/crop_icon.svg',
+                              label: 'Crop',
+                              onTap: _cropImage,
+                            ),
+                            _buildEditToolButton(
+                              assetPath: 'assets/icons/rotate_icon.svg',
+                              label: 'Rotate',
+                              onTap: _rotateImage,
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
