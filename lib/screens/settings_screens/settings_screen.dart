@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -496,40 +497,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Colors.grey.withOpacity(0.1)),
                 ),
-                child: Obx(() => DropdownButton<String>(
-                      value: languageController.currentLanguage.value,
-                      icon: SvgPicture.asset(
-                        'assets/icons/arrow_up_down_icon.svg',
-                        height: 16,
-                        width: 16,
-                      ),
-                      elevation: 16,
-                      isExpanded: true,
-                      underline: Container(),
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.gradientEnd,
-                      ),
-                      onChanged: (String? newValue) {
-                        if (newValue != null) {
-                          final selected = languageController.languageOptions
-                              .firstWhere((lang) => lang['name'] == newValue);
-                          languageController.changeLanguage(
-                            selected['code']!,
-                            selected['country']!,
-                            selected['name']!,
-                          );
-                        }
-                      },
-                      items: languageController.languageOptions
-                          .map<DropdownMenuItem<String>>((lang) {
-                        return DropdownMenuItem<String>(
-                          value: lang['name'],
-                          child: Text(lang['name']!),
-                        );
-                      }).toList(),
-                    )),
+                child: Obx(() => DropdownButton2<String>(
+                  value: languageController.currentLanguage.value,
+                  iconStyleData: IconStyleData(
+                    icon: SvgPicture.asset(
+                      'assets/icons/arrow_up_down_icon.svg',
+                      height: 16,
+                      width: 16,
+                    ),
+                  ),
+                  dropdownStyleData: DropdownStyleData(
+                    elevation: 16,
+                    width: MediaQuery.of(context).size.width * 0.79,
+                    useSafeArea: true,
+                    offset: const Offset(-10, 0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white,
+                    ),
+                  ),
+                  isExpanded: true,
+                  underline: Container(),
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.gradientEnd,
+                  ),
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      final selected = languageController.languageOptions
+                          .firstWhere((lang) => lang['name'] == newValue);
+                      languageController.changeLanguage(
+                        selected['code']!,
+                        selected['country']!,
+                        selected['name']!,
+                      );
+                    }
+                  },
+                  items: languageController.languageOptions
+                      .map<DropdownMenuItem<String>>((lang) {
+                    return DropdownMenuItem<String>(
+                      value: lang['name'],
+                      child: Text(lang['name']!,),
+
+                    );
+                  }).toList(),
+                )),
               ),
             ),
         ],

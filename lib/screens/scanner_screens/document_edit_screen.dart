@@ -148,7 +148,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     if (_processedImage == null) return;
 
     setState(() {
-      _isRotating = true; // Reuse the rotating indicator for cropping
+      _isRotating = true;
     });
 
     try {

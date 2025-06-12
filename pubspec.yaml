@@ -80,6 +80,7 @@ dependencies:
   xml: any
   docx_template: ^0.4.0
   aspose_words_cloud: ^25.5.0
+  dropdown_button2: ^2.3.9
 
   hive_ce_flutter: ^2.3.1
   hive_ce: ^2.11.2
