@@ -362,8 +362,9 @@ class _ScannerScreenState extends State<ScannerScreen>
       }
     } catch (e) {
       print('Error capturing image: $e');
-     }
+    }
   }
+
   Future<void> _captureIdCardImage() async {
     if (_controller == null || !_controller!.value.isInitialized) {
       return;
@@ -537,7 +538,9 @@ class _ScannerScreenState extends State<ScannerScreen>
       return const Scaffold(
         backgroundColor: Colors.white,
         body: Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
+          ),
         ),
       );
     }

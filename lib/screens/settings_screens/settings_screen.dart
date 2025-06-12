@@ -1,13 +1,17 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toolkit/screens/settings_screens/password_verification_screen.dart';
 import 'package:toolkit/screens/settings_screens/phone_recovery_screen.dart';
 import 'package:toolkit/screens/settings_screens/set_password_screen.dart';
 import 'package:toolkit/utils/app_colors.dart';
 import '../../controllers/language_controller.dart';
+import '../../provider/profile_provider.dart';
+import '../../services/auth_service.dart';
 import '../../services/notification_service.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/gradient_background.dart';
@@ -16,6 +20,7 @@ import '../../widgets/settings_widgets/settings_tile.dart';
 import '../../widgets/settings_widgets/settings_toggle_tile.dart';
 import 'email_recovery_screen.dart';
 import 'locked_files_Screen.dart';
+import 'continue_with_google_screen.dart'; // Add this import
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -28,9 +33,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = false;
   bool _isGeneralExpanded = false;
   bool _isConfidentialExpanded = false;
-  bool _isPasswordSet = false; // Track password state
+  bool _isPasswordSet = false;
+  bool _isUserAuthenticated = false; // Add this
   final String _selectedLanguage = 'English';
   String _selectedRecoveryOption = 'email'.tr;
+  final AuthService _authService = AuthService();
+  StreamSubscription? _authSubscription;
 
   // List of available languages
   final List<String> _languages = [
@@ -50,23 +58,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.initState();
     _loadNotificationStatus();
     _initializeLanguageController();
-    _loadPasswordStatus(); // Load password status
+    _loadPasswordStatus();
+    _loadProfileData();
+    _setupAuthListener(); // Add this
   }
 
-  void _initializeLanguageController() {
-    try {
-      Get.find<LanguageController>();
-    } catch (e) {
-      // Controller not found, initialize it
-      Get.put(LanguageController());
-    }
+  @override
+  void dispose() {
+    _authSubscription?.cancel(); // Cancel the subscription
+    super.dispose();
   }
 
-  // Load password status from shared preferences
-  void _loadPasswordStatus() async {
+  void _setupAuthListener() {
+    _authSubscription = _authService.authStateChanges.listen((user) {
+      if (mounted) {
+        setState(() {
+          _isUserAuthenticated = user != null;
+          if (!_isUserAuthenticated) {
+            _isPasswordSet = false; // Reset password status when logged out
+          }
+        });
+        if (_isUserAuthenticated) {
+          _loadPasswordStatus(); // Reload password status when logged in
+        }
+      }
+    });
+  }
+
+  Future<void> _loadPasswordStatus() async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      bool isSet = prefs.getBool('is_password_set') ?? false;
+      bool isSet = await _authService.isPasswordSet();
       setState(() {
         _isPasswordSet = isSet;
       });
@@ -76,10 +97,186 @@ class _SettingsScreenState extends State<SettingsScreen> {
       });
     }
   }
+
+  void _initializeLanguageController() {
+    try {
+      Get.find<LanguageController>();
+    } catch (e) {
+      Get.put(LanguageController());
+    }
+  }
+
+  Future<void> _loadProfileData() async {
+    try {
+      final user = _authService.currentUser;
+      if (user != null) {
+        final userData = await _authService.getUserData(user.uid);
+        final profileProvider =
+            Provider.of<ProfileProvider>(context, listen: false);
+
+        if (userData != null) {
+          profileProvider.loadProfileData(
+            avatar: userData.avatarId ?? '6',
+            username: userData.displayName,
+            email: userData.email,
+            gender: userData.gender,
+            dateOfBirth: userData.dateOfBirth,
+          );
+        } else {
+          profileProvider.loadProfileData(
+            avatar: profileProvider.selectedAvatar ?? '6',
+            username: user.displayName ?? 'Not set',
+            email: user.email ?? 'Not set',
+            gender: 'Not set',
+            dateOfBirth: 'Not set',
+          );
+        }
+      }
+    } catch (e) {
+      print('Error loading profile data in settings: $e');
+      final profileProvider =
+          Provider.of<ProfileProvider>(context, listen: false);
+      if (profileProvider.selectedAvatar == null) {
+        profileProvider.loadProfileData(
+          avatar: '6',
+          username: 'Not set',
+          email: 'Not set',
+          gender: 'Not set',
+          dateOfBirth: 'Not set',
+        );
+      }
+    }
+  }
+
+  // Show authentication required dialog
+  void _showAuthenticationRequiredDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.lock_outline,
+                  color: AppColors.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Sign in Required',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'Please sign in to secure your documents.',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: Colors.black54,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Navigate to Google sign-in screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ContinueWithGoogleScreen(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              child: Text(
+                'Sign in',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _navigateToSetPasswordScreen() async {
+    // Check authentication first
+    if (!_isUserAuthenticated) {
+      _showAuthenticationRequiredDialog();
+      return;
+    }
+
+    // Check if password is already set
+    final isPasswordSet = await _authService.isPasswordSet();
+
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SetPasswordScreen(
+          isChanging: isPasswordSet,
+        ),
+      ),
+    );
+
+    if (result == true) {
+      setState(() {
+        _isPasswordSet = true;
+      });
+    }
+  }
+
   void _navigateToLockedFiles() async {
+    // Check authentication first
+    if (!_isUserAuthenticated) {
+      _showAuthenticationRequiredDialog();
+      return;
+    }
+
     // Check if password is set
     if (_isPasswordSet) {
-      // Password is set, navigate to password verification screen
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -90,20 +287,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       );
     } else {
-      // Password is not set, navigate to set password screen first
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => SetPasswordScreen(
-            isChangingPassword: false,
-          ),
+          builder: (context) => SetPasswordScreen(),
         ),
       );
 
-      // If password was successfully set, then navigate to locked files
       if (result == true) {
         _savePasswordStatus(true);
-        // After setting password, navigate to locked files
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -117,7 +309,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  // Save password status to shared preferences
   void _savePasswordStatus(bool isSet) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -130,7 +321,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  // Load notification status from shared preferences
   void _loadNotificationStatus() async {
     try {
       bool enabled = await NotificationService.areNotificationsEnabled();
@@ -144,44 +334,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  // Navigate to email recovery screen
-  void _navigateToEmailRecovery() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EmailRecoveryScreen(email: 'email_hint'.tr),
-      ),
-    );
-  }
-
-  // Navigate to phone recovery screen
-  void _navigateToPhoneRecovery() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-        const PhoneRecoveryScreen(phone: '+1 234 567 8900'),
-      ),
-    );
-  }
-
-  // Handle notification toggle
   Future<void> _handleNotificationToggle(bool newValue) async {
     if (newValue) {
-      // User is trying to enable notifications - request permission
       try {
         await NotificationService.initialize(context);
         bool permissionGranted = await NotificationService.requestPermissions();
 
         if (permissionGranted) {
-          // Save the enabled state
           await NotificationService.setNotificationEnabled(true);
           setState(() {
             _notificationsEnabled = true;
           });
           AppSnackBar.show(context, message: 'notification_enabled'.tr);
         } else {
-          // Permission denied, keep notifications disabled
           await NotificationService.setNotificationEnabled(false);
           setState(() {
             _notificationsEnabled = false;
@@ -189,7 +354,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           AppSnackBar.show(context, message: 'notification_permission'.tr);
         }
       } catch (e) {
-        // Error occurred, keep notifications disabled
         await NotificationService.setNotificationEnabled(false);
         setState(() {
           _notificationsEnabled = false;
@@ -197,7 +361,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         AppSnackBar.show(context, message: 'Error enabling notifications: $e');
       }
     } else {
-      // User is disabling notifications - save the disabled state
       try {
         await NotificationService.setNotificationEnabled(false);
         setState(() {
@@ -236,25 +399,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: ListView(
                     physics: const BouncingScrollPhysics(),
                     children: [
-                      // General section with expandable content
                       _buildGeneralSection(),
-                      const SizedBox(
-                        height: 4,
-                      ),
-                      // Confidential Documents section with expandable content
+                      const SizedBox(height: 4),
                       _buildConfidentialDocumentsSection(),
-                      const SizedBox(
-                        height: 4,
-                      ),
+                      const SizedBox(height: 4),
                       SettingTile(
                         title: 'Locked Files',
                         onTap: () {
                           _navigateToLockedFiles();
                         },
                       ),
-                      const SizedBox(
-                        height: 4,
-                      ),
+                      const SizedBox(height: 4),
                       SettingToggleTile(
                         title: 'notifications_and_alerts'.tr,
                         value: _notificationsEnabled,
@@ -262,17 +417,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       SettingTile(
                           title: 'support_and_feedback'.tr, onTap: () {}),
-                      const SizedBox(
-                        height: 4,
-                      ),
+                      const SizedBox(height: 4),
                       SettingTile(title: 'privacy_policy'.tr, onTap: () {}),
-                      const SizedBox(
-                        height: 4,
-                      ),
+                      const SizedBox(height: 4),
                       SettingTile(title: 'rate_us'.tr, onTap: () {}),
-                      const SizedBox(
-                        height: 4,
-                      ),
+                      const SizedBox(height: 4),
                       SettingTile(title: 'share'.tr, onTap: () {}),
                     ],
                   ),
@@ -348,39 +497,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   border: Border.all(color: Colors.grey.withOpacity(0.1)),
                 ),
                 child: Obx(() => DropdownButton<String>(
-                  value: languageController.currentLanguage.value,
-                  icon: SvgPicture.asset(
-                    'assets/icons/arrow_up_down_icon.svg',
-                    height: 16,
-                    width: 16,
-                  ),
-                  elevation: 16,
-                  isExpanded: true,
-                  underline: Container(),
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.gradientEnd,
-                  ),
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      final selected = languageController.languageOptions
-                          .firstWhere((lang) => lang['name'] == newValue);
-                      languageController.changeLanguage(
-                        selected['code']!,
-                        selected['country']!,
-                        selected['name']!,
-                      );
-                    }
-                  },
-                  items: languageController.languageOptions
-                      .map<DropdownMenuItem<String>>((lang) {
-                    return DropdownMenuItem<String>(
-                      value: lang['name'],
-                      child: Text(lang['name']!),
-                    );
-                  }).toList(),
-                )),
+                      value: languageController.currentLanguage.value,
+                      icon: SvgPicture.asset(
+                        'assets/icons/arrow_up_down_icon.svg',
+                        height: 16,
+                        width: 16,
+                      ),
+                      elevation: 16,
+                      isExpanded: true,
+                      underline: Container(),
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.gradientEnd,
+                      ),
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          final selected = languageController.languageOptions
+                              .firstWhere((lang) => lang['name'] == newValue);
+                          languageController.changeLanguage(
+                            selected['code']!,
+                            selected['country']!,
+                            selected['name']!,
+                          );
+                        }
+                      },
+                      items: languageController.languageOptions
+                          .map<DropdownMenuItem<String>>((lang) {
+                        return DropdownMenuItem<String>(
+                          value: lang['name'],
+                          child: Text(lang['name']!),
+                        );
+                      }).toList(),
+                    )),
               ),
             ),
         ],
@@ -405,7 +554,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       child: Column(
         children: [
-          // Header row for Confidential Documents
           InkWell(
             onTap: () {
               setState(() {
@@ -438,15 +586,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
-
-          // Expandable content - conditionally show based on password status
           if (_isConfidentialExpanded)
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
               child: Column(
                 children: [
-                  // Set/Change Password Container
                   Container(
                     margin: EdgeInsets.only(bottom: _isPasswordSet ? 12 : 0),
                     child: InkWell(
@@ -472,7 +617,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              _isPasswordSet ? 'Change Password' : 'Set Password',
+                              _isPasswordSet
+                                  ? 'Change Password'
+                                  : 'Set Password',
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
@@ -490,9 +637,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                   ),
-
-                  // Code Recovery Options Container - only show if password is set
                   if (_isPasswordSet)
+                    // In the _buildConfidentialDocumentsSection method, update the email recovery section
+
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -504,69 +651,76 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             spreadRadius: 1,
                             blurRadius: 2,
                             offset: const Offset(0, 0),
-                          ),
+                          )
                         ],
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'code_recovery_options'.tr,
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          // Dropdown for recovery options
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: AppColors.bgBoxColor,
-                              borderRadius: BorderRadius.circular(10),
-                              border:
-                              Border.all(color: Colors.grey.withOpacity(0.1)),
-                            ),
-                            child: DropdownButton<String>(
-                              value: _selectedRecoveryOption,
-                              icon: SvgPicture.asset(
-                                'assets/icons/arrow_up_down_icon.svg',
-                                height: 16,
-                                width: 16,
-                              ),
-                              elevation: 16,
-                              isExpanded: true,
-                              underline: Container(),
+                      child: InkWell(
+                        onTap: () {
+                          if (_isUserAuthenticated) {
+                            // Get user email from profile provider
+                            final profileProvider =
+                                Provider.of<ProfileProvider>(context,
+                                    listen: false);
+                            final userEmail = profileProvider.email;
+
+                            if (userEmail != null && userEmail.isNotEmpty) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PhoneRecoveryScreen(),
+                                ),
+                              );
+                            } else {
+                              AppSnackBar.show(context,
+                                  message: 'No email found for this account');
+                            }
+                          } else {
+                            _showAuthenticationRequiredDialog();
+                          }
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'code_recovery_options'.tr,
                               style: GoogleFonts.inter(
                                 fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                                color: AppColors.gradientEnd,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.primary,
                               ),
-                              onChanged: (String? value) {
-                                if (value != null) {
-                                  setState(() {
-                                    _selectedRecoveryOption = value;
-                                  });
-
-                                  // Add navigation logic here
-                                  if (value == 'Email') {
-                                    _navigateToEmailRecovery();
-                                  } else if (value == 'Phone Number') {
-                                    _navigateToPhoneRecovery();
-                                  }
-                                }
-                              },
-                              items: _recoveryOptions
-                                  .map<DropdownMenuItem<String>>((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList(),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 16),
+                              decoration: BoxDecoration(
+                                color: AppColors.bgBoxColor,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                    color: Colors.grey.withOpacity(0.1)),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Forgot password?',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      color: AppColors.gradientEnd,
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: 16,
+                                    color: AppColors.gradientEnd,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                 ],
@@ -575,22 +729,5 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
-  }
-
-
-  void _navigateToSetPasswordScreen() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SetPasswordScreen(
-          isChangingPassword: _isPasswordSet, // Pass true if password is already set
-        ),
-      ),
-    );
-
-    // If password was successfully set or changed, update the state
-    if (result == true) {
-      _savePasswordStatus(true);
-    }
   }
 }

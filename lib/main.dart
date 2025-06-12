@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart'; // Updated import for Get
+import 'package:get/get.dart';
 import 'package:hive_ce_flutter/adapters.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toolkit/provider/certification_provider.dart';
 import 'package:toolkit/provider/education_provider.dart';
 import 'package:toolkit/provider/file_provider.dart';
 import 'package:toolkit/provider/language_provider.dart';
+import 'package:toolkit/provider/profile_provider.dart';
 import 'package:toolkit/provider/saved_cv_provider.dart';
 import 'package:toolkit/provider/skills_provider.dart';
 import 'package:toolkit/provider/template_provider.dart';
 import 'package:toolkit/provider/user_provider.dart';
 import 'package:toolkit/provider/work_experience_provider.dart';
+import 'package:toolkit/screens/onboarding_screen.dart';
 import 'package:toolkit/screens/home_screen.dart';
 import 'package:toolkit/services/notification_service.dart';
-import 'localization/language.dart'; // Add your languages file
+import 'localization/language.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -26,7 +32,6 @@ void main() async {
 
   // Initialize Hive
   await Hive.initFlutter();
-
 
   runApp(
     MultiProvider(
@@ -40,6 +45,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
         ChangeNotifierProvider(create: (_) => SavedCVProvider()),
         ChangeNotifierProvider(create: (_) => FileProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
       ],
       child: const MyApp(),
     ),
@@ -54,18 +60,14 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Toolkit App',
       debugShowCheckedModeBanner: false,
-
-      // Localization setup
-      translations: Language(), // Your Translations class
-      locale: Get.deviceLocale, // Uses the device locale
-      fallbackLocale: const Locale('en', 'US'), // Fallback locale
-
+      translations: Language(),
+      locale: Get.deviceLocale,
+      fallbackLocale: const Locale('en', 'US'),
       theme: ThemeData(
         primaryColor: const Color(0xFF00BFA5),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-
-      home: const AppInitializer(), // Your app's initial screen
+      home: const AppInitializer(),
     );
   }
 }
@@ -78,6 +80,9 @@ class AppInitializer extends StatefulWidget {
 }
 
 class _AppInitializerState extends State<AppInitializer> {
+  bool _isLoading = true;
+  bool _showOnboarding = true;
+
   @override
   void initState() {
     super.initState();
@@ -88,13 +93,37 @@ class _AppInitializerState extends State<AppInitializer> {
     try {
       // Initialize notifications
       await NotificationService.initialize(context);
+
+      // Check if onboarding has been shown before
+      await _checkOnboardingStatus();
     } catch (e) {
       debugPrint('Error initializing app: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
+  }
+
+  Future<void> _checkOnboardingStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
+
+    setState(() {
+      _showOnboarding = !hasSeenOnboarding;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return const HomeScreen();
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    return _showOnboarding ? const OnboardingScreen() : const HomeScreen();
   }
 }

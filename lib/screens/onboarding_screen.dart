@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils/app_colors.dart';
 import '../utils/constants.dart';
@@ -22,7 +23,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     OnboardingContent(
       title: 'Scan & Convert',
       description:
-          'Quickly scan and convert PDFs effortlessly with high-quality results.',
+      'Quickly scan and convert PDFs effortlessly with high-quality results.',
       image: 'assets/images/onboarding_images/1.svg',
       imageHeight: 230,
       imageWidth: 224,
@@ -30,7 +31,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     OnboardingContent(
       title: 'Edit & Enhance',
       description:
-          'Seamless edits, smart annotations for effective document refinement.',
+      'Seamless edits, smart annotations for effective document refinement.',
       image: 'assets/images/onboarding_images/2.svg',
       imageHeight: 218,
       imageWidth: 200,
@@ -38,7 +39,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     OnboardingContent(
       title: 'Protect & Share',
       description:
-          'Keep your documents confidential and secure from sharing with ease.',
+      'Keep your documents confidential and secure from sharing with ease.',
       image: 'assets/images/onboarding_images/3.svg',
       imageHeight: 240,
       imageWidth: 200,
@@ -49,6 +50,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  // Method to mark onboarding as completed
+  Future<void> _completeOnboarding() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('has_seen_onboarding', true);
+  }
+
+  // Method to navigate to home screen
+  void _navigateToHome() async {
+    await _completeOnboarding();
+    if (mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    }
   }
 
   @override
@@ -92,7 +109,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
                       _contents.length,
-                      (index) => buildDot(index),
+                          (index) => buildDot(index),
                     ),
                   ),
                   const SizedBox(height: 80),
@@ -106,12 +123,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 24),
                           child: TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                    builder: (context) => const HomeScreen()),
-                              );
-                            },
+                            onPressed: _navigateToHome,
                             child: Text(
                               'SKIP',
                               style: GoogleFonts.inter(
@@ -127,10 +139,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           child: ElevatedButton(
                             onPressed: () {
                               if (_currentPage == _contents.length - 1) {
-                                Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute(
-                                      builder: (context) => const HomeScreen()),
-                                );
+                                _navigateToHome();
                               } else {
                                 _pageController.nextPage(
                                   duration: const Duration(milliseconds: 300),
@@ -174,7 +183,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(4),
         color:
-            _currentPage == index ? AppColors.dotActive : AppColors.dotInactive,
+        _currentPage == index ? AppColors.dotActive : AppColors.dotInactive,
       ),
     );
   }

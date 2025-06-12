@@ -19,7 +19,8 @@ class SaveDocumentService {
 
   /// Initialize Hive box for files
   static Future<Box<FileModel>> initFilesBox() async {
-    if (!Hive.isAdapterRegistered(1)) { // Match the typeId
+    if (!Hive.isAdapterRegistered(1)) {
+      // Match the typeId
       Hive.registerAdapter(FileModelAdapter());
     }
     return await Hive.openBox<FileModel>(_filesBoxName);
@@ -68,7 +69,7 @@ class SaveDocumentService {
           title: const Text('Permission Issue'),
           content: const Text(
               'Unable to save document. This might be due to permission restrictions on your device.\n\n'
-                  'For Android 11+ users: Please allow the app to manage all files in your device settings.'),
+              'For Android 11+ users: Please allow the app to manage all files in your device settings.'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancel'),
@@ -124,7 +125,8 @@ class SaveDocumentService {
 
   /// Fallback method to save files using system dialog if Toolkit folder creation fails
   static Future<String?> _saveFileWithDialog(
-      BuildContext context, File documentFile, {bool skipTimestamp = false}) async {
+      BuildContext context, File documentFile,
+      {bool skipTimestamp = false}) async {
     try {
       String baseFileName = path.basename(documentFile.path);
       if (!baseFileName.toLowerCase().endsWith('.docx')) {
@@ -137,7 +139,7 @@ class SaveDocumentService {
       } else {
         final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
         uniqueFileName =
-        '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
+            '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
       }
 
       final params = SaveFileDialogParams(
@@ -156,7 +158,8 @@ class SaveDocumentService {
       }
     } catch (e) {
       debugPrint('Error in _saveFileWithDialog: $e');
-      AppSnackBar.show(context, message: 'Failed to save document: ${e.toString()}');
+      AppSnackBar.show(context,
+          message: 'Failed to save document: ${e.toString()}');
       return null;
     }
   }
@@ -178,10 +181,10 @@ class SaveDocumentService {
 
   /// Main method to save a document file to Toolkit folder
   static Future<bool?> saveDocument(
-      BuildContext context,
-      File documentFile, {
-        bool skipTimestamp = false,
-      }) async {
+    BuildContext context,
+    File documentFile, {
+    bool skipTimestamp = false,
+  }) async {
     try {
       bool canAccessStorage = await checkAndRequestStoragePermission(context);
 
@@ -202,22 +205,27 @@ class SaveDocumentService {
 
             // Check if file already exists
             if (await _fileExistsInToolkitFolder(uniqueFileName)) {
-              AppSnackBar.show(context, message: 'File name already exists. Please choose a different name.');
+              AppSnackBar.show(context,
+                  message:
+                      'File name already exists. Please choose a different name.');
               return false;
             }
           } else {
             // Add timestamp only if not skipping
             final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-            uniqueFileName = '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
+            uniqueFileName =
+                '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
           }
 
           final destinationPath = '${toolkitDir.path}/$uniqueFileName';
           await documentFile.copy(destinationPath);
           savedFilePath = destinationPath;
 
-          AppSnackBar.show(context, message: 'Document saved to ${toolkitDir.path}');
+          AppSnackBar.show(context,
+              message: 'Document saved to ${toolkitDir.path}');
         } else {
-          savedFilePath = await _saveFileWithDialog(context, documentFile, skipTimestamp: skipTimestamp);
+          savedFilePath = await _saveFileWithDialog(context, documentFile,
+              skipTimestamp: skipTimestamp);
           if (savedFilePath == null) {
             return false;
           }
@@ -234,14 +242,15 @@ class SaveDocumentService {
         ));
 
         return true;
-      
+
         return false;
       } else {
         showPermissionHelperDialog(context);
         return null;
       }
     } on PlatformException catch (e) {
-      AppSnackBar.show(context, message: 'Failed to save document: ${e.message}');
+      AppSnackBar.show(context,
+          message: 'Failed to save document: ${e.message}');
       return null;
     } catch (e) {
       AppSnackBar.show(context, message: 'Failed to save document: $e');

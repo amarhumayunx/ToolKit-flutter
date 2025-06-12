@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce_flutter/adapters.dart';
 import 'package:intl/intl.dart';
 import 'package:toolkit/utils/app_colors.dart';
 import 'package:toolkit/widgets/settings_widgets/result_document_container.dart';
@@ -28,18 +29,30 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   final TextEditingController _searchController = TextEditingController();
+  final GlobalKey<_HomeContentViewState> _homeContentKey = GlobalKey<_HomeContentViewState>();
 
   // Screens for each tab
-  final List<Widget> _screens = [
-    const HomeContentView(),
-    const Placeholder(), // Scanner screen placeholder
-    const FilesMainScreen(),
-  ];
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      HomeContentView(key: _homeContentKey),
+      const Placeholder(), // Scanner screen placeholder
+      const FilesMainScreen(),
+    ];
+  }
 
   void _handleNavigation(int index) {
     setState(() {
       _currentIndex = index;
     });
+
+    // Refresh home content when returning to home tab
+    if (index == 0) {
+      _homeContentKey.currentState?._refreshFiles();
+    }
   }
 
   @override
@@ -80,6 +93,24 @@ class _HomeContentViewState extends State<HomeContentView> {
 
   Future<void> _initHive() async {
     try {
+      filesBox = await SaveDocumentService.initFilesBox();
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  // Add this method to refresh files
+  Future<void> _refreshFiles() async {
+    if (!mounted) return;
+
+    setState(() => _isLoading = true);
+    try {
+      // Re-initialize the box to get fresh data
       filesBox = await SaveDocumentService.initFilesBox();
       if (mounted) {
         setState(() => _isLoading = false);
@@ -174,8 +205,6 @@ class _HomeContentViewState extends State<HomeContentView> {
   }
 
   Widget _buildRecentFilesSection() {
-    final recentFiles = _getRecentFiles(limit: 2);
-
     return Column(
       children: [
         Row(
@@ -188,7 +217,7 @@ class _HomeContentViewState extends State<HomeContentView> {
                 onTap: () {
                   // Switch to Files tab
                   final homeState =
-                      context.findAncestorStateOfType<_HomeScreenState>();
+                  context.findAncestorStateOfType<_HomeScreenState>();
                   homeState?._handleNavigation(2);
                 },
                 child: Row(
@@ -222,10 +251,10 @@ class _HomeContentViewState extends State<HomeContentView> {
           const Center(
             child: Padding(
               padding: EdgeInsets.all(20),
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(color: AppColors.primary),
             ),
           )
-        else if (recentFiles.isEmpty)
+        else if (filesBox == null)
           Center(
             child: Padding(
               padding: const EdgeInsets.all(20),
@@ -239,29 +268,51 @@ class _HomeContentViewState extends State<HomeContentView> {
             ),
           )
         else
-          Column(
-            children: recentFiles.map((entry) {
-              final index = entry.key;
-              final file = entry.value;
-              return Column(
-                children: [
-                  ResultDocumentContainer(
-                    documentName: file.name,
-                    date: DateFormat('yy/MM/dd').format(file.date),
-                    time: DateFormat('h:mma').format(file.date),
-                    size: file.size,
-                    isFavorite: file.isFavorite,
-                    isLocked: file.isLocked,
-                    filePath: file.path,
-                    onFavoriteToggle: () => _toggleFavorite(index),
-                    onDelete: () => _deleteFile(index),
-                    onFileRenamed: (newPath) => _renameFile(index, newPath),
-                    onLockToggle: () => _toggleLock(index),
+          ValueListenableBuilder<Box<FileModel>>(
+            valueListenable: filesBox!.listenable(),
+            builder: (context, box, _) {
+              final recentFiles = _getRecentFiles(limit: 2);
+
+              if (recentFiles.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      'No recent documents found',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                ],
+                );
+              }
+
+              return Column(
+                children: recentFiles.map((entry) {
+                  final index = entry.key;
+                  final file = entry.value;
+                  return Column(
+                    children: [
+                      ResultDocumentContainer(
+                        documentName: file.name,
+                        date: DateFormat('yy/MM/dd').format(file.date),
+                        time: DateFormat('h:mma').format(file.date),
+                        size: file.size,
+                        isFavorite: file.isFavorite,
+                        isLocked: file.isLocked,
+                        filePath: file.path,
+                        onFavoriteToggle: () => _toggleFavorite(index),
+                        onDelete: () => _deleteFile(index),
+                        onFileRenamed: (newPath) => _renameFile(index, newPath),
+                        onLockToggle: () => _toggleLock(index),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  );
+                }).toList(),
               );
-            }).toList(),
+            },
           ),
       ],
     );

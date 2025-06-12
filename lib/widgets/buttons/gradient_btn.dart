@@ -8,6 +8,7 @@ class CustomGradientButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
 
+
   const CustomGradientButton({
     super.key,
     required this.text,

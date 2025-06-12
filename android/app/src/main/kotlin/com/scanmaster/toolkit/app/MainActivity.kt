@@ -1,4 +1,4 @@
-package com.example.toolkit
+package com.scanmaster.toolkit.app
 
 import io.flutter.embedding.android.FlutterActivity
 

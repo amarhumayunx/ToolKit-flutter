@@ -16,6 +16,7 @@ import '../../provider/language_provider.dart';
 import '../../provider/skills_provider.dart';
 import '../../provider/user_provider.dart';
 import '../../provider/work_experience_provider.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/cv_progress_indicator.dart';
 import '../../widgets/custom_appbar.dart';
@@ -35,6 +36,8 @@ class MainCVScreen extends StatefulWidget {
   final dynamic editData;
   final bool isEditing;
   final GlobalKey<PersonalInfoPageState> personalInfoKey = GlobalKey();
+  final GlobalKey<CareerObjectivesPageState> careerObjectivesKey = GlobalKey();
+  final GlobalKey<EducationDetailPageState> educationKey = GlobalKey();
 
   MainCVScreen({
     super.key,
@@ -67,13 +70,10 @@ class _MainCVScreenState extends State<MainCVScreen> {
   @override
   void initState() {
     super.initState();
-    // Load edit data into providers if editing
     if (widget.isEditing && widget.editData != null) {
       _loadEditDataIntoProviders();
     }
   }
-
-
 
   void _loadEditDataIntoProviders() async {
     if (_isLoadingEditData) return;
@@ -124,13 +124,15 @@ class _MainCVScreenState extends State<MainCVScreen> {
       _isLoadingEditData = false;
     }
   }
+
   Future<void> _loadEducationData(Map<String, dynamic> convertedData) async {
     await Future.delayed(const Duration(milliseconds: 50));
     if (!mounted) return;
 
     final educationData = _getNestedListData('education');
     if (educationData != null) {
-      final educationProvider = Provider.of<EducationProvider>(context, listen: false);
+      final educationProvider =
+          Provider.of<EducationProvider>(context, listen: false);
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         educationProvider.clearEducationItems();
@@ -149,13 +151,15 @@ class _MainCVScreenState extends State<MainCVScreen> {
     }
   }
 
-  Future<void> _loadWorkExperienceData(Map<String, dynamic> convertedData) async {
+  Future<void> _loadWorkExperienceData(
+      Map<String, dynamic> convertedData) async {
     await Future.delayed(const Duration(milliseconds: 50));
     if (!mounted) return;
 
     final workExpData = _getNestedListData('workExperience');
     if (workExpData != null) {
-      final workExpProvider = Provider.of<WorkExperienceProvider>(context, listen: false);
+      final workExpProvider =
+          Provider.of<WorkExperienceProvider>(context, listen: false);
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         workExpProvider.clearWorkExperienceItems();
@@ -176,7 +180,8 @@ class _MainCVScreenState extends State<MainCVScreen> {
     }
   }
 
-  Future<void> _loadCertificationData(Map<String, dynamic> convertedData) async {
+  Future<void> _loadCertificationData(
+      Map<String, dynamic> convertedData) async {
     if (_isLoadingEditData) return;
 
     try {
@@ -194,7 +199,8 @@ class _MainCVScreenState extends State<MainCVScreen> {
       if (certData != null && certData.isNotEmpty) {
         debugPrint('Processing ${certData.length} certification items');
 
-        final certProvider = Provider.of<CertificationProvider>(context, listen: false);
+        final certProvider =
+            Provider.of<CertificationProvider>(context, listen: false);
 
         // Use post-frame callback to ensure safe state updates
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -244,7 +250,8 @@ class _MainCVScreenState extends State<MainCVScreen> {
       if (skillsData != null && skillsData.isNotEmpty) {
         debugPrint('Processing ${skillsData.length} skills');
 
-        final skillsProvider = Provider.of<SkillsProvider>(context, listen: false);
+        final skillsProvider =
+            Provider.of<SkillsProvider>(context, listen: false);
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           try {
@@ -268,6 +275,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
       debugPrint('Error in _loadSkillsData: $e');
     }
   }
+
   Future<void> _loadLanguagesData(Map<String, dynamic> convertedData) async {
     if (_isLoadingEditData) return;
 
@@ -283,7 +291,8 @@ class _MainCVScreenState extends State<MainCVScreen> {
       if (languageData != null && languageData.isNotEmpty) {
         debugPrint('Processing ${languageData.length} language items');
 
-        final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+        final languageProvider =
+            Provider.of<LanguageProvider>(context, listen: false);
 
         // Use post-frame callback to ensure safe state updates
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -456,16 +465,16 @@ class _MainCVScreenState extends State<MainCVScreen> {
     // Save data for the current page
     switch (currentStep) {
       case 1:
-      // Personal Info - data is automatically saved via saveCurrentDataToProvider
+        // Personal Info - data is automatically saved via saveCurrentDataToProvider
         widget.personalInfoKey.currentState?.saveCurrentDataToProvider();
         break;
-    // Add cases for other pages as needed
+      // Add cases for other pages as needed
     }
   }
 
   void _navigateToTemplate(BuildContext context) {
     final templateProvider =
-    Provider.of<TemplateProvider>(context, listen: false);
+        Provider.of<TemplateProvider>(context, listen: false);
     final templateId = templateProvider.selectedTemplateId;
     final websites = Provider.of<UserProvider>(context, listen: false).websites;
 
@@ -497,99 +506,168 @@ class _MainCVScreenState extends State<MainCVScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async {
-        if (currentStep > 1) {
-          goToPreviousPage();
-          return false;
-        }
-        return true;
-      },
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: CustomAppBar(
-          title: stepTitles[currentStep - 1],
-          onBackPressed: () {
-            if (currentStep > 1) {
-              goToPreviousPage();
-            } else {
-              Navigator.pop(context);
-            }
-          },
-        ),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 26, left: 26, top: 30),
-              child: CVProgressIndicator(currentStep: currentStep),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(),
-                onPageChanged: (index) {
-                  setState(() {
-                    currentStep = index + 1;
-                  });
-                },
-                children: [
-                  PersonalInfoPage(
-                    key: widget.personalInfoKey,
-                    templateId: widget.templateId,
-                    templateName: widget.templateName,
-                    initialData: _getNestedData('personalInfo'),
-                  ),
-                  const CareerObjectivesPage(),
-                  EducationDetailPage(
-                    initialData: _getNestedListData('education'),
-                  ),
-                  WorkExperiencePage(
-                    initialData: _getNestedListData('workExperience'),
-                  ),
-                  CertificationPage(
-                    initialData: _getNestedListData('certifications'),
-                  ),
-                  SkillsPage(
-                    initialData: _getNestedListData('skills'),
-                  ),
-                  LanguagesPage(
-                    initialData: _getNestedListData('languages'),
-                  ),
-                  WebsitePage(
-                    initialData: _getNestedListData('websites'),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        bottomNavigationBar: Padding(
-          padding: const EdgeInsets.only(
-            bottom: 28.0,
-            left: 28.0,
-            right: 28.0,
-            top: 10.0,
-          ),
-          child: CustomGradientButton(
-            text: widget.isEditing
-                ? 'Update'
-                : (currentStep == stepTitles.length ? 'Add' : 'Next'),
-            onPressed: () {
-              if (currentStep == 1) {
-                final isValid =
-                    widget.personalInfoKey.currentState?.validate() ?? false;
-                if (isValid) {
-                  goToNextPage();
-                }
-              } else if (currentStep < stepTitles.length) {
-                goToNextPage();
+        onWillPop: () async {
+          if (currentStep > 1) {
+            goToPreviousPage();
+            return false;
+          }
+          return true;
+        },
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: CustomAppBar(
+            title: stepTitles[currentStep - 1],
+            onBackPressed: () {
+              if (currentStep > 1) {
+                goToPreviousPage();
               } else {
-                _navigateToTemplate(context);
+                Navigator.pop(context);
               }
             },
           ),
-        ),
-      ),
-    );
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 26, left: 26, top: 30),
+                child: CVProgressIndicator(currentStep: currentStep),
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  onPageChanged: (index) {
+                    setState(() {
+                      currentStep = index + 1;
+                    });
+                  },
+                  children: [
+                    PersonalInfoPage(
+                      key: widget.personalInfoKey,
+                      templateId: widget.templateId,
+                      templateName: widget.templateName,
+                      initialData: _getNestedData('personalInfo'),
+                    ),
+                    CareerObjectivesPage(key: widget.careerObjectivesKey),
+                    EducationDetailPage(
+                      key: widget.educationKey,
+                      initialData: _getNestedListData('education'),
+                    ),
+                    WorkExperiencePage(
+                      initialData: _getNestedListData('workExperience'),
+                    ),
+                    CertificationPage(
+                      initialData: _getNestedListData('certifications'),
+                    ),
+                    SkillsPage(
+                      initialData: _getNestedListData('skills'),
+                    ),
+                    LanguagesPage(
+                      initialData: _getNestedListData('languages'),
+                    ),
+                    WebsitePage(
+                      initialData: _getNestedListData('websites'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          bottomNavigationBar: Padding(
+            padding: const EdgeInsets.only(
+              bottom: 28.0,
+              left: 28.0,
+              right: 28.0,
+              top: 10.0,
+            ),
+            child: CustomGradientButton(
+              text: widget.isEditing
+                  ? 'Update'
+                  : (currentStep == stepTitles.length ? 'Add' : 'Next'),
+              onPressed: () {
+                // Validation for each step
+                bool isValid = false;
+
+                if (currentStep == 1) {
+                  // Personal Info validation
+                  isValid =
+                      widget.personalInfoKey.currentState?.validate() ?? false;
+                } else if (currentStep == 2) {
+                  // Career Objectives validation
+                  isValid =
+                      widget.careerObjectivesKey.currentState?.validate() ??
+                          false;
+                } else if (currentStep == 3) {
+                  // Education validation
+                  final educationProvider =
+                      Provider.of<EducationProvider>(context, listen: false);
+                  isValid = educationProvider.educationItems.isNotEmpty;
+                  if (!isValid) {
+                    AppSnackBar.show(context,
+                        message: 'Please add at least one education item');
+                  }
+                } else if (currentStep == 4) {
+                  // Work Experience validation
+                  final workExpProvider = Provider.of<WorkExperienceProvider>(
+                      context,
+                      listen: false);
+                  isValid = workExpProvider.workExperienceItems.isNotEmpty;
+                  if (!isValid) {
+                    AppSnackBar.show(context,
+                        message: 'Please add at least one work experience');
+                  }
+                } else if (currentStep == 5) {
+                  // Certification validation
+                  final certProvider = Provider.of<CertificationProvider>(
+                      context,
+                      listen: false);
+                  isValid = certProvider.certificationItems.isNotEmpty;
+                  if (!isValid) {
+                    AppSnackBar.show(context,
+                        message: 'Please add at least one certification');
+                  }
+                } else if (currentStep == 6) {
+                  // Skills validation
+                  final skillsProvider =
+                      Provider.of<SkillsProvider>(context, listen: false);
+                  isValid = skillsProvider.skillItems.isNotEmpty;
+                  if (!isValid) {
+                    AppSnackBar.show(context,
+                        message: 'Please add at least one skill');
+                  }
+                } else if (currentStep == 7) {
+                  // Languages validation
+                  final languageProvider =
+                      Provider.of<LanguageProvider>(context, listen: false);
+                  isValid = languageProvider.languages.isNotEmpty;
+                  if (!isValid) {
+                    AppSnackBar.show(context,
+                        message: 'Please add at least one language');
+                  }
+                } else if (currentStep == 8) {
+                  // Websites validation
+                  final userProvider =
+                      Provider.of<UserProvider>(context, listen: false);
+                  isValid = userProvider.websites.isNotEmpty;
+                  if (!isValid) {
+                    AppSnackBar.show(context,
+                        message: 'Please add at least one website/link');
+                  }
+                } else {
+                  // For other steps, allow navigation
+                  isValid = true;
+                }
+
+                if (isValid) {
+                  if (currentStep < stepTitles.length) {
+                    goToNextPage();
+                  } else {
+                    _navigateToTemplate(context);
+                  }
+                }
+              },
+            ),
+          ),
+        ));
   }
 }
