@@ -12,7 +12,11 @@ class ScannerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => const ScannerScreen()),
+        );
+      },
       child: Container(
         height: 90,
         width: 90,
@@ -41,23 +45,15 @@ class ScannerButton extends StatelessWidget {
                   AppColors.gradientEnd,
                 ],
               ),
-
             ),
             child: Center(
-              child: GestureDetector(
-                onTap: (){
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => const ScannerScreen()),
-                  );
-                },
-                child: SvgPicture.asset(
-                  'assets/icons/scan_icon.svg',
-                  width: 30,
-                  height: 30,
-                  colorFilter: const ColorFilter.mode(
-                    Colors.white,
-                    BlendMode.srcIn,
-                  ),
+              child: SvgPicture.asset(
+                'assets/icons/scan_icon.svg',
+                width: 30,
+                height: 30,
+                colorFilter: const ColorFilter.mode(
+                  Colors.white,
+                  BlendMode.srcIn,
                 ),
               ),
             ),

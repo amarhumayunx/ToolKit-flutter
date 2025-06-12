@@ -55,17 +55,16 @@ class MyApp extends StatelessWidget {
       title: 'Toolkit App',
       debugShowCheckedModeBanner: false,
 
-      // Localization setup
-      translations: Language(), // Your Translations class
-      locale: Get.deviceLocale, // Uses the device locale
-      fallbackLocale: const Locale('en', 'US'), // Fallback locale
+      translations: Language(),
+      locale: Get.deviceLocale,
+      fallbackLocale: const Locale('en', 'US'),
 
       theme: ThemeData(
         primaryColor: const Color(0xFF00BFA5),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
 
-      home: const AppInitializer(), // Your app's initial screen
+      home: const AppInitializer(),
     );
   }
 }
@@ -86,7 +85,6 @@ class _AppInitializerState extends State<AppInitializer> {
 
   Future<void> _initializeApp() async {
     try {
-      // Initialize notifications
       await NotificationService.initialize(context);
     } catch (e) {
       debugPrint('Error initializing app: $e');

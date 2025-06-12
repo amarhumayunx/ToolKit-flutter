@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_svg/svg.dart';
@@ -34,6 +35,8 @@ class _ScannerScreenState extends State<ScannerScreen>
   String _errorMessage = '';
   bool _isLoading = true;
   String? _selectedScanType = 'Batch'; // default selected
+  int _retryCount = 0;
+  static const int maxRetryCount = 3;
 
   // Recent images list - to show in place of image icon
   final List<File> _recentImages = [];
@@ -76,7 +79,7 @@ class _ScannerScreenState extends State<ScannerScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _requestCameraPermission();
+    _initializeCamera();
 
     // Add post-frame callback to measure container height
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -87,7 +90,7 @@ class _ScannerScreenState extends State<ScannerScreen>
   void _measureBottomContainerHeight() {
     if (_bottomContainerKey.currentContext != null) {
       final RenderBox box =
-          _bottomContainerKey.currentContext!.findRenderObject() as RenderBox;
+      _bottomContainerKey.currentContext!.findRenderObject() as RenderBox;
       setState(() {
         _bottomContainerHeight = box.size.height;
       });
@@ -97,8 +100,17 @@ class _ScannerScreenState extends State<ScannerScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _controller?.dispose();
+    _disposeCamera();
     super.dispose();
+  }
+
+  Future<void> _disposeCamera() async {
+    try {
+      await _controller?.dispose();
+    } catch (e) {
+      print('Error disposing camera: $e');
+    }
+    _controller = null;
   }
 
   @override
@@ -109,26 +121,86 @@ class _ScannerScreenState extends State<ScannerScreen>
       return;
     }
 
-    if (state == AppLifecycleState.inactive) {
-      cameraController.dispose();
-    } else if (state == AppLifecycleState.resumed) {
-      _initializeControllerAfterPermission();
+    switch (state) {
+      case AppLifecycleState.paused:
+        _disposeCamera();
+        setState(() {
+          _isCameraInitialized = false;
+        });
+        break;
+      case AppLifecycleState.resumed:
+        if (!_isCameraInitialized && _isCameraPermissionGranted) {
+          _initializeControllerAfterPermission();
+        }
+        break;
+      case AppLifecycleState.inactive:
+      // Don't dispose, just pause preview
+        try {
+          cameraController.pausePreview();
+        } catch (e) {
+          print('Error pausing camera preview: $e');
+        }
+        break;
+      case AppLifecycleState.detached:
+        _disposeCamera();
+        break;
+      case AppLifecycleState.hidden:
+        // TODO: Handle this case.
+        throw UnimplementedError();
     }
   }
 
-  Future<void> _requestCameraPermission() async {
-    final status = await Permission.camera.request();
+  Future<void> _initializeCamera() async {
     setState(() {
-      _isCameraPermissionGranted = status.isGranted;
-      _isLoading = false;
+      _isLoading = true;
+      _errorMessage = '';
+      _retryCount = 0;
     });
 
-    if (status.isGranted) {
-      _initializeControllerAfterPermission();
-    } else {
+    await _requestCameraPermission();
+  }
+
+  Future<void> _requestCameraPermission() async {
+    try {
+      final status = await Permission.camera.request();
+
+      if (status.isDenied) {
+        setState(() {
+          _errorMessage = 'Camera permission denied. Please enable camera access in settings.';
+          _isLoading = false;
+          _isCameraPermissionGranted = false;
+        });
+        return;
+      }
+
+      if (status.isPermanentlyDenied) {
+        setState(() {
+          _errorMessage = 'Camera permission permanently denied. Please enable camera access in device settings.';
+          _isLoading = false;
+          _isCameraPermissionGranted = false;
+        });
+        return;
+      }
+
       setState(() {
-        _errorMessage = 'Camera permission is required to use the scanner';
+        _isCameraPermissionGranted = status.isGranted;
       });
+
+      if (status.isGranted) {
+        await _initializeControllerAfterPermission();
+      } else {
+        setState(() {
+          _errorMessage = 'Camera permission is required to use the scanner';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to request camera permission: ${e.toString()}';
+        _isLoading = false;
+        _isCameraPermissionGranted = false;
+      });
+      print('Permission request error: $e');
     }
   }
 
@@ -139,16 +211,22 @@ class _ScannerScreenState extends State<ScannerScreen>
         _errorMessage = '';
       });
 
+      // Dispose existing controller first
+      await _disposeCamera();
+
+      // Check if cameras are available
       cameras = await availableCameras();
 
       if (cameras.isEmpty) {
         setState(() {
-          _errorMessage = 'No cameras found on device';
+          _errorMessage = 'No cameras found on this device';
           _isLoading = false;
+          _isCameraInitialized = false;
         });
         return;
       }
 
+      // Initialize camera controller
       _controller = CameraController(
         cameras[0],
         ResolutionPreset.high,
@@ -158,18 +236,71 @@ class _ScannerScreenState extends State<ScannerScreen>
 
       await _controller!.initialize();
 
+      // Check if widget is still mounted before setState
       if (!mounted) return;
 
       setState(() {
         _isCameraInitialized = true;
         _isLoading = false;
+        _retryCount = 0; // Reset retry count on success
       });
+
+      print('Camera initialized successfully');
     } catch (e) {
+      if (!mounted) return;
+
+      print('Camera initialization error: $e');
+
       setState(() {
-        _errorMessage = 'Camera initialization failed: ${e.toString()}';
+        _errorMessage = _getCameraErrorMessage(e);
         _isLoading = false;
+        _isCameraInitialized = false;
       });
-      print('Error initializing camera: $e');
+
+      // Auto-retry with exponential backoff if under retry limit
+      if (_retryCount < maxRetryCount) {
+        _retryCount++;
+        final delay = Duration(seconds: _retryCount * 2);
+        print('Retrying camera initialization in ${delay.inSeconds} seconds (attempt $_retryCount)');
+
+        Future.delayed(delay, () {
+          if (mounted && _isCameraPermissionGranted && !_isCameraInitialized) {
+            _initializeControllerAfterPermission();
+          }
+        });
+      }
+    }
+  }
+
+  String _getCameraErrorMessage(dynamic error) {
+    final errorString = error.toString().toLowerCase();
+
+    if (errorString.contains('permission')) {
+      return 'Camera permission denied. Please check app permissions.';
+    } else if (errorString.contains('already in use') || errorString.contains('busy')) {
+      return 'Camera is being used by another app. Please close other camera apps and try again.';
+    } else if (errorString.contains('not available') || errorString.contains('not found')) {
+      return 'Camera not available on this device.';
+    } else if (errorString.contains('initialization')) {
+      return 'Failed to initialize camera. Please try again.';
+    } else {
+      return 'Camera error: Please restart the app or check if camera is working in other apps.';
+    }
+  }
+
+  Future<void> _retryInitialization() async {
+    setState(() {
+      _errorMessage = '';
+      _retryCount = 0;
+    });
+    await _initializeCamera();
+  }
+
+  Future<void> _openAppSettings() async {
+    try {
+      await openAppSettings();
+    } catch (e) {
+      print('Error opening app settings: $e');
     }
   }
 
@@ -191,6 +322,11 @@ class _ScannerScreenState extends State<ScannerScreen>
         _errorMessage = 'Failed to toggle flash: ${e.toString()}';
       });
       print('Error toggling flash: $e');
+
+      // Revert flash state on error
+      setState(() {
+        _isFlashOn = !_isFlashOn;
+      });
     }
   }
 
@@ -201,70 +337,76 @@ class _ScannerScreenState extends State<ScannerScreen>
   }
 
   Future<void> _pickImageFromGallery() async {
-    if (_selectedScanType == 'Batch') {
-      final List<XFile> pickedFiles = await _imagePicker.pickMultiImage();
+    try {
+      if (_selectedScanType == 'Batch') {
+        final List<XFile> pickedFiles = await _imagePicker.pickMultiImage();
 
-      if (pickedFiles.isNotEmpty) {
-        List<File> selectedImages =
-            pickedFiles.map((file) => File(file.path)).toList();
+        if (pickedFiles.isNotEmpty) {
+          List<File> selectedImages =
+          pickedFiles.map((file) => File(file.path)).toList();
 
-        if (_isBatchModeActive) {
+          if (_isBatchModeActive) {
+            setState(() {
+              _batchImages.addAll(selectedImages);
+            });
+
+            AppSnackBar.show(context,
+                message:
+                'Added ${selectedImages.length} images to batch. Total: ${_batchImages.length}');
+          } else {
+            setState(() {
+              _batchImages = selectedImages;
+              _isBatchModeActive = true;
+            });
+
+            _navigateToBatchPreviewScreen();
+          }
+        }
+      } else if (_selectedScanType == 'Id Card') {
+        final XFile? pickedFile = await _imagePicker.pickImage(
+          source: ImageSource.gallery,
+        );
+
+        if (pickedFile != null) {
+          final File imageFile = File(pickedFile.path);
           setState(() {
-            _batchImages.addAll(selectedImages);
+            _idCardImages.add(imageFile);
+            _recentImages.insert(0, imageFile);
+          });
+          _navigateToIdCardPreviewScreen();
+        }
+      } else {
+        final XFile? pickedFile = await _imagePicker.pickImage(
+          source: ImageSource.gallery,
+        );
+
+        if (pickedFile != null) {
+          final File imageFile = File(pickedFile.path);
+          setState(() {
+            _imageFile = imageFile;
+            _recentImages.insert(0, imageFile);
           });
 
-          AppSnackBar.show(context,
-              message:
-                  'Added ${selectedImages.length} images to batch. Total: ${_batchImages.length}');
-        } else {
-          setState(() {
-            _batchImages = selectedImages;
-            _isBatchModeActive = true;
-          });
-
-          _navigateToBatchPreviewScreen();
+          _navigateToPreviewScreen(imageFile);
         }
       }
-    } else if (_selectedScanType == 'Id Card') {
-      final XFile? pickedFile = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
-      );
-
-      if (pickedFile != null) {
-        final File imageFile = File(pickedFile.path);
-        setState(() {
-          _idCardImages.add(imageFile);
-          _recentImages.insert(0, imageFile);
-        });
-        _navigateToIdCardPreviewScreen();
-      }
-    } else {
-      final XFile? pickedFile = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
-      );
-
-      if (pickedFile != null) {
-        final File imageFile = File(pickedFile.path);
-        setState(() {
-          _imageFile = imageFile;
-          _recentImages.insert(0, imageFile);
-        });
-
-        _navigateToPreviewScreen(imageFile);
-      }
+    } catch (e) {
+      print('Error picking image from gallery: $e');
+      AppSnackBar.show(context,
+          message: 'Failed to pick image from gallery');
     }
   }
 
-// In your _ScannerScreenState class, modify the _captureImage method:
   Future<void> _captureImage() async {
     if (_controller == null || !_controller!.value.isInitialized) {
+      AppSnackBar.show(context, message: 'Camera not ready. Please wait.');
       return;
     }
 
     try {
       final XFile photo = await _controller!.takePicture();
       final directory = await getApplicationDocumentsDirectory();
-      final String fileName = path.basename(photo.path);
+      final String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
       final File originalImage = File(photo.path);
 
       // Get screen dimensions
@@ -321,12 +463,12 @@ class _ScannerScreenState extends State<ScannerScreen>
 
         // Enhance the document image
         final File? enhancedImage =
-            await FrameCaptureService.enhanceDocumentImage(framedImage);
+        await FrameCaptureService.enhanceDocumentImage(framedImage);
         final File savedImage = enhancedImage ?? framedImage;
 
         // Save to permanent storage
         final File permanentFile =
-            await savedImage.copy('${directory.path}/$fileName');
+        await savedImage.copy('${directory.path}/$fileName');
 
         setState(() {
           _recentImages.insert(0, permanentFile);
@@ -345,7 +487,7 @@ class _ScannerScreenState extends State<ScannerScreen>
         }
       } else if (_selectedScanType == 'Batch') {
         final File savedImage =
-            await originalImage.copy('${directory.path}/$fileName');
+        await originalImage.copy('${directory.path}/$fileName');
         setState(() {
           _batchImages.add(savedImage);
           _isBatchModeActive = true;
@@ -353,7 +495,7 @@ class _ScannerScreenState extends State<ScannerScreen>
         });
       } else {
         final File savedImage =
-            await originalImage.copy('${directory.path}/$fileName');
+        await originalImage.copy('${directory.path}/$fileName');
         setState(() {
           _imageFile = savedImage;
           _recentImages.insert(0, savedImage);
@@ -362,8 +504,11 @@ class _ScannerScreenState extends State<ScannerScreen>
       }
     } catch (e) {
       print('Error capturing image: $e');
-     }
+      AppSnackBar.show(context,
+          message: 'Failed to capture image. Please try again.');
+    }
   }
+
   Future<void> _captureIdCardImage() async {
     if (_controller == null || !_controller!.value.isInitialized) {
       return;
@@ -372,9 +517,9 @@ class _ScannerScreenState extends State<ScannerScreen>
     try {
       final XFile photo = await _controller!.takePicture();
       final directory = await getApplicationDocumentsDirectory();
-      final String fileName = path.basename(photo.path);
+      final String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
       final File savedImage =
-          await File(photo.path).copy('${directory.path}/$fileName');
+      await File(photo.path).copy('${directory.path}/$fileName');
 
       setState(() {
         _idCardImages.add(savedImage);
@@ -384,6 +529,8 @@ class _ScannerScreenState extends State<ScannerScreen>
       _navigateToIdCardPreviewScreen();
     } catch (e) {
       print('Error capturing ID card image: $e');
+      AppSnackBar.show(context,
+          message: 'Failed to capture ID card image. Please try again.');
     }
   }
 
@@ -480,7 +627,7 @@ class _ScannerScreenState extends State<ScannerScreen>
           title: const Text('Discard Batch?'),
           content: const Text(
               'Changing scan type will discard your current batch of images. '
-              'Do you want to continue?'),
+                  'Do you want to continue?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -531,37 +678,129 @@ class _ScannerScreenState extends State<ScannerScreen>
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
+  Widget _buildErrorScreen() {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
         backgroundColor: Colors.white,
-        body: Center(
-          child: CircularProgressIndicator(),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
         ),
-      );
-    }
-
-    if (!_isCameraPermissionGranted) {
-      return Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(
+        title: Text(
+          'Camera Error',
+          style: GoogleFonts.inter(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.camera_alt, size: 100, color: Colors.grey),
-              const SizedBox(height: 16),
-              Text(
-                _errorMessage.isEmpty
-                    ? 'Camera permission not granted'
-                    : _errorMessage,
-                style: const TextStyle(fontSize: 16),
-                textAlign: TextAlign.center,
+              const Icon(
+                Icons.camera_alt_outlined,
+                size: 100,
+                color: Colors.grey,
               ),
               const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _requestCameraPermission,
-                child: const Text('Grant Camera Permission'),
+              Text(
+                _errorMessage,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              if (_errorMessage.contains('permission'))
+                Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _openAppSettings,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          'Open Settings',
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                ),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _retryInitialization,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _errorMessage.contains('permission')
+                        ? Colors.grey[300]
+                        : AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Retry',
+                    style: GoogleFonts.inter(
+                      color: _errorMessage.contains('permission')
+                          ? Colors.grey[700]
+                          : Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.close, color: Colors.black),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(
+                color: AppColors.primary,
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Initializing camera...',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54,
+                ),
               ),
             ],
           ),
@@ -569,11 +808,38 @@ class _ScannerScreenState extends State<ScannerScreen>
       );
     }
 
+    if (!_isCameraPermissionGranted || _errorMessage.isNotEmpty) {
+      return _buildErrorScreen();
+    }
+
     if (!_isCameraInitialized) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: Colors.white,
-        body: Center(
-          child: Text('Initializing camera...'),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.close, color: Colors.black),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(
+                color: AppColors.primary,
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Setting up camera...',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -583,7 +849,7 @@ class _ScannerScreenState extends State<ScannerScreen>
         isFlashOn: _isFlashOn,
         isGridVisible: _isGridVisible,
         showGridIcon:
-            _selectedScanType == 'Single' || _selectedScanType == 'Batch',
+        _selectedScanType == 'Single' || _selectedScanType == 'Batch',
         // Only show for Single and Batch
         onClosePressed: () => Navigator.pop(context),
         onFlashPressed: _toggleFlash,
@@ -667,10 +933,10 @@ class _ScannerScreenState extends State<ScannerScreen>
                     bottomPadding: _bottomContainerHeight,
                   )
                 else if (_selectedScanType == 'Single')
-                  SingleScan(
-                    isGridVisible: _isGridVisible,
-                    bottomPadding: _bottomContainerHeight,
-                  ),
+                    SingleScan(
+                      isGridVisible: _isGridVisible,
+                      bottomPadding: _bottomContainerHeight,
+                    ),
 
                 // Bottom controls container
                 Positioned(

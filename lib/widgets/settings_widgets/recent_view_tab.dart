@@ -8,6 +8,7 @@ import 'package:toolkit/widgets/settings_widgets/sort_btn.dart';
 import 'package:toolkit/widgets/settings_widgets/result_document_container.dart';
 import '../../models/file_model.dart';
 import '../../services/save_document_service.dart';
+import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 
 class RecentsViewTab extends StatefulWidget {
@@ -81,12 +82,10 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
       final oldFile = File(file.path);
       final newFile = File(newPath);
 
-      // Rename the actual file
       if (await oldFile.exists()) {
         await oldFile.rename(newPath);
       }
 
-      // Update the database entry
       final newFileName = path.basename(newPath);
       setState(() {
         filesBox.putAt(
@@ -168,7 +167,7 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
         const SizedBox(height: 10),
         Expanded(
           child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator(color: AppColors.primary,))
               : ListView(
             children: [
               if (filteredFiles.isEmpty)
@@ -188,23 +187,29 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
                 ...filteredFiles.map((entry) {
                   final index = entry.key;
                   final file = entry.value;
-                  return Column(
-                    children: [
-                      ResultDocumentContainer(
-                        documentName: file.name,
-                        date: DateFormat('yy/MM/dd').format(file.date),
-                        time: DateFormat('h:mma').format(file.date),
-                        size: file.size,
-                        isFavorite: file.isFavorite,
-                        isLocked: file.isLocked,
-                        filePath: file.path,
-                        onFavoriteToggle: () => _toggleFavorite(index),
-                        onDelete: () => _deleteFile(index),
-                        onFileRenamed: (newPath) => _renameFile(index, newPath),
-                        onLockToggle: () => _toggleLock(index),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 6, right: 6),
+                          child: ResultDocumentContainer(
+                            documentName: file.name,
+                            date: DateFormat('yy/MM/dd').format(file.date),
+                            time: DateFormat('h:mma').format(file.date),
+                            size: file.size,
+                            isFavorite: file.isFavorite,
+                            isLocked: file.isLocked,
+                            filePath: file.path,
+                            onFavoriteToggle: () => _toggleFavorite(index),
+                            onDelete: () => _deleteFile(index),
+                            onFileRenamed: (newPath) => _renameFile(index, newPath),
+                            onLockToggle: () => _toggleLock(index),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                    ),
                   );
                 }),
               const SizedBox(height: 100),

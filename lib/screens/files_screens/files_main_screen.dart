@@ -21,7 +21,7 @@ class _FilesMainScreenState extends State<FilesMainScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this); // Changed from 4 to 3
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -47,7 +47,6 @@ class _FilesMainScreenState extends State<FilesMainScreen>
       body: SafeArea(
         child: Column(
           children: [
-            // Custom Header with integrated search
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Row(
@@ -101,8 +100,6 @@ class _FilesMainScreenState extends State<FilesMainScreen>
               ),
             ),
 
-            // Tab Bar
-            // Tab Bar
             TabBar(
               controller: _tabController,
               indicator: const UnderlineTabIndicator(
@@ -124,7 +121,6 @@ class _FilesMainScreenState extends State<FilesMainScreen>
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
-              // Custom touch effect properties
               splashFactory: InkRipple.splashFactory,
               overlayColor: WidgetStateProperty.resolveWith<Color?>(
                     (Set<WidgetState> states) {
@@ -143,7 +139,7 @@ class _FilesMainScreenState extends State<FilesMainScreen>
               tabs: const [
                 Tab(text: 'RECENTS'),
                 Tab(text: 'FAVOURITES'),
-                Tab(text: 'ALL'), // Removed 'LOCKED' tab
+                Tab(text: 'ALL'),
               ],
             ),
 

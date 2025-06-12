@@ -41,14 +41,14 @@ class ResultDocumentContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.16),
-            blurRadius: 4,
+            blurRadius: 3,
             offset: const Offset(0, 0),
           ),
         ],

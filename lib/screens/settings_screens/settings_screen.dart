@@ -372,7 +372,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
-                    color: Colors.black,
+                    color: AppColors.gradientEnd,
                   ),
                   onChanged: (String? newValue) {
                     if (newValue != null) {

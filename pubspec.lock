@@ -146,18 +146,18 @@ packages:
     dependency: "direct main"
     description:
       name: camera
-      sha256: dfa8fc5a1adaeb95e7a54d86a5bd56f4bb0e035515354c8ac6d262e35cec2ec8
+      sha256: "413d2b34fe28496c35c69ede5b232fb9dd5ca2c3a4cb606b14efc1c7546cc8cb"
       url: "https://pub.dev"
     source: hosted
-    version: "0.10.6"
-  camera_android:
+    version: "0.11.1"
+  camera_android_camerax:
     dependency: transitive
     description:
-      name: camera_android
-      sha256: "007c57cdcace4751014071e3d42f2eb8a64a519254abed35b714223d81d66234"
+      name: camera_android_camerax
+      sha256: "68d7ec97439108ac22cfba34bb74d0ab53adbc017175116d2cbc5a3d8fc8ea5e"
       url: "https://pub.dev"
     source: hosted
-    version: "0.10.10"
+    version: "0.6.18+2"
   camera_avfoundation:
     dependency: transitive
     description:
@@ -547,14 +547,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.17"
-  flutter_tesseract_ocr:
-    dependency: "direct main"
-    description:
-      name: flutter_tesseract_ocr
-      sha256: "9cb94ee4e00fa0131f55b0e512a62f514d50cf8cee45d067b728c8d3ca82f655"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.28"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -1692,4 +1684,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.7.0 <4.0.0"
-  flutter: ">=3.27.0"
+  flutter: ">=3.29.0"

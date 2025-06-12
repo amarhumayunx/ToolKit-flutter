@@ -182,24 +182,29 @@ class _AllFilesViewState extends State<AllFilesView> {
                       break;
                     }
                   }
-
-                  return Column(
-                    children: [
-                      ResultDocumentContainer(
-                        documentName: file.name,
-                        date: DateFormat('yy/MM/dd').format(file.date),
-                        time: DateFormat('h:mma').format(file.date),
-                        size: file.size,
-                        isFavorite: file.isFavorite,
-                        isLocked: file.isLocked,
-                        filePath: file.path,
-                        onFavoriteToggle: () => _toggleFavorite(actualIndex),
-                        onDelete: () => _deleteFile(actualIndex),
-                        onFileRenamed: (newPath) => _renameFile(actualIndex, newPath),
-                        onLockToggle: () => _toggleLock(actualIndex),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 6, right: 6),
+                          child: ResultDocumentContainer(
+                            documentName: file.name,
+                            date: DateFormat('yy/MM/dd').format(file.date),
+                            time: DateFormat('h:mma').format(file.date),
+                            size: file.size,
+                            isFavorite: file.isFavorite,
+                            isLocked: file.isLocked,
+                            filePath: file.path,
+                            onFavoriteToggle: () => _toggleFavorite(actualIndex),
+                            onDelete: () => _deleteFile(actualIndex),
+                            onFileRenamed: (newPath) => _renameFile(actualIndex, newPath),
+                            onLockToggle: () => _toggleLock(actualIndex),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                    ),
                   );
                 }),
               const SizedBox(height: 100),

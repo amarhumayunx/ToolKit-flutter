@@ -53,19 +53,18 @@ class _HomeScreenState extends State<HomeScreen> {
     final now = DateTime.now();
     const maxDuration = Duration(seconds: 2);
 
-    if (_lastPressedAt == null || now.difference(_lastPressedAt!) > maxDuration) {
+    if (_lastPressedAt == null || now.difference(_lastPressedAt!) > maxDuration)
+    {
       _lastPressedAt = now;
 
-      // Show toast message
       AppSnackBar.show(
         context,
-        message: 'press_again_to_exit'.tr, // or "Press again to exit"
+        message: 'press_again_to_exit'.tr,
       );
 
-      return false; // Don't exit yet
+      return false;
     }
 
-    // Exit the app
     SystemNavigator.pop();
     return true;
   }
@@ -73,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope( // Wrap Scaffold with WillPopScope
+    return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         extendBody: true,
@@ -329,7 +328,6 @@ class _HomeContentViewState extends State<HomeContentView> {
                       const SizedBox(height: 14),
                       const ConvertOptionsView(),
                       const SizedBox(height: 28),
-                      // Recent files section
                       _buildRecentFilesSection(),
                       const SizedBox(height: 100),
                       // Extra space at bottom for nav bar
