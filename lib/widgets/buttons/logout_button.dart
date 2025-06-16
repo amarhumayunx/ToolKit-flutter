@@ -17,7 +17,7 @@ class LogoutButton extends StatelessWidget {
       width: double.infinity,
       height: 48,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [
             AppColors.gradientStart,
             AppColors.gradientEnd,

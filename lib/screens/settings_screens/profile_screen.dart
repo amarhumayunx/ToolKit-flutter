@@ -303,7 +303,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           if (isEditable)
             GestureDetector(
               onTap: onEdit,
-              child: Icon(
+              child: const Icon(
                 Icons.edit,
                 size: 20,
                 color: AppColors.primary,

@@ -93,7 +93,7 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
         Navigator.of(context).popUntil((route) => route.isFirst);
       } catch (e) {
         AppSnackBar.show(context,
-            message: 'Failed to save file: ${e.toString()}');
+            message: '${'failed_to_save_file'.tr}: ${e.toString()}');
       }
     }
   }
@@ -125,11 +125,11 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
       });
 
       if (mounted) {
-        AppSnackBar.show(context, message: 'File renamed successfully');
+        AppSnackBar.show(context, message: 'file_renamed_successfully'.tr);
       }
     } catch (e) {
       if (mounted) {
-        AppSnackBar.show(context, message: 'Error renaming file: ${e.toString()}');
+        AppSnackBar.show(context, message: '${'error_renaming_file'.tr}: ${e.toString()}');
       }
     }
   }
@@ -155,7 +155,7 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
       else if (fileName.toLowerCase().endsWith('.docx')) {
         await _processDocxFile(outputPath);
       } else {
-        _updateStatus("Processing generic document...");
+        _updateStatus('processing_generic_document'.tr);
         _outputFile = File(outputPath);
         await widget.document.file.copy(_outputFile!.path);
 
@@ -176,7 +176,7 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
 
     } catch (e) {
       print('Error processing file: $e');
-      _updateStatus("Error encountered, using fallback method...");
+      _updateStatus('error_encountered_fallback'.tr);
 
       final tempDir = await getTemporaryDirectory();
       _outputFile = File('${tempDir.path}/split_${widget.document.name}');
@@ -211,7 +211,7 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
   }
 
   Future<void> _processPdfFile(String outputPath) async {
-    _updateStatus("Creating PDF with selected pages...");
+    _updateStatus('creating_pdf_selected_pages'.tr);
 
     final pdfData = await widget.document.file.readAsBytes();
     final originalDoc = syncfusion.PdfDocument(inputBytes: pdfData);
@@ -225,7 +225,7 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
 
     if (selectedIndices.isEmpty) {
       originalDoc.dispose();
-      throw Exception("No pages selected");
+      throw Exception('no_pages_selected'.tr);
     }
 
     final mergedDoc = syncfusion.PdfDocument();
@@ -255,33 +255,33 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
     if (mounted) {
       setState(() => _progress = 1.0);
     }
-    _updateStatus("PDF with selected pages created successfully!");
+    _updateStatus('pdf_created_successfully'.tr);
   }
 
   Future<void> _openFile() async {
     try {
       if (_outputFile == null) {
-        AppSnackBar.show(context, message: 'No document available to open');
+        AppSnackBar.show(context, message: 'no_document_available_to_open'.tr);
         return;
       }
 
       if (!await _outputFile!.exists()) {
-        AppSnackBar.show(context, message: 'File not found');
+        AppSnackBar.show(context, message: 'file_not_found'.tr);
         return;
       }
 
       final result = await OpenFile.open(_outputFile!.path);
 
       if (result.type != ResultType.done) {
-        AppSnackBar.show(context, message: 'Cannot open file: ${result.message}');
+        AppSnackBar.show(context, message: '${'cannot_open_file'.tr}: ${result.message}');
 
         if (_outputFile!.path.toLowerCase().endsWith('.zip')) {
-          AppSnackBar.show(context, message: 'This is a ZIP file. You may need a ZIP extractor app to view its contents.');
+          AppSnackBar.show(context, message: 'zip_file_message'.tr);
         }
       }
     } catch (e) {
       print('Error opening file: $e');
-      AppSnackBar.show(context, message: 'Error opening document');
+      AppSnackBar.show(context, message: 'error_opening_document'.tr);
     }
   }
 
@@ -308,20 +308,20 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
       }
 
       if (mounted) {
-        AppSnackBar.show(context, message: 'File deleted successfully');
+        AppSnackBar.show(context, message: 'file_deleted_successfully'.tr);
       }
 
     } catch (e) {
       print('Error deleting file: $e');
       if (mounted) {
-        AppSnackBar.show(context, message: 'Error during deletion: ${e.toString()}');
+        AppSnackBar.show(context, message: '${'error_during_deletion'.tr}: ${e.toString()}');
       }
     }
   }
 
   Future<void> _processDocxFile(String outputPath) async {
     try {
-      _updateStatus("Splitting DOCX into individual files...");
+      _updateStatus('splitting_docx_files'.tr);
 
       final pages = await _docxService.extractPages(widget.document.file);
       final archive = Archive();
@@ -345,16 +345,16 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
         setState(() => _progress = (i + 1) / widget.selectedPages.length * 0.9);
       }
 
-      _updateStatus("Creating ZIP archive...");
+      _updateStatus('creating_zip_archive'.tr);
       final zipBytes = ZipEncoder().encode(archive);
       _outputFile = File(outputPath.replaceAll('.docx', '.zip'));
       await _outputFile!.writeAsBytes(zipBytes!);
 
       setState(() => _progress = 1.0);
-      _updateStatus("ZIP created with split DOCX pages!");
+      _updateStatus('zip_created_successfully'.tr);
     } catch (e) {
       print("DOCX splitting error: $e");
-      _updateStatus("Error occurred. Saving original file instead...");
+      _updateStatus('error_saving_original'.tr);
       _outputFile = File(outputPath);
       await widget.document.file.copy(outputPath);
     }
@@ -374,60 +374,60 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: CustomAppBar(title: ('split_document'.tr)),
-        resizeToAvoidBottomInset: true,
-        body: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 100.0),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 20),
-                      _buildLoadingContainer(),
-                      if (_animationCompleted) ...[
-                        const SizedBox(height: 36),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            ('split_file_progress_screen'.tr),
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(title: ('split_document'.tr)),
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 100.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    _buildLoadingContainer(),
+                    if (_animationCompleted) ...[
+                      const SizedBox(height: 36),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          ('split_file_progress_screen'.tr),
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        if (_outputFile != null)
-                          DocumentContainer(
-                            filePath: _outputFile!.path,
-                            onTap: _openFile,
-                            onDelete: _handleFileDeleted,
-                            onFileRenamed: _handleFileRenamed,
-                          ),
-                      ],
+                      ),
+                      const SizedBox(height: 10),
+                      if (_outputFile != null)
+                        DocumentContainer(
+                          filePath: _outputFile!.path,
+                          onTap: _openFile,
+                          onDelete: _handleFileDeleted,
+                          onFileRenamed: _handleFileRenamed,
+                        ),
                     ],
+                  ],
+                ),
+              ),
+            ),
+
+            if (_animationCompleted && hasValidFile)
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                  child: CustomGradientButton(
+                    key: ValueKey(_saveButtonKey),
+                    text: _isSaving ? 'saving'.tr : 'save'.tr,
+                    onPressed: _isSaving ? null : _handleSaveFile,
                   ),
                 ),
               ),
-
-              if (_animationCompleted && hasValidFile)
-                SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                    child: CustomGradientButton(
-                      key: ValueKey(_saveButtonKey),
-                      text: _isSaving ? 'Saving...' : 'Save',
-                      onPressed: _isSaving ? null : _handleSaveFile,
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          ],
         ),
-      );
+      ),
+    );
   }
 
   Widget _buildLoadingContainer() {

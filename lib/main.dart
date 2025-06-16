@@ -17,6 +17,7 @@ import 'package:toolkit/provider/work_experience_provider.dart';
 import 'package:toolkit/screens/onboarding_screen.dart';
 import 'package:toolkit/screens/home_screen.dart';
 import 'package:toolkit/services/notification_service.dart';
+import 'package:toolkit/utils/app_colors.dart';
 import 'localization/language.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -119,11 +120,12 @@ class _AppInitializerState extends State<AppInitializer> {
     if (_isLoading) {
       return const Scaffold(
         body: Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
+          ),
         ),
       );
     }
-
     return _showOnboarding ? const OnboardingScreen() : const HomeScreen();
   }
 }

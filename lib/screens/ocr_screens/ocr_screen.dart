@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
@@ -54,7 +55,7 @@ class _OcrScreenState extends State<OcrScreen> {
         }
       }
     } catch (e) {
-      print("Error picking images: $e");
+      print('error_picking_images'.trParams({'error': e.toString()}));
     }
   }
 
@@ -97,7 +98,7 @@ class _OcrScreenState extends State<OcrScreen> {
 
       return processedFile;
     } catch (e) {
-      print("Error preprocessing image: $e");
+      print('error_preprocessing_image'.trParams({'error': e.toString()}));
       return imageFile; // Return original if preprocessing fails
     }
   }
@@ -156,7 +157,7 @@ class _OcrScreenState extends State<OcrScreen> {
 
   Future<void> _extractTextFromImages() async {
     if (_selectedImages.isEmpty) {
-      AppSnackBar.show(context, message: 'Please select at least one image');
+      AppSnackBar.show(context, message: 'select_at_least_one_image'.tr);
       return;
     }
 
@@ -189,7 +190,7 @@ class _OcrScreenState extends State<OcrScreen> {
 
           // Add image separator if multiple images
           if (_selectedImages.length > 1) {
-            combinedText.writeln('--- Image ${i + 1} ---');
+            combinedText.writeln('image_header'.trParams({'number': (i + 1).toString()}));
           }
 
           // Clean and add the extracted text
@@ -207,7 +208,7 @@ class _OcrScreenState extends State<OcrScreen> {
           try {
             await tempFile.delete();
           } catch (e) {
-            print("Error deleting temp file: $e");
+            print('error_deleting_temp_file'.trParams({'error': e.toString()}));
           }
         }
       }
@@ -229,12 +230,11 @@ class _OcrScreenState extends State<OcrScreen> {
           _clearSelectedImages();
         }
       } else {
-        AppSnackBar.show(context,
-            message: 'No text could be found in the selected images. Try images with clearer text.');
+        AppSnackBar.show(context, message: 'no_text_in_images'.tr);
       }
     } catch (e) {
-      print("Error in OCR: $e");
-      AppSnackBar.show(context, message: 'Error processing images: $e');
+      print('error_in_ocr'.trParams({'error': e.toString()}));
+      AppSnackBar.show(context, message: 'error_processing_images'.trParams({'error': e.toString()}));
       setState(() {
         _isProcessing = false;
       });
@@ -259,8 +259,8 @@ class _OcrScreenState extends State<OcrScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const ToolsAppBar(
-        title: 'OCR',
+      appBar: ToolsAppBar(
+        title: 'ocr'.tr,
       ),
       body: Column(
         children: [
@@ -272,10 +272,9 @@ class _OcrScreenState extends State<OcrScreen> {
                 children: [
                   const CustomSvgImage(imagePath: 'assets/images/ocr_image.svg'),
                   const SizedBox(height: 30),
-                  const InfoCard(
-                    title: 'Extract text from files',
-                    description:
-                    'Seamlessly extract text copy from multiple images or documents instantly with enhanced accuracy.',
+                  InfoCard(
+                    title: 'extract_text_from_files'.tr,
+                    description: 'extract_text_description'.tr,
                   ),
                   const SizedBox(height: 24),
                   Container(
@@ -293,7 +292,7 @@ class _OcrScreenState extends State<OcrScreen> {
                     child: Column(
                       children: [
                         FileSelectionSection(
-                          sectionTitle: 'Choose File',
+                          sectionTitle: 'choose_file'.tr,
                           onSelectFiles: () => _pickImages(ImageSource.gallery),
                           onScanNew: () => _pickImages(ImageSource.camera),
                         ),
@@ -305,7 +304,7 @@ class _OcrScreenState extends State<OcrScreen> {
                             onTap: () => _pickImages(ImageSource.gallery),
                             onRemoveImage: _removeImage,
                             isEmpty: _shouldClearImages || _selectedImages.isEmpty,
-                            emptyStateText: 'Click to choose files',
+                            emptyStateText: 'click_to_choose_files'.tr,
                           ),
                         ),
                       ],
@@ -318,7 +317,7 @@ class _OcrScreenState extends State<OcrScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
             child: CustomGradientButton(
-              text: _isProcessing ? 'Processing...' : 'Extract Text',
+              text: _isProcessing ? 'processing'.tr : 'extract_text'.tr,
               onPressed: _isProcessing ? null : _extractTextFromImages,
             ),
           ),

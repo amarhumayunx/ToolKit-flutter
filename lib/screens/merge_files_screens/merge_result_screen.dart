@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'package:open_file/open_file.dart';
@@ -91,16 +92,16 @@ class _MergeResultScreenState extends State<MergeResultScreen>
         final result = await OpenFile.open(_currentFilePath);
         if (result.type != ResultType.done && mounted) {
           AppSnackBar.show(context,
-              message: 'Cannot open file: ${result.message}');
+              message: '${'cannot_open_file'.tr}: ${result.message}');
         }
       } catch (e) {
         if (mounted) {
           AppSnackBar.show(context,
-              message: 'Error opening file: ${e.toString()}');
+              message: '${'error_opening_file'.tr}: ${e.toString()}');
         }
       }
     } else if (mounted) {
-      AppSnackBar.show(context, message: 'File not found or not yet processed');
+      AppSnackBar.show(context, message: 'file_not_found_or_not_processed'.tr);
     }
   }
 
@@ -110,7 +111,7 @@ class _MergeResultScreenState extends State<MergeResultScreen>
     }
     Navigator.of(context).pop();
     Navigator.of(context).pop();
-    AppSnackBar.show(context, message: 'File deleted successfully');
+    AppSnackBar.show(context, message: 'file_deleted_successfully'.tr);
   }
 
   void _handleSaveCompleted() {
@@ -119,13 +120,16 @@ class _MergeResultScreenState extends State<MergeResultScreen>
     }
     Navigator.of(context).pop();
     Navigator.of(context).pop();
-    AppSnackBar.show(context, message: 'File saved successfully');
+    AppSnackBar.show(context, message: 'file_saved_successfully'.tr);
   }
 
   void _handleFileRenamed(String newPath) {
     setState(() {
       _currentFilePath = newPath;
     });
+    if (mounted) {
+      AppSnackBar.show(context, message: 'file_renamed_successfully'.tr);
+    }
   }
 
   @override
@@ -133,7 +137,7 @@ class _MergeResultScreenState extends State<MergeResultScreen>
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(
-        title: 'Merge',
+        title: 'merge_results'.tr,
         onBackPressed: () {
           Navigator.of(context).pop(false);
         },
@@ -153,7 +157,7 @@ class _MergeResultScreenState extends State<MergeResultScreen>
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'Merged PDF File:',
+                        'merged_pdf_file'.tr,
                         style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -183,7 +187,7 @@ class _MergeResultScreenState extends State<MergeResultScreen>
                 child: SaveFileButton(
                   filePath: _currentFilePath,
                   fileType: 'pdf',
-                  buttonText: 'Save',
+                  buttonText: 'save'.tr,
                   onSaveCompleted: _handleSaveCompleted,
                 ),
               ),

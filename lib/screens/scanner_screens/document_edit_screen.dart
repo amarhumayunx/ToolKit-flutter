@@ -152,6 +152,12 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     });
 
     try {
+      SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.manual,
+        overlays: [SystemUiOverlay.bottom], // Only show navigation bar
+      );
+
+
       final croppedFile = await ImageCropper().cropImage(
         sourcePath: _processedImage!.path,
         compressFormat: ImageCompressFormat.jpg,
@@ -167,7 +173,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
             initAspectRatio: CropAspectRatioPreset.original,
             lockAspectRatio: false,
             hideBottomControls: false,
-            backgroundColor: Colors.black,
+            backgroundColor: Colors.white,
             activeControlsWidgetColor: AppColors.primary,
             dimmedLayerColor: Colors.black.withOpacity(0.6),
             cropFrameColor: AppColors.primary,
@@ -187,7 +193,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
             cancelButtonTitle: 'Cancel',
             rotateButtonsHidden: true,
             rotateClockwiseButtonHidden: true,
-            hidesNavigationBar: true,
+            hidesNavigationBar: false,
             minimumAspectRatio: 0.1,
             rectX: 0.0,
             rectY: 0.0,
@@ -223,7 +229,6 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
       }
     }
   }
-
   Future<void> _preGenerateFilterPreviews() async {
     for (String filter in _filterOptions) {
       File preview = await _generateFilterPreview(filter);
@@ -454,7 +459,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => Center(
+        builder: (context) => const Center(
           child: CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
           ),
@@ -541,7 +546,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     return ChangeNotifierProvider.value(
       value: _filterProvider,
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(
+        value: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.dark,
           statusBarBrightness: Brightness.light,
@@ -660,7 +665,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
                     if (_isRotating)
                       Container(
                         color: Colors.black26,
-                        child: Center(
+                        child: const Center(
                           child: CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                           ),

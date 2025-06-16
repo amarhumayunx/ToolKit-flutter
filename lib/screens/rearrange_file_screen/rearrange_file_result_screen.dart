@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -86,7 +87,7 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
         Navigator.of(context).popUntil((route) => route.isFirst);
       } catch (e) {
         AppSnackBar.show(context,
-            message: 'Failed to save file: ${e.toString()}');
+            message: '${'failed_to_save_file'.tr}: ${e.toString()}');
       }
     }
   }
@@ -372,11 +373,11 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
       });
 
       if (mounted) {
-        AppSnackBar.show(context, message: 'File renamed successfully');
+        AppSnackBar.show(context, message: 'file_renamed_successfully'.tr);
       }
     } catch (e) {
       if (mounted) {
-        AppSnackBar.show(context, message: 'Error renaming file: ${e.toString()}');
+        AppSnackBar.show(context, message: '${'error_renaming_file'.tr}: ${e.toString()}');
       }
     }
   }
@@ -389,7 +390,7 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.white,
-        appBar: const CustomAppBar(title: 'Rearrange Results'),
+        appBar: CustomAppBar(title: 'rearrange_results'.tr),
         resizeToAvoidBottomInset: true,
         body: SafeArea(
           child: Column(
@@ -411,7 +412,7 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Error occurred',
+                            'error_occurred'.tr,
                             style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
                             textAlign: TextAlign.center,
                           ),
@@ -428,7 +429,7 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
                                 _errorOccurred = false;
                                 _processingComplete = false;
                                 _progress = 0.0;
-                                _statusMessage = 'Processing document...';
+                                _statusMessage = 'processing_document'.tr;
                                 _rearrangedFiles.clear();
                                 _outputFile = null;
                                 convertedFile = null;
@@ -438,14 +439,14 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
                               });
                               _rearrangeDocument();
                             },
-                            child: const Text('Try Again'),
+                            child: Text('try_again'.tr),
                           ),
                         ] else ...[
                           const SizedBox(height: 24),
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              'Rearranged Files:',
+                              'rearranged_files'.tr,
                               style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500),
                             ),
                           ),
@@ -472,7 +473,7 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
                           else if (!_processingComplete)
                             Center(
                               child: Text(
-                                'Processing document...',
+                                'processing_document'.tr,
                                 style: GoogleFonts.inter(fontSize: 16),
                               ),
                             ),
@@ -489,7 +490,9 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
                     padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
                     child: CustomGradientButton(
                       key: Key(_saveButtonKey),
-                      text: _isSaving ? 'Saving...' : 'Save',
+                      text: _isSaving
+                          ? 'saving'.tr
+                          : 'save'.tr,
                       onPressed: _isSaving ? null : _handleSaveFile,
                     ),
                   ),

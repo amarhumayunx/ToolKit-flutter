@@ -19,7 +19,6 @@ import '../../widgets/gradient_background.dart';
 import '../../widgets/settings_widgets/settings_appbar.dart';
 import '../../widgets/settings_widgets/settings_tile.dart';
 import '../../widgets/settings_widgets/settings_toggle_tile.dart';
-import 'email_recovery_screen.dart';
 import 'locked_files_Screen.dart';
 import 'continue_with_google_screen.dart'; // Add this import
 
@@ -37,7 +36,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isPasswordSet = false;
   bool _isUserAuthenticated = false; // Add this
   final String _selectedLanguage = 'English';
-  String _selectedRecoveryOption = 'email'.tr;
+  final String _selectedRecoveryOption = 'email'.tr;
   final AuthService _authService = AuthService();
   StreamSubscription? _authSubscription;
 
@@ -167,7 +166,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.lock_outline,
                   color: AppColors.primary,
                   size: 24,
@@ -281,7 +280,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PasswordVerificationScreen(
+          builder: (context) => const PasswordVerificationScreen(
             destinationScreen: LockedFilesScreen(),
             title: 'Enter Password',
           ),
@@ -291,7 +290,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => SetPasswordScreen(),
+          builder: (context) => const SetPasswordScreen(),
         ),
       );
 
@@ -300,7 +299,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PasswordVerificationScreen(
+            builder: (context) => const PasswordVerificationScreen(
               destinationScreen: LockedFilesScreen(),
               title: 'Enter Password',
             ),
@@ -388,9 +387,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Expanded(
               child: Container(
                 width: double.infinity,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: const BorderRadius.only(
+                  borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(30),
                     topRight: Radius.circular(30),
                   ),
@@ -680,7 +679,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => PhoneRecoveryScreen(),
+                                  builder: (context) => const PhoneRecoveryScreen(),
                                 ),
                               );
                             } else {
@@ -724,7 +723,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       color: AppColors.gradientEnd,
                                     ),
                                   ),
-                                  Icon(
+                                  const Icon(
                                     Icons.arrow_forward_ios,
                                     size: 16,
                                     color: AppColors.gradientEnd,

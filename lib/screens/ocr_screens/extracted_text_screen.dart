@@ -1,7 +1,8 @@
-// extracted_text_screen.dart (updated with copy functionality)
+// extracted_text_screen.dart (fully translated version)
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Add this import for clipboard
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_file/open_file.dart';
 import 'package:toolkit/widgets/custom_appbar.dart';
@@ -33,7 +34,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
   bool _animationCompleted = false;
   bool _isSaving = false;
   String? _savedFilePath;
-  bool _fileRenamed = false; // Track if file was renamed
+  bool _fileRenamed = false;
   late AnimationController _animationController;
   late Animation<double> _progressAnimation;
   final WordDocumentService _wordDocumentService = WordDocumentService();
@@ -97,7 +98,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
       setState(() {
         _isSaving = false;
       });
-      AppSnackBar.show(context, message: 'Error saving file: $e');
+      AppSnackBar.show(context, message: '${'error_saving_file'.tr}: $e');
     }
   }
 
@@ -112,11 +113,11 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
       if (mounted) {
         Navigator.of(context).pop(true);
         Navigator.of(context).pop(true);
-        AppSnackBar.show(context, message: 'File deleted successfully');
+        AppSnackBar.show(context, message: 'file_deleted_successfully'.tr);
       }
     } catch (e) {
       if (mounted) {
-        AppSnackBar.show(context, message: 'Error deleting file: $e');
+        AppSnackBar.show(context, message: '${'error_deleting_file'.tr}: $e');
       }
     }
   }
@@ -128,10 +129,10 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
       final result = await OpenFile.open(_savedFilePath!);
       if (result.type != ResultType.done) {
         AppSnackBar.show(context,
-            message: 'Could not open file: ${result.message}');
+            message: '${'could_not_open_file'.tr}: ${result.message}');
       }
     } catch (e) {
-      AppSnackBar.show(context, message: 'Error opening file: $e');
+      AppSnackBar.show(context, message: '${'error_opening_file'.tr}: $e');
     }
   }
 
@@ -146,11 +147,11 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
     try {
       await Clipboard.setData(ClipboardData(text: _textController.text));
       if (mounted) {
-        AppSnackBar.show(context, message: 'Text copied to clipboard');
+        AppSnackBar.show(context, message: 'text_copied_to_clipboard'.tr);
       }
     } catch (e) {
       if (mounted) {
-        AppSnackBar.show(context, message: 'Error copying text: $e');
+        AppSnackBar.show(context, message: '${'error_copying_text'.tr}: $e');
       }
     }
   }
@@ -160,7 +161,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(
-        title: 'OCR',
+        title: 'ocr'.tr,
         onBackPressed: () {
           Navigator.of(context).pop(false);
         },
@@ -186,7 +187,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Extracted Text File:',
+                          'extracted_text_file'.tr,
                           style: GoogleFonts.inter(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -211,7 +212,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
                           ),
                           child: Center(
                             child: Text(
-                              'No file available',
+                              'no_file_available'.tr,
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
@@ -221,18 +222,16 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
                           ),
                         ),
                       const SizedBox(height: 20),
-                      // Updated section with copy button
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Extracted Text:',
+                            'extracted_text'.tr,
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -262,7 +261,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
                 child: SaveDocumentButton(
                   documentFile: File(_savedFilePath!),
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  skipTimestamp: _fileRenamed, // Pass skipTimestamp if file was renamed
+                  skipTimestamp: _fileRenamed,
                   onSaveCompleted: () {
                     Navigator.of(context).pop(true);
                   },

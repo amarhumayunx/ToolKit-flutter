@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../utils/app_colors.dart';
 
@@ -129,7 +130,7 @@ class _AnimatedLoadingContainerState extends State<AnimatedLoadingContainer> {
             ),
             const SizedBox(height: 24),
             Text(
-              widget.animationCompleted ? 'Completed!' : 'Please Wait!',
+              widget.animationCompleted ? 'completed'.tr : 'please_wait'.tr,
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
