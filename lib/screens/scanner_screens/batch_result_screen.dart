@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'dart:io';
 import '../../widgets/batch_app_bar.dart';
 import '../../widgets/scanner_widgets/document_preview.dart';
@@ -121,6 +122,7 @@ class _BatchResultScreenState extends State<BatchResultScreen> {
       appBar: BatchAppBar(
         onNextPressed: _navigateToEditScreen,
         onBackPressed: () => Navigator.pop(context),
+        actionText: 'next'.tr,
 
       ),
       body: Column(

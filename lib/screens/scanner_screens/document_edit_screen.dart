@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
@@ -17,7 +19,7 @@ import '../../widgets/scanner_widgets/filter_selector.dart';
 
 // Filter provider to manage filter state
 class FilterProvider extends ChangeNotifier {
-  String _selectedFilter = 'Original';
+  String _selectedFilter = 'original'.tr;
   final Map<String, File> _filterCache = {};
 
   String get selectedFilter => _selectedFilter;
@@ -89,14 +91,14 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
   int _currentHistoryIndex = 0;
 
   // Filter options
-  final List<String> _filterOptions = [
-    'Original',
-    'Cool Tone',
-    'Warm Tone',
-    'Grayscale',
-    'Blue Light',
-    'Sepia',
-    'Soft Pastel'
+  List<String> get _filterOptions => [
+    'original'.tr,
+    'cool_tone'.tr,
+    'warm_tone'.tr,
+    'grayscale'.tr,
+    'blue_light'.tr,
+    'sepia'.tr,
+    'soft_pastel'.tr
   ];
 
   // Pre-computed filter thumbnails
@@ -157,7 +159,6 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
         overlays: [SystemUiOverlay.bottom], // Only show navigation bar
       );
 
-
       final croppedFile = await ImageCropper().cropImage(
         sourcePath: _processedImage!.path,
         compressFormat: ImageCompressFormat.jpg,
@@ -166,7 +167,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
         maxHeight: 3000,
         uiSettings: [
           AndroidUiSettings(
-            toolbarTitle: 'Crop Document',
+            toolbarTitle: 'crop_document'.tr,
             toolbarColor: AppColors.primary,
             toolbarWidgetColor: Colors.white,
             statusBarColor: AppColors.primary,
@@ -185,12 +186,12 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
             cropGridColumnCount: 3,
           ),
           IOSUiSettings(
-            title: 'Crop Document',
+            title: 'crop_document'.tr,
             aspectRatioLockEnabled: false,
             resetAspectRatioEnabled: false,
             aspectRatioPickerButtonHidden: true,
-            doneButtonTitle: 'Done',
-            cancelButtonTitle: 'Cancel',
+            doneButtonTitle: 'done'.tr,
+            cancelButtonTitle: 'cancel'.tr,
             rotateButtonsHidden: true,
             rotateClockwiseButtonHidden: true,
             hidesNavigationBar: false,
@@ -217,9 +218,9 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
         _preGenerateFilterPreviews();
       }
     } catch (e) {
-      debugPrint('Error cropping image: $e');
+      debugPrint('error_cropping_image'.tr + ': $e');
       if (mounted) {
-        AppSnackBar.show(context, message: 'Failed to crop image');
+        AppSnackBar.show(context, message: 'failed_to_crop_image'.tr);
       }
     } finally {
       if (mounted) {
@@ -229,6 +230,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
       }
     }
   }
+
   Future<void> _preGenerateFilterPreviews() async {
     for (String filter in _filterOptions) {
       File preview = await _generateFilterPreview(filter);
@@ -272,7 +274,9 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
       _preGenerateFilterPreviews();
     } catch (e) {
       // Handle any errors
-      print('Error rotating image: $e');
+      if (kDebugMode) {
+        print('${'error_rotating_image'.tr}: $e');
+      }
     } finally {
       setState(() {
         _isRotating = false;
@@ -316,7 +320,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     _filterProvider.setFilter(filterName);
 
     // Skip animation for Original filter
-    if (filterName != 'Original') {
+    if (filterName != 'original'.tr) {
       // Start scanning animation
       setState(() {
         _isApplyingFilter = true;
@@ -336,7 +340,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
       _addToHistory(_filterProvider.filterCache[filterName]!);
 
       // Skip animation for Original filter
-      if (filterName == 'Original') {
+      if (filterName == 'original'.tr) {
         setState(() {
           _isApplyingFilter = false;
         });
@@ -356,35 +360,26 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
       }
 
       // Apply selected filter with enhanced contrast for text
-      switch (filterName) {
-        case 'Sepia':
-          image = img.sepia(image);
-          image = img.adjustColor(image, contrast: 1.3);
-          break;
-        case 'Cool Tone':
-          image = img.colorOffset(image, blue: 20, green: 10);
-          image = img.adjustColor(image, contrast: 1.2, gamma: 1.0);
-          break;
-        case 'Warm Tone':
-          image = img.colorOffset(image, red: 20, green: 10);
-          image = img.adjustColor(image, contrast: 1.2, gamma: 1.0);
-          break;
-        case 'Grayscale':
-          image = img.grayscale(image);
-          image = img.adjustColor(image, contrast: 1.4);
-          break;
-        case 'Blue Light':
-          image = img.colorOffset(image, blue: 30);
-          image = img.adjustColor(image, contrast: 1.25);
-          break;
-        case 'Soft Pastel':
-          image = img.adjustColor(image, saturation: 0.5, contrast: 1.1);
-          break;
-        case 'Original':
-        default:
-        // Use original image with current rotation
-          image = img.adjustColor(image, contrast: 1.1);
-          break;
+      if (filterName == 'sepia'.tr) {
+        image = img.sepia(image);
+        image = img.adjustColor(image, contrast: 1.3);
+      } else if (filterName == 'cool_tone'.tr) {
+        image = img.colorOffset(image, blue: 20, green: 10);
+        image = img.adjustColor(image, contrast: 1.2, gamma: 1.0);
+      } else if (filterName == 'warm_tone'.tr) {
+        image = img.colorOffset(image, red: 20, green: 10);
+        image = img.adjustColor(image, contrast: 1.2, gamma: 1.0);
+      } else if (filterName == 'grayscale'.tr) {
+        image = img.grayscale(image);
+        image = img.adjustColor(image, contrast: 1.4);
+      } else if (filterName == 'blue_light'.tr) {
+        image = img.colorOffset(image, blue: 30);
+        image = img.adjustColor(image, contrast: 1.25);
+      } else if (filterName == 'soft_pastel'.tr) {
+        image = img.adjustColor(image, saturation: 0.5, contrast: 1.1);
+      } else {
+        // Original or default
+        image = img.adjustColor(image, contrast: 1.1);
       }
 
       // Save the filtered image
@@ -403,13 +398,15 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
       _addToHistory(filteredImage);
 
       // For Original filter, immediately set applying to false
-      if (filterName == 'Original') {
+      if (filterName == 'original'.tr) {
         setState(() {
           _isApplyingFilter = false;
         });
       }
     } catch (e) {
-      print('Error applying filter: $e');
+      if (kDebugMode) {
+        print('${'error_applying_filter'.tr}: $e');
+      }
       setState(() {
         _isApplyingFilter = false;
       });
@@ -493,7 +490,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
         if (mounted) {
           Navigator.pop(context); // Close loading dialog
 
-          AppSnackBar.show(context, message: 'Failed to create document: $e');
+          AppSnackBar.show(context, message: 'failed_to_create_document'.tr + ': $e');
         }
       }
     }
@@ -508,30 +505,20 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     image = img.copyResize(image, width: 100);
 
     // Apply selected filter
-    switch (filterName) {
-      case 'Sepia':
-        image = img.sepia(image);
-        break;
-      case 'Cool Tone':
-        image = img.colorOffset(image, blue: 20, green: 10);
-        break;
-      case 'Warm Tone':
-        image = img.colorOffset(image, red: 20, green: 10);
-        break;
-      case 'Grayscale':
-        image = img.grayscale(image);
-        break;
-      case 'Blue Light':
-        image = img.colorOffset(image, blue: 30);
-        break;
-      case 'Soft Pastel':
-        image = img.adjustColor(image, saturation: 0.5, contrast: 0.9);
-        break;
-      case 'Original':
-      default:
-      // No filter applied
-        break;
+    if (filterName == 'sepia'.tr) {
+      image = img.sepia(image);
+    } else if (filterName == 'cool_tone'.tr) {
+      image = img.colorOffset(image, blue: 20, green: 10);
+    } else if (filterName == 'warm_tone'.tr) {
+      image = img.colorOffset(image, red: 20, green: 10);
+    } else if (filterName == 'grayscale'.tr) {
+      image = img.grayscale(image);
+    } else if (filterName == 'blue_light'.tr) {
+      image = img.colorOffset(image, blue: 30);
+    } else if (filterName == 'soft_pastel'.tr) {
+      image = img.adjustColor(image, saturation: 0.5, contrast: 0.9);
     }
+    // Original - no filter applied
 
     // Save the filtered image
     final directory = await getTemporaryDirectory();
@@ -566,7 +553,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
                 Navigator.pop(context);
               }
             },
-            actionText: 'Done',
+            actionText: 'done'.tr,
           ),
           body: Column(
             children: [
@@ -713,23 +700,23 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
                           children: [
                             _buildEditToolButton(
                               assetPath: 'assets/icons/retake_icon.svg',
-                              label: 'Retake',
+                              label: 'retake'.tr,
                               onTap: _retakePhoto,
                             ),
                             _buildEditToolButton(
                               assetPath: 'assets/icons/filters_icon.svg',
-                              label: 'Filters',
+                              label: 'filters'.tr,
                               isActive: _isFiltering,
                               onTap: _toggleFilterView,
                             ),
                             _buildEditToolButton(
                               assetPath: 'assets/icons/crop_icon.svg',
-                              label: 'Crop',
+                              label: 'crop'.tr,
                               onTap: _cropImage,
                             ),
                             _buildEditToolButton(
                               assetPath: 'assets/icons/rotate_icon.svg',
-                              label: 'Rotate',
+                              label: 'rotate'.tr,
                               onTap: _rotateImage,
                             ),
                           ],

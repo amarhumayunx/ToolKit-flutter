@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../utils/app_colors.dart';
@@ -6,13 +7,13 @@ import '../utils/app_colors.dart';
 class BatchAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onNextPressed;
   final VoidCallback onBackPressed;
-  final String actionText; // New parameter for customizable action text
+  final String? actionText;
 
   const BatchAppBar({
     super.key,
     required this.onNextPressed,
     required this.onBackPressed,
-    this.actionText = 'Next', // Default value is 'Next'
+    this.actionText,
   });
 
   @override
@@ -43,7 +44,7 @@ class BatchAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: TextButton(
               onPressed: onNextPressed,
               child: Text(
-                actionText, // Use the actionText parameter here
+                actionText!,
                 style: GoogleFonts.inter(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w500,

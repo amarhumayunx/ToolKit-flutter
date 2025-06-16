@@ -84,8 +84,8 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
     _pdfPages = await pdfService.extractPages(_docxFile!);
 
     setState(() {
-      _selectedPages = List<bool>.filled(pageCount, true);
-      _pageSelectionOrder = List.generate(pageCount, (index) => index);
+      _selectedPages = List<bool>.filled(pageCount, false); // Changed to false
+      _pageSelectionOrder = []; // Start with empty list
       _pageImages = List<Uint8List?>.filled(pageCount, null);
       _isLoadingPreviews = true;
     });
@@ -98,8 +98,8 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
     final pages = await docxService.extractPages(_docxFile!);
 
     setState(() {
-      _selectedPages = List<bool>.filled(pages.length, true);
-      _pageSelectionOrder = List.generate(pages.length, (index) => index);
+      _selectedPages = List<bool>.filled(pages.length, false); // Changed to false
+      _pageSelectionOrder = []; // Start with empty list
       _isLoadingPreviews = false;
     });
   }
@@ -201,7 +201,7 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
     final newOrder = List<int>.from(_pageSelectionOrder);
 
     if (newOrder.isEmpty) {
-      AppSnackBar.show(context, message: 'please_select_one_page'.tr);
+      AppSnackBar.show(context, message: 'please_select_at_least_one_page'.tr);
       return;
     }
 
@@ -232,69 +232,69 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
         );
       }
 
-            if (_pageImages[index] != null) {
-          return Padding(
-            padding: const EdgeInsets.all(3.5),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                image: DecorationImage(
-                  image: MemoryImage(_pageImages[index]!),
-                  fit: BoxFit.cover,
-                ),
+      if (_pageImages[index] != null) {
+        return Padding(
+          padding: const EdgeInsets.all(3.5),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              image: DecorationImage(
+                image: MemoryImage(_pageImages[index]!),
+                fit: BoxFit.cover,
               ),
             ),
-          );
-        }
-
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.picture_as_pdf,
-                size: 40,
-                color: Colors.grey.shade600,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${'page_number'.tr} ${index + 1}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
           ),
         );
-      } else {
-        return Column(
+      }
+
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: Center(
-                child: Image.asset(
-                  'assets/images/doc.png',
-                  fit: BoxFit.cover,
-                  height: 150,
-                  width: 150,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      'assets/images/doc.png',
-                      color: Colors.grey.shade400,
-                    );
-                  },
-                ),
+            Icon(
+              Icons.picture_as_pdf,
+              size: 40,
+              color: Colors.grey.shade600,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${'page_number'.tr} ${index + 1}',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
-        );
-      }
+        ),
+      );
+    } else {
+      return Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: Image.asset(
+                'assets/images/doc.png',
+                fit: BoxFit.cover,
+                height: 150,
+                width: 150,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset(
+                    'assets/images/doc.png',
+                    color: Colors.grey.shade400,
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      );
     }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -330,7 +330,7 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
               const SizedBox(height: 16),
               Expanded(
                 child: _isProcessing
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: CircularProgressIndicator(color: AppColors.primary,))
                     : GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,

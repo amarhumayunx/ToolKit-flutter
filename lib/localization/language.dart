@@ -5,6 +5,59 @@ class Language extends Translations {
   Map<String, Map<String, String>> get keys => {
     'en_US': {
 
+      "selected_file": "Selected File",
+      "select_format": "Select Format",
+      "convert": "Convert",
+      "converting": "Converting...",
+      "please_select_format_first": "Please select a format first",
+      "conversion_failed": "Conversion Failed",
+      "ok": "OK",
+
+      "word": "Word",
+      "excel": "Excel",
+      "powerpoint": "PowerPoint",
+      "image": "Image",
+
+      "error_excel_not_implemented": "Excel conversion not implemented",
+
+      "am": "AM",
+      "pm": "PM",
+
+      "convert_pdf_format": "Convert PDF Format",
+      "convert_pdf_description": "Easily convert PDFs to various formats while retaining their quality, resolution and clarity.",
+
+      "click_to_choose_pdf": "Click to choose PDF file",
+      "next": "Next",
+      "error_selecting_pdf": "Error selecting PDF",
+      "please_select_pdf_first": "Please select a PDF file first",
+
+      "edit": "Edit",
+      "failed_to_open_document": "Failed to open document",
+      "file_deleted_successfully": "File deleted successfully",
+      "generated_document": "Generated Document",
+
+      "original": "Original",
+      "cool_tone": "Cool Tone",
+      "warm_tone": "Warm Tone",
+      "grayscale": "Grayscale",
+      "blue_light": "Blue Light",
+      "sepia": "Sepia",
+      "soft_pastel": "Soft Pastel",
+
+      "crop_document": "Crop Document",
+      "done": "Done",
+      "cancel": "Cancel",
+      "retake": "Retake",
+      "filters": "Filters",
+      "crop": "Crop",
+      "rotate": "Rotate",
+
+      "failed_to_crop_image": "Failed to crop image",
+      "failed_to_create_document": "Failed to create document",
+      "error_cropping_image": "Error cropping image",
+      "error_rotating_image": "Error rotating image",
+      "error_applying_filter": "Error applying filter",
+
       "rearrange_results": "Rearrange Results",
       "processing_document": "Processing document...",
       "reading_pages": "Reading document pages...",
@@ -47,7 +100,6 @@ class Language extends Translations {
       "cannot_open_file": "Unable to open the file",
       "zip_file_message": "This is a ZIP file. You may need a ZIP extractor app to view its contents.",
       "error_opening_document": "Error opening document",
-      "file_deleted_successfully": "File deleted successfully",
       "error_during_deletion": "Error during deletion",
       "processing_generic_document": "Processing document...",
       "error_encountered_fallback": "Error encountered, using fallback method...",
@@ -62,7 +114,7 @@ class Language extends Translations {
       'edit_files_description': 'Make changes to your images easily. Upload and modify multiple images for a seamless experience.',
       'choose_images': 'Choose Images',
       'click_to_choose_images_from_gallery': 'Click to choose images from gallery',
-      'next': 'Next',
+
       'error_selecting_images': 'Error selecting images',
       'error_capturing_document': 'Error capturing document',
       'error_processing_files': 'Error processing files',
@@ -123,9 +175,6 @@ class Language extends Translations {
       "delete_file_confirmation": "Are you sure you want to delete this file?",
       "rename_file": "Rename File",
 
-      // Button texts
-      "cancel": "Cancel",
-
 
       // Share content
       "sharing_document_from_ocr_tool": "Sharing document from OCR Tool",
@@ -184,7 +233,6 @@ class Language extends Translations {
       'completed': 'Completed!',
       'please_wait': 'Please wait!',
       'file_name': 'File Name',
-      'done': 'Done',
       'single': 'Single',
       'batch': 'Batch',
       'camera_permission_required': 'Camera permission is required to use the scanner',
@@ -330,6 +378,59 @@ class Language extends Translations {
 
     'en_GB': {
 
+      "selected_file": "Selected File",
+      "select_format": "Select Format",
+      "convert": "Convert",
+      "converting": "Converting...",
+      "please_select_format_first": "Please select a format first",
+      "conversion_failed": "Conversion Failed",
+      "ok": "OK",
+
+      "word": "Word",
+      "excel": "Excel",
+      "powerpoint": "PowerPoint",
+      "image": "Image",
+
+      "error_excel_not_implemented": "Excel conversion not implemented",
+
+      "am": "AM",
+      "pm": "PM",
+
+      "convert_pdf_format": "Convert PDF Format",
+      "convert_pdf_description": "Easily convert PDFs to various formats while retaining their quality, resolution and clarity.",
+
+      "click_to_choose_pdf": "Click to choose PDF file",
+      "next": "Next",
+      "error_selecting_pdf": "Error selecting PDF",
+      "please_select_pdf_first": "Please select a PDF file first",
+
+      "edit": "Edit",
+      "failed_to_open_document": "Failed to open document",
+      "file_deleted_successfully": "File deleted successfully",
+      "generated_document": "Generated Document",
+
+      "original": "Original",
+      "cool_tone": "Cool Tone",
+      "warm_tone": "Warm Tone",
+      "grayscale": "Grayscale",
+      "blue_light": "Blue Light",
+      "sepia": "Sepia",
+      "soft_pastel": "Soft Pastel",
+
+      "crop_document": "Crop Document",
+      "done": "Done",
+      "cancel": "Cancel",
+      "retake": "Retake",
+      "filters": "Filters",
+      "crop": "Crop",
+      "rotate": "Rotate",
+
+      "failed_to_crop_image": "Failed to crop image",
+      "failed_to_create_document": "Failed to create document",
+      "error_cropping_image": "Error cropping image",
+      "error_rotating_image": "Error rotating image",
+      "error_applying_filter": "Error applying filter",
+
       "rearrange_results": "Rearrange Results",
       "processing_document": "Processing document...",
       "reading_pages": "Reading document pages...",
@@ -372,7 +473,6 @@ class Language extends Translations {
       "cannot_open_file": "Unable to open the file",
       "zip_file_message": "This is a ZIP file. You may need a ZIP extractor app to view its contents.",
       "error_opening_document": "Error opening document",
-      "file_deleted_successfully": "File deleted successfully",
       "error_during_deletion": "Error during deletion",
       "processing_generic_document": "Processing document...",
       "error_encountered_fallback": "Error encountered, using fallback method...",
@@ -445,9 +545,6 @@ class Language extends Translations {
       "delete_file": "Delete File",
       "delete_file_confirmation": "Are you sure you want to delete this file?",
       "rename_file": "Rename File",
-
-      // Button texts
-      "cancel": "Cancel",
 
 
       // Share content
@@ -638,7 +735,6 @@ class Language extends Translations {
       'norecentdocuments': 'No recent documents found',
 
       'file_name': 'File Name',
-      'done': 'Done',
       'single': 'Single',
       'batch': 'Batch',
       'camera_permission_required': 'Camera permission is required to use the scanner',
@@ -653,6 +749,62 @@ class Language extends Translations {
     },
 
     'ur_PK': {
+
+      "selected_file": "منتخب فائل",
+      "select_format": "فارمیٹ منتخب کریں",
+      "convert": "تبدیل کریں",
+      "converting": "تبدیل کیا جا رہا ہے...",
+      "please_select_format_first": "براہ مہربانی پہلے ایک فارمیٹ منتخب کریں",
+      "conversion_failed": "تبدیل کرنے کا عمل ناکام رہا",
+      "ok": "ٹھیک ہے",
+
+      "word": "ورڈ",
+      "excel": "ایکسل",
+      "powerpoint": "پاورپوائنٹ",
+      "image": "تصویر",
+
+      "error_excel_not_implemented": "ایکسل کی تبدیلی کی سہولت دستیاب نہیں",
+
+      "am": "صبح",
+      "pm": "شام",
+
+      "convert_pdf": "پی ڈی ایف کو مزید فارمیٹس میں بدلیں",
+      "convert_pdf_format": "پی ڈی ایف کی شکل بدلیں",
+      "convert_pdf_description": "پی ڈی ایف کی کوالٹی، ریزولوشن اور وضاحت برقرار رکھتے ہوئے مزید فارمیٹس میں آسانی سے بدلیں.",
+      "select_file": "فائل منتخب کریں",
+      "click_to_choose_pdf": "پی ڈی ایف فائل منتخب کرنے کے لیے کلک کریں",
+      "next": "اگلا",
+      "please_select_pdf_only": "براہ مہربانی صرف پی ڈی ایف فائل منتخب کریں",
+      "error_selecting_pdf": "پی ڈی ایف منتخب کرنے کی صورت میں مسئلہ آیا",
+      "please_select_pdf_first": "براہ مہربانی پہلے ایک پی ڈی ایف فائل منتخب کریں",
+
+      "edit": "ترمیم کریں",
+      "failed_to_open_document": "دستاویز کھولنے میں ناکام",
+      "file_deleted_successfully": "فائل کامیابی کے ساتھ حذف کی گیا!",
+      "generated_document": "تخلیق شدہ دستاویز",
+
+      "original": "اصلی",
+      "cool_tone": "ٹھنڈی چھایا",
+      "warm_tone": "گرم چھایا",
+      "grayscale": "سیاہ و سفید",
+      "blue_light": "نیلی روشنی",
+      "sepia": "سیپیا",
+      "soft_pastel": "ہلکے رنگ",
+
+      "crop_document": "دستاویز تراشیں",
+      "done": "ہو گیا",
+      "cancel": "منسوخ",
+      "retake": "دوبارہ لینے کیجیے",
+      "filters": "فلٹرز",
+      "crop": "تراشیں",
+      "rotate": "گھمائیں",
+
+      "failed_to_crop_image": "تصویر تراشنے میں ناکام",
+      "failed_to_create_document": "دستاویز کی تخلیق ناکام",
+      "error_cropping_image": "تصویر تراشتے وقت مسئلہ",
+      "error_rotating_image": "تصویر گھماتے وقت مسئلہ",
+      "error_applying_filter": "فلٹر لگانے کی صورت میں مسئلہ",
+
 
       "rearrange_results": "نتائج کی ترتیب بدلیں",
       "processing_document": "دستاویز کی پراسیسنگ جاری ہے...",
@@ -697,7 +849,6 @@ class Language extends Translations {
       "cannot_open_file": "فائل کھولی نہیں جا سکتی",
       "zip_file_message": "یہ ایک ZIP فائل ہے. مواد دیکھنے کے لیے ZIP ایکسٹریکٹر کی ضرورت ہے.",
       "error_opening_document": "دستاویز کھولنے کی کوشش کے دوران مسئلہ پیش آیا",
-      "file_deleted_successfully": "فائل کامیابی کے ساتھ حذف کر دی گی",
       "error_during_deletion": "فائل کو حذف کرنے کے دوران مسئلہ پیش آیا",
       "processing_generic_document": "دستاویز کی تیاری جاری ہے...",
       "error_encountered_fallback": "خرابی آگئی، بیک اپ طریقہ استعمال کیا جا رہا ہے...",
@@ -772,9 +923,6 @@ class Language extends Translations {
       "delete_file_confirmation": " کیا آپ واقعی اس فائل کو حذف کرنا چاہتے ہیں؟",
       "rename_file": "فائل کا نام بدلیں",
 
-      // Button texts
-      "cancel": "منسوخ کریں",
-
       // Share content
       "sharing_document_from_ocr_tool": "متن کی شراکت کی جا رہی ہے بذریعہ OCR ٹول",
       "document_from_ocr_tool": "OCR ٹول کی جانب سے दस्तاویز",
@@ -816,7 +964,6 @@ class Language extends Translations {
       "please_select_at_least_one_file": "پہلے کم از کم ایک فائل منتخب کریں",
       "error_compressing_files": "فائلز کمپریس کرنے میں خرابی",
       "too_small": "بہت چھوٹی",
-      "bytes": "بائٹس",
       "kilobytes": "کے بی",
       "megabytes": "ایم بی",
       "file_size_format": "{size} {unit}",
@@ -835,7 +982,6 @@ class Language extends Translations {
 
 
       'file_name': 'فائل کا نام',
-      'done': 'مکمل',
       'single': 'واحد',
       'batch': 'بیچ',
       'camera_permission_required': 'اسکینر استعمال کرنے کے لیے کیمرے کی اجازت درکار ہے',
@@ -911,15 +1057,12 @@ class Language extends Translations {
       'select_only_pdf': 'براہ کرم صرف PDF، DOC یا DOCX فائلیں منتخب کریں',
       'rearrange_file_pages': 'فائل کے صفحات دوبارہ ترتیب دیں',
       'rearrange_file_description': 'پی ڈی ایف کے صفحات کو آسانی سے گھسیٹیں اور دوبارہ ترتیب دیں تاکہ آپ کی دستاویز منظم ہو جائے۔',
-      'rearrange_results': 'ترتیب نو کے نتائج',
+
       'error': 'خرابی پیش آگئی',
       'processing_doc': 'دستاویز پر کارروائی ہو رہی ہے...',
-      'rearranged_files': 'دوبارہ ترتیب دی گئی فائلیں...',
-      'try_again': 'دوبارہ کوشش کریں',
       'file_does_not_exist': 'فائل موجود نہیں',
       'file_empty': 'فائل خالی ہے',
       'opening_file': 'فائل کھولی جا رہی ہے:',
-      'rearrange': 'ترتیب دیں',
       'rearrange_pages': 'صفحات کی ترتیب تبدیل کریں',
       'selected': 'منتخب شدہ:',
       'easy_file_transfer': 'آسان فائل ٹرانسفر',
@@ -983,6 +1126,61 @@ class Language extends Translations {
 
     'zh_CN': {
 
+      "selected_file": "已选择文件",
+      "select_format": "选择格式",
+      "convert": "转换",
+      "converting": "正在转换...",
+      "please_select_format_first": "请先选择格式",
+      "conversion_failed": "转换失败",
+      "ok": "确定",
+
+      "word": "Word",
+      "excel": "Excel",
+      "powerpoint": "PowerPoint",
+      "image": "图片",
+
+      "error_excel_not_implemented": "未实现 Excel 转换",
+
+      "am": "上午",
+      "pm": "下午",
+
+      "convert_pdf": "转换 PDF",
+      "convert_pdf_format": "转换 PDF 格式",
+      "convert_pdf_description": "轻松地将 PDF 转换为不同格式，同时保持其质量、分辨率和清晰度。",
+      "select_file": "选择文件",
+      "click_to_choose_pdf": "点击选择 PDF 文件",
+      "next": "下一步",
+      "please_select_pdf_only": "请输入仅选择 PDF 文件",
+      "error_selecting_pdf": "选择 PDF 文件时发生错误",
+      "please_select_pdf_first": "请先选择 PDF 文件",
+
+      "edit": "编辑",
+      "failed_to_open_document": "打开文件失败",
+      "file_deleted_successfully": "文件已成功删除",
+      "generated_document": "已生成文件",
+
+      "original": "原图",
+      "cool_tone": "冷色调",
+      "warm_tone": "暖色调",
+      "grayscale": "灰度",
+      "blue_light": "蓝光",
+      "sepia": "棕褐色",
+      "soft_pastel": "柔和粉彩",
+
+      "crop_document": "裁剪文件",
+      "done": "完成",
+      "cancel": "取消",
+      "retake": "重新拍摄",
+      "filters": "滤镜",
+      "crop": "裁剪",
+      "rotate": "旋转",
+
+      "failed_to_crop_image": "裁剪图片失败",
+      "failed_to_create_document": "创建文件失败",
+      "error_cropping_image": "裁剪图片时发生错误",
+      "error_rotating_image": "旋转图片时发生错误",
+      "error_applying_filter": "应用滤镜时发生错误",
+
       "rearrange_results": "重新安排结果",
       "processing_document": "正在处理文档...",
       "reading_pages": "正在阅读文档页面...",
@@ -1029,7 +1227,6 @@ class Language extends Translations {
       "cannot_open_file": "无法打开文件",
       "zip_file_message": "这是一个ZIP文件，需要ZIP解压器查看其中的内容。",
       "error_opening_document": "打开文档时发生错误",
-      "file_deleted_successfully": "文件已成功删除",
       "error_during_deletion": "删除时发生错误",
       "processing_generic_document": "正在处理文档...",
       "error_encountered_fallback": "发生错误，正在使用备用方案...",
@@ -1039,8 +1236,6 @@ class Language extends Translations {
       "creating_zip_archive": "正在创建ZIP压缩文件...",
       "zip_created_successfully": "ZIP压缩文件已成功创建!",
       "error_saving_original": "发生错误。正在保存原文件...",
-      "saving": "正在保存...",
-      "save": "保存",
 
       "edit_files": "编辑文件",
       "edit_files_description": "轻松修改您的图片。上传并修改多张图片以获得无缝体验。",
@@ -1107,9 +1302,6 @@ class Language extends Translations {
       "delete_file_confirmation": "你确定要删除这个文件吗？",
       "rename_file": "重命名文件",
 
-      // Button texts
-      "cancel": "取消",
-
       // Success messages
 
       // Share content
@@ -1125,7 +1317,6 @@ class Language extends Translations {
       "compress_file": "压缩文件",
       "reduce_file_size": "减少文件大小",
       "reduce_file_size_description": "减少 PDF、文档和图片的大小，同时保持原有质量。",
-      "select_file": "选择文件",
       "compression_quality": "压缩质量",
       "compressing": "正在压缩...",
       "compress": "压缩",
@@ -1143,7 +1334,6 @@ class Language extends Translations {
       "please_select_at_least_one_file": "请先选择至少一个文件",
       "error_compressing_files": "压缩文件时出错",
       "too_small": "太小",
-      "bytes": "字节",
       "kilobytes": "KB",
       "megabytes": "MB",
       "file_size_format": "{size} {unit}",
@@ -1173,7 +1363,6 @@ class Language extends Translations {
       'please_wait': '请稍等！',
 
       'file_name': '文件名',
-      'done': '完成',
       'single': '单个',
       'batch': '批量',
       'camera_permission_required': '使用扫描仪需要相机权限',
@@ -1211,7 +1400,6 @@ class Language extends Translations {
       'merge_file': '合并文件',
       'edit_file': '编辑文件',
       'split_file': '拆分文件',
-      'rearrange_file': '重新排列文件',
       'convert_options': '转换选项',
       'convert_pdf': '转换PDF',
       'convert_image': '转换图像',
@@ -1247,15 +1435,11 @@ class Language extends Translations {
       'select_only_pdf': '请选择 PDF、DOC 或 DOCX 文件',
       'rearrange_file_pages': '重新排列文件页面',
       'rearrange_file_description': '轻松拖动和重新排列PDF页面，轻松组织文档。',
-      'rearrange_results': '重新排列结果',
       'error': '发生错误',
       'processing_doc': '正在处理文档...',
-      'rearranged_files': '已重新排列的文件...',
-      'try_again': '再试一次',
       'file_does_not_exist': '文件不存在',
       'file_empty': '文件为空',
       'opening_file': '正在打开文件：',
-      'rearrange': '重新排列',
       'rearrange_pages': '重新排列页面',
       'selected': '已选择：',
       'easy_file_transfer': '轻松文件传输',
@@ -1311,6 +1495,61 @@ class Language extends Translations {
 
     'de_DE': {
 
+      "selected_file": "Ausgewählte Datei",
+      "select_format": "Format auswählen",
+      "convert": "Konvertieren",
+      "converting": "Konvertiert...",
+      "please_select_format_first": "Bitte zuerst das Format auswählen",
+      "conversion_failed": "Konvertierung ist fehlgeschlagen",
+      "ok": "OK",
+
+      "word": "Word",
+      "excel": "Excel",
+      "powerpoint": "PowerPoint",
+      "image": "Bild",
+
+      "error_excel_not_implemented": "Die Konvertierung in Excel ist nicht implementiert",
+
+      "am": "Vormittag",
+      "pm": "Nachmittag",
+
+      "convert_pdf": "PDF konvertieren",
+      "convert_pdf_format": "PDF-Format konvertieren",
+      "convert_pdf_description": "Konvertieren Sie PDFs problemlos in verschiedene Formate, wobei Qualität, Auflösung und Klarheit erhalten bleiben.",
+      "select_file": "Datei auswählen",
+      "click_to_choose_pdf": "Zum Auswählen einer PDF klicken",
+      "next": "Weiter",
+      "please_select_pdf_only": "Bitte wählen Sie nur PDF Dateien aus",
+      "error_selecting_pdf": "Fehler beim Auswählen der PDF",
+      "please_select_pdf_first": "Bitte wählen Sie zuerst eine PDF aus",
+
+      "edit": "Bearbeiten",
+      "failed_to_open_document": "Dokument konnte nicht geöffnet werden",
+      "file_deleted_successfully": "Datei wurde erfolgreich gelöscht",
+      "generated_document": "Generiertes Dokument",
+
+      "original": "Original",
+      "cool_tone": "Kühler Ton",
+      "warm_tone": "Warmer Ton",
+      "grayscale": "Graustufe",
+      "blue_light": "Blaulicht",
+      "sepia": "Sepia",
+      "soft_pastel": "Weiches Pastell",
+
+      "crop_document": "Dokument zuschneiden",
+      "done": "Fertig",
+      "cancel": "Abbrechen",
+      "retake": "Erneut aufnehmen",
+      "filters": "Filter",
+      "crop": "Zuschneiden",
+      "rotate": "Drehen",
+
+      "failed_to_crop_image": "Zuschneiden des Bildes ist fehlgeschlagen",
+      "failed_to_create_document": "Dokument konnte nicht erstellt werden",
+      "error_cropping_image": "Fehler beim Zuschneiden des Bildes",
+      "error_rotating_image": "Fehler beim Drehen des Bildes",
+      "error_applying_filter": "Anwenden des Filters ist fehlgeschlagen",
+
       "rearrange_results": "Ergebnisse neu anordnen",
       "processing_document": "Dokument wird verarbeitet...",
       "reading_pages": "Dokumentseiten werden gelesen...",
@@ -1356,7 +1595,7 @@ class Language extends Translations {
       "cannot_open_file": "Die Datei kann nicht geöffnet werden",
       "zip_file_message": "Dies ist eine ZIP-Datei. Möglicherweise benötigen Sie zum Öffnen ein ZIP-Extraktor.",
       "error_opening_document": "Beim Öffnen des Dokuments ist ein Fehler aufgetreten",
-      "file_deleted_successfully": "Die Datei wurde erfolgreich gelöscht",
+
       "error_during_deletion": "Beim Löschen ist ein Fehler aufgetreten",
       "processing_generic_document": "Dokument wird verarbeitet...",
       "error_encountered_fallback": "Ein Fehler ist aufgetreten, Rückfalllösung wird verwendet...",
@@ -1366,8 +1605,7 @@ class Language extends Translations {
       "creating_zip_archive": "ZIP-Archiv wird erstellt...",
       "zip_created_successfully": "ZIP-Archiv wurde erfolgreich erstellt!",
       "error_saving_original": "Ein Fehler ist aufgetreten. Die Originaldatei wird gespeichert...",
-      "saving": "Speichert...",
-      "save": "Speichern",
+
 
       "edit_files": "Dateien bearbeiten",
       "edit_files_description": "Bearbeiten Sie Ihre Bilder ganz einfach. Laden Sie mehrere Bilder hoch und ändern Sie sie für ein nahtloses Erlebnis.",
@@ -1432,8 +1670,6 @@ class Language extends Translations {
       "delete_file_confirmation": "Sind Sie sicher, dass Sie diese Datei löschen wollen?",
       "rename_file": "Datei umbenennen",
 
-      // Button texts
-      "cancel": "Abbrechen",
 
       // Share content
       "sharing_document_from_ocr_tool": "Dokument wird aus dem OCR-Tool geteilt",
@@ -1455,7 +1691,7 @@ class Language extends Translations {
       "compress_file": "Datei komprimieren",
       "reduce_file_size": "Dateigröße reduzieren",
       "reduce_file_size_description": "Reduzieren Sie die Dateigröße von PDFs, Dokumenten und Bildern, ohne die Originalqualität zu beeinträchtigen.",
-      "select_file": "Dateien auswählen",
+
       "compression_quality": "Komprimierungsqualität",
       "compressing": "Komprimiere...",
       "compress": "Komprimieren",
@@ -1473,7 +1709,6 @@ class Language extends Translations {
       "please_select_at_least_one_file": "Bitte wählen Sie zuerst mindestens eine Datei aus",
       "error_compressing_files": "Fehler beim Komprimieren der Dateien",
       "too_small": "zu klein",
-      "bytes": "B",
       "kilobytes": "KB",
       "megabytes": "MB",
       "file_size_format": "{size} {unit}",
@@ -1493,7 +1728,6 @@ class Language extends Translations {
       'please_wait': 'Bitte warten!',
 
       'file_name': 'Dateiname',
-      'done': 'Fertig',
       'single': 'Einzeln',
       'batch': 'Stapel',
       'camera_permission_required': 'Kameraberechtigung ist erforderlich, um den Scanner zu verwenden',
@@ -1520,7 +1754,6 @@ class Language extends Translations {
       'merge_file': 'Dateien zusammenführen',
       'edit_file': 'Datei bearbeiten',
       'split_file': 'Datei aufteilen',
-      'rearrange_file': 'Datei neu anordnen',
       'convert_options': 'Konvertierungsoptionen',
       'convert_pdf': 'PDF konvertieren',
       'convert_image': 'Bild konvertieren',
@@ -1566,15 +1799,11 @@ class Language extends Translations {
       'select_only_pdf': 'Bitte nur PDF-, DOC- oder DOCX-Dateien auswählen',
       'rearrange_file_pages': 'Seiten in Dateien neu anordnen',
       'rearrange_file_description': 'Ziehen und ordnen Sie PDF-Seiten mühelos neu, um Ihr Dokument zu organisieren.',
-      'rearrange_results': 'Ergebnisse neu anordnen',
       'error': 'Fehler aufgetreten',
       'processing_doc': 'Dokument wird verarbeitet...',
-      'rearranged_files': 'Neu angeordnete Dateien...',
-      'try_again': 'Erneut versuchen',
       'file_does_not_exist': 'Datei existiert nicht',
       'file_empty': 'Datei ist leer',
       'opening_file': 'Datei wird geöffnet:',
-      'rearrange': 'Neu anordnen',
       'rearrange_pages': 'Seiten neu anordnen',
       'selected': 'Ausgewählt:',
       'easy_file_transfer': 'Einfacher Dateitransfer',
