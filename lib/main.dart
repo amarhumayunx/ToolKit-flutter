@@ -124,6 +124,6 @@ class _AppInitializerState extends State<AppInitializer> {
       );
     }
 
-    return _showOnboarding ? const OnboardingScreen() : const HomeScreen();
+    return _showOnboarding ? const OnboardingScreen() : HomeScreen();
   }
 }

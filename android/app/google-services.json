@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1083628972635-ir8vc40amop13pescm18l7liuvhk0g1a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.scanmaster.toolkit.app",
+            "certificate_hash": "34fc0fecd7338c59e170bf127a1b069ec5eb825a"
+          }
+        },
+        {
           "client_id": "1083628972635-oirmv13ge6qe2no6ooutc2as6cbupoqp.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

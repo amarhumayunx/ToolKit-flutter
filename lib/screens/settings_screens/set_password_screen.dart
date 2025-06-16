@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
+import '../../services/auth_service.dart';
 import '../../utils/app_colors.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
-import '../../services/auth_service.dart';
-import '../../utils/app_snackbar.dart';
 
 class SetPasswordScreen extends StatefulWidget {
   final bool isChanging;
   final bool isRecovery;
   final String? email;
+  final String? userId; // Add this parameter
 
   const SetPasswordScreen({
     super.key,
     this.isChanging = false,
     this.isRecovery = false,
     this.email,
+    this.userId,
   });
 
   @override
@@ -36,7 +37,7 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.isChanging) {
+    if (widget.isChanging && !widget.isRecovery) {
       _isEnteringOldPassword = true;
     }
   }
@@ -66,6 +67,41 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
         }
       }
     });
+  }
+
+  // Key fix for SetPasswordScreen - _setPassword method
+  Future<void> _setPassword() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      bool success;
+      if (widget.isRecovery && widget.userId != null) {
+        success = await _authService.resetPasswordForUser(widget.userId!, _password);
+      } else if (widget.isChanging && !widget.isRecovery) {
+        success = await _authService.changePassword(_oldPassword, _password);
+      } else {
+        success = await _authService.savePassword(_password);
+      }
+
+      if (success) {
+        // Notify parent screen of successful password operation
+        Navigator.of(context).pop(true);
+      } else {
+        AppSnackBar.show(context, message: 'Failed to set password. Please try again.');
+        _resetPasswordFields();
+      }
+    } catch (e) {
+      AppSnackBar.show(context, message: 'Error: ${e.toString()}');
+      _resetPasswordFields();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   Future<void> _verifyOldPassword() async {
@@ -114,55 +150,12 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
     }
   }
 
-  Future<void> _setPassword() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      bool success;
-      if (widget.isChanging) {
-        success = await _authService.changePassword(_oldPassword, _password);
-      } else {
-        success = await _authService.savePassword(_password);
-      }
-
-      if (success) {
-        AppSnackBar.show(
-          context,
-          message: widget.isChanging
-              ? 'Password changed successfully!'
-              : 'Password set successfully!',
-        );
-        Navigator.of(context).pop(true);
-      } else {
-        AppSnackBar.show(
-          context,
-          message: 'Failed to set password. Please try again.',
-        );
-        _resetPasswordFields();
-      }
-    } catch (e) {
-      AppSnackBar.show(
-        context,
-        message: 'Error: ${e.toString()}',
-      );
-      _resetPasswordFields();
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
   void _resetPasswordFields() {
     setState(() {
       _password = '';
       _confirmPassword = '';
       _isConfirming = false;
-      if (widget.isChanging) {
+      if (widget.isChanging && !widget.isRecovery) {
         _oldPassword = '';
         _isEnteringOldPassword = true;
       }
@@ -194,6 +187,9 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
     } else if (_isConfirming) {
       return 'Confirm your 4-Digit Code';
     } else {
+      if (widget.isRecovery) {
+        return 'Set New 4-Digit Code';
+      }
       return widget.isChanging
           ? 'Set New 4-Digit Code'
           : 'Set your 4-Digit Code';
@@ -286,7 +282,11 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBar(
-        title: widget.isChanging ? 'Change Password' : 'Set Password',
+        title: widget.isRecovery
+            ? 'Reset Password'
+            : widget.isChanging
+            ? 'Change Password'
+            : 'Set Password',
         onBackPressed: () {
           Navigator.of(context).pop();
         },
