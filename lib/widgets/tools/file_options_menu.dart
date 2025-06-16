@@ -1,6 +1,7 @@
 // file_options_menu.dart (updated)
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path/path.dart' as path;
 import 'package:share_plus/share_plus.dart';
@@ -44,7 +45,7 @@ class FileOptionsMenu extends StatelessWidget {
         return [
           _buildMenuItem(
             value: 'edit',
-            text: 'Rename',
+            text: 'rename'.tr,
           ),
           const PopupMenuItem<String>(
             enabled: false,
@@ -63,7 +64,7 @@ class FileOptionsMenu extends StatelessWidget {
           ),
           _buildMenuItem(
             value: 'share',
-            text: 'Share',
+            text: 'share'.tr,
           ),
           const PopupMenuItem<String>(
             enabled: false,
@@ -82,7 +83,7 @@ class FileOptionsMenu extends StatelessWidget {
           ),
           _buildMenuItem(
             value: 'delete',
-            text: 'Delete',
+            text: 'delete'.tr,
           ),
         ];
       },
@@ -117,17 +118,17 @@ class FileOptionsMenu extends StatelessWidget {
     try {
       final file = File(filePath);
       if (!await file.exists()) {
-        AppSnackBar.show(context, message: 'File not found');
+        AppSnackBar.show(context, message: 'file_not_found'.tr);
         return;
       }
 
       await Share.shareXFiles(
         [XFile(filePath)],
-        text: 'Sharing document from OCR Tool',
-        subject: 'Document from OCR Tool',
+        text: 'sharing_document_from_ocr_tool'.tr,
+        subject: 'document_from_ocr_tool'.tr,
       );
     } catch (e) {
-      AppSnackBar.show(context, message: 'Error sharing file: $e');
+      AppSnackBar.show(context, message: '${'error_sharing_file'.tr}: $e');
     }
   }
 
@@ -156,7 +157,7 @@ class FileOptionsMenu extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Delete File',
+                  'delete_file'.tr,
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.w600,
                     color: AppColors.primary,
@@ -166,7 +167,7 @@ class FileOptionsMenu extends StatelessWidget {
               ],
             ),
             content: Text(
-              'Are you sure you want to delete this file?',
+              'delete_file_confirmation'.tr,
               style: GoogleFonts.inter(),
             ),
             actions: [
@@ -180,7 +181,7 @@ class FileOptionsMenu extends StatelessWidget {
                         Navigator.of(context).pop();
                       },
                       child: Text(
-                        'Cancel',
+                        'cancel'.tr,
                         style: GoogleFonts.inter(color: Colors.grey[700]),
                       ),
                     ),
@@ -200,7 +201,7 @@ class FileOptionsMenu extends StatelessWidget {
                         } catch (e) {
                           Navigator.of(context).pop();
                           AppSnackBar.show(context,
-                              message: 'Error deleting file: $e');
+                              message: '${'error_deleting_file'.tr}: $e');
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -211,7 +212,7 @@ class FileOptionsMenu extends StatelessWidget {
                         elevation: 2,
                       ),
                       child: Text(
-                        'Delete',
+                        'delete'.tr,
                         style: GoogleFonts.inter(
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
@@ -273,7 +274,7 @@ class FileOptionsMenu extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Rename File',
+                      'rename_file'.tr,
                       style: GoogleFonts.inter(
                         fontWeight: FontWeight.w600,
                         color: AppColors.primary,
@@ -297,8 +298,8 @@ class FileOptionsMenu extends StatelessWidget {
                         // Override the primary color for the input decoration
                         primaryColor: AppColors.primary,
                         colorScheme: Theme.of(context).colorScheme.copyWith(
-                              primary: AppColors.primary,
-                            ),
+                          primary: AppColors.primary,
+                        ),
                       ),
                       child: TextField(
                         controller: controller,
@@ -351,7 +352,7 @@ class FileOptionsMenu extends StatelessWidget {
                 actions: [
                   Padding(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -360,7 +361,7 @@ class FileOptionsMenu extends StatelessWidget {
                             Navigator.of(context).pop();
                           },
                           child: Text(
-                            'Cancel',
+                            'cancel'.tr,
                             style: GoogleFonts.inter(color: Colors.grey[700]),
                           ),
                         ),
@@ -371,7 +372,7 @@ class FileOptionsMenu extends StatelessWidget {
                               final newName = controller.text.trim();
                               if (newName.isEmpty) {
                                 setDialogState(() {
-                                  errorMessage = 'Please enter a valid name';
+                                  errorMessage = 'please_enter_valid_name'.tr;
                                 });
                                 return;
                               }
@@ -389,13 +390,13 @@ class FileOptionsMenu extends StatelessWidget {
 
                               if (fileExists) {
                                 setDialogState(() {
-                                  errorMessage = 'File name already exists.';
+                                  errorMessage = 'file_name_already_exists'.tr;
                                 });
                                 return;
                               }
 
                               final newPath =
-                                  path.join(directoryPath, newFileName);
+                              path.join(directoryPath, newFileName);
                               await file.rename(newPath);
 
                               if (onFileRenamed != null) {
@@ -404,10 +405,10 @@ class FileOptionsMenu extends StatelessWidget {
 
                               Navigator.of(context).pop();
                               AppSnackBar.show(context,
-                                  message: 'File renamed successfully');
+                                  message: 'file_renamed_successfully'.tr);
                             } catch (e) {
                               setDialogState(() {
-                                errorMessage = 'Error renaming file: $e';
+                                errorMessage = '${'error_renaming_file'.tr}: $e';
                               });
                             }
                           },
@@ -419,7 +420,7 @@ class FileOptionsMenu extends StatelessWidget {
                             elevation: 2,
                           ),
                           child: Text(
-                            'Rename',
+                            'rename'.tr,
                             style: GoogleFonts.inter(
                               color: Colors.white,
                               fontWeight: FontWeight.w500,

@@ -66,7 +66,7 @@ class _SplitScreenState extends State<SplitScreen> {
       }
     } catch (e) {
       setState(() {
-        AppSnackBar.show(context, message: 'error_selecting_documents ${e.toString()}'.tr);
+        AppSnackBar.show(context, message: '${'error_processing_files'.tr}: ${e.toString()}');
       });
       print('Error in file picker: $e');
     }
@@ -74,7 +74,7 @@ class _SplitScreenState extends State<SplitScreen> {
 
   Future<bool> _processAndSplitDocuments() async {
     if (_selectedDocuments.isEmpty) {
-      AppSnackBar.show(context, message: 'please select document');
+      AppSnackBar.show(context, message: 'please_select_document'.tr);
       return false;
     }
 
@@ -208,13 +208,13 @@ class _SplitScreenState extends State<SplitScreen> {
           );
           return true;
         } else {
-          AppSnackBar.show(context, message: 'Unsupported file type');
+          AppSnackBar.show(context, message: 'unsupported_file_type'.tr);
           return false;
         }
       }
     } catch (e) {
       print('Error processing documents: $e');
-      AppSnackBar.show(context, message: 'Error processing files: ${e.toString()}');
+      AppSnackBar.show(context, message: '${'error_processing_files'.tr}: ${e.toString()}');
       return false;
     }
   }
@@ -307,13 +307,13 @@ class _SplitScreenState extends State<SplitScreen> {
                     ),
                     child: Column(
                       children: [
-                        const Padding(
-                          padding: EdgeInsets.only(top: 10, left: 16, bottom: 10),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10, left: 16, bottom: 10),
                           child: Align(
                             alignment: Alignment.topLeft,
                             child: Text(
-                              ('Select File'),
-                              style: TextStyle(
+                              ('select_files'.tr),
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.black,

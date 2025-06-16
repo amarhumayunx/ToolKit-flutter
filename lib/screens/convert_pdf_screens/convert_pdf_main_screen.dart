@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart'; // GetX import for localization
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
@@ -28,6 +29,7 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
       _selectedPdf = null;
     });
   }
+
   Future<void> _pickPdf() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -40,7 +42,7 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
         // Double check the extension in case the platform didn't filter properly
         if (result.files.single.extension?.toLowerCase() != 'pdf') {
           setState(() {
-            _errorMessage = 'Please select a PDF file only';
+            _errorMessage = 'please_select_pdf_only'.tr;
             _selectedPdf = null;
           });
           return;
@@ -53,7 +55,7 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Error selecting PDF: $e';
+        _errorMessage = 'error_selecting_pdf'.tr + ': $e';
         _selectedPdf = null;
       });
     }
@@ -67,7 +69,7 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
 
   Future<void> _convertPdf() async {
     if (_selectedPdf == null) {
-      AppSnackBar.show(context, message: 'Please select a PDF file first');
+      AppSnackBar.show(context, message: 'please_select_pdf_first'.tr);
       return;
     }
 
@@ -92,8 +94,8 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const ToolsAppBar(
-        title: 'Convert PDF',
+      appBar: ToolsAppBar(
+        title: 'convert_pdf'.tr,
       ),
       body: Column(
         children: [
@@ -106,10 +108,9 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
                   const CustomSvgImage(
                       imagePath: 'assets/images/convert_pdf_img.svg'),
                   const SizedBox(height: 30),
-                  const InfoCard(
-                      title: 'Convert PDF Format',
-                      description:
-                          'Easily convert PDF’s to various formats while maintaining it’s quality, resolution and clarity.'),
+                  InfoCard(
+                      title: 'convert_pdf_format'.tr,
+                      description: 'convert_pdf_description'.tr),
                   const SizedBox(height: 24),
                   // Custom PDF selection container
                   _buildPdfSelectionContainer(),
@@ -126,9 +127,9 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
           ),
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: 30.0, vertical: 26.0),
+            const EdgeInsets.symmetric(horizontal: 30.0, vertical: 26.0),
             child: CustomGradientButton(
-              text: 'Next',
+              text: 'next'.tr,
               onPressed: _convertPdf,
             ),
           ),
@@ -158,7 +159,7 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
             child: Padding(
               padding: const EdgeInsets.only(left: 14, top: 14),
               child: Text(
-                'Select File',
+                'select_file'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -189,85 +190,85 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
                   ),
                   child: _selectedPdf != null
                       ? Stack(
-                          children: [
-                            Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Padding(
-                                      padding: EdgeInsets.only(top: 10),
-                                      child: Icon(
-                                        Icons.picture_as_pdf,
-                                        size: 30,
-                                        color: Colors.red,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      _selectedPdf!.path.split('/').last,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
+                    children: [
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(top: 10),
+                                child: Icon(
+                                  Icons.picture_as_pdf,
+                                  size: 30,
+                                  color: Colors.red,
                                 ),
                               ),
-                            ),
-                            Positioned(
-                              top: 8,
-                              right: 8,
-                              child: GestureDetector(
-                                onTap: _removePdf,
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      )
-                                    ],
-                                  ),
-                                  child: const Icon(
-                                    Icons.close,
-                                    size: 12,
-                                    color: Colors.grey,
-                                  ),
+                              const SizedBox(height: 8),
+                              Text(
+                                _selectedPdf!.path.split('/').last,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.grey.shade600,
                                 ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          ],
-                        )
-                      : Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SvgPicture.asset(
-                              'assets/icons/upload_file_icon.svg',
-                              height: 28,
-                              width: 36,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Click to choose PDF file',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.inter(
-                                color: Colors.grey,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
+                      ),
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: GestureDetector(
+                          onTap: _removePdf,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                )
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              size: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                      : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/icons/upload_file_icon.svg',
+                        height: 28,
+                        width: 36,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'click_to_choose_pdf'.tr,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          color: Colors.grey,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

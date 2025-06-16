@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../screens/cv_maker_screens/create_cv_screen.dart';
 import '../../utils/app_colors.dart';
@@ -32,7 +33,7 @@ class CreateCVButton extends StatelessWidget {
               'assets/icons/pencil_cv.svg',
             ),
             Text(
-              'Create Your CV',
+              'create_your_cv'.tr,
               style: GoogleFonts.inter(
                 color: AppColors.white,
                 fontSize: 16,

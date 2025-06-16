@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -75,7 +76,7 @@ class _ResultScreenState extends State<ResultScreen>
       // Use the current file path instead of the original path
       await OpenFile.open(_currentFilePath);
     } catch (e) {
-      AppSnackBar.show(context, message: 'Failed to open document: $e');
+      AppSnackBar.show(context, message: 'failed_to_open_document'.tr + ': $e');
     }
   }
 
@@ -118,7 +119,7 @@ class _ResultScreenState extends State<ResultScreen>
 
     Navigator.pop(context);
     Navigator.pop(context);
-    AppSnackBar.show(context, message: 'File deleted successfully');
+    AppSnackBar.show(context, message: 'file_deleted_successfully'.tr);
   }
 
   // Add this method to handle file rename
@@ -132,7 +133,7 @@ class _ResultScreenState extends State<ResultScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const CustomAppBar(title: 'Edit'),
+      appBar: CustomAppBar(title: 'edit'.tr),
       body: Stack(
         children: [
           SingleChildScrollView(
@@ -150,7 +151,7 @@ class _ResultScreenState extends State<ResultScreen>
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'Generated Document:',
+                        '${'generated_document'.tr}:',
                         style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,

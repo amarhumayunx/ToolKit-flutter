@@ -2,12 +2,12 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../utils/app_colors.dart';
 
-// Updated OcrCameraScreen with image preview and proper done button functionality
 class OcrCameraScreen extends StatefulWidget {
   const OcrCameraScreen({super.key});
 
@@ -23,7 +23,7 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
   bool _isCameraPermissionGranted = false;
   String _errorMessage = '';
   bool _isLoading = true;
-  String _selectedScanType = 'Single'; // default to Single
+  String _selectedScanType = 'Single';
   final List<File> _capturedImages = [];
   final ImagePicker _imagePicker = ImagePicker();
   bool _isFlashOn = false;
@@ -54,7 +54,7 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
       _initializeControllerAfterPermission();
     } else {
       setState(() {
-        _errorMessage = 'Camera permission is required to use the scanner';
+        _errorMessage = 'camera_permission_required'.tr;
       });
     }
   }
@@ -70,7 +70,7 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
 
       if (cameras.isEmpty) {
         setState(() {
-          _errorMessage = 'No cameras found on device';
+          _errorMessage = 'no_cameras_found'.tr;
           _isLoading = false;
         });
         return;
@@ -93,7 +93,7 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Camera initialization failed: ${e.toString()}';
+        _errorMessage = '${'camera_initialization_failed'.tr}: ${e.toString()}';
         _isLoading = false;
       });
     }
@@ -158,7 +158,7 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
     return GestureDetector(
       onTap: () => _selectScanType(label),
       child: Text(
-        label,
+        label.toLowerCase().tr,
         style: GoogleFonts.inter(
           color: isSelected ? AppColors.primary : AppColors.saveDateColor,
           fontWeight: FontWeight.w500,
@@ -183,7 +183,7 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
       );
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to toggle flash: ${e.toString()}';
+        _errorMessage = '${'failed_to_toggle_flash'.tr}: ${e.toString()}';
       });
       print('Error toggling flash: $e');
     }
@@ -211,7 +211,7 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
               const SizedBox(height: 16),
               Text(
                 _errorMessage.isEmpty
-                    ? 'Camera permission not granted'
+                    ? 'camera_permission_not_granted'.tr
                     : _errorMessage,
                 style: const TextStyle(fontSize: 16),
                 textAlign: TextAlign.center,
@@ -219,7 +219,7 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _requestCameraPermission,
-                child: const Text('Grant Camera Permission'),
+                child: Text('grant_camera_permission'.tr),
               ),
             ],
           ),
@@ -228,10 +228,10 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
     }
 
     if (!_isCameraInitialized) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: Colors.white,
         body: Center(
-          child: Text('Initializing camera...'),
+          child: Text('initializing_camera'.tr),
         ),
       );
     }
@@ -247,7 +247,7 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
           },
         ),
         title: Text(
-          'File Name',
+          'file_name'.tr,
           style: GoogleFonts.inter(
             color: Colors.black,
             fontWeight: FontWeight.w500,
@@ -261,7 +261,7 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  'Done',
+                  'done'.tr,
                   style: GoogleFonts.inter(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,

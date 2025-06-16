@@ -141,7 +141,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                     ),
                     child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.error_outline,
                           color: Colors.red,
                           size: 18,

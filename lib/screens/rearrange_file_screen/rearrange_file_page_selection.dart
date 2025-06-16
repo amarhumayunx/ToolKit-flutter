@@ -36,6 +36,7 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
   List<Uint8List?> _pageImages = [];
   bool _isLoadingPreviews = false;
   PdfDocument? _pdfDocument;
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -50,6 +51,10 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
   }
 
   Future<void> _processSelectedFile() async {
+    if (_isProcessing) return;
+
+    setState(() => _isProcessing = true);
+
     try {
       _docxFile = widget.selectedFile;
       _fileName = path.basename(_docxFile!.path);
@@ -64,7 +69,11 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
       }
     } catch (e) {
       if (mounted) {
-        AppSnackBar.show(context, message: 'Error processing file: ${e.toString()}');
+        AppSnackBar.show(context, message: '${'error_processing_file'.tr}: ${e.toString()}');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
       }
     }
   }
@@ -75,8 +84,8 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
     _pdfPages = await pdfService.extractPages(_docxFile!);
 
     setState(() {
-      _selectedPages = List<bool>.filled(pageCount, true);
-      _pageSelectionOrder = List.generate(pageCount, (index) => index);
+      _selectedPages = List<bool>.filled(pageCount, false); // Changed to false
+      _pageSelectionOrder = []; // Start with empty list
       _pageImages = List<Uint8List?>.filled(pageCount, null);
       _isLoadingPreviews = true;
     });
@@ -89,8 +98,8 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
     final pages = await docxService.extractPages(_docxFile!);
 
     setState(() {
-      _selectedPages = List<bool>.filled(pages.length, true);
-      _pageSelectionOrder = List.generate(pages.length, (index) => index);
+      _selectedPages = List<bool>.filled(pages.length, false); // Changed to false
+      _pageSelectionOrder = []; // Start with empty list
       _isLoadingPreviews = false;
     });
   }
@@ -99,7 +108,10 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
     try {
       _pdfDocument = await PdfDocument.openFile(_docxFile!.path);
 
+      // Generate previews for visible pages first
       for (int i = 0; i < _pdfDocument!.pagesCount; i++) {
+        if (!mounted) break;
+
         try {
           final page = await _pdfDocument!.getPage(i + 1);
           final pageImage = await page.render(
@@ -115,27 +127,19 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
             });
           }
         } catch (pageError) {
-          print('Error rendering page ${i + 1}: $pageError');
+          debugPrint('Error rendering page ${i + 1}: $pageError');
           _pageImages[i] = await _generatePlaceholderImage(i + 1, 'PDF');
         }
       }
-
-      if (mounted) {
-        setState(() {
-          _isLoadingPreviews = false;
-        });
-      }
     } catch (e) {
-      print('Error generating PDF previews: $e');
+      debugPrint('Error generating PDF previews: $e');
 
       for (int i = 0; i < _pdfPages.length; i++) {
         _pageImages[i] = await _generatePlaceholderImage(i + 1, 'PDF');
       }
-
+    } finally {
       if (mounted) {
-        setState(() {
-          _isLoadingPreviews = false;
-        });
+        setState(() => _isLoadingPreviews = false);
       }
     }
   }
@@ -192,12 +196,12 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
   }
 
   void _navigateToResults() {
-    if (_docxFile == null) return;
+    if (_docxFile == null || _isProcessing) return;
 
     final newOrder = List<int>.from(_pageSelectionOrder);
 
     if (newOrder.isEmpty) {
-      AppSnackBar.show(context, message: 'please_select_one_page'.tr);
+      AppSnackBar.show(context, message: 'please_select_at_least_one_page'.tr);
       return;
     }
 
@@ -258,7 +262,7 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
             ),
             const SizedBox(height: 8),
             Text(
-              'Page ${index + 1}',
+              '${'page_number'.tr} ${index + 1}',
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.grey.shade600,
@@ -298,7 +302,7 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(title: ('rearrange_pages'.tr)),
+      appBar: CustomAppBar(title: 'rearrange_pages'.tr),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -308,16 +312,16 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  'Selected: $_fileName',
+                  '${'selected_file'.tr}: $_fileName',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
               if (_isPdfFile && _isLoadingPreviews)
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    'Loading PDF page previews...',
-                    style: TextStyle(
+                    'loading_pdf_previews'.tr,
+                    style: const TextStyle(
                       fontSize: 12,
                       color: Colors.grey,
                     ),
@@ -325,7 +329,9 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
                 ),
               const SizedBox(height: 16),
               Expanded(
-                child: GridView.builder(
+                child: _isProcessing
+                    ? const Center(child: CircularProgressIndicator(color: AppColors.primary,))
+                    : GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     childAspectRatio: 0.7,
@@ -380,7 +386,6 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
                                   : null,
                             ),
                           ),
-                          // Order number (top left)
                           if (_selectedPages[index])
                             Positioned(
                               top: 8,
@@ -414,7 +419,7 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
               SizedBox(
                 width: double.infinity,
                 child: CustomGradientButton(
-                  text: 'Rearrange',
+                  text: 'rearrange'.tr,
                   onPressed: _navigateToResults,
                 ),
               ),

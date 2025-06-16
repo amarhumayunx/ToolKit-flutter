@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -35,7 +36,9 @@ class _EditFileScreenState extends State<EditFileScreen> {
         fileProvider.addFiles(newFiles);
       }
     } catch (e) {
-      AppSnackBar.show(context, message: 'Error selecting images: $e');
+      if (mounted) {
+        AppSnackBar.show(context, message: '${'error_selecting_images'.tr}: $e');
+      }
     }
   }
 
@@ -54,40 +57,52 @@ class _EditFileScreenState extends State<EditFileScreen> {
         fileProvider.addFiles(capturedImages);
       }
     } catch (e) {
-      AppSnackBar.show(context, message: 'Error capturing document: $e');
+      if (mounted) {
+        AppSnackBar.show(context, message: '${'error_capturing_document'.tr}: $e');
+      }
     }
   }
 
   void _removeFile(int index) {
     final fileProvider = Provider.of<FileProvider>(context, listen: false);
     fileProvider.removeFile(index);
+
+    if (mounted) {
+      AppSnackBar.show(context, message: 'image_removed_successfully'.tr);
+    }
   }
 
   Future<void> _editFiles() async {
     final fileProvider = Provider.of<FileProvider>(context, listen: false);
 
     if (!fileProvider.hasFiles) {
-      AppSnackBar.show(context, message: 'Please select at least one image');
+      AppSnackBar.show(context, message: 'please_select_at_least_one_image'.tr);
       return;
     }
 
-    // Navigate to BatchResultScreen with the selected files
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BatchResultScreen(
-          batchImages: fileProvider.selectedFiles,
+    try {
+      // Navigate to BatchResultScreen with the selected files
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BatchResultScreen(
+            batchImages: fileProvider.selectedFiles,
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      if (mounted) {
+        AppSnackBar.show(context, message: '${'error_processing_files'.tr}: $e');
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const ToolsAppBar(
-        title: 'Edit Files',
+      appBar: ToolsAppBar(
+        title: 'edit_files'.tr,
       ),
       body: Column(
         children: [
@@ -101,10 +116,9 @@ class _EditFileScreenState extends State<EditFileScreen> {
                     imagePath: 'assets/images/edit_file_img.svg',
                   ),
                   const SizedBox(height: 30),
-                  const InfoCard(
-                    title: 'Edit Files',
-                    description:
-                        'Make changes to your images easily. Upload and modify multiple images for a seamless experience.',
+                  InfoCard(
+                    title: 'edit_files'.tr,
+                    description: 'edit_files_description'.tr,
                   ),
                   const SizedBox(height: 24),
                   // Combined container with shadow
@@ -124,7 +138,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
                       children: [
                         // File selection section
                         FileSelectionSection(
-                          sectionTitle: 'Choose Images',
+                          sectionTitle: 'choose_images'.tr,
                           onSelectFiles: _pickImages,
                           onScanNew: _scanNewDocument,
                         ),
@@ -138,8 +152,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
                                 selectedImages: fileProvider.selectedFiles,
                                 onTap: _pickImages,
                                 onRemoveImage: _removeFile,
-                                emptyStateText:
-                                    'Click to choose images from gallery',
+                                emptyStateText: 'click_to_choose_images_from_gallery'.tr,
                               );
                             },
                           ),
@@ -153,9 +166,9 @@ class _EditFileScreenState extends State<EditFileScreen> {
           ),
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: 30.0, vertical: 26.0),
+            const EdgeInsets.symmetric(horizontal: 30.0, vertical: 26.0),
             child: CustomGradientButton(
-              text: 'Next',
+              text: 'next'.tr,
               onPressed: _editFiles,
             ),
           ),

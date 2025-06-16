@@ -213,7 +213,7 @@ class _HomeContentViewState extends State<HomeContentView> {
                 onTap: () {
                   // Switch to Files tab
                   final homeState =
-                      context.findAncestorStateOfType<_HomeScreenState>();
+                  context.findAncestorStateOfType<_HomeScreenState>();
                   homeState?._handleNavigation(2);
                 },
                 child: Row(
@@ -255,7 +255,7 @@ class _HomeContentViewState extends State<HomeContentView> {
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Text(
-                'No recent documents found',
+                'norecentdocuments'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   color: Colors.grey[600],

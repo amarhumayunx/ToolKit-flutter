@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../screens/convert_image_screens/convert_img_main_screen.dart';
-import '../screens/convert_pdf_screens/convert_pdf_main_screen.dart'; // Add this import
+import '../screens/convert_pdf_screens/convert_pdf_main_screen.dart';
 import 'tool_item.dart';
 
 class ConvertOptionsView extends StatelessWidget {
@@ -9,14 +10,40 @@ class ConvertOptionsView extends StatelessWidget {
   final List<Map<String, String>> convertOptions = const [
     {
       'icon': 'assets/icons/convert_pdf.svg',
-      'name': 'Convert pdf',
+      'id': 'convert_pdf',
     },
     {
       'icon': 'assets/icons/convert_img_icon.svg',
-      'name': 'Convert Image',
+      'id': 'convert_image',
     },
     // Add more conversion options here as needed
   ];
+
+  void _navigateToConvertPage(BuildContext context, String convertId) {
+    switch (convertId) {
+      case 'convert_pdf':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ConvertPdfMainScreen(),
+          ),
+        );
+        break;
+      case 'convert_image':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ConvertImgMainScreen(),
+          ),
+        );
+        break;
+      default:
+      // Handle unknown conversion option
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('conversion_not_implemented'.trParams({'conversion': convertId}))),
+        );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,23 +58,9 @@ class ConvertOptionsView extends StatelessWidget {
             padding: const EdgeInsets.only(right: 6),
             child: ToolItem(
               icon: option['icon']!,
-              name: option['name']!,
+              name: option['id']!.tr, // Use id field with .tr for translation
               onTap: () {
-                if (option['name'] == 'Convert Image') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ConvertImgMainScreen(),
-                    ),
-                  );
-                } else if (option['name'] == 'Convert pdf') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ConvertPdfMainScreen(),
-                    ),
-                  );
-                }
+                _navigateToConvertPage(context, option['id']!);
               },
             ),
           );

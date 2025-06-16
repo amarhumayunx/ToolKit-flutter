@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../services/save_document_service.dart';
 import 'gradient_btn.dart';
 
@@ -15,11 +16,11 @@ class SaveDocumentButton extends StatelessWidget {
   const SaveDocumentButton({
     super.key,
     required this.documentFile,
-    this.buttonText = 'Save',
+    this.buttonText = 'save',
     this.width,
     this.padding,
     this.onSaveCompleted,
-    this.skipTimestamp = true, // Change default to true for original filename
+    this.skipTimestamp = true,
   });
 
   @override
@@ -31,7 +32,7 @@ class SaveDocumentButton extends StatelessWidget {
         width: width ?? double.infinity,
         child: CustomGradientButton(
           onPressed: () => _handleSave(context),
-          text: buttonText,
+          text: buttonText.tr,
         ),
       ),
     );

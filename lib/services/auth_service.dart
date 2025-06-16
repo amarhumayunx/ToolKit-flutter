@@ -42,7 +42,7 @@ class AuthService {
       return userCredential;
     } catch (e) {
       print('Error signing in with Google: $e');
-      throw e;
+      rethrow;
     }
   }
   Future<bool> verifyPassword(String password) async {
@@ -278,7 +278,7 @@ class AuthService {
       }
     } catch (e) {
       print('Error saving user to Firestore: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -314,7 +314,7 @@ class AuthService {
       await userDoc.update(updateData);
     } catch (e) {
       print('Error updating user profile: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -585,7 +585,7 @@ class AuthService {
       await _auth.signOut();
     } catch (e) {
       print('Error signing out: $e');
-      throw e;
+      rethrow;
     }
   }
 

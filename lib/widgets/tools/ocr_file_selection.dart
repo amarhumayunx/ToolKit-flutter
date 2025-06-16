@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../utils/app_colors.dart';
@@ -62,7 +63,7 @@ class _FileSelectionSectionState extends State<FileSelectionSection> {
                           ),
                           child: Center(
                             child: Text(
-                              'Select File',
+                              'select_file'.tr,
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
@@ -91,7 +92,7 @@ class _FileSelectionSectionState extends State<FileSelectionSection> {
                           ),
                           child: Center(
                             child: Text(
-                              'Scan New',
+                              'scan_new'.tr,
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,

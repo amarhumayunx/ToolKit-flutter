@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart'; // Add this import for localization
 import 'dart:io';
 import '../../services/pdf_to_img_service.dart';
 import '../../utils/app_colors.dart';
@@ -14,7 +15,7 @@ class PdfFormatSelectionScreen extends StatefulWidget {
   final File selectedPdf;
   final VoidCallback? onFileDeleted;
 
-  const PdfFormatSelectionScreen({super.key, required this.selectedPdf,     this.onFileDeleted,});
+  const PdfFormatSelectionScreen({super.key, required this.selectedPdf, this.onFileDeleted});
 
   @override
   State<PdfFormatSelectionScreen> createState() =>
@@ -38,13 +39,13 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
 
   String get formattedTime {
     final modifiedDate = widget.selectedPdf.lastModifiedSync();
-    return '${modifiedDate.hour}:${modifiedDate.minute.toString().padLeft(2, '0')}${modifiedDate.hour < 12 ? 'am' : 'pm'}';
+    return '${modifiedDate.hour}:${modifiedDate.minute.toString().padLeft(2, '0')}${modifiedDate.hour < 12 ? 'AM'.tr : 'PM'.tr}';
   }
 
   Future<void> _convertFile() async {
     // Check if no format is selected
     if (selectedFormat == null) {
-      AppSnackBar.show(context, message: 'Please select a format first');
+      AppSnackBar.show(context, message: 'Please select a format first'.tr);
       return;
     }
 
@@ -64,11 +65,11 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
           _convertedFile = await service.convertPdfToImage(widget.selectedPdf);
           break;
         case 'Excel':
-          throw UnimplementedError('Excel conversion not implemented');
+          throw UnimplementedError('Excel conversion not implemented'.tr);
         case 'PowerPoint':
-          throw UnimplementedError('PowerPoint conversion not implemented');
+          throw UnimplementedError('PowerPoint conversion not implemented'.tr);
         default:
-          throw Exception('Unsupported format');
+          throw Exception('Unsupported format'.tr);
       }
 
       if (!mounted) return;
@@ -102,7 +103,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          'Conversion Failed',
+          'Conversion Failed'.tr,
           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
         ),
         content: Text(
@@ -113,7 +114,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'OK',
+              'OK'.tr,
               style: GoogleFonts.inter(color: AppColors.primary),
             ),
           ),
@@ -126,7 +127,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const CustomAppBar(title: 'Convert PDF'),
+      appBar: CustomAppBar(title: 'Convert PDF'.tr),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -134,7 +135,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
           children: [
             const SizedBox(height: 20),
             Text(
-              'Selected File',
+              'Selected File'.tr,
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -163,7 +164,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
                         height: 60,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(4),
-                          color: Colors.grey.shade200,
+                          color: Colors.transparent,
                         ),
                         child: Center(
                           child: SvgPicture.asset(
@@ -220,7 +221,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
             ),
             const SizedBox(height: 30),
             Text(
-              'Select Format:',
+              'Select Format:'.tr,
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -230,17 +231,17 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildFormatOption('Word', 'assets/icons/word_icon.svg'),
-                _buildFormatOption('Excel', 'assets/icons/excel_icon.svg'),
+                _buildFormatOption('Word'.tr, 'assets/icons/word_icon.svg'),
+                _buildFormatOption('Excel'.tr, 'assets/icons/excel_icon.svg'),
                 _buildFormatOption(
-                    'PowerPoint', 'assets/icons/powerpoint_icon.svg'),
+                    'PowerPoint'.tr, 'assets/icons/powerpoint_icon.svg'),
                 _buildFormatOption(
-                    'Image', 'assets/icons/convert_img_icon.svg'),
+                    'Image'.tr, 'assets/icons/convert_img_icon.svg'),
               ],
             ),
             const Spacer(),
             CustomGradientButton(
-              text: _isConverting ? 'Converting...' : 'Convert',
+              text: _isConverting ? 'Converting...'.tr : 'Convert'.tr,
               onPressed: _isConverting ? null : _convertFile,
             ),
           ],

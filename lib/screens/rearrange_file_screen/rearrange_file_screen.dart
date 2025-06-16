@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:toolkit/screens/rearrange_file_screen/rearrange_file_drop.dart';
 import 'package:toolkit/utils/app_snackbar.dart';
-
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/info_card.dart';
@@ -66,8 +66,8 @@ class _RearrangeFileScreenState extends State<RearrangeFileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const ToolsAppBar(
-        title: 'Rearrange Files',
+      appBar: ToolsAppBar(
+        title: 'rearrange_files'.tr,
       ),
       body: Column(
         children: [
@@ -81,10 +81,10 @@ class _RearrangeFileScreenState extends State<RearrangeFileScreen> {
                     imagePath: 'assets/images/rearrange_image.svg',
                   ),
                   const SizedBox(height: 30),
-                  const InfoCard(
-                    title: 'Rearrange Pages In Files',
+                  InfoCard(
+                    title: 'rearrange_pages_in_files'.tr,
                     description:
-                    'Easily drag and reorder PDF pages to organize your document effortlessly.',
+                    'rearrange_file_desc'.tr,
                   ),
                   const SizedBox(height: 24),
                   Container(
@@ -101,13 +101,13 @@ class _RearrangeFileScreenState extends State<RearrangeFileScreen> {
                     ),
                     child: Column(
                       children: [
-                        const Padding(
-                          padding: EdgeInsets.only(top: 10, left: 16, bottom: 10),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10, left: 16, bottom: 10),
                           child: Align(
                             alignment: Alignment.topLeft,
                             child: Text(
-                              'Select File',
-                              style: TextStyle(
+                              'select_file'.tr,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.black,
@@ -133,7 +133,7 @@ class _RearrangeFileScreenState extends State<RearrangeFileScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 26.0),
             child: CustomGradientButton(
-              text: 'Rearrange File',
+              text: 'rearrange_file'.tr,
               onPressed: selectedFiles.isNotEmpty
                   ? () {
                 if (selectedFiles.isNotEmpty) {

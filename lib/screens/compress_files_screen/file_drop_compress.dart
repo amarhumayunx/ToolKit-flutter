@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
@@ -147,7 +148,7 @@ class DottedFileDropZoneCompress extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Drag & Drop or click to choose file',
+                'drag_drop'.tr,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   color: Colors.grey,
