@@ -7,15 +7,15 @@ import '../../models/file_model.dart';
 import '../../utils/app_colors.dart';
 
 class FileTransferDropZone extends StatelessWidget {
-  final List<FileModel> selectedFiles;
+  final FileModel? selectedFile;
   final VoidCallback onTap;
-  final Function(int) onRemoveFile;
+  final VoidCallback onRemoveFile;
   final String emptyStateText;
   final bool isEmpty;
 
   const FileTransferDropZone({
     super.key,
-    required this.selectedFiles,
+    required this.selectedFile,
     required this.onTap,
     required this.onRemoveFile,
     this.emptyStateText = 'Generate QR Code',
@@ -24,7 +24,7 @@ class FileTransferDropZone extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final showEmptyState = isEmpty || selectedFiles.isEmpty;
+    final showEmptyState = isEmpty || selectedFile == null;
 
     return InkWell(
       onTap: onTap,
@@ -36,9 +36,8 @@ class FileTransferDropZone extends StatelessWidget {
         radius: const Radius.circular(8),
         child: Container(
           width: double.infinity,
-          constraints: BoxConstraints(
-            minHeight: 128,
-            maxHeight: showEmptyState ? 128 : 300,
+          constraints: const BoxConstraints(
+            minHeight: 100,
           ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
@@ -65,36 +64,20 @@ class FileTransferDropZone extends StatelessWidget {
               ),
             ],
           )
-              : SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: selectedFiles.length,
-                    itemBuilder: (context, index) {
-                      final file = selectedFiles[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: _buildFileItem(file, index),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
+              : Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: _buildFileItem(selectedFile!),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFileItem(FileModel file, int index) {
+  Widget _buildFileItem(FileModel file) {
     final fileExtension = path.extension(file.name).toLowerCase();
 
     return Container(
+
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -147,7 +130,7 @@ class FileTransferDropZone extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           GestureDetector(
-            onTap: () => onRemoveFile(index),
+            onTap: onRemoveFile,
             child: Container(
               padding: const EdgeInsets.all(4),
               decoration: const BoxDecoration(
@@ -173,18 +156,11 @@ class FileTransferDropZone extends StatelessWidget {
       case '.doc':
       case '.docx':
         return Colors.blue;
-      case '.xls':
-      case '.xlsx':
-        return Colors.green;
-      case '.ppt':
-      case '.pptx':
-        return Colors.orange;
       case '.txt':
         return Colors.grey;
       case '.jpg':
       case '.jpeg':
       case '.png':
-      case '.gif':
         return Colors.purple;
       default:
         return AppColors.primary;
@@ -198,18 +174,13 @@ class FileTransferDropZone extends StatelessWidget {
       case '.doc':
       case '.docx':
         return Icons.description;
-      case '.xls':
-      case '.xlsx':
-        return Icons.table_chart;
-      case '.ppt':
-      case '.pptx':
-        return Icons.slideshow;
-      case '.txt':
-        return Icons.text_fields;
+
+
+
       case '.jpg':
       case '.jpeg':
       case '.png':
-      case '.gif':
+
         return Icons.image;
       default:
         return Icons.insert_drive_file;

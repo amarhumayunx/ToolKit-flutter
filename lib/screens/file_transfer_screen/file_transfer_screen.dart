@@ -18,8 +18,8 @@ class FileTransferScreen extends StatefulWidget {
 }
 
 class _FileTransferScreenState extends State<FileTransferScreen> {
-  final List<FileModel> _selectedFiles = [];
-  bool _shouldClearFiles = false;
+  FileModel? _selectedFile;
+  bool _shouldClearFile = false;
   bool _isGeneratingQR = false;
 
   Future<void> _navigateToFileSelection() async {
@@ -32,16 +32,14 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
 
     if (selectedFiles != null && selectedFiles.isNotEmpty) {
       setState(() {
-        // Clear previous selection and add new one
-        _selectedFiles.clear();
-        _selectedFiles.add(selectedFiles.first);
-        _shouldClearFiles = false;
+        _selectedFile = selectedFiles.first;
+        _shouldClearFile = false;
       });
     }
   }
 
   Future<void> _generateQRCode() async {
-    if (_selectedFiles.isEmpty) {
+    if (_selectedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('select_at_least_one_file'.tr),
@@ -69,7 +67,7 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
         ),
       );
 
-      _clearSelectedFiles();
+      _clearSelectedFile();
     } catch (e) {
       setState(() {
         _isGeneratingQR = false;
@@ -85,16 +83,16 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
     }
   }
 
-  void _removeFile(int index) {
+  void _removeFile() {
     setState(() {
-      _selectedFiles.removeAt(index);
+      _selectedFile = null;
     });
   }
 
-  void _clearSelectedFiles() {
+  void _clearSelectedFile() {
     setState(() {
-      _selectedFiles.clear();
-      _shouldClearFiles = true;
+      _selectedFile = null;
+      _shouldClearFile = true;
     });
   }
 
@@ -148,12 +146,11 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
                             bottom: 16,
                           ),
                           child: FileTransferDropZone(
-                            selectedFiles: _selectedFiles,
+                            selectedFile: _selectedFile,
                             onTap: _navigateToFileSelection,
                             onRemoveFile: _removeFile,
-                            isEmpty:
-                            _shouldClearFiles || _selectedFiles.isEmpty,
-                            emptyStateText: 'click_to_choose_files'.tr,
+                            isEmpty: _shouldClearFile || _selectedFile == null,
+                            emptyStateText: 'Generate QR Code'.tr,
                           ),
                         ),
                       ],
@@ -168,8 +165,8 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
             const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
             child: CustomGradientButton(
               text: _isGeneratingQR
-                  ? 'Generating_qr_code'.tr
-                  : 'Generate_qr_code'.tr,
+                  ? 'Generating QR Code'.tr
+                  : 'Generate QR Code'.tr,
               onPressed: _isGeneratingQR ? null : _generateQRCode,
             ),
           ),

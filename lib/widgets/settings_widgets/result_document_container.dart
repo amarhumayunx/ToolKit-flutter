@@ -58,11 +58,9 @@ class ResultDocumentContainer extends StatelessWidget {
               offset: const Offset(0, 0),
             ),
           ],
-          border: isSelectable
-              ? Border.all(
-              color: isSelected
-                  ? AppColors.primary
-                  : AppColors.primary.withOpacity(0.3))
+          // Only show border when selectable AND selected
+          border: (isSelectable && isSelected)
+              ? Border.all(color: AppColors.primary, width: 2)
               : null,
         ),
         child: IntrinsicHeight(
@@ -240,6 +238,7 @@ class ResultDocumentContainer extends StatelessWidget {
                   size: 24,
                 ),
               ],
+              const SizedBox(width: 8),
             ],
           ),
         ),

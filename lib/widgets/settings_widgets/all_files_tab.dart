@@ -139,6 +139,56 @@ class _AllFilesViewState extends State<AllFilesView> {
         widget.selectedFiles.first.path == file.path;
   }
 
+  // Check if file size is within 2MB limit
+  bool _isFileSizeValid(String sizeString) {
+    try {
+      // Extract numeric value and unit from size string (e.g., "1.5 MB", "500 KB")
+      final parts = sizeString.trim().split(' ');
+      if (parts.length != 2) return false;
+
+      final value = double.tryParse(parts[0]);
+      final unit = parts[1].toUpperCase();
+
+      if (value == null) return false;
+
+      // Convert to MB
+      double sizeInMB;
+      switch (unit) {
+        case 'KB':
+          sizeInMB = value / 1024;
+          break;
+        case 'MB':
+          sizeInMB = value;
+          break;
+        case 'GB':
+          sizeInMB = value * 1024;
+          break;
+        case 'B':
+        case 'BYTES':
+          sizeInMB = value / (1024 * 1024);
+          break;
+        default:
+          return false;
+      }
+
+      return sizeInMB <= 2.0; // 2MB limit
+    } catch (e) {
+      return false;
+    }
+  }
+
+  void _handleFileSelection(FileModel file, int actualIndex) {
+    if (!_isFileSizeValid(file.size)) {
+      AppSnackBar.show(
+        context,
+        message: 'File size exceeds 2MB limit. Please select a smaller file.',
+      );
+      return;
+    }
+
+    widget.onFileSelected?.call(file, actualIndex);
+  }
+
   @override
   Widget build(BuildContext context) {
     final allFiles = _isLoading
@@ -228,8 +278,7 @@ class _AllFilesViewState extends State<AllFilesView> {
                           onFileRenamed: (newPath) =>
                               _renameFile(actualIndex, newPath),
                           onTap: widget.isSelectingFiles
-                              ? () => widget.onFileSelected
-                              ?.call(file, actualIndex)
+                              ? () => _handleFileSelection(file, actualIndex)
                               : null,
                         ),
                         const SizedBox(height: 12),
