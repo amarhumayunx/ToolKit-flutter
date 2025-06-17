@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:toolkit/services/file_encryption_service.dart';
 import 'package:toolkit/services/save_document_service.dart';
 
 import '../models/file_model.dart';
@@ -19,12 +20,10 @@ class SaveFileService {
   static Future<bool> checkAndRequestStoragePermission(
       BuildContext context) async {
     if (Platform.isAndroid) {
-      // For Android 10 (API 29) and above, we can use the media store without storage permission
       if (await _isAndroidVersionAbove29()) {
-        return true; // No need for storage permission on Android 10+
+        return true;
       }
 
-      // For older Android versions, request storage permission
       final status = await Permission.storage.status;
       if (!status.isGranted) {
         final result = await Permission.storage.request();
@@ -32,7 +31,6 @@ class SaveFileService {
       }
       return status.isGranted;
     } else if (Platform.isIOS) {
-      // For iOS, we need photos permission to save to gallery
       if (await Permission.photos.status.isGranted) {
         return true;
       }
@@ -47,7 +45,7 @@ class SaveFileService {
   static Future<bool> _isAndroidVersionAbove29() async {
     if (Platform.isAndroid) {
       final androidInfo = await DeviceInfoPlugin().androidInfo;
-      return androidInfo.version.sdkInt >= 29; // Android 10 is API 29
+      return androidInfo.version.sdkInt >= 29;
     }
     return false;
   }
@@ -61,7 +59,7 @@ class SaveFileService {
           title: const Text('Permission Issue'),
           content: const Text(
               'Unable to save file. This might be due to permission restrictions on your device.\n\n'
-              'For Android 11+ users: Please allow the app to manage files and photos in your device settings.'),
+                  'For Android 11+ users: Please allow the app to manage files and photos in your device settings.'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancel'),
@@ -88,21 +86,16 @@ class SaveFileService {
       Directory? baseDir;
 
       if (Platform.isAndroid) {
-        // For Android, we'll use the Downloads directory
         baseDir = Directory('/storage/emulated/0/Download');
         if (!await baseDir.exists()) {
-          // Fallback to app documents directory if Downloads not accessible
           baseDir = await getApplicationDocumentsDirectory();
         }
       } else if (Platform.isIOS) {
-        // For iOS, use the app's documents directory
         baseDir = await getApplicationDocumentsDirectory();
       } else {
-        // Unsupported platform
         return null;
       }
 
-      // Create the Toolkit directory
       final toolkitDir = Directory('${baseDir.path}/$toolkitFolderName');
       if (!await toolkitDir.exists()) {
         await toolkitDir.create(recursive: true);
@@ -134,31 +127,25 @@ class SaveFileService {
   /// Save PNG file to Toolkit folder
   static Future<void> savePngFile(BuildContext context, File imageFile) async {
     try {
-      // Check if we can access storage
       bool hasPermission = await checkAndRequestStoragePermission(context);
 
       if (hasPermission) {
-        // Try to create the Toolkit folder
         final toolkitDir = await _createToolkitFolder();
 
         if (toolkitDir == null) {
-          // If folder creation failed, use default save mechanism
           await _saveFileWithDialog(context, imageFile, 'png');
           return;
         }
 
-        // Use the actual filename from the file path
         String fileName = path.basename(imageFile.path);
-
-        // Generate unique filename if it already exists
         String uniqueFileName =
-            await _generateUniqueFileName(toolkitDir.path, fileName);
-
-        // Create destination file path in Toolkit folder
+        await _generateUniqueFileName(toolkitDir.path, fileName);
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
 
-        // Copy the file to the Toolkit folder
         await imageFile.copy(destinationPath);
+
+        // Save to Hive
+        await _saveFileToHive(File(destinationPath), 'png');
 
         AppSnackBar.show(context, message: 'Image saved to ${toolkitDir.path}');
       } else {
@@ -177,31 +164,25 @@ class SaveFileService {
   /// Save ZIP file to Toolkit folder
   static Future<void> saveZipFile(BuildContext context, File zipFile) async {
     try {
-      // Check if we can access storage
       bool hasPermission = await checkAndRequestStoragePermission(context);
 
       if (hasPermission) {
-        // Try to create the Toolkit folder
         final toolkitDir = await _createToolkitFolder();
 
         if (toolkitDir == null) {
-          // If folder creation failed, use default save mechanism
           await _saveFileWithDialog(context, zipFile, 'zip');
           return;
         }
 
-        // Use the actual filename from the file path
         String fileName = path.basename(zipFile.path);
-
-        // Generate unique filename if it already exists
         String uniqueFileName =
-            await _generateUniqueFileName(toolkitDir.path, fileName);
-
-        // Create destination file path in Toolkit folder
+        await _generateUniqueFileName(toolkitDir.path, fileName);
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
 
-        // Copy the file to the Toolkit folder
         await zipFile.copy(destinationPath);
+
+        // Save to Hive
+        await _saveFileToHive(File(destinationPath), 'zip');
 
         AppSnackBar.show(context,
             message: 'ZIP file saved to ${toolkitDir.path}');
@@ -228,6 +209,8 @@ class SaveFileService {
         date: DateTime.now(),
         size: '${(file.lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB',
         isFavorite: false,
+        isLocked: false,
+        isEncrypted: false,
       );
       await filesBox.add(fileModel);
     } catch (e) {
@@ -259,9 +242,6 @@ class SaveFileService {
         default:
           await _saveGenericFile(context, file);
       }
-
-      // Add file to Hive after successful save
-      await _saveFileToHive(file, fileType);
     } catch (e) {
       debugPrint('Error in saveFile: $e');
       AppSnackBar.show(context,
@@ -273,31 +253,25 @@ class SaveFileService {
   static Future<void> _saveDocumentFile(
       BuildContext context, File docFile) async {
     try {
-      // Check if we can access storage
       bool hasPermission = await checkAndRequestStoragePermission(context);
 
       if (hasPermission) {
-        // Try to create the Toolkit folder
         final toolkitDir = await _createToolkitFolder();
 
         if (toolkitDir == null) {
-          // If folder creation failed, use default save mechanism
           await _saveFileWithDialog(context, docFile, 'docx');
           return;
         }
 
-        // Use the actual filename from the file path
         String fileName = path.basename(docFile.path);
-
-        // Generate unique filename if it already exists
         String uniqueFileName =
-            await _generateUniqueFileName(toolkitDir.path, fileName);
-
-        // Create destination file path in Toolkit folder
+        await _generateUniqueFileName(toolkitDir.path, fileName);
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
 
-        // Copy the file to the Toolkit folder
         await docFile.copy(destinationPath);
+
+        // Save to Hive
+        await _saveFileToHive(File(destinationPath), 'docx');
 
         AppSnackBar.show(context,
             message: 'Document saved to ${toolkitDir.path}');
@@ -318,31 +292,25 @@ class SaveFileService {
   /// Save PDF file to Toolkit folder
   static Future<void> _savePdfFile(BuildContext context, File pdfFile) async {
     try {
-      // Check if we can access storage
       bool hasPermission = await checkAndRequestStoragePermission(context);
 
       if (hasPermission) {
-        // Try to create the Toolkit folder
         final toolkitDir = await _createToolkitFolder();
 
         if (toolkitDir == null) {
-          // If folder creation failed, use default save mechanism
           await _saveFileWithDialog(context, pdfFile, 'pdf');
           return;
         }
 
-        // Use the actual filename from the file path
         String fileName = path.basename(pdfFile.path);
-
-        // Generate unique filename if it already exists
         String uniqueFileName =
-            await _generateUniqueFileName(toolkitDir.path, fileName);
-
-        // Create destination file path in Toolkit folder
+        await _generateUniqueFileName(toolkitDir.path, fileName);
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
 
-        // Copy the file to the Toolkit folder
         await pdfFile.copy(destinationPath);
+
+        // Save to Hive
+        await _saveFileToHive(File(destinationPath), 'pdf');
 
         AppSnackBar.show(context, message: 'PDF saved to ${toolkitDir.path}');
       } else {
@@ -363,28 +331,23 @@ class SaveFileService {
       bool hasPermission = await checkAndRequestStoragePermission(context);
 
       if (hasPermission) {
-        // Try to create the Toolkit folder
         final toolkitDir = await _createToolkitFolder();
 
         if (toolkitDir == null) {
-          // If folder creation failed, use default save mechanism
           await _saveFileWithDialog(
               context, file, path.extension(file.path).replaceAll('.', ''));
           return;
         }
 
-        // Use the actual filename from the file path
         String fileName = path.basename(file.path);
-
-        // Generate unique filename if it already exists
         String uniqueFileName =
-            await _generateUniqueFileName(toolkitDir.path, fileName);
-
-        // Create destination file path in Toolkit folder
+        await _generateUniqueFileName(toolkitDir.path, fileName);
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
 
-        // Copy the file to the Toolkit folder
         await file.copy(destinationPath);
+
+        // Save to Hive
+        await _saveFileToHive(File(destinationPath), path.extension(file.path).replaceAll('.', ''));
 
         AppSnackBar.show(context, message: 'File saved to ${toolkitDir.path}');
       } else {
@@ -401,17 +364,19 @@ class SaveFileService {
   static Future<void> _saveFileWithDialog(
       BuildContext context, File file, String fileType) async {
     try {
-      // Use the actual filename from the file path
       String fileName = path.basename(file.path);
 
       final params = SaveFileDialogParams(
         sourceFilePath: file.path,
-        fileName: fileName, // Use actual filename instead of adding timestamp
+        fileName: fileName,
       );
 
       final savedFilePath = await FlutterFileDialog.saveFile(params: params);
 
       if (savedFilePath != null) {
+        // Save to Hive
+        await _saveFileToHive(File(savedFilePath), fileType);
+
         AppSnackBar.show(context, message: 'File saved successfully');
       } else {
         AppSnackBar.show(context, message: 'File saving canceled');

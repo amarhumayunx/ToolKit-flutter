@@ -17,14 +17,98 @@ class PhoneNumberScreen extends StatefulWidget {
 
 class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
   final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   final AuthService _authService = AuthService();
   bool _isLoading = false;
   String? _errorMessage;
+  String _selectedCountryCode = '+1'; // Default to US for broader appeal
+  List<Map<String, String>> _filteredCountryCodes = [];
+
+  // Comprehensive list of country codes
+  final List<Map<String, String>> _countryCodes = [
+    {'code': '+1', 'name': 'United States', 'flag': '🇺🇸'},
+    {'code': '+1', 'name': 'Canada', 'flag': '🇨🇦'},
+    {'code': '+44', 'name': 'United Kingdom', 'flag': '🇬🇧'},
+    {'code': '+91', 'name': 'India', 'flag': '🇮🇳'},
+    {'code': '+92', 'name': 'Pakistan', 'flag': '🇵🇰'},
+    {'code': '+93', 'name': 'Afghanistan', 'flag': '🇦🇫'},
+    {'code': '+33', 'name': 'France', 'flag': '🇫🇷'},
+    {'code': '+49', 'name': 'Germany', 'flag': '🇩🇪'},
+    {'code': '+86', 'name': 'China', 'flag': '🇨🇳'},
+    {'code': '+81', 'name': 'Japan', 'flag': '🇯🇵'},
+    {'code': '+82', 'name': 'South Korea', 'flag': '🇰🇷'},
+    {'code': '+61', 'name': 'Australia', 'flag': '🇦🇺'},
+    {'code': '+7', 'name': 'Russia', 'flag': '🇷🇺'},
+    {'code': '+55', 'name': 'Brazil', 'flag': '🇧🇷'},
+    {'code': '+52', 'name': 'Mexico', 'flag': '🇲🇽'},
+    {'code': '+34', 'name': 'Spain', 'flag': '🇪🇸'},
+    {'code': '+39', 'name': 'Italy', 'flag': '🇮🇹'},
+    {'code': '+90', 'name': 'Turkey', 'flag': '🇹🇷'},
+    {'code': '+20', 'name': 'Egypt', 'flag': '🇪🇬'},
+    {'code': '+27', 'name': 'South Africa', 'flag': '🇿🇦'},
+    {'code': '+966', 'name': 'Saudi Arabia', 'flag': '🇸🇦'},
+    {'code': '+971', 'name': 'UAE', 'flag': '🇦🇪'},
+    {'code': '+62', 'name': 'Indonesia', 'flag': '🇮🇩'},
+    {'code': '+60', 'name': 'Malaysia', 'flag': '🇲🇾'},
+    {'code': '+65', 'name': 'Singapore', 'flag': '🇸🇬'},
+    {'code': '+66', 'name': 'Thailand', 'flag': '🇹🇭'},
+    {'code': '+84', 'name': 'Vietnam', 'flag': '🇻🇳'},
+    {'code': '+63', 'name': 'Philippines', 'flag': '🇵🇭'},
+    {'code': '+880', 'name': 'Bangladesh', 'flag': '🇧🇩'},
+    {'code': '+94', 'name': 'Sri Lanka', 'flag': '🇱🇰'},
+    {'code': '+977', 'name': 'Nepal', 'flag': '🇳🇵'},
+    {'code': '+98', 'name': 'Iran', 'flag': '🇮🇷'},
+    {'code': '+964', 'name': 'Iraq', 'flag': '🇮🇶'},
+    {'code': '+972', 'name': 'Israel', 'flag': '🇮🇱'},
+    {'code': '+31', 'name': 'Netherlands', 'flag': '🇳🇱'},
+    {'code': '+32', 'name': 'Belgium', 'flag': '🇧🇪'},
+    {'code': '+41', 'name': 'Switzerland', 'flag': '🇨🇭'},
+    {'code': '+43', 'name': 'Austria', 'flag': '🇦🇹'},
+    {'code': '+45', 'name': 'Denmark', 'flag': '🇩🇰'},
+    {'code': '+46', 'name': 'Sweden', 'flag': '🇸🇪'},
+    {'code': '+47', 'name': 'Norway', 'flag': '🇳🇴'},
+    {'code': '+48', 'name': 'Poland', 'flag': '🇵🇱'},
+    {'code': '+351', 'name': 'Portugal', 'flag': '🇵🇹'},
+    {'code': '+30', 'name': 'Greece', 'flag': '🇬🇷'},
+    {'code': '+234', 'name': 'Nigeria', 'flag': '🇳🇬'},
+    {'code': '+254', 'name': 'Kenya', 'flag': '🇰🇪'},
+    {'code': '+256', 'name': 'Uganda', 'flag': '🇺🇬'},
+    {'code': '+255', 'name': 'Tanzania', 'flag': '🇹🇿'},
+    {'code': '+233', 'name': 'Ghana', 'flag': '🇬🇭'},
+    {'code': '+212', 'name': 'Morocco', 'flag': '🇲🇦'},
+    {'code': '+213', 'name': 'Algeria', 'flag': '🇩🇿'},
+    {'code': '+216', 'name': 'Tunisia', 'flag': '🇹🇳'},
+    {'code': '+218', 'name': 'Libya', 'flag': '🇱🇾'},
+    {'code': '+54', 'name': 'Argentina', 'flag': '🇦🇷'},
+    {'code': '+56', 'name': 'Chile', 'flag': '🇨🇱'},
+    {'code': '+57', 'name': 'Colombia', 'flag': '🇨🇴'},
+    {'code': '+51', 'name': 'Peru', 'flag': '🇵🇪'},
+    {'code': '+58', 'name': 'Venezuela', 'flag': '🇻🇪'},
+    {'code': '+593', 'name': 'Ecuador', 'flag': '🇪🇨'},
+    {'code': '+595', 'name': 'Paraguay', 'flag': '🇵🇾'},
+    {'code': '+598', 'name': 'Uruguay', 'flag': '🇺🇾'},
+    {'code': '+591', 'name': 'Bolivia', 'flag': '🇧🇴'},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredCountryCodes = List.from(_countryCodes);
+    _detectUserCountry(); // Auto-detect user's country if possible
+  }
 
   @override
   void dispose() {
     _phoneController.dispose();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  // Simple country detection based on common patterns
+  void _detectUserCountry() {
+    // You can implement more sophisticated detection here
+    // For now, we'll keep US as default for broader appeal
+    // You could use packages like 'geolocator' or 'geocoding' for better detection
   }
 
   @override
@@ -60,7 +144,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'We\'ll use this to keep your account secure',
+                  'We\'ll use this to keep your account secure\nSelect any country code',
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
@@ -70,7 +154,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                 ),
                 const Spacer(flex: 1),
 
-                // Phone Number Input Field
+                // Phone Number Input Field with Country Code Selector
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -83,50 +167,87 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                       ),
                     ],
                   ),
-                  child: TextField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(11), // Limit to 11 digits for Pakistani numbers
-                    ],
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      color: const Color(0xFF1F2937),
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'Enter phone number (03xxxxxxxxx)',
-                      hintStyle: GoogleFonts.inter(
-                        fontSize: 16,
-                        color: const Color(0xFF9CA3AF),
-                      ),
-                      prefixIcon: Container(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(
-                          '+92',
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            color: const Color(0xFF1F2937),
-                            fontWeight: FontWeight.w500,
+                  child: Row(
+                    children: [
+                      // Country Code Selector
+                      InkWell(
+                        onTap: _showCountryCodePicker,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          decoration: const BoxDecoration(
+                            border: Border(
+                              right: BorderSide(
+                                color: Color(0xFFE5E7EB),
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _getCountryFlag(_selectedCountryCode),
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                _selectedCountryCode,
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  color: const Color(0xFF1F2937),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(
+                                Icons.arrow_drop_down,
+                                color: Color(0xFF6B7280),
+                                size: 20,
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
+                      // Phone Number Input
+                      Expanded(
+                        child: TextField(
+                          controller: _phoneController,
+                          cursorColor: AppColors.primary,
+                          keyboardType: TextInputType.phone,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(15),
+                          ],
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            color: const Color(0xFF1F2937),
+                          ),
+                          decoration: InputDecoration(
+                            hintText: _getPhoneHint(_selectedCountryCode),
+                            hintStyle: GoogleFonts.inter(
+                              fontSize: 16,
+
+                              color: const Color(0xFF9CA3AF),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _errorMessage = null;
+                            });
+                          },
+                        ),
                       ),
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        _errorMessage = null;
-                      });
-                    },
+                    ],
                   ),
                 ),
 
@@ -208,14 +329,11 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                     'Skip for now',
                     style: GoogleFonts.inter(
                       fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white.withOpacity(_isLoading ? 0.4 : 0.8),
-                      decoration: TextDecoration.underline,
-                      decorationColor: Colors.white.withOpacity(_isLoading ? 0.4 : 0.8),
+                      color: Colors.white.withOpacity(0.8),
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 40),
               ],
             ),
           ),
@@ -224,32 +342,268 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
     );
   }
 
+  void _showCountryCodePicker() {
+    _filteredCountryCodes = List.from(_countryCodes);
+    _searchController.clear();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.8,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: Column(
+                children: [
+                  // Header
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Color(0xFFE5E7EB)),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Select Country Code',
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1F2937),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.close),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Search Field
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search country or code...',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.primary),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setModalState(() {
+                          _filterCountries(value);
+                        });
+                      },
+                    ),
+                  ),
+
+                  // Country List
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _filteredCountryCodes.length,
+                      itemBuilder: (context, index) {
+                        final country = _filteredCountryCodes[index];
+                        final isSelected = country['code'] == _selectedCountryCode;
+
+                        return ListTile(
+                          selected: isSelected,
+                          selectedTileColor: AppColors.primary.withOpacity(0.1),
+                          leading: Text(
+                            country['flag']!,
+                            style: const TextStyle(fontSize: 24),
+                          ),
+                          title: Text(
+                            country['name']!,
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              color: const Color(0xFF1F2937),
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                            ),
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                country['code']!,
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: isSelected ? AppColors.primary : const Color(0xFF6B7280),
+                                ),
+                              ),
+                              if (isSelected) ...[
+                                const SizedBox(width: 8),
+                                Icon(
+                                  Icons.check_circle,
+                                  color: AppColors.primary,
+                                  size: 20,
+                                ),
+                              ],
+                            ],
+                          ),
+                          onTap: () {
+                            setState(() {
+                              _selectedCountryCode = country['code']!;
+                              _errorMessage = null; // Clear any previous errors
+                            });
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _filterCountries(String query) {
+    if (query.isEmpty) {
+      _filteredCountryCodes = List.from(_countryCodes);
+    } else {
+      _filteredCountryCodes = _countryCodes.where((country) {
+        final name = country['name']!.toLowerCase();
+        final code = country['code']!.toLowerCase();
+        final searchQuery = query.toLowerCase();
+
+        return name.contains(searchQuery) ||
+            code.contains(searchQuery) ||
+            code.replaceAll('+', '').contains(searchQuery);
+      }).toList();
+    }
+  }
+
+  String _getCountryFlag(String countryCode) {
+    final country = _countryCodes.firstWhere(
+          (c) => c['code'] == countryCode,
+      orElse: () => {'flag': '🌍'},
+    );
+    return country['flag']!;
+  }
+
+  String _getPhoneHint(String countryCode) {
+    switch (countryCode) {
+      case '+1':
+        return '(555) 000-0000';
+      case '+44':
+        return '7911 123456';
+      case '+91':
+        return '98765 43210';
+      case '+92':
+        return '300 1234567';
+      case '+33':
+        return '6 12 34 56 78';
+      case '+49':
+        return '171 2345678';
+      case '+86':
+        return '138 0013 8000';
+      case '+81':
+        return '90 1234 5678';
+      case '+61':
+        return '4 1234 5678';
+      case '+55':
+        return '11 91234-5678';
+      case '+7':
+        return '912 345-67-89';
+      case '+966':
+        return '50 123 4567';
+      case '+971':
+        return '50 123 4567';
+      case '+234':
+        return '802 123 4567';
+      case '+62':
+        return '812-3456-7890';
+      default:
+        return 'Enter phone number';
+    }
+  }
+
   bool _validatePhoneNumber(String phone) {
     // Remove any spaces or special characters
     phone = phone.replaceAll(RegExp(r'[^\d]'), '');
 
-    // Check if it's a valid Pakistani mobile number format
-    if (phone.length == 11 && phone.startsWith('03')) {
-      return true;
-    } else if (phone.length == 10 && phone.startsWith('3')) {
+    // Enhanced validation based on country code
+    final minLength = _getMinLengthForCountry(_selectedCountryCode);
+    final maxLength = _getMaxLengthForCountry(_selectedCountryCode);
+
+    if (phone.length >= minLength && phone.length <= maxLength) {
       return true;
     }
 
     return false;
   }
 
+  int _getMinLengthForCountry(String countryCode) {
+    switch (countryCode) {
+      case '+1': // US/Canada
+        return 10;
+      case '+44': // UK
+        return 10;
+      case '+91': // India
+        return 10;
+      case '+92': // Pakistan
+        return 10;
+      case '+86': // China
+        return 11;
+      case '+7': // Russia
+        return 10;
+      default:
+        return 7; // International minimum
+    }
+  }
+
+  int _getMaxLengthForCountry(String countryCode) {
+    switch (countryCode) {
+      case '+1': // US/Canada
+        return 10;
+      case '+44': // UK
+        return 11;
+      case '+91': // India
+        return 10;
+      case '+92': // Pakistan
+        return 10;
+      case '+86': // China
+        return 11;
+      case '+7': // Russia
+        return 10;
+      default:
+        return 15; // International maximum
+    }
+  }
+
   String _formatPhoneNumber(String phone) {
     // Remove any spaces or special characters
     phone = phone.replaceAll(RegExp(r'[^\d]'), '');
 
-    // Ensure it starts with country code
-    if (phone.length == 10 && phone.startsWith('3')) {
-      return '+92$phone';
-    } else if (phone.length == 11 && phone.startsWith('03')) {
-      return '+92${phone.substring(1)}';
-    }
-
-    return '+92$phone';
+    // Combine country code with phone number
+    return '$_selectedCountryCode$phone';
   }
 
   Future<void> _handleContinue() async {
@@ -263,8 +617,10 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
     }
 
     if (!_validatePhoneNumber(phoneNumber)) {
+      final minLength = _getMinLengthForCountry(_selectedCountryCode);
+      final maxLength = _getMaxLengthForCountry(_selectedCountryCode);
       setState(() {
-        _errorMessage = 'Please enter a valid Pakistani mobile number';
+        _errorMessage = 'Please enter a valid phone number ($minLength-$maxLength digits)';
       });
       return;
     }

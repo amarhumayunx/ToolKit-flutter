@@ -230,8 +230,8 @@ class _VerifyPasswordScreenState extends State<VerifyPasswordScreen> {
           if (_isLoading)
             Container(
               color: Colors.black.withOpacity(0.3),
-              child: const Center(
-                child: CircularProgressIndicator(),
+              child:  Center(
+                child: CircularProgressIndicator( color:  AppColors.primary,),
               ),
             ),
         ],

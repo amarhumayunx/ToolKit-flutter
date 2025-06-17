@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-
 import '../../provider/profile_provider.dart';
 import '../../services/auth_service.dart';
 import '../../utils/app_colors.dart';
+import '../../utils/app_snackbar.dart';
 import 'profile_screen.dart';
 import 'phone_number_screen.dart';
 
@@ -257,16 +257,8 @@ class _ContinueWithGoogleScreenState extends State<ContinueWithGoogleScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Failed to sign in with Google. Please try again.',
-              style: GoogleFonts.inter(),
-            ),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        AppSnackBar.show(context,
+            message: 'Failed to sign in with Google. Please try again.');
       }
     } finally {
       if (mounted) {

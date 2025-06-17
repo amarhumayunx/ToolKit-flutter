@@ -4,14 +4,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../services/auth_service.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
-import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
 
 class SetPasswordScreen extends StatefulWidget {
   final bool isChanging;
   final bool isRecovery;
   final String? email;
-  final String? userId; // Add this parameter
+  final String? userId;
 
   const SetPasswordScreen({
     super.key,
@@ -356,7 +355,7 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
             Container(
               color: Colors.black.withOpacity(0.3),
               child: const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(color:    AppColors.primary,),
               ),
             ),
         ],

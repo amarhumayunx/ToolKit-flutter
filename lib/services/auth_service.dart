@@ -65,8 +65,6 @@ class AuthService {
       return false;
     }
   }
-  // Modified verifyOTPForPasswordReset - keeps user signed in
-  // Key fixes for AuthService.dart
 
 // 1. Fix the verifyOTPForPasswordReset method
   Future<String?> verifyOTPForPasswordReset(String otp) async {
@@ -244,9 +242,6 @@ class AuthService {
       print('Error syncing user data after phone auth: $e');
     }
   }
-
-
-
   Future<void> _saveUserToFirestore(User user) async {
     try {
       final userDoc = _firestore.collection('users').doc(user.uid);
@@ -281,7 +276,6 @@ class AuthService {
       rethrow;
     }
   }
-
   Future<UserModel?> getUserData(String uid) async {
     try {
       final doc = await _firestore.collection('users').doc(uid).get();
@@ -294,7 +288,6 @@ class AuthService {
       return null;
     }
   }
-
   Future<void> updateUserProfile({
     required String uid,
     String? displayName,
@@ -526,32 +519,6 @@ class AuthService {
       return false;
     }
   }
-
-
-
-  // Verify password
-  // Future<bool> verifyPassword(String password) async {
-  //   try {
-  //     final user = currentUser;
-  //     if (user == null) return false;
-  //
-  //     final doc = await _firestore.collection('users').doc(user.uid).get();
-  //     if (doc.exists) {
-  //       final data = doc.data();
-  //       final storedPassword = data?['password'];
-  //       if (storedPassword != null) {
-  //         final hashedInputPassword = _hashPassword(password);
-  //         return hashedInputPassword == storedPassword;
-  //       }
-  //     }
-  //     return false;
-  //   } catch (e) {
-  //     print('Error verifying password: $e');
-  //     return false;
-  //   }
-  // }
-
-  // Update/Change existing password
   Future<bool> changePassword(String oldPassword, String newPassword) async {
     try {
       final user = currentUser;

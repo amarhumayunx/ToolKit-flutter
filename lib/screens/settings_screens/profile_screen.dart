@@ -521,6 +521,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
       initialDate: initialDate,
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primary, // Header background color
+              onPrimary: Colors.white, // Header text color
+              onSurface: Colors.black, // Body text color
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary, // Button text color
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (pickedDate != null) {

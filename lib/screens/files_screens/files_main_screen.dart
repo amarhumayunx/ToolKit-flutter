@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../models/file_model.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/settings_widgets/all_files_tab.dart';
 import '../../widgets/settings_widgets/favorites_view_tab.dart';
 import '../../widgets/settings_widgets/recent_view_tab.dart';
 
 class FilesMainScreen extends StatefulWidget {
-  const FilesMainScreen({super.key});
+  final bool isSelectingFiles;
+  const FilesMainScreen({super.key, this.isSelectingFiles = false});
 
   @override
   State<FilesMainScreen> createState() => _FilesMainScreenState();
@@ -38,6 +40,39 @@ class _FilesMainScreenState extends State<FilesMainScreen>
         _searchController.clear();
       }
     });
+  }
+
+  void _onFileSelected(FileModel file, int index) {
+    if (widget.isSelectingFiles) {
+      // Check file size
+      final sizeParts = file.size.split(' ');
+      if (sizeParts.length == 2) {
+        final sizeValue = double.tryParse(sizeParts[0]) ?? 0;
+        final sizeUnit = sizeParts[1].toUpperCase();
+
+        double sizeInMB = sizeValue;
+        if (sizeUnit == 'KB') {
+          sizeInMB = sizeValue / 1024;
+        } else if (sizeUnit == 'GB') {
+          sizeInMB = sizeValue * 1024;
+        }
+
+        if (sizeInMB > 2) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('File size must be less than 2MB'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+      }
+
+      // Return only the selected file
+      Navigator.of(context).pop([file]);
+    } else {
+      // Normal file handling
+    }
   }
 
   @override
@@ -99,7 +134,6 @@ class _FilesMainScreenState extends State<FilesMainScreen>
                 ],
               ),
             ),
-
             TabBar(
               controller: _tabController,
               indicator: const UnderlineTabIndicator(
@@ -142,31 +176,36 @@ class _FilesMainScreenState extends State<FilesMainScreen>
                 Tab(text: 'ALL'),
               ],
             ),
-
             const SizedBox(height: 20),
-
-            // Tab Bar View
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(top: 10),
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    // Recents Tab
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child:
-                      RecentsViewTab(searchQuery: _searchController.text),
+                      child: RecentsViewTab(
+                        searchQuery: _searchController.text,
+                        onFileSelected: _onFileSelected,
+                        isSelectingFiles: widget.isSelectingFiles,
+                      ),
                     ),
-                    // Favorites Tab
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: FavoritesView(searchQuery: _searchController.text),
+                      child: FavoritesView(
+                        searchQuery: _searchController.text,
+                        onFileSelected: _onFileSelected,
+                        isSelectingFiles: widget.isSelectingFiles,
+                      ),
                     ),
-                    // All Files Tab
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: AllFilesView(searchQuery: _searchController.text),
+                      child: AllFilesView(
+                        searchQuery: _searchController.text,
+                        onFileSelected: _onFileSelected,
+                        isSelectingFiles: widget.isSelectingFiles,
+                      ),
                     ),
                   ],
                 ),

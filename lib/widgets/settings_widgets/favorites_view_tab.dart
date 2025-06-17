@@ -12,8 +12,12 @@ import '../../utils/app_snackbar.dart';
 
 class FavoritesView extends StatefulWidget {
   final String searchQuery;
+  final Function(FileModel, int)? onFileSelected;
+  final bool isSelectingFiles;
 
-  const FavoritesView({super.key, required this.searchQuery});
+
+  const FavoritesView({super.key, required this.searchQuery,this.onFileSelected,
+    this.isSelectingFiles = false,});
 
   @override
   State<FavoritesView> createState() => _FavoritesViewState();
@@ -53,26 +57,55 @@ class _FavoritesViewState extends State<FavoritesView> {
     });
   }
 
-  void _toggleLock(int index) {
-    setState(() {
-      final file = filesBox.getAt(index);
-      if (file != null) {
-        filesBox.putAt(
-            index,
-            FileModel(
-              name: file.name,
-              path: file.path,
-              date: file.date,
-              size: file.size,
-              isFavorite: file.isFavorite,
-              isLocked: !file.isLocked,
-            ));
+  Future<void> _toggleLock(int index) async {
+    final file = filesBox.getAt(index);
+    if (file != null) {
+      // First update the lock status and remove favorite status when locking
+      final updatedFile = FileModel(
+        name: file.name,
+        path: file.path,
+        date: file.date,
+        size: file.size,
+        isFavorite: file.isLocked ? file.isFavorite : false,
+        // Remove favorite when locking
+        isLocked: !file.isLocked,
+        originalPath: file.originalPath,
+        isEncrypted: file.isEncrypted,
+      );
+
+      await filesBox.putAt(index, updatedFile);
+
+      // Then handle encryption/decryption
+      final success =
+          await SaveDocumentService.toggleFileLock(updatedFile, index);
+
+      if (success) {
+        setState(() {});
+        AppSnackBar.show(context,
+            message: updatedFile.isLocked
+                ? 'File locked and removed from favorites'
+                : 'File unlocked and decrypted');
+      } else {
+        // Revert the lock status if encryption/decryption failed
+        await filesBox.putAt(index, file);
+        AppSnackBar.show(context, message: 'Failed to toggle file lock');
       }
-    });
-    AppSnackBar.show(context,
-        message: filesBox.getAt(index)?.isLocked == true
-            ? 'File locked'
-            : 'File unlocked');
+    }
+  }
+
+  List<MapEntry<int, FileModel>> _getFavoriteFiles() {
+    if (_isLoading || filesBox.isEmpty) return [];
+
+    List<MapEntry<int, FileModel>> favoriteFilesWithIndex = [];
+    for (int i = 0; i < filesBox.length; i++) {
+      final file = filesBox.getAt(i);
+      if (file != null && file.isFavorite && !file.isLocked) {
+        // Add !file.isLocked condition
+        favoriteFilesWithIndex.add(MapEntry(i, file));
+      }
+    }
+
+    return favoriteFilesWithIndex;
   }
 
   Future<void> _renameFile(int index, String newPath) async {
@@ -114,20 +147,6 @@ class _FavoritesViewState extends State<FavoritesView> {
       filesBox.deleteAt(index);
     });
     AppSnackBar.show(context, message: 'File deleted');
-  }
-
-  List<MapEntry<int, FileModel>> _getFavoriteFiles() {
-    if (_isLoading || filesBox.isEmpty) return [];
-
-    List<MapEntry<int, FileModel>> favoriteFilesWithIndex = [];
-    for (int i = 0; i < filesBox.length; i++) {
-      final file = filesBox.getAt(i);
-      if (file != null && file.isFavorite) {
-        favoriteFilesWithIndex.add(MapEntry(i, file));
-      }
-    }
-
-    return favoriteFilesWithIndex;
   }
 
   @override
@@ -192,8 +211,9 @@ class _FavoritesViewState extends State<FavoritesView> {
                           child: Column(
                             children: [
                               Padding(
-                                padding: const EdgeInsets.only(left: 6, right: 6),
-                                child: ResultDocumentContainer(
+                                padding:
+                                    const EdgeInsets.only(left: 6, right: 6),
+                                child:ResultDocumentContainer(
                                   documentName: file.name,
                                   date: DateFormat('yy/MM/dd').format(file.date),
                                   time: DateFormat('h:mma').format(file.date),
@@ -201,12 +221,13 @@ class _FavoritesViewState extends State<FavoritesView> {
                                   isFavorite: file.isFavorite,
                                   isLocked: file.isLocked,
                                   filePath: file.path,
+                                  isSelectable: widget.isSelectingFiles, // Add this
                                   onFavoriteToggle: () => _toggleFavorite(index),
                                   onDelete: () => _deleteFile(index),
-                                  onFileRenamed: (newPath) =>
-                                      _renameFile(index, newPath),
+                                  onFileRenamed: (newPath) => _renameFile(index, newPath),
                                   onLockToggle: () => _toggleLock(index),
-                                ),
+                                  onTap: widget.isSelectingFiles ? () => widget.onFileSelected?.call(file, index) : null, // Add this
+                                )
                               ),
                               const SizedBox(height: 12),
                             ],
