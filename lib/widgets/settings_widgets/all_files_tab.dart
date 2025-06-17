@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
@@ -71,7 +72,7 @@ class _AllFilesViewState extends State<AllFilesView> {
       }
     });
     AppSnackBar.show(context,
-        message: filesBox.getAt(index)?.isLocked == true ? 'File locked' : 'File unlocked');
+        message: filesBox.getAt(index)?.isLocked == true ? 'file_locked'.tr : 'file_unlocked'.tr);
   }
 
   Future<void> _renameFile(int index, String newPath) async {
@@ -102,9 +103,9 @@ class _AllFilesViewState extends State<AllFilesView> {
             ));
       });
 
-      AppSnackBar.show(context, message: 'File renamed successfully');
+      AppSnackBar.show(context, message: 'file_renamed_successfully'.tr);
     } catch (e) {
-      AppSnackBar.show(context, message: 'Error renaming file: $e');
+      AppSnackBar.show(context, message: 'error_renaming_file'.tr.replaceAll('{error}', e.toString()));
     }
   }
 
@@ -112,7 +113,7 @@ class _AllFilesViewState extends State<AllFilesView> {
     setState(() {
       filesBox.deleteAt(index);
     });
-    AppSnackBar.show(context, message: 'File deleted');
+    AppSnackBar.show(context, message: 'file_deleted'.tr);
   }
 
   @override
@@ -160,7 +161,7 @@ class _AllFilesViewState extends State<AllFilesView> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 100),
                     child: Text(
-                      'No files found',
+                      'no_files_found'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         color: Colors.grey[600],

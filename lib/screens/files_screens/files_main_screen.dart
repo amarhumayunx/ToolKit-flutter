@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart'; // For .tr extension
 import '../../utils/app_colors.dart';
 import '../../widgets/settings_widgets/all_files_tab.dart';
 import '../../widgets/settings_widgets/favorites_view_tab.dart';
@@ -59,7 +60,7 @@ class _FilesMainScreenState extends State<FilesMainScreen>
                       autofocus: true,
                       cursorColor: AppColors.primary,
                       decoration: InputDecoration(
-                        hintText: 'Search files...',
+                        hintText: 'search_files'.tr,
                         hintStyle: GoogleFonts.inter(
                           fontSize: 14,
                           color: Colors.grey[500],
@@ -78,7 +79,7 @@ class _FilesMainScreenState extends State<FilesMainScreen>
                       children: [
                         const SizedBox(width: 8),
                         Text(
-                          'Files',
+                          'files'.tr,
                           style: GoogleFonts.inter(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -136,10 +137,10 @@ class _FilesMainScreenState extends State<FilesMainScreen>
                   return null;
                 },
               ),
-              tabs: const [
-                Tab(text: 'RECENTS'),
-                Tab(text: 'FAVOURITES'),
-                Tab(text: 'ALL'),
+              tabs: [
+                Tab(text: 'recents'.tr),
+                Tab(text: 'favourites'.tr),
+                Tab(text: 'all'.tr),
               ],
             ),
 

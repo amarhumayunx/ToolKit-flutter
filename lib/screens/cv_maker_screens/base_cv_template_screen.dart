@@ -8,6 +8,7 @@ import 'package:open_file/open_file.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:provider/provider.dart';
+import 'package:get/get.dart'; // Add this import for .tr extension
 import '../../provider/certification_provider.dart';
 import '../../provider/education_provider.dart';
 import '../../provider/language_provider.dart';
@@ -55,22 +56,22 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
   Future<Map<String, dynamic>> _collectAllFormData() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final workExpProvider =
-        Provider.of<WorkExperienceProvider>(context, listen: false);
+    Provider.of<WorkExperienceProvider>(context, listen: false);
     final educationProvider =
-        Provider.of<EducationProvider>(context, listen: false);
+    Provider.of<EducationProvider>(context, listen: false);
     final certificationProvider =
-        Provider.of<CertificationProvider>(context, listen: false);
+    Provider.of<CertificationProvider>(context, listen: false);
     final skillsProvider = Provider.of<SkillsProvider>(context, listen: false);
     final languageProvider =
-        Provider.of<LanguageProvider>(context, listen: false);
+    Provider.of<LanguageProvider>(context, listen: false);
     final templateProvider =
-        Provider.of<TemplateProvider>(context, listen: false);
+    Provider.of<TemplateProvider>(context, listen: false);
 
     final websites = userProvider.websites
         .map((website) => {
-              'name': website.name,
-              'url': website.url,
-            })
+      'name': website.name,
+      'url': website.url,
+    })
         .toList();
 
     return {
@@ -83,9 +84,9 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
       },
       'careerObjective': userProvider.userData.careerObjective,
       'education':
-          educationProvider.educationItems.map((e) => e.toMap()).toList(),
+      educationProvider.educationItems.map((e) => e.toMap()).toList(),
       'workExperience':
-          workExpProvider.workExperienceItems.map((e) => e.toMap()).toList(),
+      workExpProvider.workExperienceItems.map((e) => e.toMap()).toList(),
       'certifications': certificationProvider.certificationItems
           .map((e) => e.toMap())
           .toList(),
@@ -104,7 +105,7 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
       _showLoadingDialog();
 
       bool notificationsEnabled =
-          await NotificationService.areNotificationsEnabled();
+      await NotificationService.areNotificationsEnabled();
       if (notificationsEnabled) {
         await NotificationService.showExportStartNotification();
       }
@@ -129,11 +130,11 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
       }
 
       if (pageImages.isEmpty) {
-        throw Exception('Failed to capture any pages');
+        throw Exception('failed_to_capture_pages'.tr);
       }
 
       final toolkitDir = await _getToolkitDirectory();
-      if (toolkitDir == null) throw Exception('Could not access storage');
+      if (toolkitDir == null) throw Exception('could_not_access_storage'.tr);
 
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final fileName = 'CV_$timestamp.pdf';
@@ -149,7 +150,7 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
       }
 
       final savedCVProvider =
-          Provider.of<SavedCVProvider>(context, listen: false);
+      Provider.of<SavedCVProvider>(context, listen: false);
       await savedCVProvider.addSavedCV(
         fileName: fileName,
         filePath: filePath,
@@ -165,7 +166,7 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
 
       if (mounted) {
         Navigator.pop(context);
-        AppSnackBar.show(context, message: 'PDF saved successfully');
+        AppSnackBar.show(context, message: 'pdf_saved_successfully'.tr);
 
         if (openAfterExport) {
           await OpenFile.open(filePath);
@@ -174,14 +175,14 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
         _clearAllData();
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const CreateCvScreen()),
-          (Route<dynamic> route) => false,
+              (Route<dynamic> route) => false,
         );
       }
     } catch (e) {
       debugPrint('Export error: $e');
 
       bool notificationsEnabled =
-          await NotificationService.areNotificationsEnabled();
+      await NotificationService.areNotificationsEnabled();
       if (notificationsEnabled) {
         await NotificationService.cancelExportProgressNotification();
         await NotificationService.showErrorNotification(e.toString());
@@ -189,7 +190,7 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
 
       if (mounted) {
         Navigator.pop(context);
-        AppSnackBar.show(context, message: 'Export failed: ${e.toString()}');
+        AppSnackBar.show(context, message: '${'export_failed'.tr}: ${e.toString()}');
       }
     } finally {
       _isExporting = false;
@@ -201,14 +202,14 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return const AlertDialog(
+        return AlertDialog(
           content: Row(
             children: [
-              CircularProgressIndicator(
+              const CircularProgressIndicator(
                 color: AppColors.primary,
               ),
-              SizedBox(width: 20),
-              Text("Exporting CV..."),
+              const SizedBox(width: 20),
+              Text("exporting_cv".tr),
             ],
           ),
         );
@@ -256,10 +257,10 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
   Future<Uint8List?> _capturePageAsImage(GlobalKey key) async {
     try {
       final RenderRepaintBoundary boundary =
-          key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      key.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
       final ByteData? byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
+      await image.toByteData(format: ui.ImageByteFormat.png);
       return byteData?.buffer.asUint8List();
     } catch (e) {
       debugPrint('Error capturing page as image: $e');
@@ -270,10 +271,10 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
   Future<Uint8List> _createThumbnail(Uint8List imageBytes) async {
     try {
       final codec =
-          await ui.instantiateImageCodec(imageBytes, targetWidth: 200);
+      await ui.instantiateImageCodec(imageBytes, targetWidth: 200);
       final frame = await codec.getNextFrame();
       final byteData =
-          await frame.image.toByteData(format: ui.ImageByteFormat.png);
+      await frame.image.toByteData(format: ui.ImageByteFormat.png);
       return byteData!.buffer.asUint8List();
     } catch (e) {
       debugPrint('Error creating thumbnail: $e');
@@ -313,18 +314,18 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Export CV"),
-          content: const Text("What would you like to do with your CV?"),
+          title: Text("export_cv".tr),
+          content: Text("what_would_you_like_to_do_with_cv".tr),
           actions: [
             TextButton(
               onPressed: () => _handleExportAction(false),
-              child: const Text("Export PDF",
-                  style: TextStyle(color: AppColors.primary)),
+              child: Text("export_pdf".tr,
+                  style: const TextStyle(color: AppColors.primary)),
             ),
             TextButton(
               onPressed: () => _handleExportAction(true),
-              child: const Text("Open PDF",
-                  style: TextStyle(color: AppColors.primary)),
+              child: Text("open_pdf".tr,
+                  style: const TextStyle(color: AppColors.primary)),
             ),
           ],
         );
@@ -345,8 +346,8 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
 
   void _changeTemplate(int templateId) {
     final templateProvider =
-        Provider.of<TemplateProvider>(context, listen: false);
-    templateProvider.setTemplate(templateId, 'Template $templateId');
+    Provider.of<TemplateProvider>(context, listen: false);
+    templateProvider.setTemplate(templateId, '${'template'.tr} $templateId');
 
     final websites = Provider.of<UserProvider>(context, listen: false).websites;
 
@@ -369,7 +370,7 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBar(
-        title: 'CV',
+        title: 'cv'.tr,
         onBackPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const CreateCvScreen()),

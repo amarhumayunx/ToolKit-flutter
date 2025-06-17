@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:get/get.dart'; // Add this import for .tr extension
 import '../../models/work_experience_model.dart';
 import '../../provider/work_experience_provider.dart';
 import '../../utils/app_colors.dart';
@@ -128,7 +129,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
         // Validate that end date is after start date
         if (startDate != null && picked.isBefore(startDate!)) {
           setState(() {
-            dateError = 'End date must be after start date';
+            dateError = 'end_date_error'.tr;
           });
           return;
         } else {
@@ -182,20 +183,20 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
         endDate != null &&
         endDate!.isBefore(startDate!)) {
       setState(() {
-        dateError = 'End date must be after start date';
+        dateError = 'end_date_error'.tr;
       });
       return;
     }
 
     final provider =
-        Provider.of<WorkExperienceProvider>(context, listen: false);
+    Provider.of<WorkExperienceProvider>(context, listen: false);
 
     provider.addWorkExperience(
       WorkExperienceItem(
         position: _positionController.text,
         company: _companyController.text,
         startDate: _startDateController.text,
-        endDate: isCurrent ? 'Present' : _endDateController.text,
+        endDate: isCurrent ? 'present'.tr : _endDateController.text,
         projects: projectsList,
         projectUrls: projectUrlsList,
         description: _descriptionController.text,
@@ -223,7 +224,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
 
   void _editWorkExperience(BuildContext context, int index) {
     final provider =
-        Provider.of<WorkExperienceProvider>(context, listen: false);
+    Provider.of<WorkExperienceProvider>(context, listen: false);
     final item = provider.workExperienceItems[index];
 
     // Parse the dates when editing
@@ -265,7 +266,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
 
   void _deleteWorkExperience(BuildContext context, int index) {
     final provider =
-        Provider.of<WorkExperienceProvider>(context, listen: false);
+    Provider.of<WorkExperienceProvider>(context, listen: false);
     provider.deleteWorkExperience(index);
   }
 
@@ -304,7 +305,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
               child: SingleChildScrollView(
                 child: Padding(
                   padding:
-                      const EdgeInsets.only(left: 26, right: 26, bottom: 8),
+                  const EdgeInsets.only(left: 26, right: 26, bottom: 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -326,7 +327,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16.0),
                           child: AddAnotherButton(
-                            text: 'Add another Experience',
+                            text: 'add_another_experience'.tr,
                             onPressed: _toggleForm,
                           ),
                         ),
@@ -378,7 +379,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
             // Date information
             Text(
               item.isCurrent
-                  ? "${item.startDate} - Present"
+                  ? "${item.startDate} - ${'present'.tr}"
                   : "${item.startDate} - ${item.endDate}",
               style: GoogleFonts.inter(
                 fontSize: 12,
@@ -398,7 +399,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Projects:',
+                    'projects'.tr,
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -484,16 +485,16 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
           children: [
             // Position
             CustomTextField(
-              label: 'Position',
-              hint: 'Enter your position',
+              label: 'position'.tr,
+              hint: 'enter_position'.tr,
               controller: _positionController,
             ),
             const SizedBox(height: 16),
 
             // Company
             CustomTextField(
-              label: 'Company Name',
-              hint: 'Enter your company',
+              label: 'company_name'.tr,
+              hint: 'enter_company'.tr,
               controller: _companyController,
             ),
             const SizedBox(height: 16),
@@ -505,7 +506,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                 // Start date
                 Expanded(
                   child: DateField(
-                    label: 'Start date',
+                    label: 'start_date'.tr,
                     controller: _startDateController,
                     onTap: () => _selectDate(context, _startDateController, true),
                   ),
@@ -515,7 +516,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                 if (!isCurrent)
                   Expanded(
                     child: DateField(
-                      label: 'End Date',
+                      label: 'end_date'.tr,
                       controller: _endDateController,
                       onTap: () => _selectDate(context, _endDateController, false),
                       errorText: dateError,
@@ -556,7 +557,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  'Current',
+                  'current'.tr,
                   style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
@@ -571,7 +572,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                 Row(
                   children: [
                     Text(
-                      'Projects',
+                      'projects'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
@@ -603,7 +604,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                         controller: _projectController,
                         cursorColor: AppColors.primary,
                         decoration: InputDecoration(
-                          hintText: 'Project name',
+                          hintText: 'project_name_hint'.tr,
                           hintStyle: GoogleFonts.inter(
                             fontSize: 12,
                             fontWeight: FontWeight.w300,
@@ -640,7 +641,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                               controller: _projectUrlController,
                               cursorColor: AppColors.primary,
                               decoration: InputDecoration(
-                                hintText: 'Project URL (optional)',
+                                hintText: 'project_url_hint'.tr,
                                 hintStyle: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w300,
@@ -712,7 +713,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           projectsList[index],
@@ -728,7 +729,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                                               fontSize: 12,
                                               color: Colors.blue,
                                               decoration:
-                                                  TextDecoration.underline,
+                                              TextDecoration.underline,
                                             ),
                                           ),
                                       ],
@@ -762,7 +763,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                 Row(
                   children: [
                     Text(
-                      'Description',
+                      'description'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
@@ -771,7 +772,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '( Optional )',
+                      'optional'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w300,
@@ -800,7 +801,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                     maxLines: 5,
                     maxLength: 150,
                     decoration: InputDecoration(
-                      hintText: 'Your responsibilities and achievements',
+                      hintText: 'description_hint'.tr,
                       hintStyle: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w300,

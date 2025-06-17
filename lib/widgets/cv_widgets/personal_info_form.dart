@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 import '../../provider/user_provider.dart';
 import '../../widgets/custom_text_field.dart';
 
@@ -9,11 +10,11 @@ class PersonalInfoForm extends StatefulWidget {
   final TextEditingController emailController;
   final TextEditingController phoneController;
   final String? nameError;
-  final String? designationError; // Added designation error
+  final String? designationError;
   final String? emailError;
   final String? phoneError;
   final Function(String?) onNameErrorChanged;
-  final Function(String?) onDesignationErrorChanged; // Added designation error handler
+  final Function(String?) onDesignationErrorChanged;
   final Function(String?) onEmailErrorChanged;
   final Function(String?) onPhoneErrorChanged;
 
@@ -24,11 +25,11 @@ class PersonalInfoForm extends StatefulWidget {
     required this.emailController,
     required this.phoneController,
     required this.nameError,
-    required this.designationError, // Added designation error
+    required this.designationError,
     required this.emailError,
     required this.phoneError,
     required this.onNameErrorChanged,
-    required this.onDesignationErrorChanged, // Added designation error handler
+    required this.onDesignationErrorChanged,
     required this.onEmailErrorChanged,
     required this.onPhoneErrorChanged,
   });
@@ -74,8 +75,8 @@ class _PersonalInfoFormState extends State<PersonalInfoForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomTextField(
-          label: 'Full Name',
-          hint: 'Your Name',
+          label: 'full_name'.tr,
+          hint: 'your_name'.tr,
           controller: widget.nameController,
           onChanged: (value) {
             Provider.of<UserProvider>(context, listen: false)
@@ -104,8 +105,8 @@ class _PersonalInfoFormState extends State<PersonalInfoForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomTextField(
-          label: 'Designation',
-          hint: 'Your Designation',
+          label: 'designation'.tr,
+          hint: 'your_designation'.tr,
           controller: widget.designationController,
           onChanged: (value) {
             Provider.of<UserProvider>(context, listen: false)
@@ -136,8 +137,8 @@ class _PersonalInfoFormState extends State<PersonalInfoForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomTextField(
-          label: 'Email',
-          hint: 'Your Mail',
+          label: 'email'.tr,
+          hint: 'your_email'.tr,
           keyboardType: TextInputType.emailAddress,
           controller: widget.emailController,
           onChanged: (value) {
@@ -169,8 +170,8 @@ class _PersonalInfoFormState extends State<PersonalInfoForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomTextField(
-          label: 'Phone Number',
-          hint: 'Your Number',
+          label: 'phone_number'.tr,
+          hint: 'your_phone_number'.tr,
           keyboardType: TextInputType.phone,
           controller: widget.phoneController,
           onChanged: (value) {

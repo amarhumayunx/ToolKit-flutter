@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:get/get.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
@@ -31,7 +32,7 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
         });
       }
     } catch (e) {
-      AppSnackBar.show(context, message: 'Error selecting images: $e');
+      AppSnackBar.show(context, message: '${'error_selecting_images'.tr}: $e');
     }
   }
 
@@ -44,7 +45,7 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
   Future<void> _convertImages() async {
     if (_selectedImages.isEmpty) {
       AppSnackBar.show(context,
-          message: 'Please select at least one image first');
+          message: 'please_select_at_least_one_image_first'.tr);
       return;
     }
 
@@ -73,7 +74,7 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
       }
     } catch (e) {
       setState(() {});
-      AppSnackBar.show(context, message: 'Error processing images: $e');
+      AppSnackBar.show(context, message: '${'error_processing_images'.tr}: $e');
     }
   }
 
@@ -81,8 +82,8 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const ToolsAppBar(
-        title: 'Convert Image',
+      appBar: ToolsAppBar(
+        title: 'convert_image'.tr,
       ),
       body: Column(
         children: [
@@ -94,16 +95,15 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
                 children: [
                   const CustomSvgImage(imagePath: 'assets/images/convert_image.svg'),
                   const SizedBox(height: 30),
-                  const InfoCard(
-                    title: 'Convert Image Format',
-                    description:
-                    'Easily convert multiple images to various formats while maintaining quality, resolution and clarity.',
+                  InfoCard(
+                    title: 'convert_image_format'.tr,
+                    description: 'convert_image_description'.tr,
                   ),
                   const SizedBox(height: 24),
                   // Combined container with shadow
                   FileSelectionContainer(
-                    title: 'Select Images',
-                    emptyStateText: 'click to choose file',
+                    title: 'select_images'.tr,
+                    emptyStateText: 'click_to_choose_file'.tr,
                     selectedFiles: _selectedImages,
                     onTap: _pickImages,
                     onRemoveFile: _removeImage,
@@ -117,7 +117,7 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
             padding:
             const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
             child: CustomGradientButton(
-              text: 'Next',
+              text: 'next'.tr,
               onPressed: _convertImages,
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import '../../models/education_item_model.dart';
 import '../../provider/education_provider.dart';
@@ -105,7 +106,7 @@ class EducationDetailPageState extends State<EducationDetailPage> {
         endDate = picked;
         if (startDate != null && picked.isBefore(startDate!)) {
           setState(() {
-            dateError = 'End date must be after start date';
+            dateError = 'end_date_after_start_date'.tr;
           });
           return;
         } else {
@@ -138,28 +139,28 @@ class EducationDetailPageState extends State<EducationDetailPage> {
         endDate != null &&
         endDate!.isBefore(startDate!)) {
       setState(() {
-        dateError = 'End date must be after start date';
+        dateError = 'end_date_after_start_date'.tr;
       });
       return;
     }
 
     if (_degreeController.text.trim().isEmpty) {
-      AppSnackBar.show(context, message: 'Please enter degree title');
+      AppSnackBar.show(context, message: 'enter_degree_title'.tr);
       return;
     }
 
     if (_instituteController.text.trim().isEmpty) {
-      AppSnackBar.show(context, message: 'Please enter institute name');
+      AppSnackBar.show(context, message: 'enter_institute_name'.tr);
       return;
     }
 
     if (_startDateController.text.trim().isEmpty) {
-      AppSnackBar.show(context, message: 'Please select start date');
+      AppSnackBar.show(context, message: 'select_start_date'.tr);
       return;
     }
 
     if (!isCompleted && _endDateController.text.trim().isEmpty) {
-      AppSnackBar.show(context, message: 'Please select end date');
+      AppSnackBar.show(context, message: 'select_end_date'.tr);
       return;
     }
 
@@ -176,10 +177,10 @@ class EducationDetailPageState extends State<EducationDetailPage> {
 
     if (editingIndex != null) {
       educationProvider.updateEducationItem(editingIndex!, newEducation);
-      AppSnackBar.show(context, message: 'Education updated successfully');
+      AppSnackBar.show(context, message: 'education_updated_successfully'.tr);
     } else {
       educationProvider.addEducationItem(newEducation);
-      AppSnackBar.show(context, message: 'Education added successfully');
+      AppSnackBar.show(context, message: 'education_added_successfully'.tr);
     }
 
     _clearForm();
@@ -227,7 +228,7 @@ class EducationDetailPageState extends State<EducationDetailPage> {
     final educationProvider =
     Provider.of<EducationProvider>(context, listen: false);
     educationProvider.deleteEducationItem(index);
-    AppSnackBar.show(context, message: 'Education deleted successfully');
+    AppSnackBar.show(context, message: 'education_deleted_successfully'.tr);
   }
 
   void _toggleForm() {
@@ -320,7 +321,7 @@ class EducationDetailPageState extends State<EducationDetailPage> {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
                         child: AddAnotherButton(
-                          text: 'Add another Education',
+                          text: 'add_another_education'.tr,
                           onPressed: _toggleForm,
                         ),
                       ),

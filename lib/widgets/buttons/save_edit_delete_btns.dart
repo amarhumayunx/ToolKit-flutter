@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../utils/app_colors.dart';
-
-
 
 /// A reusable Save button widget used across the app
 class SaveButton extends StatelessWidget {
@@ -15,7 +14,7 @@ class SaveButton extends StatelessWidget {
   const SaveButton({
     super.key,
     required this.onPressed,
-    this.text = 'Save',
+    this.text = 'save',
     this.width = 88,
     this.height = 36,
   });
@@ -50,7 +49,7 @@ class SaveButton extends StatelessWidget {
               ),
             ),
             child: Text(
-              text,
+              text.tr,
               style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
@@ -63,7 +62,6 @@ class SaveButton extends StatelessWidget {
   }
 }
 
-/// A reusable Action button (Edit/Delete) widget used across the app
 class ActionButton extends StatelessWidget {
   final VoidCallback onPressed;
   final String text;
@@ -102,7 +100,7 @@ class ActionButton extends StatelessWidget {
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
         child: Text(
-          text,
+          text.tr,
           style: GoogleFonts.inter(
             fontSize: 12,
             fontWeight: FontWeight.w500,
@@ -136,13 +134,13 @@ class EditDeleteActionRow extends StatelessWidget {
       children: [
         ActionButton(
           onPressed: onEdit,
-          text: 'Edit',
+          text: 'edit',
           width: buttonWidth,
           height: buttonHeight,
         ),
         ActionButton(
           onPressed: onDelete,
-          text: 'Delete',
+          text: 'delete',
           width: buttonWidth,
           height: buttonHeight,
         ),
@@ -151,7 +149,6 @@ class EditDeleteActionRow extends StatelessWidget {
   }
 }
 
-/// A reusable container for displaying saved details with edit/delete options
 class SavedDetailContainer extends StatelessWidget {
   final String title;
   final String content;
@@ -190,7 +187,7 @@ class SavedDetailContainer extends StatelessWidget {
           // Title (optional)
           if (showTitle)
             Text(
-              title,
+              title.tr,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -200,10 +197,9 @@ class SavedDetailContainer extends StatelessWidget {
 
           // Content with minimum height
           Container(
-
             constraints: const BoxConstraints(minHeight: 60),
             child: Text(
-              content,
+              content.tr,
               style: GoogleFonts.inter(
                 fontSize: 12,
                 color: Colors.grey[600],

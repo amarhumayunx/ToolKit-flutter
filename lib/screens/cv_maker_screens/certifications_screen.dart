@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:get/get.dart'; // Add this import for .tr extension
 import '../../models/certification_model.dart';
 import '../../provider/certification_provider.dart';
 import '../../utils/app_colors.dart';
@@ -22,15 +23,16 @@ class CertificationPage extends StatefulWidget {
 
 class _CertificationPageState extends State<CertificationPage> {
   final TextEditingController _certificationNameController =
-      TextEditingController();
+  TextEditingController();
   final TextEditingController _organizationNameController =
-      TextEditingController();
+  TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
   bool hasCertification = false;
   bool showForm = false;
   int? editingIndex;
+
   bool validate() {
     final provider = Provider.of<CertificationProvider>(context, listen: false);
     return provider.certificationItems.isNotEmpty;
@@ -47,7 +49,7 @@ class _CertificationPageState extends State<CertificationPage> {
   void _loadInitialData() {
     if (widget.initialData != null && widget.initialData!.isNotEmpty) {
       final certProvider =
-          Provider.of<CertificationProvider>(context, listen: false);
+      Provider.of<CertificationProvider>(context, listen: false);
 
       // Clear any existing data
       certProvider.clearCertificationItems();
@@ -95,11 +97,11 @@ class _CertificationPageState extends State<CertificationPage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: AppColors.primary,
-                  onPrimary: Colors.white,
-                  surface: Colors.white,
-                  onSurface: Colors.black,
-                ),
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
           ),
           child: child!,
         );
@@ -109,14 +111,14 @@ class _CertificationPageState extends State<CertificationPage> {
       setState(() {
         // Format date as DD/MM/YYYY to include the day
         controller.text =
-            "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+        "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
       });
     }
   }
 
   void _saveCertification() {
     final certificationProvider =
-        Provider.of<CertificationProvider>(context, listen: false);
+    Provider.of<CertificationProvider>(context, listen: false);
 
     final newItem = CertificationItem(
       certificationName: _certificationNameController.text,
@@ -149,7 +151,7 @@ class _CertificationPageState extends State<CertificationPage> {
 
   void _editCertification(int index) {
     final certificationProvider =
-        Provider.of<CertificationProvider>(context, listen: false);
+    Provider.of<CertificationProvider>(context, listen: false);
     final item = certificationProvider.certificationItems[index];
 
     setState(() {
@@ -164,7 +166,7 @@ class _CertificationPageState extends State<CertificationPage> {
 
   void _deleteCertification(int index) {
     final certificationProvider =
-        Provider.of<CertificationProvider>(context, listen: false);
+    Provider.of<CertificationProvider>(context, listen: false);
     certificationProvider.removeCertificationItem(index);
 
     setState(() {
@@ -188,6 +190,7 @@ class _CertificationPageState extends State<CertificationPage> {
       }
     });
   }
+
   @override
   Widget build(BuildContext context) {
     final certificationProvider = Provider.of<CertificationProvider>(context);
@@ -222,7 +225,7 @@ class _CertificationPageState extends State<CertificationPage> {
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
                       child: AddAnotherButton(
-                        text: 'Add another certificate',
+                        text: 'add_another_certificate'.tr,
                         onPressed: _toggleForm,
                       ),
                     ),
@@ -237,8 +240,6 @@ class _CertificationPageState extends State<CertificationPage> {
       ],
     );
   }
-
-
 
   Widget _buildSavedCertification(CertificationItem item, int index) {
     return Container(
@@ -260,7 +261,7 @@ class _CertificationPageState extends State<CertificationPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start, // Add this line
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   item.certificationName,
@@ -318,16 +319,16 @@ class _CertificationPageState extends State<CertificationPage> {
           children: [
             // Certification Name
             CustomTextField(
-              label: 'Certification Name',
-              hint: 'Enter certification name',
+              label: 'certification_name'.tr,
+              hint: 'enter_certification_name'.tr,
               controller: _certificationNameController,
             ),
             const SizedBox(height: 16),
 
             // Organization Name
             CustomTextField(
-              label: 'Organization Name',
-              hint: 'Enter organization name',
+              label: 'organization_name'.tr,
+              hint: 'enter_organization_name'.tr,
               controller: _organizationNameController,
             ),
             const SizedBox(height: 16),
@@ -337,7 +338,7 @@ class _CertificationPageState extends State<CertificationPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Date',
+                  'date'.tr,
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -364,7 +365,7 @@ class _CertificationPageState extends State<CertificationPage> {
                       controller: _dateController,
                       enabled: false,
                       decoration: InputDecoration(
-                        hintText: '00/00/00',
+                        hintText: 'date_placeholder'.tr, // '00/00/00'
                         hintStyle: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w300,
@@ -390,7 +391,7 @@ class _CertificationPageState extends State<CertificationPage> {
                 Row(
                   children: [
                     Text(
-                      'Description',
+                      'description'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
@@ -399,7 +400,7 @@ class _CertificationPageState extends State<CertificationPage> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '( Optional )',
+                      'optional'.tr, // '( Optional )'
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w300,
@@ -428,7 +429,7 @@ class _CertificationPageState extends State<CertificationPage> {
                     maxLines: 7,
                     maxLength: 150,
                     decoration: InputDecoration(
-                      hintText: 'Add more details about this certification',
+                      hintText: 'certification_description_hint'.tr,
                       hintStyle: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w300,
