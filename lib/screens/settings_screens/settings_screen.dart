@@ -60,7 +60,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _initializeLanguageController();
     _loadPasswordStatus();
     _loadProfileData();
-    _setupAuthListener(); // Add this
+    _setupAuthListener();
+    _loadCurrentLanguage();
   }
 
   @override
@@ -82,6 +83,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _loadPasswordStatus(); // Reload password status when logged in
         }
       }
+    });
+  }
+
+  void _loadCurrentLanguage() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final languageController = Get.find<LanguageController>();
+      languageController.loadSavedLanguage();
     });
   }
 

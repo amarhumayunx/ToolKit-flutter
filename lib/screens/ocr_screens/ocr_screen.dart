@@ -68,7 +68,6 @@ class _OcrScreenState extends State<OcrScreen> {
 
       if (image == null) return imageFile;
 
-      // 1. Resize image if too small (minimum 300px on shorter side for better OCR)
       if (image.width < 300 || image.height < 300) {
         final scale = 300 / (image.width < image.height ? image.width : image.height);
         image = img.copyResize(image,
@@ -78,13 +77,10 @@ class _OcrScreenState extends State<OcrScreen> {
         );
       }
 
-      // 2. Convert to grayscale for better text recognition
       image = img.grayscale(image);
 
-      // 3. Enhance contrast using histogram equalization
       image = _enhanceContrast(image);
 
-      // 4. Apply noise reduction
       image = img.gaussianBlur(image, radius: 1);
 
       // 5. Sharpen the image slightly

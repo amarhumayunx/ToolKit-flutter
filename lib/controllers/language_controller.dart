@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -23,13 +24,15 @@ class LanguageController extends GetxController {
       if (savedLanguageCode != null && savedCountryCode != null && savedLanguageName != null) {
         currentLocale.value = Locale(savedLanguageCode, savedCountryCode);
         currentLanguage.value = savedLanguageName;
-        Get.updateLocale(currentLocale.value);
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Get.updateLocale(currentLocale.value);
+        });
       }
     } catch (e) {
       print('Error loading saved language: $e');
     }
   }
-
   Future<void> changeLanguage(String languageCode, String countryCode, String languageName) async {
     try {
       currentLocale.value = Locale(languageCode, countryCode);

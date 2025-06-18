@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'package:get/get.dart'; // Add this import for .tr extension
 import 'package:toolkit/widgets/settings_widgets/sort_btn.dart';
 import 'package:toolkit/widgets/settings_widgets/result_document_container.dart';
 import '../../models/file_model.dart';
@@ -22,7 +23,7 @@ class RecentsViewTab extends StatefulWidget {
 
 class _RecentsViewTabState extends State<RecentsViewTab> {
   late Box<FileModel> filesBox;
-  String _sortBy = 'Recent';
+  String _sortBy = 'recent'.tr; // Localized
   bool _isLoading = true;
 
   @override
@@ -71,7 +72,9 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
       }
     });
     AppSnackBar.show(context,
-        message: filesBox.getAt(index)?.isLocked == true ? 'File locked' : 'File unlocked');
+        message: filesBox.getAt(index)?.isLocked == true
+            ? 'file_locked'.tr
+            : 'file_unlocked'.tr);
   }
 
   Future<void> _renameFile(int index, String newPath) async {
@@ -100,9 +103,9 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
             ));
       });
 
-      AppSnackBar.show(context, message: 'File renamed successfully');
+      AppSnackBar.show(context, message: 'file_renamed_successfully'.tr);
     } catch (e) {
-      AppSnackBar.show(context, message: 'Error renaming file: $e');
+      AppSnackBar.show(context, message: 'error_renaming_file'.trParams({'error': e.toString()}));
     }
   }
 
@@ -111,7 +114,7 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
       filesBox.deleteAt(index);
     });
 
-    AppSnackBar.show(context, message: 'File deleted');
+    AppSnackBar.show(context, message: 'file_deleted'.tr);
   }
 
   List<MapEntry<int, FileModel>> _getRecentFiles() {
@@ -140,9 +143,9 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
         .contains(widget.searchQuery.toLowerCase()))
         .toList();
 
-    if (_sortBy == 'Name') {
+    if (_sortBy == 'name'.tr) {
       filteredFiles.sort((a, b) => a.value.name.compareTo(b.value.name));
-    } else if (_sortBy == 'Date') {
+    } else if (_sortBy == 'date'.tr) {
       filteredFiles.sort((a, b) => b.value.date.compareTo(a.value.date));
     }
 
@@ -175,7 +178,7 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 100),
                     child: Text(
-                      'No recent documents found',
+                      'no_recent_documents_found'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         color: Colors.grey[600],

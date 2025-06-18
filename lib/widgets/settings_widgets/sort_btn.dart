@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart'; // Add this import for .tr extension
 
 class SortButton extends StatelessWidget {
   final String currentSort;
@@ -37,7 +38,7 @@ class SortButton extends StatelessWidget {
             return [
               _buildMenuItem(
                   value: 'Name',
-                  text: 'Name',
+                  text: 'name'.tr,
                   isSelected: currentSort == 'Name'),
               PopupMenuItem<String>(
                 enabled: false,
@@ -56,7 +57,7 @@ class SortButton extends StatelessWidget {
               ),
               _buildMenuItem(
                   value: 'Date',
-                  text: 'Date',
+                  text: 'date'.tr,
                   isSelected: currentSort == 'Date'),
             ];
           },
@@ -71,7 +72,7 @@ class SortButton extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Sort',
+                  'sort'.tr,
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,

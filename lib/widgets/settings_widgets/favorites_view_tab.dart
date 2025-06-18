@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
-import 'package:get/get.dart'; // GetX import کریں
+import 'package:get/get.dart';
 import 'package:toolkit/widgets/settings_widgets/sort_btn.dart';
 import 'package:toolkit/widgets/settings_widgets/result_document_container.dart';
 import '../../models/file_model.dart';
@@ -22,7 +22,7 @@ class FavoritesView extends StatefulWidget {
 
 class _FavoritesViewState extends State<FavoritesView> {
   late Box<FileModel> filesBox;
-  String _sortBy = 'recent'.tr; // Localized default value
+  String _sortBy = 'recent'.tr;
   bool _isLoading = true;
 
   @override

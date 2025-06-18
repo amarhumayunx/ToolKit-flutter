@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:hive_ce_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toolkit/controllers/language_controller.dart';
 import 'package:toolkit/provider/certification_provider.dart';
 import 'package:toolkit/provider/education_provider.dart';
 import 'package:toolkit/provider/file_provider.dart';
@@ -62,7 +63,7 @@ class MyApp extends StatelessWidget {
       title: 'Toolkit App',
       debugShowCheckedModeBanner: false,
       translations: Language(),
-      locale: Get.deviceLocale,
+      locale: _getStoredLocale(),
       fallbackLocale: const Locale('en', 'US'),
       theme: ThemeData(
         primaryColor: const Color(0xFF00BFA5),
@@ -70,6 +71,15 @@ class MyApp extends StatelessWidget {
       ),
       home: const AppInitializer(),
     );
+  }
+
+  Locale? _getStoredLocale(){
+    try{
+      final controller = Get.put(LanguageController());
+      return controller.currentLocale.value;
+    } catch (e) {
+      return null;
+    }
   }
 }
 

@@ -5,6 +5,13 @@ class Language extends Translations {
   Map<String, Map<String, String>> get keys => {
     'en_US': {
 
+      "lock": "Lock",
+      "unlock": "Unlock",
+
+      "sort": "Sort",
+      "name": "Name",
+      "date": "Date",
+
       "file_locked": "File locked",
       "file_unlocked": "File unlocked",
       "file_renamed_successfully": "File renamed successfully",
@@ -658,6 +665,13 @@ class Language extends Translations {
 
     'en_GB': {
 
+      "lock": "Lock",
+      "unlock": "Unlock",
+
+      "sort": "Sort",
+      "name": "Name",
+      "date": "Date",
+
       "file_locked": "File locked",
       "file_unlocked": "File unlocked",
       "file_renamed_successfully": "File renamed successfully",
@@ -1308,6 +1322,13 @@ class Language extends Translations {
     },
 
     'ur_PK': {
+
+      "lock": "تالا لگائیں",
+      "unlock": "تالا کھولیں",
+
+      "sort": "ترتیب دیں",
+      "name": "نام",
+      "date": "تاریخ",
 
       "file_locked": "فائل مقفل ہے",
       "file_unlocked": "فائل کھول دی گیا",
@@ -1966,6 +1987,13 @@ class Language extends Translations {
 
     'zh_CN': {
 
+      "lock": "锁定",
+      "unlock": "解锁",
+
+      "sort": "排序",
+      "name": "名称",
+      "date": "日期",
+
       "file_locked": "文件已锁定",
       "file_unlocked": "文件已解锁",
       "file_renamed_successfully": "文件重命名成功",
@@ -2613,6 +2641,13 @@ class Language extends Translations {
     },
 
     'de_DE': {
+
+      "lock": "Sperren",
+      "unlock": "Entsperren",
+
+      "sort": "Sortieren",
+      "name": "Name",
+      "date": "Datum",
 
       "file_locked": "Datei ist gesperrt",
       "file_unlocked": "Datei ist freigeschaltet",
