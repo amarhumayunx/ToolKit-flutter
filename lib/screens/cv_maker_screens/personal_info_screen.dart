@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import '../../provider/user_provider.dart';
 import '../../widgets/cv_widgets/personal_info_form.dart';
@@ -115,31 +116,31 @@ class PersonalInfoPageState extends State<PersonalInfoPage> {
     });
 
     if (_nameController.text.isEmpty) {
-      setState(() => _nameError = 'Please enter your name');
+      setState(() => _nameError = 'please_enter_name'.tr);
       isValid = false;
     }
 
     if (_designationController.text.isEmpty) {
-      setState(() => _designationError = 'Please enter your designation');
+      setState(() => _designationError = 'please_enter_designation'.tr);
       isValid = false;
     } else if (!_isValidDesignation(_designationController.text)) {
-      setState(() => _designationError = 'Please enter a valid designation');
+      setState(() => _designationError = 'please_enter_valid_designation'.tr);
       isValid = false;
     }
 
     if (_emailController.text.isEmpty) {
-      setState(() => _emailError = 'Please enter your email');
+      setState(() => _emailError = 'please_enter_email'.tr);
       isValid = false;
     } else if (!_isValidEmail(_emailController.text)) {
-      setState(() => _emailError = 'Please enter a valid email');
+      setState(() => _emailError = 'please_enter_valid_email'.tr);
       isValid = false;
     }
 
     if (_phoneController.text.isEmpty) {
-      setState(() => _phoneError = 'Please enter your phone number');
+      setState(() => _phoneError = 'please_enter_phone'.tr);
       isValid = false;
     } else if (!_isValidPhone(_phoneController.text)) {
-      setState(() => _phoneError = 'Please enter a valid phone number');
+      setState(() => _phoneError = 'please_enter_valid_phone'.tr);
       isValid = false;
     }
 

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:get/get.dart'; // Add this import for .tr extension
 import '../../utils/app_colors.dart';
 
 class PersonalInfoImagePicker extends StatelessWidget {
@@ -65,16 +66,16 @@ class PersonalInfoImagePicker extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child:
-                      const Icon(Icons.add, color: AppColors.primary, size: 22),
+                  const Icon(Icons.add, color: AppColors.primary, size: 22),
                 ),
                 const SizedBox(width: 26),
                 Text(
-                  'Click here to upload your photo',
+                  'click_here_to_upload_photo'.tr, // Localized text
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                      ),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
               ],
             ),

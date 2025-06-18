@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../utils/app_colors.dart';
 
@@ -33,7 +34,7 @@ class ChangeTemplateButton extends StatelessWidget {
           ),
         ),
         child: Text(
-          'Change Template',
+          'change_template'.tr,
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w500,

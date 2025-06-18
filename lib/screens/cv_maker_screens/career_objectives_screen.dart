@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-
+import 'package:get/get.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/save_edit_delete_btns.dart';
@@ -61,7 +61,7 @@ class CareerObjectivesPageState extends State<CareerObjectivesPage> {
     }
 
     AppSnackBar.show(context,
-        message: 'Please add your career objective before proceeding');
+        message: 'please_add_career_objective_before_proceeding'.tr);
 
     return false;
   }
@@ -69,8 +69,7 @@ class CareerObjectivesPageState extends State<CareerObjectivesPage> {
   void _saveObjective() {
     if (_objectiveController.text.trim().isEmpty) {
       // Show validation message for empty field
-
-      AppSnackBar.show(context, message: 'Please enter your career objective');
+      AppSnackBar.show(context, message: 'please_enter_career_objective'.tr);
       return;
     }
 
@@ -87,8 +86,6 @@ class CareerObjectivesPageState extends State<CareerObjectivesPage> {
       // Clear form field
       _objectiveController.clear();
     });
-
-
   }
 
   void _editObjective() {
@@ -112,8 +109,7 @@ class CareerObjectivesPageState extends State<CareerObjectivesPage> {
     });
 
     // Show delete confirmation message
-
-    AppSnackBar.show(context, message:   'Career objective deleted');
+    AppSnackBar.show(context, message: 'career_objective_deleted'.tr);
   }
 
   @override
@@ -148,7 +144,7 @@ class CareerObjectivesPageState extends State<CareerObjectivesPage> {
   Widget _buildSavedObjective() {
     // Using the new SavedDetailContainer widget
     return SavedDetailContainer(
-      title: 'Objective',
+      title: 'objective'.tr,
       content: savedObjective,
       onEdit: _editObjective,
       onDelete: _deleteObjective,
@@ -195,7 +191,7 @@ class CareerObjectivesPageState extends State<CareerObjectivesPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Career Objective / Profile Summary',
+          'career_objective_profile_summary'.tr,
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w400,
@@ -222,7 +218,7 @@ class CareerObjectivesPageState extends State<CareerObjectivesPage> {
             maxLength: 200,
             cursorColor: AppColors.primary,
             decoration: InputDecoration(
-              hintText: 'Type your career objectives / Profile Summary',
+              hintText: 'type_career_objectives_hint'.tr,
               hintStyle: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.w300,

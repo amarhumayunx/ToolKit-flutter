@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart'; // Add this for localization
 import 'dart:io';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart';
@@ -97,7 +98,7 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
         try {
           file.deleteSync();
         } catch (e) {
-          debugPrint('Error deleting temporary file: $e');
+          debugPrint('error_deleting_temp_file'.trParams({'error': e.toString()}));
         }
       }
     }
@@ -125,10 +126,10 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
         }
       }
     } catch (e) {
-      debugPrint('Error extracting ZIP file: $e');
+      debugPrint('error_extracting_zip'.trParams({'error': e.toString()}));
       if (mounted) {
         AppSnackBar.show(context,
-            message: 'Failed to extract images: ${e.toString()}');
+            message: 'failed_to_extract_images'.trParams({'error': e.toString()}));
       }
     }
   }
@@ -185,29 +186,29 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
           final result = await OpenFile.open(_currentFilePath);
           if (result.type != ResultType.done && mounted) {
             AppSnackBar.show(context,
-                message: 'Cannot open image: ${result.message}');
+                message: 'cannot_open_image'.trParams({'message': result.message}));
           }
         } else {
           final result = await OpenFile.open(_currentFilePath);
           if (result.type != ResultType.done && mounted) {
             AppSnackBar.show(context,
-                message: 'Cannot open file: ${result.message}');
+                message: 'cannot_open_file'.trParams({'message': result.message}));
           }
         }
       } catch (e) {
         if (mounted) {
           AppSnackBar.show(context,
-              message: 'Error opening file: ${e.toString()}');
+              message: 'error_opening_file'.trParams({'error': e.toString()}));
         }
       }
     } else if (mounted) {
-      AppSnackBar.show(context, message: 'File not found or not yet converted');
+      AppSnackBar.show(context, message: 'file_not_found_or_not_converted'.tr);
     }
   }
 
   void _showImagePreviewDialog() {
     if (_extractedImageFiles.isEmpty) {
-      AppSnackBar.show(context, message: 'No preview images available');
+      AppSnackBar.show(context, message: 'no_preview_images_available'.tr);
       return;
     }
 
@@ -224,7 +225,7 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Image Preview',
+                      'image_preview'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -250,8 +251,8 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
                             _extractedImageFiles[_currentImageIndex],
                             fit: BoxFit.contain,
                           )
-                              : const Center(
-                            child: Text('No images available'),
+                              : Center(
+                            child: Text('no_images_available'.tr),
                           ),
                         ),
                         if (_extractedImageFiles.length > 1)
@@ -303,7 +304,7 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  'This archive contains ${_extractedImageFiles.length} image(s)',
+                  'archive_contains_images'.trParams({'count': _extractedImageFiles.length.toString()}),
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     color: Colors.grey[700],
@@ -322,7 +323,7 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
     Navigator.of(context).pop();
     Navigator.of(context).pop();
     Navigator.of(context).pop(true);
-    AppSnackBar.show(context, message: 'File deleted successfully');
+    AppSnackBar.show(context, message: 'file_deleted_successfully'.tr);
   }
 
   void _handleFileRenamed(String newPath) {
@@ -353,7 +354,7 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(
-        title: 'Convert PDF',
+        title: 'convert_pdf'.tr,
         onBackPressed: () {
           Navigator.of(context).pop(false);
         },
@@ -373,7 +374,7 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'Converted File:',
+                        'converted_file'.tr,
                         style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -401,7 +402,7 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
               child: SaveFileButton(
                 filePath: _currentFilePath,
                 fileType: fileTypeForSaving,
-                buttonText: 'Save',
+                buttonText: 'save'.tr,
                 onSaveCompleted: () {
                   Navigator.of(context).popUntil((route) => route.isFirst);
                 },

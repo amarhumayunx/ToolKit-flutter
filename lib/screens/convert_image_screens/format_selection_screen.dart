@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:toolkit/widgets/custom_appbar.dart';
 import 'dart:io';
-
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
@@ -21,11 +21,9 @@ class SelectFormatScreen extends StatefulWidget {
 class _SelectFormatScreenState extends State<SelectFormatScreen> {
   String? selectedFormat;
 
-  // For display purposes, we'll use the first image's info
   String get fileName => widget.selectedImages.first.path.split('/').last;
 
   String get fileSize {
-    // Calculate total size of all images
     double totalSizeBytes = widget.selectedImages
         .fold(0.0, (sum, file) => sum + file.lengthSync());
     return (totalSizeBytes / (1024 * 1024)).toStringAsFixed(2);
@@ -43,11 +41,10 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
 
   Future<void> _convertImages() async {
     if (selectedFormat == null) {
-      AppSnackBar.show(context, message: 'Please select a format first');
+      AppSnackBar.show(context, message: 'select_format_first'.tr);
       return;
     }
 
-    // Navigate to the save screen and wait for a result
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -68,7 +65,7 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const CustomAppBar(title: 'Convert Images'),
+      appBar: CustomAppBar(title: 'convert_images'.tr),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -76,7 +73,7 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
           children: [
             const SizedBox(height: 20),
             Text(
-              'Selected Files (${widget.selectedImages.length})',
+              '${'selected_files'.tr} (${widget.selectedImages.length})',
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -92,7 +89,7 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
 
             const SizedBox(height: 30),
             Text(
-              'Select Format:',
+              'select_format'.tr,
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -102,19 +99,19 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildFormatOption('Word', 'assets/icons/word_icon.svg'),
-                _buildFormatOption('Excel', 'assets/icons/excel_icon.svg'),
+                _buildFormatOption('word'.tr, 'assets/icons/word_icon.svg'),
+                _buildFormatOption('excel'.tr, 'assets/icons/excel_icon.svg'),
                 _buildFormatOption(
-                    'PowerPoint', 'assets/icons/powerpoint_icon.svg'),
+                    'powerpoint'.tr, 'assets/icons/powerpoint_icon.svg'),
                 _buildFormatOption(
-                  'PDF',
+                  'pdf'.tr,
                   'assets/icons/convert_pdf.svg',
                 ),
               ],
             ),
             const Spacer(),
             CustomGradientButton(
-              text: 'Convert',
+              text: 'convert'.tr,
               onPressed: _convertImages,
             ),
           ],
@@ -267,7 +264,7 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Total size: $fileSize MB',
+              'total_size $fileSize mb'.tr,
               style: GoogleFonts.inter(
                 fontSize: 9,
                 fontWeight: FontWeight.w400,

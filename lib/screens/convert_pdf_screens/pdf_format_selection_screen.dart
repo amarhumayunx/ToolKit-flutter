@@ -103,7 +103,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          'Conversion Failed'.tr,
+          'conversion_failed'.tr,
           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
         ),
         content: Text(
@@ -114,7 +114,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'OK'.tr,
+              'ok'.tr,
               style: GoogleFonts.inter(color: AppColors.primary),
             ),
           ),
@@ -127,7 +127,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(title: 'Convert PDF'.tr),
+      appBar: CustomAppBar(title: 'convert_pdf'.tr),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -135,7 +135,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
           children: [
             const SizedBox(height: 20),
             Text(
-              'Selected File'.tr,
+              'selected_file'.tr,
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -221,7 +221,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
             ),
             const SizedBox(height: 30),
             Text(
-              'Select Format:'.tr,
+              'select_format'.tr,
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -231,17 +231,17 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildFormatOption('Word'.tr, 'assets/icons/word_icon.svg'),
-                _buildFormatOption('Excel'.tr, 'assets/icons/excel_icon.svg'),
+                _buildFormatOption('word'.tr, 'assets/icons/word_icon.svg'),
+                _buildFormatOption('excel'.tr, 'assets/icons/excel_icon.svg'),
                 _buildFormatOption(
-                    'PowerPoint'.tr, 'assets/icons/powerpoint_icon.svg'),
+                    'powerpoint'.tr, 'assets/icons/powerpoint_icon.svg'),
                 _buildFormatOption(
-                    'Image'.tr, 'assets/icons/convert_img_icon.svg'),
+                    'image'.tr, 'assets/icons/convert_img_icon.svg'),
               ],
             ),
             const Spacer(),
             CustomGradientButton(
-              text: _isConverting ? 'Converting...'.tr : 'Convert'.tr,
+              text: _isConverting ? 'converting'.tr : 'convert'.tr,
               onPressed: _isConverting ? null : _convertFile,
             ),
           ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../provider/template_provider.dart';
@@ -17,10 +18,10 @@ class CvMakerScreen extends StatefulWidget {
 class _CvMakerScreenState extends State<CvMakerScreen> {
   // Define template names for better reference
   final List<String> templateNames = [
-    'Classic Professional',
-    'Modern Minimal',
-    'Creative Design',
-    'Executive Style'
+    'classic_professional'.tr,
+    'modern_minimal'.tr,
+    'creative_design'.tr,
+    'executive_style'.tr
   ];
 
   // In CvMakerScreen.dart
@@ -44,8 +45,8 @@ class _CvMakerScreenState extends State<CvMakerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const ToolsAppBar(
-        title: 'CV Maker',
+      appBar: ToolsAppBar(
+        title: 'cv_maker'.tr,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -63,12 +64,12 @@ class _CvMakerScreenState extends State<CvMakerScreen> {
               const SizedBox(height: 10),
 
               // Make your CV title
-              const Padding(
-                padding: EdgeInsets.all(8.0),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
                 child: InfoCard(
-                  title: 'Make your CV',
+                  title: 'make_your_cv'.tr,
                   description:
-                      'Quickly craft a professional, eye-catching CV tailored to your career goals.',
+                      'cv_description'.tr,
                 ),
               ),
               const SizedBox(height: 8),
@@ -93,7 +94,7 @@ class _CvMakerScreenState extends State<CvMakerScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Select Template',
+                        'select_template'.tr,
                         style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:get/get.dart'; // Add this import for .tr extension
 import '../../models/skills_model.dart';
 import '../../provider/skills_provider.dart';
 import '../../widgets/tags_input_widget.dart';
@@ -18,10 +19,12 @@ class SkillsPage extends StatefulWidget {
 class _SkillsPageState extends State<SkillsPage> {
   final TextEditingController _skillController = TextEditingController();
   final FocusNode _skillFocusNode = FocusNode();
+
   bool validate() {
     final provider = Provider.of<SkillsProvider>(context, listen: false);
     return provider.skillItems.isNotEmpty;
   }
+
   @override
   void initState() {
     super.initState();
@@ -60,11 +63,10 @@ class _SkillsPageState extends State<SkillsPage> {
     if (skillsProvider.skillItems.length < 6) {
       skillsProvider.addSkill(Skill(name: name));
     } else {
-      // Show a message that maximum skills have been reached
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You can only add up to 6 skills'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text('max_skills_reached'.tr),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -87,14 +89,14 @@ class _SkillsPageState extends State<SkillsPage> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 26.0),
               child: TagInputWidget<Skill>(
-                title: 'Add Your Skills',
-                inputLabel: 'Skill',
-                hintText: 'Enter a skill',
+                title: 'add_your_skills'.tr,
+                inputLabel: 'skill'.tr,
+                hintText: 'enter_skill_hint'.tr,
                 items: skills,
                 getItemName: (skill) => skill.name,
                 onAdd: _addSkill,
                 onRemove: _removeSkill,
-                emptyMessage: 'No skills added yet',
+                emptyMessage: 'no_skills_added'.tr,
                 controller: _skillController,
                 focusNode: _skillFocusNode,
                 minItemsRequired: 1, // Add this parameter

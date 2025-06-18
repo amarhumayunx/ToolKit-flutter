@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../utils/app_colors.dart';
@@ -102,8 +103,8 @@ class _EducationFormWidgetState extends State<EducationFormWidget> {
           children: [
             // Degree and Courses
             CustomTextField(
-              label: 'Degree and Courses',
-              hint: 'Enter your education',
+              label: 'degree_and_courses'.tr,
+              hint: 'enter_your_education'.tr,
               controller: widget.degreeController,
               focusNode: widget.degreeFocus,
               nextFocus: widget.instituteFocus,
@@ -112,8 +113,8 @@ class _EducationFormWidgetState extends State<EducationFormWidget> {
 
             // Institute
             CustomTextField(
-              label: 'Institute',
-              hint: 'Enter your institute',
+              label: 'institute'.tr,
+              hint: 'enter_your_institute'.tr,
               controller: widget.instituteController,
               focusNode: widget.instituteFocus,
               nextFocus: widget.startDateFocus,
@@ -126,7 +127,7 @@ class _EducationFormWidgetState extends State<EducationFormWidget> {
                 // Start date
                 Expanded(
                   child: DateField(
-                    label: 'Start date',
+                    label: 'start_date'.tr,
                     controller: widget.startDateController,
                     focusNode: widget.startDateFocus,
                     onTap: () => _selectDate(context, widget.startDateController),
@@ -137,7 +138,7 @@ class _EducationFormWidgetState extends State<EducationFormWidget> {
                 if (!widget.isCompleted)
                   Expanded(
                     child: DateField(
-                      label: 'End Date',
+                      label: 'end_date'.tr,
                       controller: widget.endDateController,
                       focusNode: widget.endDateFocus,
                       onTap: () => _selectDate(context, widget.endDateController),
@@ -170,7 +171,7 @@ class _EducationFormWidgetState extends State<EducationFormWidget> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  'Continued',
+                  'continued'.tr,
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -202,7 +203,7 @@ class _EducationFormWidgetState extends State<EducationFormWidget> {
         Row(
           children: [
             Text(
-              'Description',
+              'description'.tr,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
@@ -211,7 +212,7 @@ class _EducationFormWidgetState extends State<EducationFormWidget> {
             ),
             const SizedBox(width: 8),
             Text(
-              '( Optional )',
+              'optional'.tr,
               style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
@@ -241,7 +242,7 @@ class _EducationFormWidgetState extends State<EducationFormWidget> {
             maxLength: 100,
             cursorColor: AppColors.primary,
             decoration: InputDecoration(
-              hintText: 'e.g cgpa/grade',
+              hintText: 'cgpa_grade_hint'.tr,
               hintStyle: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.w300,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'dart:async';
@@ -79,7 +80,7 @@ class _SaveScreenState extends State<SaveScreen>
     try {
       if (widget.selectedFormat == 'Word') {
         final wordFile =
-            await WordImagesService.createWordDocument(widget.selectedImages);
+        await WordImagesService.createWordDocument(widget.selectedImages);
         setState(() {
           convertedFile = wordFile;
           _currentFilePath = wordFile.path;
@@ -97,7 +98,7 @@ class _SaveScreenState extends State<SaveScreen>
     } catch (e) {
       if (mounted) {
         AppSnackBar.show(context,
-            message: 'Error converting file: ${e.toString()}');
+            message: 'error_converting_file'.tr + ': ${e.toString()}');
       }
     }
   }
@@ -122,18 +123,18 @@ class _SaveScreenState extends State<SaveScreen>
                 crossAxisAlignment: pw.CrossAxisAlignment.center,
                 children: images
                     .map((image) => pw.Container(
-                          margin: const pw.EdgeInsets.symmetric(vertical: 20),
-                          width: 400,
-                          height: 300,
-                          child: pw.Center(
-                            child: pw.Image(
-                              image,
-                              fit: pw.BoxFit.contain,
-                              width: 400,
-                              height: 300,
-                            ),
-                          ),
-                        ))
+                  margin: const pw.EdgeInsets.symmetric(vertical: 20),
+                  width: 400,
+                  height: 300,
+                  child: pw.Center(
+                    child: pw.Image(
+                      image,
+                      fit: pw.BoxFit.contain,
+                      width: 400,
+                      height: 300,
+                    ),
+                  ),
+                ))
                     .toList(),
               ),
             );
@@ -201,23 +202,23 @@ class _SaveScreenState extends State<SaveScreen>
         final result = await OpenFile.open(_currentFilePath);
         if (result.type != ResultType.done && mounted) {
           AppSnackBar.show(context,
-              message: 'Cannot open file: ${result.message}');
+              message: 'cannot_open_file'.tr + ': ${result.message}');
         }
       } catch (e) {
         if (mounted) {
           AppSnackBar.show(context,
-              message: 'Error opening file: ${e.toString()}');
+              message: 'error_opening_file'.tr + ': ${e.toString()}');
         }
       }
     } else if (mounted) {
-      AppSnackBar.show(context, message: 'File not found or not yet converted');
+      AppSnackBar.show(context, message: 'file_not_found_or_not_converted'.tr);
     }
   }
 
   void _handleFileDeleted() {
     Navigator.of(context).pop(true);
     Navigator.of(context).pop(true);
-    AppSnackBar.show(context, message: 'File deleted successfully');
+    AppSnackBar.show(context, message: 'file_deleted_successfully'.tr);
   }
 
   void _handleFileRenamed(String newPath) {
@@ -239,7 +240,7 @@ class _SaveScreenState extends State<SaveScreen>
         Navigator.of(context).popUntil((route) => route.isFirst);
       } catch (e) {
         AppSnackBar.show(context,
-            message: 'Failed to save file: ${e.toString()}');
+            message: 'failed_to_save_file'.tr + ': ${e.toString()}');
       }
     }
   }
@@ -248,7 +249,7 @@ class _SaveScreenState extends State<SaveScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const CustomAppBar(title: 'Convert Images'),
+      appBar: CustomAppBar(title: 'convert_images'.tr),
       body: Stack(
         children: [
           SingleChildScrollView(
@@ -264,7 +265,7 @@ class _SaveScreenState extends State<SaveScreen>
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'Converted File:',
+                        'converted_file'.tr + ':',
                         style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -290,7 +291,7 @@ class _SaveScreenState extends State<SaveScreen>
               right: 20,
               bottom: MediaQuery.of(context).padding.bottom,
               child: CustomGradientButton(
-                text: 'Save',
+                text: 'save'.tr,
                 onPressed: _handleSaveFile,
               ),
             ),
