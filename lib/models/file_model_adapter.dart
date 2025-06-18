@@ -44,7 +44,7 @@ class FileModelAdapter extends TypeAdapter<FileModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is FileModelAdapter &&
-              runtimeType == other.runtimeType &&
-              typeId == other.typeId;
+      other is FileModelAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
 }

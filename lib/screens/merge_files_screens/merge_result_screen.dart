@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/save_zip_png_btn.dart';
 import '../../widgets/custom_appbar.dart';
@@ -32,11 +34,13 @@ class _MergeResultScreenState extends State<MergeResultScreen>
   late AnimationController _animationController;
   late Animation<double> _progressAnimation;
   late String _currentFilePath; // Track current file path
+  late String _permanentFilePath; // Add permanent file path
 
   @override
   void initState() {
     super.initState();
     _currentFilePath = widget.mergedFilePath; // Initialize with original path
+    _initializePermanentFile(); // Create permanent copy
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
@@ -60,10 +64,49 @@ class _MergeResultScreenState extends State<MergeResultScreen>
     _animationController.forward();
   }
 
+  // Create a permanent copy of the merged file
+  Future<void> _initializePermanentFile() async {
+    try {
+      final appDir = await getApplicationDocumentsDirectory();
+      final originalName = path.basenameWithoutExtension(widget.mergedFilePath);
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      _permanentFilePath = '${appDir.path}/${originalName}_$timestamp.pdf';
+
+      // Copy the temporary file to permanent location
+      final tempFile = File(widget.mergedFilePath);
+      if (await tempFile.exists()) {
+        await tempFile.copy(_permanentFilePath);
+        setState(() {
+          _currentFilePath = _permanentFilePath;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error creating permanent file: $e');
+      // If permanent copy fails, keep using the original path
+      _permanentFilePath = widget.mergedFilePath;
+    }
+  }
+
   @override
   void dispose() {
     _animationController.dispose();
+    // Clean up temporary files but keep the permanent one
+    _cleanupTempFile();
     super.dispose();
+  }
+
+  void _cleanupTempFile() {
+    try {
+      // Only delete the original temp file, not the permanent one
+      if (widget.mergedFilePath != _permanentFilePath) {
+        final tempFile = File(widget.mergedFilePath);
+        if (tempFile.existsSync()) {
+          tempFile.deleteSync();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error cleaning up temp file: $e');
+    }
   }
 
   String get fileName {
@@ -72,7 +115,10 @@ class _MergeResultScreenState extends State<MergeResultScreen>
 
   String get fileSize {
     final file = File(_currentFilePath);
-    return (file.lengthSync() / (1024 * 1024)).toStringAsFixed(2);
+    if (file.existsSync()) {
+      return (file.lengthSync() / (1024 * 1024)).toStringAsFixed(2);
+    }
+    return "0.00";
   }
 
   String get formattedDate {
@@ -106,6 +152,16 @@ class _MergeResultScreenState extends State<MergeResultScreen>
   }
 
   void _handleFileDeleted() {
+    // Clean up the current file
+    try {
+      final file = File(_currentFilePath);
+      if (file.existsSync()) {
+        file.deleteSync();
+      }
+    } catch (e) {
+      debugPrint('Error deleting file: $e');
+    }
+
     if (widget.onSaveAndReturn != null) {
       widget.onSaveAndReturn!();
     }

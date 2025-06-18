@@ -6,6 +6,8 @@ import 'package:toolkit/models/file_model.dart';
 import 'package:toolkit/services/save_document_service.dart';
 import 'package:toolkit/widgets/settings_widgets/sort_btn.dart';
 
+import '../../utils/app_snackbar.dart';
+
 class LockedFilesView extends StatefulWidget {
   final String searchQuery;
 
@@ -49,22 +51,47 @@ class _LockedFilesViewState extends State<LockedFilesView> {
     });
   }
 
-  void _toggleLock(int index) {
-    setState(() {
-      final file = filesBox.getAt(index);
-      if (file != null) {
-        filesBox.putAt(
-            index,
-            FileModel(
-              name: file.name,
-              path: file.path,
-              date: file.date,
-              size: file.size,
-              isFavorite: file.isFavorite,
-              isLocked: !file.isLocked,
-            ));
+  void _toggleLock(int index) async {
+    final file = filesBox.getAt(index);
+    if (file != null) {
+      // First update the lock status
+      final updatedFile = FileModel(
+        name: file.name,
+        path: file.path,
+        date: file.date,
+        size: file.size,
+        isFavorite: file.isFavorite,
+        isLocked: !file.isLocked,
+        originalPath: file.originalPath,
+        isEncrypted: file.isEncrypted,
+      );
+
+      await filesBox.putAt(index, updatedFile);
+
+      // Then handle encryption/decryption using SaveDocumentService
+      final success =
+      await SaveDocumentService.toggleFileLock(updatedFile, index);
+
+      if (success) {
+        setState(() {});
+
+        AppSnackBar.show(
+          context,
+          message: updatedFile.isLocked
+              ? 'File locked and encrypted'
+              : 'File unlocked and decrypted',
+        );
+      } else {
+        // Revert the lock status if encryption/decryption failed
+        await filesBox.putAt(index, file);
+        setState(() {});
+
+        AppSnackBar.show(
+          context,
+          message:'Failed to toggle file lock',
+        );
       }
-    });
+    }
   }
 
   @override
@@ -90,11 +117,11 @@ class _LockedFilesViewState extends State<LockedFilesView> {
       children: [
         // Sort button with container and custom icon
         Padding(
-          padding: const EdgeInsets.only(top: 40),
+          padding: const EdgeInsets.all(2.0),
           child: Row(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.only(top: 40, left: 20),
                 child: SortButton(
                   currentSort: _sortBy,
                   onSortSelected: (sortOption) {
@@ -117,7 +144,7 @@ class _LockedFilesViewState extends State<LockedFilesView> {
               if (lockedFiles.isEmpty)
                 Center(
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 100),
+                    padding: const EdgeInsets.only(top: 300),
                     child: Text(
                       'No locked files found',
                       style: GoogleFonts.inter(
@@ -157,7 +184,7 @@ class _LockedFilesViewState extends State<LockedFilesView> {
                               _toggleFavorite(actualIndex),
                           onLockToggle: () => _toggleLock(actualIndex),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   );

@@ -1,21 +1,26 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
-import 'package:path/path.dart' as path;
+import 'package:toolkit/models/file_model.dart';
+import 'package:toolkit/services/save_document_service.dart';
 import 'package:toolkit/widgets/settings_widgets/result_document_container.dart';
 import 'package:toolkit/widgets/settings_widgets/sort_btn.dart';
-
-import '../../models/file_model.dart';
-import '../../services/save_document_service.dart';
 import '../../utils/app_snackbar.dart';
 
 class AllFilesView extends StatefulWidget {
   final String searchQuery;
+  final Function(FileModel, int)? onFileSelected;
+  final bool isSelectingFiles;
+  final List<FileModel> selectedFiles;
 
-  const AllFilesView({super.key, required this.searchQuery});
+  const AllFilesView({
+    super.key,
+    required this.searchQuery,
+    this.onFileSelected,
+    this.isSelectingFiles = false,
+    this.selectedFiles = const [],
+  });
 
   @override
   State<AllFilesView> createState() => _AllFilesViewState();
@@ -37,101 +42,168 @@ class _AllFilesViewState extends State<AllFilesView> {
     setState(() => _isLoading = false);
   }
 
-  void _toggleFavorite(int index) {
-    setState(() {
-      final file = filesBox.getAt(index);
-      if (file != null) {
-        filesBox.putAt(
-            index,
-            FileModel(
-              name: file.name,
-              path: file.path,
-              date: file.date,
-              size: file.size,
-              isFavorite: !file.isFavorite,
-              isLocked: file.isLocked,
-            ));
-      }
-    });
-  }
+  void _toggleFavorite(int index) async {
+    final file = filesBox.getAt(index);
+    if (file != null) {
+      final updatedFile = FileModel(
+        name: file.name,
+        path: file.path,
+        date: file.date,
+        size: file.size,
+        isFavorite: !file.isFavorite,
+        isLocked: file.isLocked,
+        originalPath: file.originalPath,
+        isEncrypted: file.isEncrypted,
+      );
 
-  void _toggleLock(int index) {
-    setState(() {
-      final file = filesBox.getAt(index);
-      if (file != null) {
-        filesBox.putAt(
-            index,
-            FileModel(
-              name: file.name,
-              path: file.path,
-              date: file.date,
-              size: file.size,
-              isFavorite: file.isFavorite,
-              isLocked: !file.isLocked,
-            ));
-      }
-    });
-    AppSnackBar.show(context,
-        message: filesBox.getAt(index)?.isLocked == true ? 'file_locked'.tr : 'file_unlocked'.tr);
-  }
-
-  Future<void> _renameFile(int index, String newPath) async {
-    try {
-      final file = filesBox.getAt(index);
-      if (file == null) return;
-
-      final oldFile = File(file.path);
-      final newFile = File(newPath);
-
-      // Rename the actual file
-      if (await oldFile.exists()) {
-        await oldFile.rename(newPath);
-      }
-
-      // Update the database entry
-      final newFileName = path.basename(newPath);
-      setState(() {
-        filesBox.putAt(
-            index,
-            FileModel(
-              name: newFileName,
-              path: newPath,
-              date: file.date,
-              size: file.size,
-              isFavorite: file.isFavorite,
-              isLocked: file.isLocked,
-            ));
-      });
-
-      AppSnackBar.show(context, message: 'file_renamed_successfully'.tr);
-    } catch (e) {
-      AppSnackBar.show(context, message: 'error_renaming_file'.tr.replaceAll('{error}', e.toString()));
+      await filesBox.putAt(index, updatedFile);
+      setState(() {});
     }
   }
 
-  void _deleteFile(int index) {
-    setState(() {
-      filesBox.deleteAt(index);
-    });
-    AppSnackBar.show(context, message: 'file_deleted'.tr);
+  void _toggleLock(int index) async {
+    final file = filesBox.getAt(index);
+    if (file != null) {
+      final updatedFile = FileModel(
+        name: file.name,
+        path: file.path,
+        date: file.date,
+        size: file.size,
+        isFavorite: file.isFavorite,
+        isLocked: !file.isLocked,
+        originalPath: file.originalPath,
+        isEncrypted: file.isEncrypted,
+      );
+
+      await filesBox.putAt(index, updatedFile);
+
+      final success =
+      await SaveDocumentService.toggleFileLock(updatedFile, index);
+
+      if (success) {
+        setState(() {});
+        AppSnackBar.show(
+          context,
+          message: updatedFile.isLocked
+              ? 'File locked and encrypted'
+              : 'File unlocked and decrypted',
+        );
+      } else {
+        await filesBox.putAt(index, file);
+        AppSnackBar.show(
+          context,
+          message: 'Failed to toggle file lock',
+        );
+      }
+    }
+  }
+
+  void _deleteFile(int index) async {
+    final file = filesBox.getAt(index);
+    if (file != null) {
+      final success = await SaveDocumentService.deleteFile(file);
+      if (success) {
+        await filesBox.deleteAt(index);
+        setState(() {});
+
+        AppSnackBar.show(
+          context,
+          message: 'File deleted successfully',
+        );
+      }
+    }
+  }
+
+  void _renameFile(int index, String newPath) async {
+    final file = filesBox.getAt(index);
+    if (file != null) {
+      final updatedFile = FileModel(
+        name: newPath.split('/').last,
+        path: newPath,
+        date: file.date,
+        size: file.size,
+        isFavorite: file.isFavorite,
+        isLocked: file.isLocked,
+        originalPath: file.originalPath,
+        isEncrypted: file.isEncrypted,
+      );
+
+      await filesBox.putAt(index, updatedFile);
+      setState(() {});
+    }
+  }
+
+  bool _isFileSelected(FileModel file) {
+    return widget.isSelectingFiles &&
+        widget.selectedFiles.isNotEmpty &&
+        widget.selectedFiles.first.path == file.path;
+  }
+
+  // Check if file size is within 2MB limit
+  bool _isFileSizeValid(String sizeString) {
+    try {
+      // Extract numeric value and unit from size string (e.g., "1.5 MB", "500 KB")
+      final parts = sizeString.trim().split(' ');
+      if (parts.length != 2) return false;
+
+      final value = double.tryParse(parts[0]);
+      final unit = parts[1].toUpperCase();
+
+      if (value == null) return false;
+
+      // Convert to MB
+      double sizeInMB;
+      switch (unit) {
+        case 'KB':
+          sizeInMB = value / 1024;
+          break;
+        case 'MB':
+          sizeInMB = value;
+          break;
+        case 'GB':
+          sizeInMB = value * 1024;
+          break;
+        case 'B':
+        case 'BYTES':
+          sizeInMB = value / (1024 * 1024);
+          break;
+        default:
+          return false;
+      }
+
+      return sizeInMB <= 2.0; // 2MB limit
+    } catch (e) {
+      return false;
+    }
+  }
+
+  void _handleFileSelection(FileModel file, int actualIndex) {
+    if (!_isFileSizeValid(file.size)) {
+      AppSnackBar.show(
+        context,
+        message: 'File size exceeds 2MB limit. Please select a smaller file.',
+      );
+      return;
+    }
+
+    widget.onFileSelected?.call(file, actualIndex);
   }
 
   @override
   Widget build(BuildContext context) {
-    // Filter files based on search query
-    final filteredFiles = _isLoading
-        ? []
+    final allFiles = _isLoading
+        ? <FileModel>[]
         : filesBox.values
+        .where((file) => !file.isLocked)
         .where((file) => file.name
         .toLowerCase()
         .contains(widget.searchQuery.toLowerCase()))
         .toList();
 
-    // Sort files
     if (_sortBy == 'Name') {
-      filteredFiles.sort((a, b) => a.name.compareTo(b.name));
+      allFiles.sort((a, b) => a.name.compareTo(b.name));
     } else if (_sortBy == 'Date') {
-      filteredFiles.sort((a, b) => b.date.compareTo(a.date));
+      allFiles.sort((a, b) => b.date.compareTo(a.date));
     }
 
     return Column(
@@ -143,25 +215,27 @@ class _AllFilesViewState extends State<AllFilesView> {
               SortButton(
                 currentSort: _sortBy,
                 onSortSelected: (sortOption) {
-                  setState(() => _sortBy = sortOption);
+                  setState(() {
+                    _sortBy = sortOption;
+                  });
                 },
               ),
               const Spacer(),
             ],
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         Expanded(
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : ListView(
             children: [
-              if (filteredFiles.isEmpty)
+              if (allFiles.isEmpty)
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 100),
                     child: Text(
-                      'no_files_found'.tr,
+                      'No files found',
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         color: Colors.grey[600],
@@ -170,11 +244,10 @@ class _AllFilesViewState extends State<AllFilesView> {
                   ),
                 )
               else
-                ...filteredFiles.asMap().entries.map((entry) {
+                ...allFiles.asMap().entries.map((entry) {
                   final index = entry.key;
                   final file = entry.value;
 
-                  // Find the actual index in the box
                   int actualIndex = -1;
                   for (int i = 0; i < filesBox.length; i++) {
                     final boxFile = filesBox.getAt(i);
@@ -183,25 +256,30 @@ class _AllFilesViewState extends State<AllFilesView> {
                       break;
                     }
                   }
+
                   return Padding(
-                    padding: const EdgeInsets.only(top: 5),
+                    padding: const EdgeInsets.only(left: 6, right: 6),
                     child: Column(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 6, right: 6),
-                          child: ResultDocumentContainer(
-                            documentName: file.name,
-                            date: DateFormat('yy/MM/dd').format(file.date),
-                            time: DateFormat('h:mma').format(file.date),
-                            size: file.size,
-                            isFavorite: file.isFavorite,
-                            isLocked: file.isLocked,
-                            filePath: file.path,
-                            onFavoriteToggle: () => _toggleFavorite(actualIndex),
-                            onDelete: () => _deleteFile(actualIndex),
-                            onFileRenamed: (newPath) => _renameFile(actualIndex, newPath),
-                            onLockToggle: () => _toggleLock(actualIndex),
-                          ),
+                        ResultDocumentContainer(
+                          documentName: file.name,
+                          date: DateFormat('yy/MM/dd').format(file.date),
+                          time: DateFormat('h:mma').format(file.date),
+                          size: file.size,
+                          isFavorite: file.isFavorite,
+                          isLocked: file.isLocked,
+                          filePath: file.displayPath,
+                          isSelectable: widget.isSelectingFiles,
+                          isSelected: _isFileSelected(file),
+                          onFavoriteToggle: () =>
+                              _toggleFavorite(actualIndex),
+                          onLockToggle: () => _toggleLock(actualIndex),
+                          onDelete: () => _deleteFile(actualIndex),
+                          onFileRenamed: (newPath) =>
+                              _renameFile(actualIndex, newPath),
+                          onTap: widget.isSelectingFiles
+                              ? () => _handleFileSelection(file, actualIndex)
+                              : null,
                         ),
                         const SizedBox(height: 12),
                       ],

@@ -9,9 +9,9 @@ import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import '../models/file_model.dart';
-
 import '../models/file_model_adapter.dart';
 import '../utils/app_snackbar.dart';
+import 'file_encryption_service.dart';
 
 class SaveDocumentService {
   static const String _filesBoxName = 'filesBox';
@@ -20,23 +20,173 @@ class SaveDocumentService {
   /// Initialize Hive box for files
   static Future<Box<FileModel>> initFilesBox() async {
     if (!Hive.isAdapterRegistered(1)) {
-      // Match the typeId
       Hive.registerAdapter(FileModelAdapter());
     }
     return await Hive.openBox<FileModel>(_filesBoxName);
   }
 
+  /// Toggle file lock status (encrypt/decrypt)
+  static Future<bool> toggleFileLock(FileModel fileModel, int index) async {
+    try {
+      final filesBox = await initFilesBox();
+
+      if (fileModel.isLocked && !fileModel.isEncrypted) {
+        // Lock file: encrypt it
+        final encryptedPath =
+        await FileEncryptionService.encryptAndMoveFile(fileModel.path);
+
+        if (encryptedPath != null) {
+          // Update file model to reflect encryption
+          final updatedFile = FileModel(
+            name: fileModel.name,
+            path: encryptedPath,
+            date: fileModel.date,
+            size: fileModel.size,
+            isFavorite: fileModel.isFavorite,
+            isLocked: true,
+            originalPath: fileModel.path,
+            isEncrypted: true,
+          );
+
+          await filesBox.putAt(index, updatedFile);
+          return true;
+        }
+      } else if (!fileModel.isLocked && fileModel.isEncrypted) {
+        // Unlock file: decrypt it back to Toolkit folder
+
+        // Get the Toolkit folder path
+        final toolkitDir = await _createToolkitFolder();
+        if (toolkitDir == null) {
+          print('Error: Could not access Toolkit folder');
+          return false;
+        }
+
+        // Create the new path in Toolkit folder with the original filename
+        final originalFileName = fileModel.name;
+        final newToolkitPath = '${toolkitDir.path}/$originalFileName';
+
+        // Check if file with same name already exists in Toolkit folder
+        final existingFile = File(newToolkitPath);
+        String finalPath = newToolkitPath;
+
+        if (await existingFile.exists()) {
+          // Generate unique filename with timestamp
+          final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+          final nameWithoutExt =
+          path.basenameWithoutExtension(originalFileName);
+          final extension = path.extension(originalFileName);
+          final uniqueFileName = '${nameWithoutExt}_$timestamp$extension';
+          finalPath = '${toolkitDir.path}/$uniqueFileName';
+        }
+
+        // Decrypt file to the Toolkit folder location
+        final decryptedPath = await FileEncryptionService.decryptAndRestoreFile(
+            fileModel.path, finalPath);
+
+        if (decryptedPath != null) {
+          // Update file model to reflect decryption
+          final updatedFile = FileModel(
+            name: path.basename(decryptedPath),
+            path: decryptedPath,
+            date: fileModel.date,
+            size: fileModel.size,
+            isFavorite: fileModel.isFavorite,
+            isLocked: false,
+            originalPath: null,
+            isEncrypted: false,
+          );
+
+          await filesBox.putAt(index, updatedFile);
+          return true;
+        }
+      }
+
+      return false;
+    } catch (e) {
+      print('Error toggling file lock: $e');
+      return false;
+    }
+  }
+
+  /// Get files filtered by lock status
+  static Future<List<FileModel>> getFilesByLockStatus(
+      {required bool showLocked}) async {
+    try {
+      final filesBox = await initFilesBox();
+      return filesBox.values
+          .where((file) => file.isLocked == showLocked)
+          .toList();
+    } catch (e) {
+      print('Error getting files by lock status: $e');
+      return [];
+    }
+  }
+
+  /// Get all non-locked files (these will appear in regular file tabs)
+  static Future<List<FileModel>> getVisibleFiles() async {
+    return await getFilesByLockStatus(showLocked: false);
+  }
+
+  /// Get all locked files (these will only appear in locked files view)
+  static Future<List<FileModel>> getLockedFiles() async {
+    return await getFilesByLockStatus(showLocked: true);
+  }
+
+  /// Delete file (handles both encrypted and regular files)
+  static Future<bool> deleteFile(FileModel fileModel) async {
+    try {
+      final file = File(fileModel.path);
+
+      if (await file.exists()) {
+        await file.delete();
+      }
+
+      // If it was an encrypted file, also clean up the original path if it exists
+      if (fileModel.isEncrypted && fileModel.originalPath != null) {
+        final originalFile = File(fileModel.originalPath!);
+        if (await originalFile.exists()) {
+          await originalFile.delete();
+        }
+      }
+
+      return true;
+    } catch (e) {
+      print('Error deleting file: $e');
+      return false;
+    }
+  }
+
+  /// Rename file (handles both encrypted and regular files)
+  static Future<String?> renameFile(FileModel fileModel, String newName) async {
+    try {
+      final file = File(fileModel.path);
+      final directory = path.dirname(fileModel.path);
+      final extension = path.extension(fileModel.path);
+      final newFileName = '$newName$extension';
+      final newPath = path.join(directory, newFileName);
+
+      if (await file.exists()) {
+        await file.rename(newPath);
+        return newPath;
+      }
+
+      return null;
+    } catch (e) {
+      print('Error renaming file: $e');
+      return null;
+    }
+  }
+
+  // ... (keep all your existing methods for permission checking, folder creation, etc.)
+
   /// Checks if storage permission is available or needed
-  /// For Android 10+ (API 29+), we don't need explicit storage permission
   static Future<bool> checkAndRequestStoragePermission(
       BuildContext context) async {
     if (Platform.isAndroid) {
-      // For Android 10 (API 29) and above, we can use the media store without storage permission
       if (await _isAndroidVersionAbove29()) {
-        return true; // No need for storage permission on Android 10+
+        return true;
       }
 
-      // For older Android versions, request storage permission
       final status = await Permission.storage.status;
       if (!status.isGranted) {
         final result = await Permission.storage.request();
@@ -44,7 +194,6 @@ class SaveDocumentService {
       }
       return status.isGranted;
     } else if (Platform.isIOS) {
-      // iOS doesn't need explicit permission for this operation
       return true;
     }
 
@@ -55,7 +204,7 @@ class SaveDocumentService {
   static Future<bool> _isAndroidVersionAbove29() async {
     if (Platform.isAndroid) {
       final androidInfo = await DeviceInfoPlugin().androidInfo;
-      return androidInfo.version.sdkInt >= 29; // Android 10 is API 29
+      return androidInfo.version.sdkInt >= 29;
     }
     return false;
   }
@@ -69,7 +218,7 @@ class SaveDocumentService {
           title: const Text('Permission Issue'),
           content: const Text(
               'Unable to save document. This might be due to permission restrictions on your device.\n\n'
-              'For Android 11+ users: Please allow the app to manage all files in your device settings.'),
+                  'For Android 11+ users: Please allow the app to manage all files in your device settings.'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancel'),
@@ -96,21 +245,16 @@ class SaveDocumentService {
       Directory? baseDir;
 
       if (Platform.isAndroid) {
-        // For Android, we'll use the Downloads directory
         baseDir = Directory('/storage/emulated/0/Download');
         if (!await baseDir.exists()) {
-          // Fallback to app documents directory if Downloads not accessible
           baseDir = await getApplicationDocumentsDirectory();
         }
       } else if (Platform.isIOS) {
-        // For iOS, use the app's documents directory
         baseDir = await getApplicationDocumentsDirectory();
       } else {
-        // Unsupported platform
         return null;
       }
 
-      // Create the Toolkit directory
       final toolkitDir = Directory('${baseDir.path}/$toolkitFolderName');
       if (!await toolkitDir.exists()) {
         await toolkitDir.create(recursive: true);
@@ -123,7 +267,7 @@ class SaveDocumentService {
     }
   }
 
-  /// Fallback method to save files using system dialog if Toolkit folder creation fails
+  /// Fallback method to save files using system dialog
   static Future<String?> _saveFileWithDialog(
       BuildContext context, File documentFile,
       {bool skipTimestamp = false}) async {
@@ -139,7 +283,7 @@ class SaveDocumentService {
       } else {
         final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
         uniqueFileName =
-            '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
+        '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
       }
 
       final params = SaveFileDialogParams(
@@ -181,10 +325,10 @@ class SaveDocumentService {
 
   /// Main method to save a document file to Toolkit folder
   static Future<bool?> saveDocument(
-    BuildContext context,
-    File documentFile, {
-    bool skipTimestamp = false,
-  }) async {
+      BuildContext context,
+      File documentFile, {
+        bool skipTimestamp = false,
+      }) async {
     try {
       bool canAccessStorage = await checkAndRequestStoragePermission(context);
 
@@ -200,21 +344,18 @@ class SaveDocumentService {
 
           String uniqueFileName;
           if (skipTimestamp) {
-            // Use the filename as-is if skipping timestamp
             uniqueFileName = baseFileName;
 
-            // Check if file already exists
             if (await _fileExistsInToolkitFolder(uniqueFileName)) {
               AppSnackBar.show(context,
                   message:
-                      'File name already exists. Please choose a different name.');
+                  'File name already exists. Please choose a different name.');
               return false;
             }
           } else {
-            // Add timestamp only if not skipping
             final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
             uniqueFileName =
-                '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
+            '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
           }
 
           final destinationPath = '${toolkitDir.path}/$uniqueFileName';
@@ -239,11 +380,12 @@ class SaveDocumentService {
           path: savedFilePath,
           date: DateTime.now(),
           size: '${fileSize.toStringAsFixed(1)} MB',
+          isFavorite: false,
+          isLocked: false,
+          isEncrypted: false,
         ));
 
         return true;
-
-        return false;
       } else {
         showPermissionHelperDialog(context);
         return null;

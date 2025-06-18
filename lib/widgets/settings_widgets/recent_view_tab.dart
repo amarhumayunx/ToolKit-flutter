@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
-import 'package:get/get.dart'; // Add this import for .tr extension
 import 'package:toolkit/widgets/settings_widgets/sort_btn.dart';
 import 'package:toolkit/widgets/settings_widgets/result_document_container.dart';
 import '../../models/file_model.dart';
@@ -14,8 +13,10 @@ import '../../utils/app_snackbar.dart';
 
 class RecentsViewTab extends StatefulWidget {
   final String searchQuery;
-
-  const RecentsViewTab({super.key, required this.searchQuery});
+  final Function(FileModel, int)? onFileSelected;
+  final bool isSelectingFiles;
+  const RecentsViewTab({super.key, required this.searchQuery,this.onFileSelected,
+    this.isSelectingFiles = false,});
 
   @override
   State<RecentsViewTab> createState() => _RecentsViewTabState();
@@ -23,7 +24,7 @@ class RecentsViewTab extends StatefulWidget {
 
 class _RecentsViewTabState extends State<RecentsViewTab> {
   late Box<FileModel> filesBox;
-  String _sortBy = 'recent'.tr; // Localized
+  String _sortBy = 'Recent';
   bool _isLoading = true;
 
   @override
@@ -55,27 +56,56 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
     });
   }
 
-  void _toggleLock(int index) {
-    setState(() {
-      final file = filesBox.getAt(index);
-      if (file != null) {
-        filesBox.putAt(
-            index,
-            FileModel(
-              name: file.name,
-              path: file.path,
-              date: file.date,
-              size: file.size,
-              isFavorite: file.isFavorite,
-              isLocked: !file.isLocked,
-            ));
+  Future<void> _toggleLock(int index) async {
+    final file = filesBox.getAt(index);
+    if (file != null) {
+      // First update the lock status
+      final updatedFile = FileModel(
+        name: file.name,
+        path: file.path,
+        date: file.date,
+        size: file.size,
+        isFavorite: file.isFavorite,
+        isLocked: !file.isLocked,
+        originalPath: file.originalPath,
+        isEncrypted: file.isEncrypted,
+      );
+
+      await filesBox.putAt(index, updatedFile);
+
+      // Then handle encryption/decryption
+      final success = await SaveDocumentService.toggleFileLock(updatedFile, index);
+
+      if (success) {
+        setState(() {});
+        AppSnackBar.show(context,
+            message: updatedFile.isLocked
+                ? 'File locked and encrypted'
+                : 'File unlocked and decrypted');
+      } else {
+        // Revert the lock status if encryption/decryption failed
+        await filesBox.putAt(index, file);
+        AppSnackBar.show(context, message: 'Failed to toggle file lock');
       }
-    });
-    AppSnackBar.show(context,
-        message: filesBox.getAt(index)?.isLocked == true
-            ? 'file_locked'.tr
-            : 'file_unlocked'.tr);
+    }
   }
+
+  List<MapEntry<int, FileModel>> _getRecentFiles() {
+    if (_isLoading || filesBox.isEmpty) return [];
+
+    List<MapEntry<int, FileModel>> allFilesWithIndex = [];
+    for (int i = 0; i < filesBox.length; i++) {
+      final file = filesBox.getAt(i);
+      if (file != null && !file.isLocked) { // Only include non-locked files
+        allFilesWithIndex.add(MapEntry(i, file));
+      }
+    }
+
+    allFilesWithIndex.sort((a, b) => b.value.date.compareTo(a.value.date));
+
+    return allFilesWithIndex.take(10).toList();
+  }
+
 
   Future<void> _renameFile(int index, String newPath) async {
     try {
@@ -103,9 +133,9 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
             ));
       });
 
-      AppSnackBar.show(context, message: 'file_renamed_successfully'.tr);
+      AppSnackBar.show(context, message: 'File renamed successfully');
     } catch (e) {
-      AppSnackBar.show(context, message: 'error_renaming_file'.trParams({'error': e.toString()}));
+      AppSnackBar.show(context, message: 'Error renaming file: $e');
     }
   }
 
@@ -114,24 +144,10 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
       filesBox.deleteAt(index);
     });
 
-    AppSnackBar.show(context, message: 'file_deleted'.tr);
+    AppSnackBar.show(context, message: 'File deleted');
   }
 
-  List<MapEntry<int, FileModel>> _getRecentFiles() {
-    if (_isLoading || filesBox.isEmpty) return [];
 
-    List<MapEntry<int, FileModel>> allFilesWithIndex = [];
-    for (int i = 0; i < filesBox.length; i++) {
-      final file = filesBox.getAt(i);
-      if (file != null) {
-        allFilesWithIndex.add(MapEntry(i, file));
-      }
-    }
-
-    allFilesWithIndex.sort((a, b) => b.value.date.compareTo(a.value.date));
-
-    return allFilesWithIndex.take(10).toList();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,9 +159,9 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
         .contains(widget.searchQuery.toLowerCase()))
         .toList();
 
-    if (_sortBy == 'name'.tr) {
+    if (_sortBy == 'Name') {
       filteredFiles.sort((a, b) => a.value.name.compareTo(b.value.name));
-    } else if (_sortBy == 'date'.tr) {
+    } else if (_sortBy == 'Date') {
       filteredFiles.sort((a, b) => b.value.date.compareTo(a.value.date));
     }
 
@@ -178,7 +194,7 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 100),
                     child: Text(
-                      'no_recent_documents_found'.tr,
+                      'No recent documents found',
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         color: Colors.grey[600],
@@ -196,19 +212,21 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(left: 6, right: 6),
-                          child: ResultDocumentContainer(
-                            documentName: file.name,
-                            date: DateFormat('yy/MM/dd').format(file.date),
-                            time: DateFormat('h:mma').format(file.date),
-                            size: file.size,
-                            isFavorite: file.isFavorite,
-                            isLocked: file.isLocked,
-                            filePath: file.path,
-                            onFavoriteToggle: () => _toggleFavorite(index),
-                            onDelete: () => _deleteFile(index),
-                            onFileRenamed: (newPath) => _renameFile(index, newPath),
-                            onLockToggle: () => _toggleLock(index),
-                          ),
+                           child:  ResultDocumentContainer(
+                              documentName: file.name,
+                              date: DateFormat('yy/MM/dd').format(file.date),
+                              time: DateFormat('h:mma').format(file.date),
+                              size: file.size,
+                              isFavorite: file.isFavorite,
+                              isLocked: file.isLocked,
+                              filePath: file.path,
+                              isSelectable: widget.isSelectingFiles, // Add this
+                              onFavoriteToggle: () => _toggleFavorite(index),
+                              onDelete: () => _deleteFile(index),
+                              onFileRenamed: (newPath) => _renameFile(index, newPath),
+                              onLockToggle: () => _toggleLock(index),
+                              onTap: widget.isSelectingFiles ? () => widget.onFileSelected?.call(file, index) : null, // Add this
+                            )
                         ),
                         const SizedBox(height: 12),
                       ],

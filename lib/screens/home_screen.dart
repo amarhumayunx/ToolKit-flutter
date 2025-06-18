@@ -1,11 +1,14 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_ce_flutter/adapters.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' as path;
+
 import 'package:toolkit/utils/app_colors.dart';
-import 'package:toolkit/widgets/settings_widgets/result_document_container.dart';
+
 import '../models/file_model.dart';
 import '../services/save_document_service.dart';
 import '../utils/app_snackbar.dart';
@@ -16,20 +19,29 @@ import '../widgets/gradient_background.dart';
 import '../widgets/home_app_bar.dart';
 import '../widgets/home_section_heading.dart';
 import '../widgets/tools_list_view.dart';
+import '../widgets/settings_widgets/result_document_container.dart';
 import 'files_screens/files_main_screen.dart';
 import 'package:flutter/services.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final int initialIndex;
+
+  const HomeScreen({super.key, this.initialIndex = 0});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0;
+  late int _currentIndex;
   final TextEditingController _searchController = TextEditingController();
   DateTime? _lastPressedAt;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
 
   final List<Widget> _screens = [
     const HomeContentView(),
@@ -43,6 +55,11 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  // Public method to allow child widgets to change tabs
+  void handleNavigation(int index) {
+    _handleNavigation(index);
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -53,8 +70,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final now = DateTime.now();
     const maxDuration = Duration(seconds: 2);
 
-    if (_lastPressedAt == null || now.difference(_lastPressedAt!) > maxDuration)
-    {
+    if (_lastPressedAt == null ||
+        now.difference(_lastPressedAt!) > maxDuration) {
       _lastPressedAt = now;
 
       AppSnackBar.show(
@@ -68,7 +85,6 @@ class _HomeScreenState extends State<HomeScreen> {
     SystemNavigator.pop();
     return true;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -93,14 +109,33 @@ class HomeContentView extends StatefulWidget {
   State<HomeContentView> createState() => _HomeContentViewState();
 }
 
-class _HomeContentViewState extends State<HomeContentView> {
+class _HomeContentViewState extends State<HomeContentView>
+    with AutomaticKeepAliveClientMixin {
   Box<FileModel>? filesBox;
   bool _isLoading = true;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
     _initHive();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh data when the widget becomes visible again
+    _refreshData();
+  }
+
+  Future<void> _refreshData() async {
+    if (filesBox != null && mounted) {
+      setState(() {
+        // This will trigger a rebuild with the latest data
+      });
+    }
   }
 
   Future<void> _initHive() async {
@@ -116,26 +151,23 @@ class _HomeContentViewState extends State<HomeContentView> {
     }
   }
 
-  List<MapEntry<int, FileModel>> _getRecentFiles({int limit = 2}) {
+  List<MapEntry<int, FileModel>> _getRecentFiles() {
     if (_isLoading || filesBox == null || filesBox!.isEmpty) return [];
 
     List<MapEntry<int, FileModel>> allFilesWithIndex = [];
     for (int i = 0; i < filesBox!.length; i++) {
       final file = filesBox!.getAt(i);
-      if (file != null) {
+      if (file != null && !file.isLocked) {
         allFilesWithIndex.add(MapEntry(i, file));
       }
     }
 
-    // Sort by date (most recent first)
     allFilesWithIndex.sort((a, b) => b.value.date.compareTo(a.value.date));
 
-    return allFilesWithIndex.take(limit).toList();
+    return allFilesWithIndex.take(2).toList(); // Only show 2 recent files
   }
 
   void _toggleFavorite(int index) {
-    if (filesBox == null) return;
-
     setState(() {
       final file = filesBox!.getAt(index);
       if (file != null) {
@@ -153,147 +185,89 @@ class _HomeContentViewState extends State<HomeContentView> {
     });
   }
 
-  void _toggleLock(int index) {
-    if (filesBox == null) return;
+  Future<void> _toggleLock(int index) async {
+    final file = filesBox!.getAt(index);
+    if (file != null) {
+      final updatedFile = FileModel(
+        name: file.name,
+        path: file.path,
+        date: file.date,
+        size: file.size,
+        isFavorite: file.isFavorite,
+        isLocked: !file.isLocked,
+        originalPath: file.originalPath,
+        isEncrypted: file.isEncrypted,
+      );
 
-    setState(() {
-      final file = filesBox!.getAt(index);
-      if (file != null) {
-        filesBox!.putAt(
-            index,
-            FileModel(
-              name: file.name,
-              path: file.path,
-              date: file.date,
-              size: file.size,
-              isFavorite: file.isFavorite,
-              isLocked: !file.isLocked,
-            ));
+      await filesBox!.putAt(index, updatedFile);
+
+      final success =
+          await SaveDocumentService.toggleFileLock(updatedFile, index);
+
+      if (success) {
+        setState(() {});
+        AppSnackBar.show(context,
+            message: updatedFile.isLocked
+                ? 'File locked and encrypted'
+                : 'File unlocked and decrypted');
+      } else {
+        await filesBox!.putAt(index, file);
+        AppSnackBar.show(context, message: 'Failed to toggle file lock');
       }
-    });
-
-    AppSnackBar.show(
-      context,
-      message: filesBox!.getAt(index)?.isLocked == true
-          ? 'File locked'
-          : 'File unlocked',
-    );
-  }
-
-  void _deleteFile(int index) {
-    if (filesBox == null) return;
-
-    setState(() {
-      filesBox!.deleteAt(index);
-    });
-
-    AppSnackBar.show(
-      context,
-      message: 'File deleted',
-    );
+    }
   }
 
   Future<void> _renameFile(int index, String newPath) async {
-    // Similar implementation as in RecentsViewTab
-    // You can copy the implementation from RecentsViewTab
+    try {
+      final file = filesBox!.getAt(index);
+      if (file == null) return;
+
+      final oldFile = File(file.path);
+      final newFile = File(newPath);
+
+      if (await oldFile.exists()) {
+        await oldFile.rename(newPath);
+      }
+
+      final newFileName = path.basename(newPath);
+      setState(() {
+        filesBox!.putAt(
+            index,
+            FileModel(
+              name: newFileName,
+              path: newPath,
+              date: file.date,
+              size: file.size,
+              isFavorite: file.isFavorite,
+              isLocked: file.isLocked,
+            ));
+      });
+
+      AppSnackBar.show(context, message: 'File renamed successfully');
+    } catch (e) {
+      AppSnackBar.show(context, message: 'Error renaming file: $e');
+    }
   }
 
-  Widget _buildRecentFilesSection() {
-    final recentFiles = _getRecentFiles(limit: 2);
+  void _deleteFile(int index) {
+    setState(() {
+      filesBox!.deleteAt(index);
+    });
+    AppSnackBar.show(context, message: 'File deleted');
+  }
 
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SectionHeading(title: 'recents'.tr),
-            Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: GestureDetector(
-                onTap: () {
-                  // Switch to Files tab
-                  final homeState =
-                  context.findAncestorStateOfType<_HomeScreenState>();
-                  homeState?._handleNavigation(2);
-                },
-                child: Row(
-                  children: [
-                    Text(
-                      'see_all'.tr,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    SvgPicture.asset(
-                      'assets/icons/next_page_icon.svg',
-                      width: 6,
-                      height: 12,
-                      colorFilter: const ColorFilter.mode(
-                        Colors.grey,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
-        if (_isLoading)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: CircularProgressIndicator(),
-            ),
-          )
-        else if (recentFiles.isEmpty)
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                'norecentdocuments'.tr,
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ),
-          )
-        else
-          Column(
-            children: recentFiles.map((entry) {
-              final index = entry.key;
-              final file = entry.value;
-              return Column(
-                children: [
-                  ResultDocumentContainer(
-                    documentName: file.name,
-                    date: DateFormat('yy/MM/dd').format(file.date),
-                    time: DateFormat('h:mma').format(file.date),
-                    size: file.size,
-                    isFavorite: file.isFavorite,
-                    isLocked: file.isLocked,
-                    filePath: file.path,
-                    onFavoriteToggle: () => _toggleFavorite(index),
-                    onDelete: () => _deleteFile(index),
-                    onFileRenamed: (newPath) => _renameFile(index, newPath),
-                    onLockToggle: () => _toggleLock(index),
-                  ),
-                  const SizedBox(height: 12),
-                ],
-              );
-            }).toList(),
-          ),
-      ],
-    );
+  void _navigateToRecentTab() {
+    // Get the parent HomeScreen state and change the tab
+    final homeScreenState = context.findAncestorStateOfType<_HomeScreenState>();
+    if (homeScreenState != null) {
+      homeScreenState.handleNavigation(2); // Files tab
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+
     return GradientBackgroundWidget(
       child: Column(
         children: [
@@ -328,9 +302,96 @@ class _HomeContentViewState extends State<HomeContentView> {
                       const SizedBox(height: 14),
                       const ConvertOptionsView(),
                       const SizedBox(height: 28),
-                      _buildRecentFilesSection(),
+
+                      // Recent documents section with See All
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SectionHeading(title: 'Recents'.tr),
+                          ValueListenableBuilder(
+                            valueListenable:
+                                filesBox?.listenable() ?? ValueNotifier(null),
+                            builder: (context, box, widget) {
+                              final recentFilesWithIndex = _getRecentFiles();
+                              return recentFilesWithIndex.isNotEmpty
+                                  ? GestureDetector(
+                                      onTap: _navigateToRecentTab,
+                                      child: Text(
+                                        'See All',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 14,
+                                          color: AppColors.primary,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    )
+                                  : const SizedBox.shrink();
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+
+                      // Recent documents list with ValueListenableBuilder
+                      ValueListenableBuilder(
+                        valueListenable:
+                            filesBox?.listenable() ?? ValueNotifier(null),
+                        builder: (context, box, widget) {
+                          final recentFilesWithIndex = _getRecentFiles();
+
+                          if (_isLoading) {
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primary,
+                              ),
+                            );
+                          }
+
+                          if (recentFilesWithIndex.isEmpty) {
+                            return Center(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                child: Text(
+                                  'No recent documents found',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+
+                          return Column(
+                            children: recentFilesWithIndex.map((entry) {
+                              final index = entry.key;
+                              final file = entry.value;
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: ResultDocumentContainer(
+                                  documentName: file.name,
+                                  date:
+                                      DateFormat('yy/MM/dd').format(file.date),
+                                  time: DateFormat('h:mma').format(file.date),
+                                  size: file.size,
+                                  isFavorite: file.isFavorite,
+                                  isLocked: file.isLocked,
+                                  filePath: file.path,
+                                  onFavoriteToggle: () =>
+                                      _toggleFavorite(index),
+                                  onDelete: () => _deleteFile(index),
+                                  onFileRenamed: (newPath) =>
+                                      _renameFile(index, newPath),
+                                  onLockToggle: () => _toggleLock(index),
+                                ),
+                              );
+                            }).toList(),
+                          );
+                        },
+                      ),
+
                       const SizedBox(height: 100),
-                      // Extra space at bottom for nav bar
                     ],
                   ),
                 ),

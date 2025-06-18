@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:toolkit/widgets/settings_widgets/locked_files_tab.dart';
-
 import '../../utils/app_colors.dart';
 import '../../widgets/custom_appbar.dart';
-
 
 class LockedFilesScreen extends StatelessWidget {
   const LockedFilesScreen({super.key});

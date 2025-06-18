@@ -41,20 +41,27 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so flutter run --release works.
             signingConfig = signingConfigs.debug
+            minifyEnabled true
+            shrinkResources true
         }
     }
 }
 
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
-
     // Import the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
 
     // Firebase dependencies
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth") // <-- Add this
     implementation("com.google.android.gms:play-services-auth")
+    implementation 'com.google.mlkit:text-recognition-chinese:16.0.1'
+    implementation 'com.google.mlkit:text-recognition-devanagari:16.0.1'
+    implementation 'com.google.mlkit:text-recognition-japanese:16.0.1'
+    implementation 'com.google.mlkit:text-recognition-korean:16.0.1'
+
+
 }
 
 flutter {

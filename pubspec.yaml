@@ -39,31 +39,23 @@ dependencies:
   google_fonts: ^6.2.1
   provider: ^6.1.4
   image_picker: ^1.1.2
-  #device_preview: ^1.2.0
   intl: ^0.19.0
   path_provider: ^2.1.5
   open_file: ^3.5.10
   share_plus: ^10.1.4
   printing: ^5.14.2
-  dio: ^5.8.0+1
   permission_handler: ^12.0.0+1
-
-  # Text get from the images
-
+  google_mlkit_text_recognition: ^0.15.0
   image_cropper: ^9.1.0
-  #  file_picker: ^10.1.2
   file_picker: ^10.1.9
   dotted_border: ^2.1.0
-  dart_pptx: ^0.1.3
   camera:
-  google_ml_kit: ^0.20.0
   archive: ^3.6.1
-  cross_file: ^0.3.4+2
   device_info_plus: ^11.3.0
   crop_image: ^1.0.16
   flutter_file_dialog: ^3.0.2
   syncfusion_flutter_pdf: ^28.2.12
-  #pdfrx: ^1.1.29
+
   flutter_image_compress: ^2.4.0
   path: ^1.9.1
   flutter_pdfview: ^1.4.0+1
@@ -73,7 +65,7 @@ dependencies:
   google_sign_in: ^6.3.0
   cloud_firestore: ^5.6.8
   shared_preferences: any
-  tesseract_ocr: ^0.4.1
+
   uuid: any
   pdf: any
   image: any
@@ -86,6 +78,12 @@ dependencies:
   hive_ce: ^2.11.2
   get: ^4.7.2
   flutter_local_notifications: ^19.2.1
+  encrypt: ^5.0.3
+  pretty_qr_code: ^3.4.0
+  firebase_storage: ^12.4.7
+  mobile_scanner: ^7.0.1
+
+
 
 
   crypto: any
