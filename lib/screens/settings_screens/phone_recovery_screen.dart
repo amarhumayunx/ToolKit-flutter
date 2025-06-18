@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:toolkit/screens/settings_screens/set_password_screen.dart';
@@ -122,7 +123,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
   Future<void> _sendOtp() async {
     if (_phoneController.text.trim().isEmpty) {
       setState(() {
-        _errorMessage = 'Please enter your phone number';
+        _errorMessage = 'recover_your_account'.tr;
       });
       return;
     }
@@ -147,7 +148,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
 
       if (userId == null) {
         setState(() {
-          _errorMessage = 'No account found with this phone number';
+          _errorMessage = 'no_account_found'.tr;
           _isLoading = false;
         });
         return;
@@ -161,7 +162,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
           _isOtpSent = true;
           _isLoading = false;
         });
-        AppSnackBar.show(context, message: 'OTP sent to your phone number');
+        AppSnackBar.show(context, message: 'otp_sent'.tr);
       }
     } on FirebaseAuthException catch (e) {
       setState(() {
@@ -199,7 +200,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
 
     if (otpCode.length != 6) {
       setState(() {
-        _errorMessage = 'Please enter all 6 digits';
+        _errorMessage = 'invalid_otp'.tr;
       });
       return;
     }
@@ -279,7 +280,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
       final success = await _authService.sendOTP(fullPhoneNumber, isResend: true);
 
       if (success) {
-        AppSnackBar.show(context, message: 'OTP resent successfully');
+        AppSnackBar.show(context, message: 'otp_resent'.tr);
       }
     } catch (e) {
       setState(() {
@@ -337,7 +338,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Select Country Code',
+                          'select_country_code'.tr,
                           style: GoogleFonts.inter(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -358,7 +359,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
                     child: TextField(
                       controller: _searchController,
                       decoration: InputDecoration(
-                        hintText: 'Search country or code...',
+                        hintText: 'search_country'.tr,
                         prefixIcon: const Icon(Icons.search),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -525,7 +526,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: !_isOtpSent ? 'Phone Recovery' : 'Verify OTP',
+        title: !_isOtpSent ? 'phone_recovery'.tr : 'verify_otp'.tr,
         onBackPressed: () {
           Navigator.of(context).pop(false);
         },
@@ -583,11 +584,11 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
       );
     }
 
-    String buttonText = 'Continue';
+    String buttonText = 'continue'.tr;
     VoidCallback? onPressed = _sendOtp;
 
     if (_isOtpSent) {
-      buttonText = 'Verify';
+      buttonText = 'verify'.tr;
       onPressed = _verifyOtp;
     }
 
@@ -602,7 +603,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Recover Your Account',
+          'recover_your_account'.tr,
           style: GoogleFonts.inter(
             fontSize: 28,
             fontWeight: FontWeight.w700,
@@ -612,7 +613,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
         ),
         const SizedBox(height: 40),
         Text(
-          'Enter your phone number to recover your account',
+          'enter_phone_to_recover'.tr,
           style: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w400,
@@ -622,7 +623,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
         ),
         const SizedBox(height: 40),
         Text(
-          'Phone number*',
+          'phone_number'.tr,
           style: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w400,
@@ -757,7 +758,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Verify Your Phone',
+          'verify_your_phone'.tr,
           style: GoogleFonts.inter(
             fontSize: 28,
             fontWeight: FontWeight.w700,
@@ -768,7 +769,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
         const SizedBox(height: 40),
         RichText(
           text: TextSpan(
-            text: 'Enter the code sent to ',
+            text: 'enter_code_sent'.tr,
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w400,
@@ -845,7 +846,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Didn't receive any code? ",
+                "no_code_received".tr,
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   color: const Color(0xFF6B6B6B),
@@ -854,7 +855,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
               GestureDetector(
                 onTap: _isLoading ? null : _resendOtp,
                 child: Text(
-                  'RESEND',
+                  'resend'.tr,
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,

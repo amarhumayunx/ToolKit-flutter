@@ -43,7 +43,7 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
   File? _outputFile;
   bool _processingComplete = false;
   bool _errorOccurred = false;
-  String _statusMessage = 'Processing document...';
+  String _statusMessage = '';
   final List<File?> _rearrangedFiles = [];
   bool _fileRenamed = false;
   String _saveButtonKey = 'initial';
@@ -54,6 +54,8 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
   @override
   void initState() {
     super.initState();
+    _statusMessage = 'processing_document'.tr;
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -102,19 +104,19 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
   Future<void> _rearrangeDocument() async {
     try {
       if (!await widget.originalFile.exists()) {
-        throw Exception('Original file does not exist');
+        throw Exception('original_file_not_exist'.tr);
       }
 
       final fileSize = await widget.originalFile.length();
       if (fileSize == 0) {
-        throw Exception('Original file is empty');
+        throw Exception('original_file_empty'.tr);
       }
 
       if (widget.newPageOrder.isEmpty) {
-        throw Exception('No page order specified');
+        throw Exception('no_page_order_specified'.tr);
       }
 
-      setState(() => _statusMessage = 'Reading document pages...');
+      setState(() => _statusMessage = 'reading_document_pages'.tr);
       _updateProgress(0.2);
 
       if (widget.isPdfFile) {
@@ -128,28 +130,28 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
         }
 
         if (allPages.isEmpty) {
-          throw Exception('No pages found in PDF document');
+          throw Exception('no_pages_found_pdf'.tr);
         }
 
         for (int index in widget.newPageOrder) {
           if (index < 0 || index >= allPages.length) {
-            throw Exception('Invalid page index: $index. Document has ${allPages.length} pages.');
+            throw Exception('${'invalid_page_index'.tr}: $index. ${'document_has'.tr} ${allPages.length} ${'pages'.tr}.');
           }
         }
 
         _updateProgress(0.4);
 
-        setState(() => _statusMessage = 'Rearranging PDF pages...');
+        setState(() => _statusMessage = 'rearranging_pdf_pages'.tr);
 
         final reorderedPages = widget.newPageOrder.map((index) => allPages[index]).toList();
 
         if (reorderedPages.isEmpty) {
-          throw Exception('No pages selected for rearrangement');
+          throw Exception('no_pages_selected_rearrangement'.tr);
         }
 
         _updateProgress(0.6);
 
-        setState(() => _statusMessage = 'Creating new PDF document...');
+        setState(() => _statusMessage = 'creating_new_pdf_document'.tr);
 
         final fileNameWithoutExt = path.basenameWithoutExtension(widget.originalFile.path);
         final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -172,27 +174,27 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
         final allPages = await docxService.extractPages(widget.originalFile);
 
         if (allPages.isEmpty) {
-          throw Exception('No pages found in document');
+          throw Exception('no_pages_found_document'.tr);
         }
 
         for (int index in widget.newPageOrder) {
           if (index < 0 || index >= allPages.length) {
-            throw Exception('Invalid page index: $index. Document has ${allPages.length} pages.');
+            throw Exception('${'invalid_page_index'.tr}: $index. ${'document_has'.tr} ${allPages.length} ${'pages'.tr}.');
           }
         }
 
         _updateProgress(0.4);
 
-        setState(() => _statusMessage = 'Rearranging pages...');
+        setState(() => _statusMessage = 'rearranging_pages'.tr);
         final reorderedPages = widget.newPageOrder.map((index) => allPages[index]).toList();
 
         if (reorderedPages.isEmpty) {
-          throw Exception('No pages selected for rearrangement');
+          throw Exception('no_pages_selected_rearrangement'.tr);
         }
 
         _updateProgress(0.6);
 
-        setState(() => _statusMessage = 'Creating new document...');
+        setState(() => _statusMessage = 'creating_new_document'.tr);
 
         final fileNameWithoutExt = path.basenameWithoutExtension(widget.originalFile.path);
         final fileExt = path.extension(widget.originalFile.path);
@@ -215,16 +217,16 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
       }
 
       if (_outputFile == null) {
-        throw Exception('Failed to create output file');
+        throw Exception('failed_create_output_file'.tr);
       }
 
       if (!await _outputFile!.exists()) {
-        throw Exception('Output file was not created successfully');
+        throw Exception('output_file_not_created'.tr);
       }
 
       final outputSize = await _outputFile!.length();
       if (outputSize == 0) {
-        throw Exception('Created file is empty - document processing may have failed');
+        throw Exception('created_file_empty'.tr);
       }
 
       print('Created ${widget.isPdfFile ? "PDF" : "DOCX"} file: ${_outputFile!.path}, size: $outputSize bytes');
@@ -237,7 +239,7 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
       _updateProgress(0.9);
 
       setState(() {
-        _statusMessage = 'Document rearranged successfully! ($outputSize bytes)';
+        _statusMessage = '${'document_rearranged_successfully'.tr} (${_formatFileSize(outputSize)})';
         _processingComplete = true;
         _progress = 1.0;
       });
@@ -245,10 +247,20 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
     } catch (e) {
       print('Error in _rearrangeDocument: $e');
       setState(() {
-        _statusMessage = 'Error: ${e.toString()}';
+        _statusMessage = '${'error'.tr}: ${e.toString()}';
         _errorOccurred = true;
         _processingComplete = false;
       });
+    }
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) {
+      return '$bytes ${'bytes'.tr}';
+    } else if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    } else {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
     }
   }
 
@@ -268,17 +280,17 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
   void _openFile(File file) async {
     try {
       if (!await file.exists()) {
-        throw Exception('File does not exist');
+        throw Exception('file_not_exist'.tr);
       }
 
       final fileSize = await file.length();
       if (fileSize == 0) {
-        throw Exception('File is empty');
+        throw Exception('file_empty'.tr);
       }
 
       // Show loading message
       if (mounted) {
-        AppSnackBar.show(context, message: 'Opening file...');
+        AppSnackBar.show(context, message: 'opening_file'.tr);
       }
 
       // Actually open the file
@@ -290,24 +302,24 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
       } else if (result.type == ResultType.noAppToOpen) {
         if (mounted) {
           AppSnackBar.show(context,
-              message: 'No application found to open this file type');
+              message: 'no_app_to_open_file'.tr);
         }
       } else if (result.type == ResultType.permissionDenied) {
         if (mounted) {
           AppSnackBar.show(context,
-              message: 'Permission denied to open file');
+              message: 'permission_denied_open_file'.tr);
         }
       } else {
         if (mounted) {
           AppSnackBar.show(context,
-              message: 'Failed to open file: ${result.message}');
+              message: '${'failed_to_open_file'.tr}: ${result.message}');
         }
       }
 
     } catch (e) {
       print('Error opening file: $e');
       if (mounted) {
-        AppSnackBar.show(context, message: 'Cannot open file: ${e.toString()}');
+        AppSnackBar.show(context, message: '${'cannot_open_file'.tr}: ${e.toString()}');
       }
     }
   }
@@ -330,20 +342,22 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
       });
 
       if (mounted) {
-        AppSnackBar.show(context, message: 'File deleted successfully!');
+        AppSnackBar.show(context, message: 'file_deleted_successfully'.tr);
       }
 
       Future.delayed(const Duration(milliseconds: 100), () {
         if (mounted) {
           Navigator.of(context).pop();
           Navigator.of(context).pop();
+          Navigator.of(context).pop();
+          AppSnackBar.show(context, message: 'file_deleted_successfully'.tr);
         }
       });
 
     } catch (e) {
       print('Error deleting file: $e');
       if (mounted) {
-        AppSnackBar.show(context, message: 'Error deleting file: $e');
+        AppSnackBar.show(context, message: '${'error_deleting_file'.tr}: $e');
       }
     }
   }
@@ -389,118 +403,118 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: CustomAppBar(title: 'rearrange_results'.tr),
-        resizeToAvoidBottomInset: true,
-        body: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 100.0),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 20),
-                      _buildLoadingContainer(),
-                      if (_animationCompleted) ...[
-                        const SizedBox(height: 36),
-                        if (_errorOccurred) ...[
-                          const Icon(
-                            Icons.error_outline,
-                            color: Colors.red,
-                            size: 64,
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(title: 'rearrange_results'.tr),
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 100.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    _buildLoadingContainer(),
+                    if (_animationCompleted) ...[
+                      const SizedBox(height: 36),
+                      if (_errorOccurred) ...[
+                        const Icon(
+                          Icons.error_outline,
+                          color: Colors.red,
+                          size: 64,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'error_occurred'.tr,
+                          style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _statusMessage,
+                          style: GoogleFonts.inter(fontSize: 16),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _errorOccurred = false;
+                              _processingComplete = false;
+                              _progress = 0.0;
+                              _statusMessage = 'processing_document'.tr;
+                              _rearrangedFiles.clear();
+                              _outputFile = null;
+                              convertedFile = null;
+                              _currentFilePath = '';
+                              _fileRenamed = false;
+                              _saveButtonKey = 'retry_${DateTime.now().millisecondsSinceEpoch}';
+                            });
+                            _rearrangeDocument();
+                          },
+                          child: Text('try_again'.tr),
+                        ),
+                      ] else ...[
+                        const SizedBox(height: 24),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'rearranged_files'.tr,
+                            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500),
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'error_occurred'.tr,
-                            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _statusMessage,
-                            style: GoogleFonts.inter(fontSize: 16),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                _errorOccurred = false;
-                                _processingComplete = false;
-                                _progress = 0.0;
-                                _statusMessage = 'processing_document'.tr;
-                                _rearrangedFiles.clear();
-                                _outputFile = null;
-                                convertedFile = null;
-                                _currentFilePath = '';
-                                _fileRenamed = false;
-                                _saveButtonKey = 'retry_${DateTime.now().millisecondsSinceEpoch}';
-                              });
-                              _rearrangeDocument();
+                        ),
+                        const SizedBox(height: 16),
+                        if (_rearrangedFiles.isNotEmpty)
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _rearrangedFiles.length,
+                            itemBuilder: (context, index) {
+                              final file = _rearrangedFiles[index];
+                              if (file == null) return const SizedBox.shrink();
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: DocumentContainer(
+                                  filePath: file.path,
+                                  onTap: () => _openFile(file),
+                                  onDelete: _handleFileDeleted,
+                                  onFileRenamed: _handleFileRenamed,
+                                ),
+                              );
                             },
-                            child: Text('try_again'.tr),
-                          ),
-                        ] else ...[
-                          const SizedBox(height: 24),
-                          Align(
-                            alignment: Alignment.centerLeft,
+                          )
+                        else if (!_processingComplete)
+                          Center(
                             child: Text(
-                              'rearranged_files'.tr,
-                              style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500),
+                              'processing_document'.tr,
+                              style: GoogleFonts.inter(fontSize: 16),
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          if (_rearrangedFiles.isNotEmpty)
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: _rearrangedFiles.length,
-                              itemBuilder: (context, index) {
-                                final file = _rearrangedFiles[index];
-                                if (file == null) return const SizedBox.shrink();
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: DocumentContainer(
-                                    filePath: file.path,
-                                    onTap: () => _openFile(file),
-                                    onDelete: _handleFileDeleted,
-                                    onFileRenamed: _handleFileRenamed,
-                                  ),
-                                );
-                              },
-                            )
-                          else if (!_processingComplete)
-                            Center(
-                              child: Text(
-                                'processing_document'.tr,
-                                style: GoogleFonts.inter(fontSize: 16),
-                              ),
-                            ),
-                        ],
                       ],
                     ],
+                  ],
+                ),
+              ),
+            ),
+
+            if (_animationCompleted && hasValidFiles && !_errorOccurred && _processingComplete)
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                  child: CustomGradientButton(
+                    key: Key(_saveButtonKey),
+                    text: _isSaving
+                        ? 'saving'.tr
+                        : 'save'.tr,
+                    onPressed: _isSaving ? null : _handleSaveFile,
                   ),
                 ),
               ),
-
-              if (_animationCompleted && hasValidFiles && !_errorOccurred && _processingComplete)
-                SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                    child: CustomGradientButton(
-                      key: Key(_saveButtonKey),
-                      text: _isSaving
-                          ? 'saving'.tr
-                          : 'save'.tr,
-                      onPressed: _isSaving ? null : _handleSaveFile,
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          ],
         ),
-      );
+      ),
+    );
   }
 
   @override

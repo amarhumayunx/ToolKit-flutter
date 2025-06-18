@@ -112,6 +112,8 @@ class _SplitScreenState extends State<SplitScreen> {
             file: firstFile,
           );
 
+          
+
           await Navigator.push(
             context,
             MaterialPageRoute(

@@ -304,11 +304,9 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
       if (_outputFile == null && mounted) {
         Navigator.of(context).pop();
         Navigator.of(context).pop();
-        return;
-      }
-
-      if (mounted) {
+        Navigator.of(context).pop();
         AppSnackBar.show(context, message: 'file_deleted_successfully'.tr);
+        return;
       }
 
     } catch (e) {

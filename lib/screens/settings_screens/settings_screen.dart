@@ -110,20 +110,25 @@ class _SettingsScreenState extends State<SettingsScreen>
       final result = await showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Password Not Set'.tr),
-          content: Text(
-              'You need to set a password first to access locked files.'.tr),
+          title: Text('password_not_set'.tr),
+          content: Text('password_required_for_locked_files'.tr),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'.tr),
+              child: Text('cancel'.tr,
+              style: const TextStyle(
+                color: Colors.black
+              ),),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context, true);
                 _navigateToSetPasswordScreen();
               },
-              child: Text('Set Password'.tr),
+              child: Text('set_password'.tr, style:
+                const TextStyle(
+                  color: AppColors.primary,
+                ),),
             ),
           ],
         ),
@@ -216,7 +221,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     }
 
     final profileProvider =
-        Provider.of<ProfileProvider>(context, listen: false);
+    Provider.of<ProfileProvider>(context, listen: false);
     final userEmail = profileProvider.email;
 
     if (userEmail != null && userEmail.isNotEmpty) {
@@ -232,7 +237,7 @@ class _SettingsScreenState extends State<SettingsScreen>
         await _refreshPasswordStatus();
       }
     } else {
-      AppSnackBar.show(context, message: 'No email found for this account');
+      AppSnackBar.show(context, message: 'no_email_found'.tr);
     }
   }
 
@@ -250,7 +255,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       if (user != null) {
         final userData = await _authService.getUserData(user.uid);
         final profileProvider =
-            Provider.of<ProfileProvider>(context, listen: false);
+        Provider.of<ProfileProvider>(context, listen: false);
 
         if (userData != null) {
           profileProvider.loadProfileData(
@@ -263,24 +268,24 @@ class _SettingsScreenState extends State<SettingsScreen>
         } else {
           profileProvider.loadProfileData(
             avatar: profileProvider.selectedAvatar ?? '6',
-            username: user.displayName ?? 'Not set',
-            email: user.email ?? 'Not set',
-            gender: 'Not set',
-            dateOfBirth: 'Not set',
+            username: user.displayName ?? 'not_set'.tr,
+            email: user.email ?? 'not_set'.tr,
+            gender: 'not_set'.tr,
+            dateOfBirth: 'not_set'.tr,
           );
         }
       }
     } catch (e) {
       print('Error loading profile data in settings: $e');
       final profileProvider =
-          Provider.of<ProfileProvider>(context, listen: false);
+      Provider.of<ProfileProvider>(context, listen: false);
       if (profileProvider.selectedAvatar == null) {
         profileProvider.loadProfileData(
           avatar: '6',
-          username: 'Not set',
-          email: 'Not set',
-          gender: 'Not set',
-          dateOfBirth: 'Not set',
+          username: 'not_set'.tr,
+          email: 'not_set'.tr,
+          gender: 'not_set'.tr,
+          dateOfBirth: 'not_set'.tr,
         );
       }
     }
@@ -302,7 +307,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                   color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.lock_outline,
                   color: AppColors.primary,
                   size: 24,
@@ -311,7 +316,7 @@ class _SettingsScreenState extends State<SettingsScreen>
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Sign in Required',
+                  'sign_in_required'.tr,
                   style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -322,7 +327,7 @@ class _SettingsScreenState extends State<SettingsScreen>
             ],
           ),
           content: Text(
-            'Please sign in to secure your documents.',
+            'please_sign_in_to_secure_documents'.tr,
             style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w400,
@@ -333,7 +338,7 @@ class _SettingsScreenState extends State<SettingsScreen>
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
-                'Cancel',
+                'cancel'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -359,10 +364,10 @@ class _SettingsScreenState extends State<SettingsScreen>
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
               child: Text(
-                'Sign in',
+                'sign_in'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -422,7 +427,7 @@ class _SettingsScreenState extends State<SettingsScreen>
             _notificationsEnabled = false;
           });
         }
-        AppSnackBar.show(context, message: 'Error enabling notifications: $e');
+        AppSnackBar.show(context, message: '${'notification_error'.tr}: $e');
       }
     } else {
       try {
@@ -432,7 +437,7 @@ class _SettingsScreenState extends State<SettingsScreen>
             _notificationsEnabled = false;
           });
         }
-        AppSnackBar.show(context, message: 'notification_disabled');
+        AppSnackBar.show(context, message: 'notification_disabled'.tr);
       } catch (e) {
         AppSnackBar.show(context, message: 'notification_error_disabling'.tr);
       }
@@ -453,9 +458,9 @@ class _SettingsScreenState extends State<SettingsScreen>
             Expanded(
               child: Container(
                 width: double.infinity,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: const BorderRadius.only(
+                  borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(30),
                     topRight: Radius.circular(30),
                   ),
@@ -470,7 +475,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                       _buildConfidentialDocumentsSection(),
                       const SizedBox(height: 4),
                       SettingTile(
-                        title: 'Locked Files',
+                        title: 'locked_files'.tr,
                         onTap: _navigateToLockedFiles,
                       ),
                       const SizedBox(height: 4),
@@ -480,7 +485,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                         onChanged: _handleNotificationToggle,
                       ),
                       SettingTile(
-                        title: 'support_and_feedback'.tr,
+                        title: 'support_feedback'.tr,
                         onTap: () {},
                       ),
                       const SizedBox(height: 4),
@@ -563,52 +568,52 @@ class _SettingsScreenState extends State<SettingsScreen>
                   border: Border.all(color: Colors.grey.withOpacity(0.1)),
                 ),
                 child: Obx(() => DropdownButton2<String>(
-                      value: languageController.currentLanguage.value,
-                      iconStyleData: IconStyleData(
-                        icon: SvgPicture.asset(
-                          'assets/icons/arrow_up_down_icon.svg',
-                          height: 16,
-                          width: 16,
-                        ),
+                  value: languageController.currentLanguage.value,
+                  iconStyleData: IconStyleData(
+                    icon: SvgPicture.asset(
+                      'assets/icons/arrow_up_down_icon.svg',
+                      height: 16,
+                      width: 16,
+                    ),
+                  ),
+                  dropdownStyleData: DropdownStyleData(
+                    elevation: 16,
+                    width: MediaQuery.of(context).size.width * 0.79,
+                    useSafeArea: true,
+                    offset: const Offset(-10, 0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white,
+                    ),
+                  ),
+                  isExpanded: true,
+                  underline: Container(),
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.gradientEnd,
+                  ),
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      final selected = languageController.languageOptions
+                          .firstWhere((lang) => lang['name'] == newValue);
+                      languageController.changeLanguage(
+                        selected['code']!,
+                        selected['country']!,
+                        selected['name']!,
+                      );
+                    }
+                  },
+                  items: languageController.languageOptions
+                      .map<DropdownMenuItem<String>>((lang) {
+                    return DropdownMenuItem<String>(
+                      value: lang['name'],
+                      child: Text(
+                        lang['name']!,
                       ),
-                      dropdownStyleData: DropdownStyleData(
-                        elevation: 16,
-                        width: MediaQuery.of(context).size.width * 0.79,
-                        useSafeArea: true,
-                        offset: const Offset(-10, 0),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          color: Colors.white,
-                        ),
-                      ),
-                      isExpanded: true,
-                      underline: Container(),
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.gradientEnd,
-                      ),
-                      onChanged: (String? newValue) {
-                        if (newValue != null) {
-                          final selected = languageController.languageOptions
-                              .firstWhere((lang) => lang['name'] == newValue);
-                          languageController.changeLanguage(
-                            selected['code']!,
-                            selected['country']!,
-                            selected['name']!,
-                          );
-                        }
-                      },
-                      items: languageController.languageOptions
-                          .map<DropdownMenuItem<String>>((lang) {
-                        return DropdownMenuItem<String>(
-                          value: lang['name'],
-                          child: Text(
-                            lang['name']!,
-                          ),
-                        );
-                      }).toList(),
-                    )),
+                    );
+                  }).toList(),
+                )),
               ),
             ),
         ],
@@ -692,14 +697,14 @@ class _SettingsScreenState extends State<SettingsScreen>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            _isPasswordSet ? 'Change Password' : 'Set Password',
+                            _isPasswordSet ? 'change_password'.tr : 'set_password'.tr,
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: AppColors.primary,
                             ),
                           ),
-                          Icon(
+                          const Icon(
                             Icons.arrow_forward_ios,
                             size: 16,
                             color: AppColors.primary,
@@ -750,17 +755,17 @@ class _SettingsScreenState extends State<SettingsScreen>
                                 ),
                                 child: Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      'Forgot password?',
+                                      'forgot_password'.tr,
                                       style: GoogleFonts.inter(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w400,
                                         color: AppColors.gradientEnd,
                                       ),
                                     ),
-                                    Icon(
+                                    const Icon(
                                       Icons.arrow_forward_ios,
                                       size: 16,
                                       color: AppColors.gradientEnd,

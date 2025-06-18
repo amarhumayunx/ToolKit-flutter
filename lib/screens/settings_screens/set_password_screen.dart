@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart'; // Add this import for .tr extension
 import '../../services/auth_service.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
@@ -88,11 +89,11 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
         // Notify parent screen of successful password operation
         Navigator.of(context).pop(true);
       } else {
-        AppSnackBar.show(context, message: 'Failed to set password. Please try again.');
+        AppSnackBar.show(context, message: 'password_set_failed'.tr);
         _resetPasswordFields();
       }
     } catch (e) {
-      AppSnackBar.show(context, message: 'Error: ${e.toString()}');
+      AppSnackBar.show(context, message: '${'error'.tr}: ${e.toString()}');
       _resetPasswordFields();
     } finally {
       if (mounted) {
@@ -118,7 +119,7 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
       } else {
         AppSnackBar.show(
           context,
-          message: 'Incorrect password. Please try again.',
+          message: 'incorrect_password'.tr,
         );
         setState(() {
           _oldPassword = '';
@@ -128,7 +129,7 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
     } catch (e) {
       AppSnackBar.show(
         context,
-        message: 'Error verifying password. Please try again.',
+        message: 'password_verification_error'.tr,
       );
       setState(() {
         _oldPassword = '';
@@ -143,7 +144,7 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
     } else {
       AppSnackBar.show(
         context,
-        message: 'Passwords do not match. Please try again.',
+        message: 'passwords_do_not_match'.tr,
       );
       _resetPasswordFields();
     }
@@ -182,16 +183,16 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
 
   String _getCurrentTitle() {
     if (_isEnteringOldPassword) {
-      return 'Enter Current Password';
+      return 'enter_current_password'.tr;
     } else if (_isConfirming) {
-      return 'Confirm your 4-Digit Code';
+      return 'confirm_4_digit_code'.tr;
     } else {
       if (widget.isRecovery) {
-        return 'Set New 4-Digit Code';
+        return 'set_new_4_digit_code'.tr;
       }
       return widget.isChanging
-          ? 'Set New 4-Digit Code'
-          : 'Set your 4-Digit Code';
+          ? 'set_new_4_digit_code'.tr
+          : 'set_4_digit_code'.tr;
     }
   }
 
@@ -282,10 +283,10 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
       backgroundColor: AppColors.white,
       appBar: CustomAppBar(
         title: widget.isRecovery
-            ? 'Reset Password'
+            ? 'reset_password'.tr
             : widget.isChanging
-            ? 'Change Password'
-            : 'Set Password',
+            ? 'change_password'.tr
+            : 'set_password'.tr,
         onBackPressed: () {
           Navigator.of(context).pop();
         },
@@ -355,7 +356,7 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
             Container(
               color: Colors.black.withOpacity(0.3),
               child: const Center(
-                child: CircularProgressIndicator(color:    AppColors.primary,),
+                child: CircularProgressIndicator(color: AppColors.primary),
               ),
             ),
         ],

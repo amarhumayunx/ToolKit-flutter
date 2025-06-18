@@ -5,6 +5,97 @@ class Language extends Translations {
   Map<String, Map<String, String>> get keys => {
     'en_US': {
 
+      'add_phone_number': 'Add Your Phone Number',
+      'phone_number_description': 'We\'ll use this to keep your account secure\nSelect any country code',
+      'continue': 'Continue',
+      'skip_for_now': 'Skip for now',
+      'select_country_code': 'Select Country Code',
+      'search_country': 'Search Country',
+      'enter_phone_number': 'Enter phone number',
+
+      // Error messages
+      'please_enter_phone_number': 'Please enter your phone number',
+      'invalid_phone_number': 'Please enter a valid phone number (@minLength-@maxLength digits)',
+      'phone_already_registered': 'This phone number is already registered with another account',
+      'failed_to_save_phone': 'Failed to save phone number. Please try again.',
+      'error_occurred': 'An error occurred. Please try again.',
+
+      "smart_tools_tagline": "Smart Tools.\nOne Tap Away",
+      "signing_in": "Signing in...",
+      "continue_with_google": "Continue with Google",
+      "google_signin_failed": "Failed to sign in with Google. Please try again.",
+
+
+      "phone_recovery": "Phone Recovery",
+      "verify_otp": "Verify OTP",
+      "recover_your_account": "Recover Your Account",
+      "enter_phone_to_recover": "Enter your phone number to recover your account",
+      "phone_number": "Phone number*",
+      "verify": "Verify",
+      "verify_your_phone": "Verify Your Phone",
+      "enter_code_sent": "Enter the code sent to ",
+      "no_code_received": "Didn't receive any code?",
+      "resend": "RESEND",
+      "invalid_phone": "Please enter a valid phone number (%s-%s digits)",
+      "no_account_found": "No account found with this phone number",
+      "otp_sent": "OTP sent to your phone number",
+      "invalid_otp": "Please enter all 6 digits",
+      "otp_resent": "OTP resent successfully",
+
+      "reset_password": "Reset Password",
+      "change_password": "Change Password",
+      "set_password": "Set Password",
+      "enter_current_password": "Enter Current Password",
+      "confirm_4_digit_code": "Confirm your 4-Digit Code",
+      "set_new_4_digit_code": "Set New 4-Digit Code",
+      "set_4_digit_code": "Set your 4-Digit Code",
+      "password_set_failed": "Failed to set password. Please try again.",
+      "error": "Error",
+      "incorrect_password": "Incorrect password. Please try again.",
+      "password_verification_error": "Error verifying password. Please try again.",
+      "passwords_do_not_match": "Passwords do not match. Please try again.",
+
+      "profile": "Profile",
+      "username": "Username",
+      "email": "Email",
+      "gender": "Gender",
+      "date_of_birth": "Date of Birth",
+      "not_set": "Not set",
+      "choose_avatar": "Choose Avatar",
+      "avatar_updated_successfully": "Avatar updated successfully",
+      "failed_to_update_avatar": "Failed to update avatar",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "select_gender": "Select Gender",
+      "male": "Male",
+      "female": "Female",
+      "other": "Other",
+      "logout": "Logout",
+      "are_you_sure_logout": "Are you sure you want to logout?",
+      "error_during_logout": "Error during logout",
+      "profile_updated_successfully": "Profile updated successfully",
+      "failed_to_update_profile": "Failed to update profile",
+
+      "password_not_set": "Password Not Set",
+      "password_required_for_locked_files": "You need to set a password first to access locked files.",
+
+      "no_email_found": "No email found for this account",
+      "sign_in_required": "Sign in Required",
+      "please_sign_in_to_secure_documents": "Please sign in to secure your documents.",
+      "sign_in": "Sign in",
+      "notification_error": "Error enabling notifications",
+      "notification_disabled": "Notifications disabled",
+      "locked_files": "Locked Files",
+      "forgot_password": "Forgot password?",
+
+      "files_title": "Files",
+      "search_files_hint": "Search files...",
+      "file_size_limit_error": "File size must be less than 2MB",
+      "recents_tab": "RECENTS",
+      "favourites_tab": "FAVOURITES",
+      "all_tab": "ALL",
+
       "lock": "Lock",
       "unlock": "Unlock",
 
@@ -20,15 +111,7 @@ class Language extends Translations {
       "no_files_found": "No files found",
 
       "no_favorites_found": "No favourites found",
-      "file_locked": "File locked",
-      "file_unlocked": "File unlocked",
-      "file_renamed_successfully": "File renamed successfully",
-      "error_renaming_file": "Error renaming file",
-      "file_deleted": "File deleted",
       "recent": "Recent",
-      "name": "Name",
-      "date": "Date",
-
       "files": "Files",
       "search_files": "Search files...",
       "recents": "RECENTS",
@@ -95,7 +178,6 @@ class Language extends Translations {
       "enter_certification_name": "Enter certification name",
       "organization_name": "Organisation Name",
       "enter_organization_name": "Enter organisation name",
-      "date": "Date",
       "date_placeholder": "00/00/00",
       "description": "Description",
       "optional": "(Optional)",
@@ -114,19 +196,13 @@ class Language extends Translations {
       "current": "Current",
       "project_name_hint": "Project name",
       "project_url_hint": "Project URL (optional)",
-      "description": "Description",
-      "optional": "(Optional)",
       "description_hint": "Your responsibilities and achievements",
 
       "degree_and_courses": "Degree and Courses",
       "enter_your_education": "Enter your education",
       "institute": "Institution",
       "enter_your_institute": "Enter your institution",
-      "start_date": "Start Date",
-      "end_date": "End Date",
       "continued": "Continuous",
-      "description": "Description",
-      "optional": "(Optional)",
       "cgpa_grade_hint": "e.g. CGPA/Grade",
 
       "end_date_after_start_date": "End date must be after start date",
@@ -184,7 +260,6 @@ class Language extends Translations {
       "converted_data_keys": "Converted data keys",
       "websites_data": "Websites data",
       "processing_websites_data": "Processing websites data",
-      "website": "Website",
       "loaded": "Loaded",
       "websites": "Websites",
       "websites_updated_in_provider": "Websites updated in provider",
@@ -216,9 +291,7 @@ class Language extends Translations {
       "your_name": "Your Name",
       "designation": "Designation",
       "your_designation": "Your Designation",
-      "email": "Email",
       "your_email": "Your Email",
-      "phone_number": "Phone Number",
       "your_phone_number": "Your Phone Number",
 
       "please_enter_name": "Please enter your name",
@@ -244,10 +317,9 @@ class Language extends Translations {
       "previously_created_resume": "Previously Created Resume",
       "no_saved_resumes_yet": "No Saved Resumes Yet",
       "create_first_resume_above": "Create Your First Resume Above",
-      "template": "Template",
       "delete_resume": "Delete Resume",
       "delete_resume_confirmation": "Are you sure you want to delete this resume?",
-      "cancel": "Cancel",
+
       "delete": "Delete",
 
       "convert_images": "Convert Images",
@@ -268,7 +340,6 @@ class Language extends Translations {
       "convert_image_description": "Easily convert multiple images to various formats while retaining their quality, resolution and clarity.",
       "select_images": "Select Images",
       "click_to_choose_file": "Click to choose a file",
-      "next": "Next",
       "error_selecting_images": "Error selecting images",
       "please_select_at_least_one_image_first": "Please select at least one image first",
       "error_processing_images": "Error processing images",
@@ -276,7 +347,6 @@ class Language extends Translations {
       "convert_pdf": "Convert PDF",
       "converted_file": "Converted File:",
       "image_preview": "Image Preview",
-      "save": "Save",
 
       "error_deleting_temp_file": "Error deleting temporary file: @error",
       "error_extracting_zip": "Error extracting ZIP file: @error",
@@ -293,16 +363,11 @@ class Language extends Translations {
       "archive_contains_images": "This archive contains @count image(s)",
 
       "selected_file": "Selected File",
-      "select_format": "Select Format",
-      "convert": "Convert",
       "converting": "Converting...",
       "please_select_format_first": "Please select a format first",
       "conversion_failed": "Conversion Failed",
       "ok": "OK",
 
-      "word": "Word",
-      "excel": "Excel",
-      "powerpoint": "PowerPoint",
       "image": "Image",
 
       "error_excel_not_implemented": "Excel conversion not implemented",
@@ -314,13 +379,11 @@ class Language extends Translations {
       "convert_pdf_description": "Easily convert PDFs to various formats while retaining their quality, resolution and clarity.",
 
       "click_to_choose_pdf": "Click to choose PDF file",
-      "next": "Next",
       "error_selecting_pdf": "Error selecting PDF",
       "please_select_pdf_first": "Please select a PDF file first",
 
-      "edit": "Edit",
+
       "failed_to_open_document": "Failed to open document",
-      "file_deleted_successfully": "File deleted successfully",
       "generated_document": "Generated Document",
 
       "original": "Original",
@@ -333,7 +396,6 @@ class Language extends Translations {
 
       "crop_document": "Crop Document",
       "done": "Done",
-      "cancel": "Cancel",
       "retake": "Retake",
       "filters": "Filters",
       "crop": "Crop",
@@ -352,11 +414,9 @@ class Language extends Translations {
       "rearranging_docx": "Rearranging document pages...",
       "creating_new_file": "Creating new document...",
       "rearrange_success": "Document successfully rearranged!",
-      "error_occurred": "An error occurred",
       "try_again": "Try again",
       "no_app_to_open": "No application found to open this file type",
       "permission_denied": "Permission denied to open the file",
-      "file_deleted": "File successfully deleted!",
       "file_renamed": "File successfully renamed!",
       "rearranged_files": "Rearranged files",
       "bytes": "bytes",
@@ -368,7 +428,6 @@ class Language extends Translations {
 
       "error_processing_file": "Error processing file",
       "page_number": "Page",
-      "selected_file": "Selected file",
       "loading_pdf_previews": "Loading PDF previews...",
       "rearrange": "Rearrange",
 
@@ -379,12 +438,9 @@ class Language extends Translations {
       'rearrange_file_desc': 'Easily drag and reorder PDF pages to organize your document effortlessly.',
 
       "failed_to_save_file": "Failed to save file",
-      "file_renamed_successfully": "File renamed successfully",
-      "error_renaming_file": "Error renaming file",
       "no_pages_selected": "No pages selected",
       "no_document_available_to_open": "No document available to open",
       "file_not_found": "File not found",
-      "cannot_open_file": "Unable to open the file",
       "zip_file_message": "This is a ZIP file. You may need a ZIP extractor app to view its contents.",
       "error_opening_document": "Error opening document",
       "error_during_deletion": "Error during deletion",
@@ -402,7 +458,6 @@ class Language extends Translations {
       'choose_images': 'Choose Images',
       'click_to_choose_images_from_gallery': 'Click to choose images from gallery',
 
-      'error_selecting_images': 'Error selecting images',
       'error_capturing_document': 'Error capturing document',
       'error_processing_files': 'Error processing files',
       'please_select_at_least_one_image': 'Please select at least one image',
@@ -410,7 +465,6 @@ class Language extends Translations {
 
       'merged_pdf_file': 'Merge PDF File:',
       'merge_results': 'Merge Results',
-      'error_opening_file': 'Error opening file',
       'file_not_found_or_not_processed': 'File not found or not yet processed',
       'merge_completed_successfully': 'PDF files merged successfully!',
 
@@ -434,7 +488,6 @@ class Language extends Translations {
       'add_more_files': 'Add More Files',
       'remove': 'Remove',
       'reorder': 'Reorder',
-      'processing': 'Processing...',
       'merge_complete': 'Merge Complete',
       'file_size': 'File Size',
       'Total_pages': 'Total Pages',
@@ -451,7 +504,6 @@ class Language extends Translations {
       // Menu items
       "rename": "Rename",
       "share": "Share",
-      "delete": "Delete",
 
       // Error messages
       "error_sharing_file": "Error sharing file",
@@ -540,12 +592,12 @@ class Language extends Translations {
 
       'select_at_least_one_image': 'Please select at least one image',
       'no_text_in_images': 'No text could be found in the selected images. Try images with clearer text.',
-      'error_processing_images': 'Error processing images: @error',
+
       'image_header': '--- Image @number ---',
       'error_picking_images': 'Error picking images: @error',
       'error_preprocessing_image': 'Error preprocessing image: @error',
       'error_in_ocr': 'Error in OCR: @error',
-      'error_deleting_temp_file': 'Error deleting temp file: @error',
+
 
       'click_to_choose_files': 'Click to choose files',
       'pdf_scanner': 'PDF Scanner',
@@ -555,27 +607,20 @@ class Language extends Translations {
       'edit_file': 'Edit File',
       'split_file': 'Split File',
       'convert_options': 'Convert Options',
-      'convert_pdf': 'Convert PDF',
-      'convert_image': 'Convert Image',
-      'recents': 'Recents',
       'see_all': 'See All',
 
       'split': 'Split',
       'split_pages': 'Split Pages In File',
       'split_description': 'Effortlessly separate pages from files while keeping everything clear and intact.',
       'split_document': 'Split Document',
-      'save': 'Save',
 
       'notifications_alerts': 'Notifications & Alerts',
       'support_feedback': 'Support & Feedback',
       'privacy_policy': 'Privacy Policy',
       'rate_us': 'Rate Us',
       'general': 'General',
-      'language': 'Language',
       'confidential_documents': 'Confidential Documents',
       'code_recovery_options': 'Code Recovery Options',
-      'email': 'Email',
-      'phone_number': 'Phone Number',
       'settings': 'Settings',
 
       'please_select_one_page': 'Please select at least one page',
@@ -590,7 +635,7 @@ class Language extends Translations {
       'select_only_pdf': 'Please select only PDF, DOC or DOCX files',
       'rearrange_file_pages': 'Rearrange Pages In Files',
       'rearrange_file_description': 'Effortlessly drag and reorder PDF pages to organize your document effortlessly.',
-      'error': 'Error occurred',
+
       'processing_doc': 'Processing document...',
       'file_does_not_exist': 'File does not exist',
       'file_empty': 'File is empty',
@@ -602,8 +647,6 @@ class Language extends Translations {
       //new Settings Secreen lines
       'notification_enabled': 'Notifications Enabled Successfully',
       'notification_permission': 'Notification permission denied',
-      'notification_error': 'Error enabling notifications',
-      'notification_disabled': 'Notifications Disabled',
       'notification_error_disabled': 'Error disabling notifications',
       'notifications_and_alerts': 'Notifications & Alerts',
       'support_and_feedback': 'Support & Feedback',
@@ -641,12 +684,9 @@ class Language extends Translations {
       //OTP Screen
       "otp_verify": "OTP Verify",
       "verify_your_email": "Verify your\nEmail",
-      "verify_your_phone": "Verify your\nPhone number",
       "enter_code_email": "Enter the code from the email we sent\nto ",
       "enter_code_sms": "Enter the code from the SMS we sent\nto ",
       "did_not_receive_code": "Didn't receive any code? ",
-      "resend": "RESEND",
-      "verify": "Verify",
       "otp_verified_successfully": "OTP Verified Successfully!",
 
 
@@ -665,6 +705,96 @@ class Language extends Translations {
 
     'en_GB': {
 
+      'add_phone_number': 'Add Your Phone Number',
+      'phone_number_description': 'We\'ll use this to keep your account secure\nSelect any country code',
+      'continue': 'Continue',
+      'skip_for_now': 'Skip for now',
+      'select_country_code': 'Select Country Code',
+      'search_country': 'Search Country',
+      'enter_phone_number': 'Enter phone number',
+
+      // Error messages
+      'please_enter_phone_number': 'Please enter your phone number',
+      'invalid_phone_number': 'Please enter a valid phone number (@minLength-@maxLength digits)',
+      'phone_already_registered': 'This phone number is already registered with another account',
+      'failed_to_save_phone': 'Failed to save phone number. Please try again.',
+      'error_occurred': 'An error occurred. Please try again.',
+
+      "smart_tools_tagline": "Smart Tools.\nOne Tap Away",
+      "signing_in": "Signing in...",
+      "continue_with_google": "Continue with Google",
+      "google_signin_failed": "Failed to sign in with Google. Please try again.",
+
+      "phone_recovery": "Phone Recovery",
+      "verify_otp": "Verify OTP",
+      "recover_your_account": "Recover Your Account",
+      "enter_phone_to_recover": "Enter your phone number to recover your account",
+      "phone_number": "Phone number*",
+      "verify": "Verify",
+      "verify_your_phone": "Verify Your Phone",
+      "enter_code_sent": "Enter the code sent to %s",
+      "no_code_received": "Didn't receive any code?",
+      "resend": "RESEND",
+      "invalid_phone": "Please enter a valid phone number (%s-%s digits)",
+      "no_account_found": "No account found with this phone number",
+      "otp_sent": "OTP sent to your phone number",
+      "invalid_otp": "Please enter all 6 digits",
+      "otp_resent": "OTP resent successfully",
+
+      "reset_password": "Reset Password",
+      "change_password": "Change Password",
+      "set_password": "Set Password",
+      "enter_current_password": "Enter Current Password",
+      "confirm_4_digit_code": "Confirm your 4-Digit Code",
+      "set_new_4_digit_code": "Set New 4-Digit Code",
+      "set_4_digit_code": "Set your 4-Digit Code",
+      "password_set_failed": "Failed to set password. Please try again.",
+      "error": "Error",
+      "incorrect_password": "Incorrect password. Please try again.",
+      "password_verification_error": "Error verifying password. Please try again.",
+      "passwords_do_not_match": "Passwords do not match. Please try again.",
+
+      "profile": "Profile",
+      "username": "Username",
+      "email": "Email",
+      "gender": "Gender",
+      "date_of_birth": "Date of Birth",
+      "not_set": "Not set",
+      "choose_avatar": "Choose Avatar",
+      "avatar_updated_successfully": "Avatar updated successfully",
+      "failed_to_update_avatar": "Failed to update avatar",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "select_gender": "Select Gender",
+      "male": "Male",
+      "female": "Female",
+      "other": "Other",
+      "logout": "Logout",
+      "are_you_sure_logout": "Are you sure you want to logout?",
+      "error_during_logout": "Error during logout",
+      "profile_updated_successfully": "Profile updated successfully",
+      "failed_to_update_profile": "Failed to update profile",
+
+      "password_not_set": "Password Not Set",
+      "password_required_for_locked_files": "You need to set a password first to access locked files.",
+
+      "no_email_found": "No email found for this account",
+      "sign_in_required": "Sign in Required",
+      "please_sign_in_to_secure_documents": "Please sign in to secure your documents.",
+      "sign_in": "Sign in",
+      "notification_error": "Error enabling notifications",
+      "notification_disabled": "Notifications disabled",
+      "locked_files": "Locked Files",
+      "forgot_password": "Forgot password?",
+
+      "files_title": "Files",
+      "search_files_hint": "Search files...",
+      "file_size_limit_error": "File size must be less than 2MB",
+      "recents_tab": "RECENTS",
+      "favourites_tab": "FAVOURITES",
+      "all_tab": "ALL",
+
       "lock": "Lock",
       "unlock": "Unlock",
 
@@ -680,14 +810,7 @@ class Language extends Translations {
       "no_files_found": "No files found",
 
       "no_favorites_found": "No favourites found",
-      "file_locked": "File locked",
-      "file_unlocked": "File unlocked",
-      "file_renamed_successfully": "File renamed successfully",
-      "error_renaming_file": "Error renaming file",
-      "file_deleted": "File deleted",
       "recent": "Recent",
-      "name": "Name",
-      "date": "Date",
 
       "files": "Files",
       "search_files": "Search files...",
@@ -755,7 +878,6 @@ class Language extends Translations {
       "enter_certification_name": "Enter certification name",
       "organization_name": "Organisation Name",
       "enter_organization_name": "Enter organisation name",
-      "date": "Date",
       "date_placeholder": "00/00/00",
       "description": "Description",
       "optional": "(Optional)",
@@ -774,19 +896,13 @@ class Language extends Translations {
       "current": "Current",
       "project_name_hint": "Project name",
       "project_url_hint": "Project URL (optional)",
-      "description": "Description",
-      "optional": "(Optional)",
       "description_hint": "Your responsibilities and achievements",
 
       "degree_and_courses": "Degree and Courses",
       "enter_your_education": "Enter your education",
       "institute": "Institution",
       "enter_your_institute": "Enter your institution",
-      "start_date": "Start Date",
-      "end_date": "End Date",
       "continued": "Continuous",
-      "description": "Description",
-      "optional": "(Optional)",
       "cgpa_grade_hint": "e.g. CGPA/Grade",
 
       "end_date_after_start_date": "End date must be after start date",
@@ -844,7 +960,6 @@ class Language extends Translations {
       "converted_data_keys": "Converted data keys",
       "websites_data": "Websites data",
       "processing_websites_data": "Processing websites data",
-      "website": "Website",
       "loaded": "Loaded",
       "websites": "Websites",
       "websites_updated_in_provider": "Websites updated in provider",
@@ -876,9 +991,7 @@ class Language extends Translations {
       "your_name": "Your Name",
       "designation": "Designation",
       "your_designation": "Your Designation",
-      "email": "Email",
       "your_email": "Your Email",
-      "phone_number": "Phone Number",
       "your_phone_number": "Your Phone Number",
 
       "please_enter_name": "Please enter your name",
@@ -903,10 +1016,8 @@ class Language extends Translations {
       "previously_created_resume": "Previously Created Resume",
       "no_saved_resumes_yet": "No Saved Resumes Yet",
       "create_first_resume_above": "Create Your First Resume Above",
-      "template": "Template",
       "delete_resume": "Delete Resume",
       "delete_resume_confirmation": "Are you sure you want to delete this resume?",
-      "cancel": "Cancel",
       "delete": "Delete",
 
       "convert_images": "Convert Images",
@@ -927,7 +1038,6 @@ class Language extends Translations {
       "convert_image_description": "Easily convert multiple images to various formats while retaining their quality, resolution and clarity.",
       "select_images": "Select Images",
       "click_to_choose_file": "Click to choose a file",
-      "next": "Next",
       "error_selecting_images": "Error selecting images",
       "please_select_at_least_one_image_first": "Please select at least one image first",
       "error_processing_images": "Error processing images",
@@ -935,7 +1045,6 @@ class Language extends Translations {
       "convert_pdf": "Convert PDF",
       "converted_file": "Converted File:",
       "image_preview": "Image Preview",
-      "save": "Save",
 
       "error_deleting_temp_file": "Error deleting temporary file: @error",
       "error_extracting_zip": "Error extracting ZIP file: @error",
@@ -952,16 +1061,10 @@ class Language extends Translations {
       "archive_contains_images": "This archive contains @count image(s)",
 
       "selected_file": "Selected File",
-      "select_format": "Select Format",
-      "convert": "Convert",
       "converting": "Converting...",
       "please_select_format_first": "Please select a format first",
       "conversion_failed": "Conversion Failed",
       "ok": "OK",
-
-      "word": "Word",
-      "excel": "Excel",
-      "powerpoint": "PowerPoint",
       "image": "Image",
 
       "error_excel_not_implemented": "Excel conversion not implemented",
@@ -973,13 +1076,10 @@ class Language extends Translations {
       "convert_pdf_description": "Easily convert PDFs to various formats while retaining their quality, resolution and clarity.",
 
       "click_to_choose_pdf": "Click to choose PDF file",
-      "next": "Next",
       "error_selecting_pdf": "Error selecting PDF",
       "please_select_pdf_first": "Please select a PDF file first",
 
-      "edit": "Edit",
       "failed_to_open_document": "Failed to open document",
-      "file_deleted_successfully": "File deleted successfully",
       "generated_document": "Generated Document",
 
       "original": "Original",
@@ -992,7 +1092,6 @@ class Language extends Translations {
 
       "crop_document": "Crop Document",
       "done": "Done",
-      "cancel": "Cancel",
       "retake": "Retake",
       "filters": "Filters",
       "crop": "Crop",
@@ -1011,11 +1110,9 @@ class Language extends Translations {
       "rearranging_docx": "Rearranging document pages...",
       "creating_new_file": "Creating new document...",
       "rearrange_success": "Document successfully rearranged!",
-      "error_occurred": "An error occurred",
       "try_again": "Try again",
       "no_app_to_open": "No application found to open this file type",
       "permission_denied": "Permission denied to open the file",
-      "file_deleted": "File successfully deleted!",
       "file_renamed": "File successfully renamed!",
       "rearranged_files": "Rearranged files",
       "bytes": "bytes",
@@ -1027,7 +1124,6 @@ class Language extends Translations {
 
       "error_processing_file": "Error processing file",
       "page_number": "Page",
-      "selected_file": "Selected file",
       "loading_pdf_previews": "Loading PDF previews...",
       "rearrange": "Rearrange",
 
@@ -1038,12 +1134,9 @@ class Language extends Translations {
       "rearrange_file_desc": "Easily drag and reorder PDF pages to organise your document effortlessly.",
 
       "failed_to_save_file": "Failed to save file",
-      "file_renamed_successfully": "File renamed successfully",
-      "error_renaming_file": "Error renaming file",
       "no_pages_selected": "No pages selected",
       "no_document_available_to_open": "No document available to open",
       "file_not_found": "File not found",
-      "cannot_open_file": "Unable to open the file",
       "zip_file_message": "This is a ZIP file. You may need a ZIP extractor app to view its contents.",
       "error_opening_document": "Error opening document",
       "error_during_deletion": "Error during deletion",
@@ -1061,8 +1154,6 @@ class Language extends Translations {
       'edit_files_description': 'Make changes to your images easily. Upload and modify multiple images for a seamless experience.',
       'choose_images': 'Choose Images',
       'click_to_choose_images_from_gallery': 'Click to choose images from gallery',
-      'next': 'Next',
-      'error_selecting_images': 'Error selecting images',
       'error_capturing_document': 'Error capturing document',
       'error_processing_files': 'Error processing files',
       'please_select_at_least_one_image': 'Please select at least one image',
@@ -1070,7 +1161,6 @@ class Language extends Translations {
 
       'merged_pdf_file': 'Merge PDF File:',
       'merge_results': 'Merge Results',
-      'error_opening_file': 'Error opening file',
       'file_not_found_or_not_processed': 'File not found or not yet processed',
       'merge_completed_successfully': 'PDF files merged successfully!',
 
@@ -1093,7 +1183,6 @@ class Language extends Translations {
       'add_more_files': 'Add More Files',
       'remove': 'Remove',
       'reorder': 'Reorder',
-      'processing': 'Processing...',
       'merge_complete': 'Merge Complete',
       'file_size': 'File Size',
       'Total_pages': 'Total Pages',
@@ -1108,7 +1197,6 @@ class Language extends Translations {
       // Menu items
       "rename": "Rename",
       "share": "Share",
-      "delete": "Delete",
 
       // Error messages
       "error_sharing_file": "Error sharing file",
@@ -1175,12 +1263,11 @@ class Language extends Translations {
 
       'select_at_least_one_image': 'Please select at least one image',
       'no_text_in_images': 'No text could be found in the selected images. Try images with clearer text.',
-      'error_processing_images': 'Error processing images: @error',
+
       'image_header': '--- Image @number ---',
       'error_picking_images': 'Error picking images: @error',
       'error_preprocessing_image': 'Error preprocessing image: @error',
       'error_in_ocr': 'Error in OCR: @error',
-      'error_deleting_temp_file': 'Error deleting temp file: @error',
       'scan_new': 'Scan New',
       'completed': 'Completed!',
       'please_wait': 'Please wait!',
@@ -1202,9 +1289,6 @@ class Language extends Translations {
       'edit_file': 'Edit File',
       'split_file': 'Split File',
       'convert_options': 'Convert Options',
-      'convert_pdf': 'Convert PDF',
-      'convert_image': 'Convert Image',
-      'recents': 'Recents',
       'see_all': 'See All',
 
 
@@ -1218,11 +1302,8 @@ class Language extends Translations {
       'privacy_policy': 'Privacy Policy',
       'rate_us': 'Rate Us',
       'general': 'General',
-      'language': 'Language',
       'confidential_documents': 'Confidential Documents',
       'code_recovery_options': 'Code Recovery Options',
-      'email': 'Email',
-      'phone_number': 'Phone Number',
       'settings': 'Settings',
 
       'please_select_one_page': 'Please select at least one page',
@@ -1236,7 +1317,7 @@ class Language extends Translations {
       'select_only_pdf': 'Please select only PDF, DOC or DOCX files',
       'rearrange_file_pages': 'Rearrange Pages In Files',
       'rearrange_file_description': 'Effortlessly drag and reorder PDF pages to organize your document effortlessly.',
-      'error': 'Error occurred',
+
       'processing_doc': 'Processing document...',
       'file_does_not_exist': 'File does not exist',
       'file_empty': 'File is empty',
@@ -1248,8 +1329,6 @@ class Language extends Translations {
       //Settings Screen Lines
       "notification_enabled": "Notifications enabled successfully",
       "notification_permission": "Notification permission denied",
-      "notification_error": "Error enabling notifications",
-      "notification_disabled": "Notifications disabled",
       "notification_error_disabled": "Error disabling notifications",
       "notifications_and_alerts": "Notifications & Alerts",
       "support_and_feedback": "Support & Feedback",
@@ -1272,7 +1351,6 @@ class Language extends Translations {
       "email_hint": "abc@abc.com",
       "enter_email_error": "Please enter your email",
       "valid_email_error": "Please enter a valid email address",
-      'save': 'Save',
 
       //Phone Recovery Screen
       "phone_verify": "Phone verify",
@@ -1288,12 +1366,9 @@ class Language extends Translations {
       //OTP Screen
       "otp_verify": "OTP Verification",
       "verify_your_email": "Verify your\nEmail",
-      "verify_your_phone": "Verify your\nPhone number",
       "enter_code_email": "Enter the code from the email we sent to",
       "enter_code_sms": "Enter the code from the SMS we sent to",
       "did_not_receive_code": "Didn't receive any code?",
-      "resend": "RESEND",
-      "verify": "Verify",
       "otp_verified_successfully": "OTP Verified Successfully!",
 
       //"ocr": "OCR",
@@ -1323,6 +1398,95 @@ class Language extends Translations {
 
     'ur_PK': {
 
+      "add_phone_number": "اپنا فون نمبر شامل کریں",
+      "phone_number_description": "ہم آپ کے اکاؤنٹ کو محفوظ رکھنے کے لیے اس کا استعمال کریں گے\nکسی بھی ملک کا کوڈ منتخب کریں",
+      "continue": "جاری رکھیں",
+      "skip_for_now": "ابھی کے لیے چھوڑ دیں",
+      "select_country_code": "ملک کا کوڈ منتخب کریں",
+      "search_country": "ملک تلاش کریں",
+      "enter_phone_number": "فون نمبر درج کریں",
+      "please_enter_phone_number": "براہ کرم اپنا فون نمبر درج کریں",
+      "invalid_phone_number": "براہ کرم درست فون نمبر درج کریں (@minLength-@maxLength ہندسے)",
+      "phone_already_registered": "یہ فون نمبر پہلے ہی کسی اور اکاؤنٹ کے ساتھ رجسٹرڈ ہے",
+      "failed_to_save_phone": "فون نمبر محفوظ کرنے میں ناکامی۔ دوبارہ کوشش کریں۔",
+      "error_occurred": "ایک خرابی پیش آئی۔ دوبارہ کوشش کریں۔",
+
+      "signing_in": "سائن ان کیا جا رہا ہے...",
+      "continue_with_google": "گوگل کے ساتھ جاری رکھیں",
+      "google_signin_failed": "گوگل کے ساتھ سائن ان ناکام ہو گیا۔ دوبارہ کوشش کریں۔",
+      "smart_tools_tagline": "اسمارٹ ٹولز۔\nبس ایک ٹیپ کی دوری پر",
+
+      "phone_recovery": "فون ریکوری",
+      "verify_otp": "OTP کی تصدیق کریں",
+      "recover_your_account": "اپنا اکاؤنٹ بازیافت کریں",
+      "enter_phone_to_recover": "اپنا اکاؤنٹ بازیافت کرنے کے لیے فون نمبر درج کریں",
+      "phone_number": "فون نمبر*",
+
+      "verify": "تصدیق کریں",
+      "verify_your_phone": "اپنے فون کی تصدیق کریں",
+      "enter_code_sent": "ارسال کردہ کوڈ درج کریں: %s",
+      "no_code_received": "کوئی کوڈ موصول نہیں ہوا؟",
+      "resend": "دوبارہ بھیجیں",
+      "invalid_phone": "براہ کرم درست فون نمبر درج کریں (%s-%s ہندسے)",
+      "no_account_found": "اس فون نمبر سے کوئی اکاؤنٹ نہیں ملا",
+      "otp_sent": "OTP آپ کے فون نمبر پر بھیج دیا گیا ہے",
+      "invalid_otp": "براہ کرم تمام 6 ہندسے درج کریں",
+      "otp_resent": "OTP کامیابی سے دوبارہ بھیج دیا گیا",
+
+      "reset_password": "پاس ورڈ دوبارہ سیٹ کریں",
+      "change_password": "پاس ورڈ تبدیل کریں",
+      "set_password": "پاس ورڈ سیٹ کریں",
+      "enter_current_password": "موجودہ پاس ورڈ درج کریں",
+      "confirm_4_digit_code": "اپنا 4 ہندسوں کا کوڈ تصدیق کریں",
+      "set_new_4_digit_code": "نیا 4 ہندسوں کا کوڈ سیٹ کریں",
+      "set_4_digit_code": "اپنا 4 ہندسوں کا کوڈ سیٹ کریں",
+      "password_set_failed": "پاس ورڈ سیٹ کرنے میں ناکامی۔ دوبارہ کوشش کریں۔",
+      "error": "خرابی",
+      "incorrect_password": "غلط پاس ورڈ۔ دوبارہ کوشش کریں۔",
+      "password_verification_error": "پاس ورڈ کی تصدیق میں خرابی۔ دوبارہ کوشش کریں۔",
+      "passwords_do_not_match": "پاس ورڈ مطابقت نہیں رکھتے۔ دوبارہ کوشش کریں۔",
+
+      "profile": "پروفائل",
+      "username": "صارف نام",
+      "email": "ای میل",
+      "gender": "صنف",
+      "date_of_birth": "تاریخ پیدائش",
+      "not_set": "سیٹ نہیں کیا گیا",
+      "choose_avatar": "اوتار منتخب کریں",
+      "avatar_updated_successfully": "اوتار کامیابی سے اپڈیٹ ہو گیا",
+      "failed_to_update_avatar": "اوتار اپڈیٹ کرنے میں ناکامی",
+      "edit": "ترمیم کریں",
+      "save": "محفوظ کریں",
+      "cancel": "منسوخ کریں",
+      "select_gender": "صنف منتخب کریں",
+      "male": "مرد",
+      "female": "عورت",
+      "other": "دیگر",
+      "logout": "لاگ آؤٹ",
+      "are_you_sure_logout": "کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟",
+      "error_during_logout": "لاگ آؤٹ کے دوران خرابی",
+      "profile_updated_successfully": "پروفائل کامیابی سے اپڈیٹ ہو گیا",
+      "failed_to_update_profile": "پروفائل اپڈیٹ کرنے میں ناکامی",
+
+      "password_not_set": "پاس ورڈ سیٹ نہیں کیا گیا",
+      "password_required_for_locked_files": "لاک شدہ فائلوں تک رسائی کے لیے پہلے پاس ورڈ سیٹ کریں۔",
+
+      "no_email_found": "اس اکاؤنٹ کے لیے کوئی ای میل نہیں ملی",
+      "sign_in_required": "سائن ان ضروری ہے",
+      "please_sign_in_to_secure_documents": "اپنے دستاویزات محفوظ کرنے کے لیے سائن ان کریں۔",
+      "sign_in": "سائن ان کریں",
+      "notification_error": "نوٹیفکیشن فعال کرنے میں خرابی",
+      "notification_disabled": "نوٹیفکیشن غیر فعال ہیں",
+      "locked_files": "لاک شدہ فائلیں",
+      "forgot_password": "پاس ورڈ بھول گئے؟",
+
+      "files_title": "فائلیں",
+      "search_files_hint": "فائلیں تلاش کریں...",
+      "file_size_limit_error": "فائل کا سائز 2MB سے کم ہونا چاہیے",
+      "recents_tab": "حالیہ",
+      "favourites_tab": "پسندیدہ",
+      "all_tab": "تمام",
+
       "lock": "تالا لگائیں",
       "unlock": "تالا کھولیں",
 
@@ -1338,14 +1502,7 @@ class Language extends Translations {
       "no_files_found": "کوئی فائل نہیں ملی",
 
       "no_favorites_found": "پسندیدہ نہیں ملے",
-      "file_locked": "فائل مقفل ہے",
-      "file_unlocked": "فائل کھول دی گیا",
-      "file_renamed_successfully": "فائل کا نام کامیابی سے بدل दिया گیا",
-      "error_renaming_file": "فائل کا نام بدلنے کی کوشش کے دوران مسئلہ پیش آیا",
-      "file_deleted": "فائل کو حذف کر दिया گیا",
       "recent": "حالیہ",
-      "name": "نام",
-      "date": "تاریخ",
 
       "files": "فائلیں",
       "search_files": "فائلیں تلاش کریں...",
@@ -1414,7 +1571,7 @@ class Language extends Translations {
       "enter_certification_name": "براہ مہربانی سرٹیفیکیٹ کا نام درج کریں",
       "organization_name": "ادارے کا نام",
       "enter_organization_name": "براہ مہربانی ادارے کا نام درج کریں",
-      "date": "تاریخ",
+
       "date_placeholder": "00/00/00",
       "description": "تفصیل",
       "optional": "(اختیاری)",
@@ -1433,19 +1590,16 @@ class Language extends Translations {
       "current": "موجودہ",
       "project_name_hint": "پروجیکٹ کا نام",
       "project_url_hint": "پروجیکٹ کا URL (اختیاری)",
-      "description": "تفصیل",
-      "optional": "(اختیاری)",
+
       "description_hint": "آپ کی ذمہ داریاں اور کارنامے",
 
       "degree_and_courses": "ڈگری اور کورسز",
       "enter_your_education": "براہ مہربانی اپنی تعلیم درج کریں",
       "institute": "ادارہ",
       "enter_your_institute": "براہ مہربانی اپنا ادارہ درج کریں",
-      "start_date": "آغاز کی تاریخ",
-      "end_date": "ختم کی تاریخ",
+
       "continued": "جاری",
-      "description": "تفصیل",
-      "optional": "(اختیاری)",
+
       "cgpa_grade_hint": "مثال کے طور پر CGPA/گریڈ",
 
       "end_date_after_start_date": "ختم کی تاریخ آغاز کی تاریخ کے بعد ہونی چاہیے",
@@ -1503,7 +1657,7 @@ class Language extends Translations {
       "converted_data_keys": "تبدیل شدہ ڈٹا کیز",
       "websites_data": "ویب سائٹس کاڈیٹا",
       "processing_websites_data": "ویب سائٹس کی پراسیسنگ کی جا رہی ہے",
-      "website": "ویب سائٹ",
+
       "loaded": "لوڈ ہوگیا",
       "websites": "ویب سائٹس",
       "websites_updated_in_provider": "پرووائڈر کی فہرست کی تجدید کی گیئ",
@@ -1536,9 +1690,9 @@ class Language extends Translations {
       "your_name": "آپ کا نام",
       "designation": "عہدہ",
       "your_designation": "آپ کا عہدہ",
-      "email": "ای میل",
+
       "your_email": "آپ کا ای میل",
-      "phone_number": "فون نمبر",
+
       "your_phone_number": "آپ کا فون نمبر",
 
       "please_enter_name": "براہ مہربانی اپنا نام درج کریں",
@@ -1563,10 +1717,10 @@ class Language extends Translations {
       "previously_created_resume": "پہلے سے تیار شدہ ریزیومے",
       "no_saved_resumes_yet": "ابھی تک کوئی محفوظ ریزیومے نہیں",
       "create_first_resume_above": "براہ مہربانی اپنا پہلا ریزیومے اوپر تخلیق کریں",
-      "template": "سانچہ",
+
       "delete_resume": "ریزیومے کو حذف کریں",
       "delete_resume_confirmation": " کیا آپ واقعی یہ ریزیومے حذف کرنا چاہتے ہیں؟",
-      "cancel": "منسوخ کریں",
+
       "delete": "حذف کریں",
 
       "convert_images": "تصاویر کی تبدیلی",
@@ -1587,7 +1741,7 @@ class Language extends Translations {
       "convert_image_description": "متعدد تصاویر کو آسانی سے مختلف فارمیٹس میں بدلیں، کوالٹی اور ریزولوشن برقرار رکھتے ہوئے.",
       "select_images": "تصاویر منتخب کریں",
       "click_to_choose_file": "فائل منتخب کرنے کے لیے کلک کریں",
-      "next": "اگلا",
+
       "error_selecting_images": "تصاویر منتخب کرنے کی صورت میں مسئلہ پیش آیا",
       "please_select_at_least_one_image_first": "براہ مہربانی پہلے ایک تصویر منتخب کریں",
       "error_processing_images": "تصاویر کی پروسیسنگ کی صورت میں مسئلہ پیش آیا",
@@ -1595,7 +1749,7 @@ class Language extends Translations {
       "convert_pdf": "پی ڈی ایف کو مزید فارمیٹس میں بدلیں",
       "converted_file": "تبدیل کی گئی فائل:",
       "image_preview": "تصویر کا پیش نظارہ",
-      "save": "محفوظ کریں",
+
 
       "error_deleting_temp_file": "عارضی فائل کو حذف کرنے کی صورت میں مسئلہ: @error",
       "error_extracting_zip": "ZIP فائل نکالنے کی صورت میں مسئلہ: @error",
@@ -1612,16 +1766,12 @@ class Language extends Translations {
       "archive_contains_images": "اس آرکائیو میں @count تصویر(یں) ہیں",
 
       "selected_file": "منتخب فائل",
-      "select_format": "فارمیٹ منتخب کریں",
-      "convert": "تبدیل کریں",
+
       "converting": "تبدیل کیا جا رہا ہے...",
       "please_select_format_first": "براہ مہربانی پہلے ایک فارمیٹ منتخب کریں",
       "conversion_failed": "تبدیل کرنے کا عمل ناکام رہا",
       "ok": "ٹھیک ہے",
 
-      "word": "ورڈ",
-      "excel": "ایکسل",
-      "powerpoint": "پاورپوائنٹ",
       "image": "تصویر",
 
       "error_excel_not_implemented": "ایکسل کی تبدیلی کی سہولت دستیاب نہیں",
@@ -1629,19 +1779,17 @@ class Language extends Translations {
       "am": "صبح",
       "pm": "شام",
 
-      "convert_pdf": "پی ڈی ایف کو مزید فارمیٹس میں بدلیں",
       "convert_pdf_format": "پی ڈی ایف کی شکل بدلیں",
       "convert_pdf_description": "پی ڈی ایف کی کوالٹی، ریزولوشن اور وضاحت برقرار رکھتے ہوئے مزید فارمیٹس میں آسانی سے بدلیں.",
       "select_file": "فائل منتخب کریں",
       "click_to_choose_pdf": "پی ڈی ایف فائل منتخب کرنے کے لیے کلک کریں",
-      "next": "اگلا",
+
       "please_select_pdf_only": "براہ مہربانی صرف پی ڈی ایف فائل منتخب کریں",
       "error_selecting_pdf": "پی ڈی ایف منتخب کرنے کی صورت میں مسئلہ آیا",
       "please_select_pdf_first": "براہ مہربانی پہلے ایک پی ڈی ایف فائل منتخب کریں",
 
-      "edit": "ترمیم کریں",
+
       "failed_to_open_document": "دستاویز کھولنے میں ناکام",
-      "file_deleted_successfully": "فائل کامیابی کے ساتھ حذف کی گیا!",
       "generated_document": "تخلیق شدہ دستاویز",
 
       "original": "اصلی",
@@ -1654,7 +1802,6 @@ class Language extends Translations {
 
       "crop_document": "دستاویز تراشیں",
       "done": "ہو گیا",
-      "cancel": "منسوخ",
       "retake": "دوبارہ لینے کیجیے",
       "filters": "فلٹرز",
       "crop": "تراشیں",
@@ -1674,12 +1821,10 @@ class Language extends Translations {
       "rearranging_docx": "دستاویز صفحات کی ترتیب بدل رہی ہے...",
       "creating_new_file": "نیا دستاویز تیار کیا جا رہا ہے...",
       "rearrange_success": "دستاویز کی ترتیب کامیاب ہوگئی!",
-      "error_occurred": "خرابی پیش آئی",
       "try_again": "دوبارہ کوشش کریں",
       "file_opened": "فائل کھول دی گئی!",
       "no_app_to_open": "اس فائل کی قسم کھولنے کے لیے کوئی ایپلیکیشن نہیں ملی",
       "permission_denied": "فائل کھولنے کی اجازت نہیں ہے",
-      "file_deleted": "فائل کو کامیابی کے ساتھ حذف کر दिया گیا!",
       "file_renamed": "فائل کا نام کامیابی کے ساتھ بدل दिया گیا!",
       "rearranged_files": "دوبارہ ترتیب دی گئیں فائلیں",
       "bytes": "بائٹس",
@@ -1691,23 +1836,18 @@ class Language extends Translations {
 
       "error_processing_file": "فائل پر کارروائی میں خرابی",
       "page_number": "صفحہ",
-      "selected_file": "منتخب فائل",
       "loading_pdf_previews": "PDF پیش نظارے لوڈ ہو رہے ہیں",
       "rearrange": "دوبارہ ترتیب دیں",
 
       "rearrange_files": "فائلوں کو دوبارہ ترتیب دیں",
       "rearrange_pages_in_files": "فائلوں میں صفحات کو دوبارہ ترتیب دیں",
-      "select_file": "فائل منتخب کریں",
       "rearrange_file": "فائل کو دوبارہ ترتیب دیں",
       "rearrange_file_desc": "آسانی سے PDF صفحات کو کھینچیں اور دوبارہ ترتیب دیں تاکہ آپ کا دستاویز بآسانی منظم ہو جائے۔",
 
       "failed_to_save_file": "فائل محفوظ کرنے کی کوشش ناکام ہوگئی",
-      "file_renamed_successfully": "فائل کا نام کامیابی کے ساتھ بدل दिया گیا",
-      "error_renaming_file": "فائل کا نام بدلنے کے دوران مسئلہ پیش آیا",
       "no_pages_selected": "کوئی صفحات منتخب نہیں ہیں",
       "no_document_available_to_open": "کھولنے کے لیے کوئی مزید دستاویز دستیاب نہیں",
       "file_not_found": "فائل نہیں ملی",
-      "cannot_open_file": "فائل کھولی نہیں جا سکتی",
       "zip_file_message": "یہ ایک ZIP فائل ہے. مواد دیکھنے کے لیے ZIP ایکسٹریکٹر کی ضرورت ہے.",
       "error_opening_document": "دستاویز کھولنے کی کوشش کے دوران مسئلہ پیش آیا",
       "error_during_deletion": "فائل کو حذف کرنے کے دوران مسئلہ پیش آیا",
@@ -1725,8 +1865,7 @@ class Language extends Translations {
       "edit_files_description": "آسانی کے ساتھ اپنی تصاویر کی ترمیم کریں۔ مزید سہولت کے لیے ایک ساتھ متعدد تصاویر اپلوڈ اور ترمیم کریں۔",
       "choose_images": "تصاویر منتخب کریں",
       "click_to_choose_images_from_gallery": "گیلری سے تصاویر منتخب کرنے کے لیے کلک کریں",
-      "next": "اگلا",
-      "error_selecting_images": "تصاویر منتخب کرنے کے دوران مسئلہ پیش آیا",
+
       "error_capturing_document": "دستاویز کیپچر کرنے کے دوران مسئلہ پیش آیا",
       "error_processing_files": "فائلیں پراسیس کرنے کے دوران مسئلہ پیش آیا",
       "please_select_at_least_one_image": "براہ مہربانی کم از کم ایک تصویر منتخب کریں",
@@ -1734,7 +1873,6 @@ class Language extends Translations {
 
       "merged_pdf_file": "PDF فائل کو مرج کریں:",
       "merge_results": "مرج کے نتائج",
-      "error_opening_file": "فائل کھولنے کے دوران مسئلہ پیش آیا",
       "file_not_found_or_not_processed": "فائل نہیں ملی یا ابھی تک پراسیس نہیں کی گی",
       "merge_completed_successfully": "PDF فائلیں کامیابی کے ساتھ مرج کی گئیں!",
 
@@ -1750,7 +1888,6 @@ class Language extends Translations {
       'please_two_select': 'براہ کرم کم از کم 2 پی ڈی ایف فائلز منتخب کریں',
       'selected_files': 'منتخب شدہ فائلز',
       'page_order': 'صفحے کی ترتیب',
-      'please_select_pdf_only': 'براہ کرم صرف پی ڈی ایف فائلز منتخب کریں',
       'error_selecting_pdfs': 'پی ڈی ایف منتخب کرنے میں خرابی',
       'failed_to_merge': 'پی ڈی ایف ضم کرنے میں ناکام',
       'pdf_merger': 'پی ڈی ایف ضم کرنے والا',
@@ -1758,7 +1895,6 @@ class Language extends Translations {
       'add_more_files': 'مزید فائلز شامل کریں',
       'remove': 'ہٹائیں',
       'reorder': 'دوبارہ ترتیب دیں',
-      'processing': 'پروسیسنگ...',
       'merge_complete': 'ضم مکمل',
       'file_size': 'فائل کا سائز',
       'total_pages': 'کل صفحات',
@@ -1773,7 +1909,6 @@ class Language extends Translations {
       // Menu items
       "rename": "نام بدلیں",
       "share": "شیئر کریں",
-      "delete": "حذف کریں",
 
       // Error messages
       "error_sharing_file": "فائل کا اشتراک کرنے کے دوران مسئلہ پیش آیا",
@@ -1800,7 +1935,7 @@ class Language extends Translations {
       "all_files_saved_as_zip": "تمام فائلیں ZIP کی صورت میں محفوظ کی گئیں",
       "compression_summary": "کمپریشن کا خلاصہ",
       "file_not_compressed_message": "فائل کو کمپریس نہیں کیا جا سکا کیونکہ وہ پہلے سے ہی کمپریس کی جا چکی ہے یا معاونت نہیں کی جاتی.",
-      "save": "محفوظ کریں",
+
       "saving": "محفوظ کیا جا رہا ہے...",
 
 
@@ -1874,19 +2009,16 @@ class Language extends Translations {
       'edit_file': 'فائل میں ترمیم کریں',
       'split_file': 'فائل کو تقسیم کریں',
       'convert_options': 'تبدیلی کے اختیارات',
-      'convert_pdf': 'پی ڈی ایف تبدیل کریں',
-      'convert_image': 'تصویر تبدیل کریں',
-      'recents': 'حالیہ',
+
       'see_all': 'سب دیکھیں',
 
       'select_at_least_one_image': 'براہ مہربانی کم از کم ایک تصویر منتخب کریں',
       'no_text_in_images': 'منتخب تصاویر میں کوئی متن نہیں ملا۔ مزید واضح تصاویر کی کوشش کریں',
-      'error_processing_images': 'تصاویر کی پراسیسنگ میں مسئلہ: @error',
+
       'image_header': '--- تصویر @number ---',
       'error_picking_images': 'تصاویر منتخب کرنے کی صورت میں مسئلہ: @error',
       'error_preprocessing_image': 'تصویر کی پیش پراسیسنگ میں مسئلہ: @error',
       'error_in_ocr': 'OCR کی صورت میں مسئلہ: @error',
-      'error_deleting_temp_file': 'عارضی فائل کو حذف کرنے کی صورت میں مسئلہ: @error',
 
 
       'split': 'تقسیم کریں',
@@ -1899,11 +2031,8 @@ class Language extends Translations {
       'privacy_policy': 'پرائیویسی پالیسی',
       'rate_us': 'ہمیں ریٹ کریں',
       'general': 'عمومی',
-      'language': 'زبان',
       'confidential_documents': 'خفیہ دستاویزات',
       'code_recovery_options': 'کوڈ بحالی کے اختیارات',
-      'email': 'ای میل',
-      'phone_number': 'فون نمبر',
       'settings': 'سیٹنگز',
 
       'please_select_one_page': 'براہ کرم کم از کم ایک صفحہ منتخب کریں',
@@ -1919,7 +2048,6 @@ class Language extends Translations {
       'rearrange_file_pages': 'فائل کے صفحات دوبارہ ترتیب دیں',
       'rearrange_file_description': 'پی ڈی ایف کے صفحات کو آسانی سے گھسیٹیں اور دوبارہ ترتیب دیں تاکہ آپ کی دستاویز منظم ہو جائے۔',
 
-      'error': 'خرابی پیش آگئی',
       'processing_doc': 'دستاویز پر کارروائی ہو رہی ہے...',
       'file_does_not_exist': 'فائل موجود نہیں',
       'file_empty': 'فائل خالی ہے',
@@ -1931,8 +2059,6 @@ class Language extends Translations {
       //Settings Screen Lines
       "notification_enabled": "اطلاعات کامیابی سے فعال ہو گئیں",
       "notification_permission": "اطلاعات کی اجازت مسترد کر دی گئی",
-      "notification_error": "اطلاعات کو فعال کرتے وقت خرابی",
-      "notification_disabled": "اطلاعات غیر فعال کر دی گئی ہیں",
       "notification_error_disabled": "اطلاعات کو غیر فعال کرتے وقت خرابی",
       "notifications_and_alerts": "اطلاعات اور الرٹس",
       "support_and_feedback": "مدد اور آراء",
@@ -1968,12 +2094,9 @@ class Language extends Translations {
       //OTP Screen
       "otp_verify": "او ٹی پی کی تصدیق",
       "verify_your_email": "اپنی\nای میل کی تصدیق کریں",
-      "verify_your_phone": "اپنے\nفون نمبر کی تصدیق کریں",
       "enter_code_email": "ہم نے جو ای میل بھیجی ہے اس کا کوڈ درج کریں",
       "enter_code_sms": "ہم نے جو ایس ایم ایس بھیجا ہے اس کا کوڈ درج کریں",
       "did_not_receive_code": "کوئی کوڈ موصول نہیں ہوا؟",
-      "resend": "دوبارہ بھیجیں",
-      "verify": "تصدیق کریں",
       "otp_verified_successfully": "او ٹی پی کی کامیاب تصدیق ہو گئی!",
 
       "compress_files": "فائلز کمپریس کریں",
@@ -1986,6 +2109,97 @@ class Language extends Translations {
     },
 
     'zh_CN': {
+
+      "add_phone_number": "添加您的电话号码",
+      "phone_number_description": "我们将使用此号码保护您的账户安全\n请选择国家代码",
+      "continue": "继续",
+      "skip_for_now": "暂时跳过",
+      "select_country_code": "选择国家代码",
+      "search_country": "搜索国家",
+      "enter_phone_number": "请输入电话号码",
+      "please_enter_phone_number": "请输入您的电话号码",
+      "invalid_phone_number": "请输入有效的电话号码（@minLength-@maxLength 位）",
+      "phone_already_registered": "该电话号码已与其他账户注册",
+      "failed_to_save_phone": "保存电话号码失败。请重试。",
+      "error_occurred": "发生错误。请重试。",
+
+      "smart_tools_tagline": "智能工具。\n一键即达",
+      "signing_in": "正在登录...",
+      "continue_with_google": "使用 Google 继续",
+      "google_signin_failed": "使用 Google 登录失败。请再试一次。",
+
+
+      "phone_recovery": "手机找回",
+      "verify_otp": "验证 OTP",
+      "recover_your_account": "找回您的账户",
+      "enter_phone_to_recover": "输入您的手机号以找回账户",
+      "phone_number": "手机号*",
+      "verify": "验证",
+      "verify_your_phone": "验证您的手机号",
+      "enter_code_sent": "输入发送到 %s 的验证码",
+      "no_code_received": "没有收到验证码？",
+      "resend": "重新发送",
+      "invalid_phone": "请输入有效的手机号码（%s-%s 位数字）",
+      "no_account_found": "该手机号未找到任何账户",
+      "otp_sent": "验证码已发送到您的手机号",
+      "invalid_otp": "请输入全部6位数字",
+      "otp_resent": "验证码已重新发送",
+
+
+      "reset_password": "重置密码",
+      "change_password": "更改密码",
+      "set_password": "设置密码",
+      "enter_current_password": "输入当前密码",
+      "confirm_4_digit_code": "确认您的4位数密码",
+      "set_new_4_digit_code": "设置新的4位数密码",
+      "set_4_digit_code": "设置您的4位数密码",
+      "password_set_failed": "设置密码失败，请重试。",
+      "error": "错误",
+      "incorrect_password": "密码不正确，请重试。",
+      "password_verification_error": "验证密码时出错，请重试。",
+      "passwords_do_not_match": "密码不匹配，请重试。",
+
+
+      "profile": "个人资料",
+      "username": "用户名",
+      "email": "电子邮件",
+      "gender": "性别",
+      "date_of_birth": "出生日期",
+      "not_set": "未设置",
+      "choose_avatar": "选择头像",
+      "avatar_updated_successfully": "头像更新成功",
+      "failed_to_update_avatar": "头像更新失败",
+      "edit": "编辑",
+      "save": "保存",
+      "cancel": "取消",
+      "select_gender": "选择性别",
+      "male": "男",
+      "female": "女",
+      "other": "其他",
+      "logout": "注销",
+      "are_you_sure_logout": "确定要注销吗？",
+      "error_during_logout": "注销时出错",
+      "profile_updated_successfully": "个人资料更新成功",
+      "failed_to_update_profile": "更新个人资料失败",
+
+      "password_not_set": "未设置密码",
+      "password_required_for_locked_files": "需要先设置密码才能访问锁定的文件。",
+
+      "no_email_found": "未找到该账户的电子邮件",
+      "sign_in_required": "需要登录",
+      "please_sign_in_to_secure_documents": "请登录以保护您的文档。",
+      "sign_in": "登录",
+      "notification_error": "启用通知时出错",
+      "notification_disabled": "通知已禁用",
+      "locked_files": "锁定的文件",
+      "forgot_password": "忘记密码？",
+
+      "files_title": "文件",
+      "search_files_hint": "搜索文件...",
+      "file_size_limit_error": "文件大小必须小于 2MB",
+      "recents_tab": "最近",
+      "favourites_tab": "收藏夹",
+      "all_tab": "全部",
 
       "lock": "锁定",
       "unlock": "解锁",
@@ -2002,14 +2216,7 @@ class Language extends Translations {
       "no_files_found": "未找到文件",
 
       "no_favorites_found": "未找到收藏",
-      "file_locked": "文件已锁定",
-      "file_unlocked": "文件已解锁",
-      "file_renamed_successfully": "文件重命名成功",
-      "error_renaming_file": "重命名文件时发生错误",
-      "file_deleted": "文件已删除",
       "recent": "最近",
-      "name": "名称",
-      "date": "日期",
 
       "files": "文件",
       "search_files": "搜索文件...",
@@ -2077,7 +2284,7 @@ class Language extends Translations {
       "enter_certification_name": "请输入证书名称",
       "organization_name": "组织名称",
       "enter_organization_name": "请输入组织名称",
-      "date": "日期",
+
       "date_placeholder": "00/00/00",
       "description": "描述",
       "optional": "（可选）",
@@ -2096,19 +2303,16 @@ class Language extends Translations {
       "current": "当前",
       "project_name_hint": "项目名称",
       "project_url_hint": "项目URL（可选）",
-      "description": "描述",
-      "optional": "（可选）",
+
       "description_hint": "你的职责和成就",
 
       "degree_and_courses": "学位和课程",
       "enter_your_education": "请输入您的教育经历",
       "institute": "学校",
       "enter_your_institute": "请输入您的学校",
-      "start_date": "开始日期",
-      "end_date": "结束日期",
+
       "continued": "继续中",
-      "description": "描述",
-      "optional": "（可选）",
+
       "cgpa_grade_hint": "例如 GPA/成绩",
 
       "end_date_after_start_date": "结束日期需要在开始日期之后",
@@ -2166,7 +2370,7 @@ class Language extends Translations {
       "converted_data_keys": "转换的数据键",
       "websites_data": "网站数据",
       "processing_websites_data": "正在处理的网站数据",
-      "website": "网站",
+
       "loaded": "已加载",
       "websites": "网站",
       "websites_updated_in_provider": "提供者中的的网站已修改",
@@ -2198,9 +2402,9 @@ class Language extends Translations {
       "your_name": "您的姓名",
       "designation": "职务",
       "your_designation": "您的职务",
-      "email": "电子邮件",
+
       "your_email": "您的电子邮件",
-      "phone_number": "电话号码",
+
       "your_phone_number": "您的电话号码",
 
       "please_enter_name": "请输入您的姓名",
@@ -2225,10 +2429,10 @@ class Language extends Translations {
         "previously_created_resume": "先前创建的简历",
         "no_saved_resumes_yet": "尚无保存的简历",
         "create_first_resume_above": "请在上方创建您的第一份简历",
-        "template": "模板",
+
         "delete_resume": "删除简历",
         "delete_resume_confirmation": "确定要删除此简历吗？",
-        "cancel": "取消",
+
         "delete": "删除",
 
       "convert_images": "转换图片",
@@ -2249,7 +2453,7 @@ class Language extends Translations {
       "convert_image_description": "轻松地将多个图片转换为不同的格式，同时保持它们的质量、分辨率和清晰度。",
       "select_images": "选择图片",
       "click_to_choose_file": "点击选择文件",
-      "next": "下一步",
+
       "error_selecting_images": "选择图片时发生错误",
       "please_select_at_least_one_image_first": "请先选择至少一张图片",
       "error_processing_images": "处理图片时发生错误",
@@ -2257,7 +2461,7 @@ class Language extends Translations {
       "convert_pdf": "转换 PDF",
       "converted_file": "已转换文件：",
       "image_preview": "图片预览",
-      "save": "保存",
+
 
       "error_deleting_temp_file": "删除临时文件时发生错误：@error",
       "error_extracting_zip": "解压 ZIP 文件时发生错误：@error",
@@ -2274,16 +2478,13 @@ class Language extends Translations {
       "archive_contains_images": "此压缩包中包含 @count 张图片",
 
       "selected_file": "已选择文件",
-      "select_format": "选择格式",
-      "convert": "转换",
+
       "converting": "正在转换...",
       "please_select_format_first": "请先选择格式",
       "conversion_failed": "转换失败",
       "ok": "确定",
 
-      "word": "Word",
-      "excel": "Excel",
-      "powerpoint": "PowerPoint",
+
       "image": "图片",
 
       "error_excel_not_implemented": "未实现 Excel 转换",
@@ -2291,19 +2492,16 @@ class Language extends Translations {
       "am": "上午",
       "pm": "下午",
 
-      "convert_pdf": "转换 PDF",
       "convert_pdf_format": "转换 PDF 格式",
       "convert_pdf_description": "轻松地将 PDF 转换为不同格式，同时保持其质量、分辨率和清晰度。",
       "select_file": "选择文件",
       "click_to_choose_pdf": "点击选择 PDF 文件",
-      "next": "下一步",
+
       "please_select_pdf_only": "请输入仅选择 PDF 文件",
       "error_selecting_pdf": "选择 PDF 文件时发生错误",
       "please_select_pdf_first": "请先选择 PDF 文件",
 
-      "edit": "编辑",
       "failed_to_open_document": "打开文件失败",
-      "file_deleted_successfully": "文件已成功删除",
       "generated_document": "已生成文件",
 
       "original": "原图",
@@ -2316,7 +2514,6 @@ class Language extends Translations {
 
       "crop_document": "裁剪文件",
       "done": "完成",
-      "cancel": "取消",
       "retake": "重新拍摄",
       "filters": "滤镜",
       "crop": "裁剪",
@@ -2335,14 +2532,11 @@ class Language extends Translations {
       "rearranging_docx": "正在重新安排 Word 文档页面...",
       "creating_new_file": "正在创建新文档...",
       "rearrange_success": "文档重新安排成功!",
-      "error_occurred": "发生错误",
       "try_again": "再试一次",
-      "save": "保存",
       "saving": "保存中...",
       "file_opened": "文件已成功打开!",
       "no_app_to_open": "未找到可以打开此文件类型的应用程序",
       "permission_denied": "无权打开此文件",
-      "file_deleted": "文件已成功删除!",
       "file_renamed": "文件已重命名!",
       "rearranged_files": "已重新安排的文件",
       "bytes": "字节数",
@@ -2354,24 +2548,19 @@ class Language extends Translations {
 
       "error_processing_file": "文件处理错误",
       "page_number": "第",
-      "selected_file": "已选择文件",
       "loading_pdf_previews": "正在加载PDF预览",
       "rearrange": "重新排列",
 
 
       "rearrange_files": "重新排列文件",
       "rearrange_pages_in_files": "重新排列文件中的页面",
-      "select_file": "选择文件",
       "rearrange_file": "重新排列文件",
       "rearrange_file_desc": "轻松拖放和重新排序PDF页面，毫不费力地整理您的文档。",
 
       "failed_to_save_file": "保存文件失败",
-      "file_renamed_successfully": "文件重命名成功",
-      "error_renaming_file": "重命名文件时发生错误",
       "no_pages_selected": "未选择页面",
       "no_document_available_to_open": "无法打开文档",
       "file_not_found": "未找到文件",
-      "cannot_open_file": "无法打开文件",
       "zip_file_message": "这是一个ZIP文件，需要ZIP解压器查看其中的内容。",
       "error_opening_document": "打开文档时发生错误",
       "error_during_deletion": "删除时发生错误",
@@ -2388,8 +2577,6 @@ class Language extends Translations {
       "edit_files_description": "轻松修改您的图片。上传并修改多张图片以获得无缝体验。",
       "choose_images": "选择图片",
       "click_to_choose_images_from_gallery": "点击从图库中选择图片",
-      "next": "下一步",
-      "error_selecting_images": "选择图片时发生错误",
       "error_capturing_document": "捕捉文档时发生错误",
       "error_processing_files": "处理文件时发生错误",
       "please_select_at_least_one_image": "请输入至少一张图片",
@@ -2397,7 +2584,6 @@ class Language extends Translations {
 
       "merged_pdf_file": "合并 PDF 文件：",
       "merge_results": "合并结果",
-      "error_opening_file": "打开文件时发生错误",
       "file_not_found_or_not_processed": "未找到文件或尚未处理",
       "merge_completed_successfully": "PDF 文件已成功合并!",
 
@@ -2413,7 +2599,6 @@ class Language extends Translations {
       'please_two_select': '请至少选择2个PDF文件',
       'selected_files': '已选择的文件',
       'page_order': '页面顺序',
-      'please_select_pdf_only': '请只选择PDF文件',
       'error_selecting_pdfs': '选择PDF文件时出错',
       'failed_to_merge': '合并PDF失败',
       'pdf_merger': 'PDF合并器',
@@ -2421,7 +2606,6 @@ class Language extends Translations {
       'add_more_files': '添加更多文件',
       'remove': '移除',
       'reorder': '重新排序',
-      'processing': '处理中...',
       'merge_complete': '合并完成',
       'file_size': '文件大小',
       'total_pages': '总页数',
@@ -2438,7 +2622,6 @@ class Language extends Translations {
       // Menu items
       "rename": "重命名",
       "share": "共享",
-      "delete": "删除",
 
       // Error messages
       "error_sharing_file": "共享文件时发生错误",
@@ -2523,12 +2706,10 @@ class Language extends Translations {
 
       'select_at_least_one_image': '请输入至少选择一张图片',
       'no_text_in_images': '所选图片中未找到文字。请试用文字更清晰的图片。',
-      'error_processing_images': '处理图片时出错：@error',
       'image_header': '---图片 @number ---',
       'error_picking_images': '选择图片时出错：@error',
       'error_preprocessing_image': '预处理图片时出错：@error',
       'error_in_ocr': 'OCR时发生错误：@error',
-      'error_deleting_temp_file': '删除临时文件时出错：@error',
 
       'extracted_text_file': '提取的文本文件：',
       'no_file_available': '没有可用文件',
@@ -2548,9 +2729,6 @@ class Language extends Translations {
       'edit_file': '编辑文件',
       'split_file': '拆分文件',
       'convert_options': '转换选项',
-      'convert_pdf': '转换PDF',
-      'convert_image': '转换图像',
-      'recents': '最近使用',
       'see_all': '查看全部',
 
       'split': '拆分',
@@ -2563,11 +2741,8 @@ class Language extends Translations {
       'privacy_policy': '隐私政策',
       'rate_us': '给我们评分',
       'general': '通用',
-      'language': '语言',
       'confidential_documents': '机密文件',
       'code_recovery_options': '代码恢复选项',
-      'email': '电子邮件',
-      'phone_number': '电话号码',
       'settings': '设置',
 
       'please_select_one_page': '请至少选择一页',
@@ -2582,7 +2757,6 @@ class Language extends Translations {
       'select_only_pdf': '请选择 PDF、DOC 或 DOCX 文件',
       'rearrange_file_pages': '重新排列文件页面',
       'rearrange_file_description': '轻松拖动和重新排列PDF页面，轻松组织文档。',
-      'error': '发生错误',
       'processing_doc': '正在处理文档...',
       'file_does_not_exist': '文件不存在',
       'file_empty': '文件为空',
@@ -2594,8 +2768,6 @@ class Language extends Translations {
       //Settings Screen Lines
       "notification_enabled": "通知已成功启用",
       "notification_permission": "通知权限被拒绝",
-      "notification_error": "启用通知时出错",
-      "notification_disabled": "通知已禁用",
       "notification_error_disabled": "禁用通知时出错",
       "notifications_and_alerts": "通知和提醒",
       "support_and_feedback": "支持与反馈",
@@ -2624,12 +2796,9 @@ class Language extends Translations {
       //OTP Screen
       "otp_verify": "验证码验证",
       "verify_your_email": "验证您的\n邮箱",
-      "verify_your_phone": "验证您的\n手机号",
       "enter_code_email": "请输入我们发送到您的邮箱的验证码",
       "enter_code_sms": "请输入我们发送到您手机的验证码",
       "did_not_receive_code": "未收到验证码？",
-      "resend": "重新发送",
-      "verify": "验证",
       "otp_verified_successfully": "验证码验证成功！",
 
       "compress_files": "压缩文件",
@@ -2641,6 +2810,99 @@ class Language extends Translations {
     },
 
     'de_DE': {
+
+      "add_phone_number": "Fügen Sie Ihre Telefonnummer hinzu",
+      "phone_number_description": "Wir verwenden diese, um Ihr Konto zu sichern\nWählen Sie eine Landesvorwahl",
+      "continue": "Weiter",
+      "skip_for_now": "Jetzt überspringen",
+      "select_country_code": "Ländervorwahl auswählen",
+      "search_country": "Land suchen",
+      "enter_phone_number": "Telefonnummer eingeben",
+      "please_enter_phone_number": "Bitte geben Sie Ihre Telefonnummer ein",
+      "invalid_phone_number": "Bitte geben Sie eine gültige Telefonnummer ein (@minLength-@maxLength Ziffern)",
+      "phone_already_registered": "Diese Telefonnummer ist bereits mit einem anderen Konto registriert",
+      "failed_to_save_phone": "Telefonnummer konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+      "error_occurred": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+
+
+      "smart_tools_tagline": " Smarte Werkzeuge.\nNur ein Tipp entfernt",
+      "signing_in": "Anmeldung läuft...",
+      "continue_with_google": "Mit Google fortfahren",
+      "google_signin_failed": "Anmeldung mit Google fehlgeschlagen. Bitte versuche es erneut.",
+
+
+      "phone_recovery": "Telefon-Wiederherstellung",
+      "verify_otp": "OTP verifizieren",
+      "recover_your_account": "Stellen Sie Ihr Konto wieder her",
+      "enter_phone_to_recover": "Geben Sie Ihre Telefonnummer ein, um Ihr Konto wiederherzustellen",
+      "phone_number": "Telefonnummer*",
+
+      "verify": "Verifizieren",
+      "verify_your_phone": "Verifizieren Sie Ihr Telefon",
+      "enter_code_sent": "Geben Sie den an %s gesendeten Code ein",
+      "no_code_received": "Keinen Code erhalten?",
+      "resend": "ERNEUT SENDEN",
+
+      "invalid_phone": "Bitte geben Sie eine gültige Telefonnummer ein (%s–%s Ziffern)",
+      "no_account_found": "Kein Konto mit dieser Telefonnummer gefunden",
+      "otp_sent": "OTP wurde an Ihre Telefonnummer gesendet",
+      "invalid_otp": "Bitte geben Sie alle 6 Ziffern ein",
+      "otp_resent": "OTP wurde erneut gesendet",
+
+      "reset_password": "Passwort zurücksetzen",
+      "change_password": "Passwort ändern",
+      "set_password": "Passwort festlegen",
+      "enter_current_password": "Aktuelles Passwort eingeben",
+      "confirm_4_digit_code": "Bestätigen Sie Ihren 4-stelligen Code",
+      "set_new_4_digit_code": "Neuen 4-stelligen Code festlegen",
+      "set_4_digit_code": "Legen Sie Ihren 4-stelligen Code fest",
+      "password_set_failed": "Passwort konnte nicht festgelegt werden. Bitte versuchen Sie es erneut.",
+      "error": "Fehler",
+      "incorrect_password": "Falsches Passwort. Bitte versuchen Sie es erneut.",
+      "password_verification_error": "Fehler bei der Passwortüberprüfung. Bitte versuchen Sie es erneut.",
+      "passwords_do_not_match": "Passwörter stimmen nicht überein. Bitte versuchen Sie es erneut.",
+
+      "profile": "Profil",
+      "username": "Benutzername",
+      "email": "E-Mail",
+      "gender": "Geschlecht",
+      "date_of_birth": "Geburtsdatum",
+      "not_set": "Nicht festgelegt",
+      "choose_avatar": "Avatar auswählen",
+      "avatar_updated_successfully": "Avatar erfolgreich aktualisiert",
+      "failed_to_update_avatar": "Avatar konnte nicht aktualisiert werden",
+      "edit": "Bearbeiten",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "select_gender": "Geschlecht auswählen",
+      "male": "Männlich",
+      "female": "Weiblich",
+      "other": "Andere",
+      "logout": "Abmelden",
+      "are_you_sure_logout": "Sind Sie sicher, dass Sie sich abmelden möchten?",
+      "error_during_logout": "Fehler beim Abmelden",
+      "profile_updated_successfully": "Profil erfolgreich aktualisiert",
+      "failed_to_update_profile": "Profil konnte nicht aktualisiert werden",
+
+      "password_not_set": "Passwort nicht festgelegt",
+      "password_required_for_locked_files": "Sie müssen zuerst ein Passwort festlegen, um auf gesperrte Dateien zuzugreifen.",
+
+      "no_email_found": "Keine E-Mail für dieses Konto gefunden",
+
+      "sign_in_required": "Anmeldung erforderlich",
+      "please_sign_in_to_secure_documents": "Bitte melden Sie sich an, um Ihre Dokumente zu sichern.",
+      "sign_in": "Anmelden",
+      "notification_error": "Fehler beim Aktivieren der Benachrichtigungen",
+      "notification_disabled": "Benachrichtigungen deaktiviert",
+      "locked_files": "Gesperrte Dateien",
+      "forgot_password": "Passwort vergessen?",
+
+      "files_title": "Dateien",
+      "search_files_hint": "Dateien suchen...",
+      "file_size_limit_error": "Dateigröße muss kleiner als 2MB sein",
+      "recents_tab": "ZULETZT",
+      "favourites_tab": "FAVORITEN",
+      "all_tab": "ALLE",
 
       "lock": "Sperren",
       "unlock": "Entsperren",
@@ -2657,14 +2919,8 @@ class Language extends Translations {
       "no_files_found": "Keine Dateien gefunden",
 
       "no_favorites_found": "Keine Favoriten gefunden",
-      "file_locked": "Datei ist gesperrt",
-      "file_unlocked": "Datei ist freigeschaltet",
-      "file_renamed_successfully": "Datei wurde erfolgreich umbenannt",
-      "error_renaming_file": "Fehler beim Umbenennen der Datei",
-      "file_deleted": "Datei wurde gelöscht",
+
       "recent": "Neueste",
-      "name": "Name",
-      "date": "Datum",
 
       "files": "Dateien",
       "search_files": "Dateien durchsuchen...",
@@ -2732,7 +2988,7 @@ class Language extends Translations {
       "enter_certification_name": "Zertifikatsnamen eingeben",
       "organization_name": "Name der Organisation",
       "enter_organization_name": "Organisationsnamen eingeben",
-      "date": "Datum",
+
       "date_placeholder": "00/00/00",
       "description": "Beschreibung",
       "optional": "(Optional)",
@@ -2751,19 +3007,13 @@ class Language extends Translations {
       "current": "Aktuell",
       "project_name_hint": "Projektname",
       "project_url_hint": "Projekt-URL (optional)",
-      "description": "Beschreibung",
-      "optional": "(Optional)",
       "description_hint": "Ihre Verantwortlichkeiten und Erfolge",
 
       "degree_and_courses": "Abschlüsse und Kurse",
       "enter_your_education": "Geben Sie Ihre Ausbildung ein",
       "institute": "Institut",
       "enter_your_institute": "Geben Sie Ihr Institut ein",
-      "start_date": "Anfangsdatum",
-      "end_date": "Enddatum",
       "continued": "Fortgesetzt",
-      "description": "Beschreibung",
-      "optional": "(Optional)",
       "cgpa_grade_hint": "z.B. CGPA/Note",
 
       "end_date_after_start_date": "Das Enddatum muss nach dem Startdatum liegen",
@@ -2822,7 +3072,7 @@ class Language extends Translations {
       "converted_data_keys": "Umgewandelte Datenschlüssel",
       "websites_data": "Website-Daten",
       "processing_websites_data": "Verarbeitung von Website-Daten",
-      "website": "Website",
+
       "loaded": "Geladen",
       "websites": "Websites",
       "websites_updated_in_provider": "Websites im Provider aktualisiert",
@@ -2853,9 +3103,8 @@ class Language extends Translations {
       "your_name": "Ihr Name",
       "designation": "Berufsbezeichnung",
       "your_designation": "Ihre Berufsbezeichnung",
-      "email": "E-Mail",
+
       "your_email": "Ihre E-Mail",
-      "phone_number": "Telefonnummer",
       "your_phone_number": "Ihre Telefonnummer",
 
       "please_enter_name": "Bitte geben Sie Ihren Namen ein",
@@ -2880,10 +3129,10 @@ class Language extends Translations {
       "previously_created_resume": "Zuvor erstellter Lebenslauf",
       "no_saved_resumes_yet": "Bisher keine gespeicherten Lebensläufe",
       "create_first_resume_above": "Erstellen Sie zuerst Ihren Lebenslauf",
-      "template": "Vorlage",
+
       "delete_resume": "Lebenslauf löschen",
       "delete_resume_confirmation": "Möchten Sie diesen Lebenslauf wirklich löschen?",
-      "cancel": "Abbrechen",
+
       "delete": "Löschen",
 
       "convert_images": "Bildkonvertierung",
@@ -2904,7 +3153,7 @@ class Language extends Translations {
       "convert_image_description": "Konvertieren Sie problemlos mehrere Bilder in verschiedene Formate, ohne an Qualität, Auflösung oder Klarheit zu verlieren.",
       "select_images": "Bilder auswählen",
       "click_to_choose_file": "Zum Auswählen einer Datei klicken",
-      "next": "Weiter",
+
       "error_selecting_images": "Fehler beim Auswählen von Bildern",
       "please_select_at_least_one_image_first": "Bitte wählen Sie zunächst mindestens ein Bild aus",
       "error_processing_images": "Fehler beim Verarbeiten von Bildern",
@@ -2912,7 +3161,7 @@ class Language extends Translations {
       "convert_pdf": "PDF konvertieren",
       "converted_file": "Konvertierte Datei:",
       "image_preview": "Bildvorschau",
-      "save": "Speichern",
+
 
       "error_deleting_temp_file": "Fehler beim Löschen der temporären Datei: @error",
       "error_extracting_zip": "Fehler beim Entpacken der ZIP-Datei: @error",
@@ -2929,16 +3178,12 @@ class Language extends Translations {
       "archive_contains_images": "Dieses Archiv enthält @count Bild(er)",
 
       "selected_file": "Ausgewählte Datei",
-      "select_format": "Format auswählen",
-      "convert": "Konvertieren",
+
       "converting": "Konvertiert...",
       "please_select_format_first": "Bitte zuerst das Format auswählen",
       "conversion_failed": "Konvertierung ist fehlgeschlagen",
       "ok": "OK",
 
-      "word": "Word",
-      "excel": "Excel",
-      "powerpoint": "PowerPoint",
       "image": "Bild",
 
       "error_excel_not_implemented": "Die Konvertierung in Excel ist nicht implementiert",
@@ -2946,19 +3191,16 @@ class Language extends Translations {
       "am": "Vormittag",
       "pm": "Nachmittag",
 
-      "convert_pdf": "PDF konvertieren",
       "convert_pdf_format": "PDF-Format konvertieren",
       "convert_pdf_description": "Konvertieren Sie PDFs problemlos in verschiedene Formate, wobei Qualität, Auflösung und Klarheit erhalten bleiben.",
       "select_file": "Datei auswählen",
       "click_to_choose_pdf": "Zum Auswählen einer PDF klicken",
-      "next": "Weiter",
+
       "please_select_pdf_only": "Bitte wählen Sie nur PDF Dateien aus",
       "error_selecting_pdf": "Fehler beim Auswählen der PDF",
       "please_select_pdf_first": "Bitte wählen Sie zuerst eine PDF aus",
 
-      "edit": "Bearbeiten",
       "failed_to_open_document": "Dokument konnte nicht geöffnet werden",
-      "file_deleted_successfully": "Datei wurde erfolgreich gelöscht",
       "generated_document": "Generiertes Dokument",
 
       "original": "Original",
@@ -2971,7 +3213,6 @@ class Language extends Translations {
 
       "crop_document": "Dokument zuschneiden",
       "done": "Fertig",
-      "cancel": "Abbrechen",
       "retake": "Erneut aufnehmen",
       "filters": "Filter",
       "crop": "Zuschneiden",
@@ -2990,14 +3231,11 @@ class Language extends Translations {
       "rearranging_docx": "Word-Dokumentseiten werden neu geordnet...",
       "creating_new_file": "Neue Datei wird erstellt...",
       "rearrange_success": "Dokument wurde erfolgreich neu geordnet!",
-      "error_occurred": "Ein Fehler ist aufgetreten",
       "try_again": "Erneut versuchen",
-      "save": "Speichern",
       "saving": "Speichert...",
       "file_opened": "Die Datei wurde erfolgreich geöffnet!",
       "no_app_to_open": "Keine Anwendung zum Öffnen dieser Dateiformat gefunden.",
       "permission_denied": "Berechtigung zum Öffnen verweigert",
-      "file_deleted": "Die Datei wurde erfolgreich gelöscht!",
       "file_renamed": "Die Datei wurde erfolgreich umbenannt!",
       "rearranged_files": "Neu geordnete Dateien",
       "bytes": "Byte",
@@ -3009,23 +3247,18 @@ class Language extends Translations {
 
       "error_processing_file": "Fehler bei der Dateiverarbeitung",
       "page_number": "Seite",
-      "selected_file": "Ausgewählte Datei",
       "loading_pdf_previews": "PDF-Vorschauen werden geladen",
       "rearrange": "Neu anordnen",
 
       "rearrange_files": "Dateien neu anordnen",
       "rearrange_pages_in_files": "Seiten in Dateien neu anordnen",
-      "select_file": "Datei auswählen",
       "rearrange_file": "Datei neu anordnen",
       "rearrange_file_desc": "Ziehen Sie PDF-Seiten einfach per Drag & Drop und ordnen Sie sie neu an, um Ihr Dokument mühelos zu organisieren.",
 
       "failed_to_save_file": "Speichern der Datei ist fehlgeschlagen",
-      "file_renamed_successfully": "Die Datei wurde erfolgreich umbenannt",
-      "error_renaming_file": "Beim Umbenennen ist ein Fehler aufgetreten",
       "no_pages_selected": "Keine Seiten ausgewählt",
       "no_document_available_to_open": "Kein Dokument zum Öffnen vorhanden",
       "file_not_found": "Datei nicht gefunden",
-      "cannot_open_file": "Die Datei kann nicht geöffnet werden",
       "zip_file_message": "Dies ist eine ZIP-Datei. Möglicherweise benötigen Sie zum Öffnen ein ZIP-Extraktor.",
       "error_opening_document": "Beim Öffnen des Dokuments ist ein Fehler aufgetreten",
 
@@ -3044,8 +3277,7 @@ class Language extends Translations {
       "edit_files_description": "Bearbeiten Sie Ihre Bilder ganz einfach. Laden Sie mehrere Bilder hoch und ändern Sie sie für ein nahtloses Erlebnis.",
       "choose_images": "Bilder auswählen",
       "click_to_choose_images_from_gallery": "Zum Auswählen von Bildern aus der Galerie klicken",
-      "next": "Weiter",
-      "error_selecting_images": "Fehler beim Auswählen von Bildern",
+
       "error_capturing_document": "Fehler beim Erfassen des Dokuments",
       "error_processing_files": "Fehler beim Verarbeiten von Dateien",
       "please_select_at_least_one_image": "Bitte wählen Sie mindestens ein Bild aus",
@@ -3054,7 +3286,6 @@ class Language extends Translations {
       "merged_pdf_file": "PDF-Datei zusammenführen:",
 
       "merge_results": "Ergebnisse zusammenführen",
-      "error_opening_file": "Fehler beim Öffnen der Datei",
       "file_not_found_or_not_processed": "Die Datei wurde nicht gefunden oder ist noch nicht verarbeitet",
       "merge_completed_successfully": "Die PDF Dateien wurden erfolgreich zusammengeführt!",
 
@@ -3069,7 +3300,6 @@ class Language extends Translations {
       'please_two_select': 'Bitte wählen Sie mindestens 2 PDF-Dateien aus',
       'selected_files': 'Ausgewählte Dateien',
       'page_order': 'Seitenreihenfolge',
-      'please_select_pdf_only': 'Bitte wählen Sie nur PDF-Dateien aus',
       'error_selecting_pdfs': 'Fehler beim Auswählen der PDFs',
       'failed_to_merge_pdfs': 'Zusammenführen der PDFs fehlgeschlagen',
       'pdf_merger': 'PDF-Zusammenführung',
@@ -3077,7 +3307,6 @@ class Language extends Translations {
       'add_more_files': 'Weitere Dateien hinzufügen',
       'remove': 'Entfernen',
       'reorder': 'Neu anordnen',
-      'processing': 'Verarbeitung...',
       'merge_complete': 'Zusammenführung abgeschlossen',
       'file_size': 'Dateigröße',
       'total_pages': 'Gesamtseiten',
@@ -3092,7 +3321,6 @@ class Language extends Translations {
           // Menu items
       "rename": "Umbenennen",
       "share": "Teilen",
-      "delete": "Löschen",
 
       // Error messages
       "error_sharing_file": "Fehler beim Teilen der Datei",
@@ -3173,12 +3401,11 @@ class Language extends Translations {
 
       'select_at_least_one_image': 'Bitte wählen Sie mindestens ein Bild aus',
       'no_text_in_images': 'In den ausgewählten Bildern wurde kein Text erkannt. Versuchen Sie Bilder mit deutlicherem Text',
-      'error_processing_images': 'Fehler beim Verarbeiten von Bildern: @error',
+
       'image_header': '--- Bild @number ---',
       'error_picking_images': 'Fehler beim Auswählen von Bildern: @error',
       'error_preprocessing_image': 'Fehler beim Vorverarbeiten des Bildes: @error',
       'error_in_ocr': 'Fehler bei der Texterkennung (OCR): @error',
-      'error_deleting_temp_file': 'Fehler beim Löschen der temporären Datei: @error',
 
 
       'pdf_scanner': 'PDF-Scanner',
@@ -3188,9 +3415,6 @@ class Language extends Translations {
       'edit_file': 'Datei bearbeiten',
       'split_file': 'Datei aufteilen',
       'convert_options': 'Konvertierungsoptionen',
-      'convert_pdf': 'PDF konvertieren',
-      'convert_image': 'Bild konvertieren',
-      'recents': 'Zuletzt verwendet',
       'see_all': 'Alle anzeigen',
       'scan_new': 'Neu scannen',
 
@@ -3213,11 +3437,8 @@ class Language extends Translations {
       'privacy_policy': 'Datenschutzrichtlinie',
       'rate_us': 'Bewerten Sie uns',
       'general': 'Allgemein',
-      'language': 'Sprache',
       'confidential_documents': 'Vertrauliche Dokumente',
       'code_recovery_options': 'Code-Wiederherstellungsoptionen',
-      'email': 'E-Mail',
-      'phone_number': 'Telefonnummer',
       'settings': 'Einstellungen',
 
       'please_select_one_page': 'Bitte wählen Sie mindestens eine Seite aus',
@@ -3232,7 +3453,7 @@ class Language extends Translations {
       'select_only_pdf': 'Bitte nur PDF-, DOC- oder DOCX-Dateien auswählen',
       'rearrange_file_pages': 'Seiten in Dateien neu anordnen',
       'rearrange_file_description': 'Ziehen und ordnen Sie PDF-Seiten mühelos neu, um Ihr Dokument zu organisieren.',
-      'error': 'Fehler aufgetreten',
+
       'processing_doc': 'Dokument wird verarbeitet...',
       'file_does_not_exist': 'Datei existiert nicht',
       'file_empty': 'Datei ist leer',
@@ -3244,8 +3465,6 @@ class Language extends Translations {
       //Settings Screen Lines
       'notification_enabled': 'Benachrichtigungen erfolgreich aktiviert',
       'notification_permission': 'Benachrichtigungsberechtigung verweigert',
-      'notification_error': 'Fehler beim Aktivieren der Benachrichtigungen',
-      'notification_disabled': 'Benachrichtigungen deaktiviert',
       'notification_error_disabled': 'Fehler beim Deaktivieren der Benachrichtigungen',
       'notifications_and_alerts': 'Benachrichtigungen & Alarme',
       'support_and_feedback': 'Support & Feedback',
@@ -3273,12 +3492,10 @@ class Language extends Translations {
       //OTP Screen
       "otp_verify": "OTP-Verifizierung",
       "verify_your_email": "Bestätigen Sie Ihre\nE-Mail",
-      "verify_your_phone": "Bestätigen Sie Ihre\nTelefonnummer",
       "enter_code_email": "Geben Sie den Code aus der E-Mail ein, die wir gesendet haben an",
       "enter_code_sms": "Geben Sie den Code aus der SMS ein, die wir gesendet haben an",
       "did_not_receive_code": "Keinen Code erhalten?",
-      "resend": "ERNEUT SENDEN",
-      "verify": "Verifizieren",
+
       "otp_verified_successfully": "OTP erfolgreich verifiziert!",
 
       "compress_files": "Dateien komprimieren",

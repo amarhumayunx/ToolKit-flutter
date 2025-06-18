@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -133,7 +134,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
               children: [
                 const Spacer(flex: 2),
                 Text(
-                  'Add Your Phone Number',
+                  'add_phone_number'.tr,
                   style: GoogleFonts.inter(
                     fontSize: 32,
                     fontWeight: FontWeight.w500,
@@ -144,7 +145,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'We\'ll use this to keep your account secure\nSelect any country code',
+                  'phone_number_description'.tr,
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
@@ -226,7 +227,6 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                             hintText: _getPhoneHint(_selectedCountryCode),
                             hintStyle: GoogleFonts.inter(
                               fontSize: 16,
-
                               color: const Color(0xFF9CA3AF),
                             ),
                             border: OutlineInputBorder(
@@ -311,7 +311,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                       ),
                     )
                         : Text(
-                      'Continue',
+                      'continue'.tr,
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -326,7 +326,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                 TextButton(
                   onPressed: _isLoading ? null : _handleSkip,
                   child: Text(
-                    'Skip for now',
+                    'skip_for_now'.tr,
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       color: Colors.white.withOpacity(0.8),
@@ -376,7 +376,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Select Country Code',
+                          'select_country_code'.tr,
                           style: GoogleFonts.inter(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -397,7 +397,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                     child: TextField(
                       controller: _searchController,
                       decoration: InputDecoration(
-                        hintText: 'Search country or code...',
+                        hintText: 'search_country'.tr,
                         prefixIcon: const Icon(Icons.search),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -456,7 +456,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                               ),
                               if (isSelected) ...[
                                 const SizedBox(width: 8),
-                                Icon(
+                                const Icon(
                                   Icons.check_circle,
                                   color: AppColors.primary,
                                   size: 20,
@@ -541,7 +541,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
       case '+62':
         return '812-3456-7890';
       default:
-        return 'Enter phone number';
+        return 'enter_phone_number'.tr;
     }
   }
 
@@ -611,7 +611,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
 
     if (phoneNumber.isEmpty) {
       setState(() {
-        _errorMessage = 'Please enter your phone number';
+        _errorMessage = 'please_enter_phone_number'.tr;
       });
       return;
     }
@@ -620,7 +620,10 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
       final minLength = _getMinLengthForCountry(_selectedCountryCode);
       final maxLength = _getMaxLengthForCountry(_selectedCountryCode);
       setState(() {
-        _errorMessage = 'Please enter a valid phone number ($minLength-$maxLength digits)';
+        _errorMessage = 'invalid_phone_number'.trParams({
+          'minLength': minLength.toString(),
+          'maxLength': maxLength.toString()
+        });
       });
       return;
     }
@@ -638,7 +641,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
 
       if (phoneExists) {
         setState(() {
-          _errorMessage = 'This phone number is already registered with another account';
+          _errorMessage = 'phone_already_registered'.tr;
           _isLoading = false;
         });
         return;
@@ -655,12 +658,12 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
         _navigateToProfile();
       } else {
         setState(() {
-          _errorMessage = 'Failed to save phone number. Please try again.';
+          _errorMessage = 'failed_to_save_phone'.tr;
         });
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'An error occurred. Please try again.';
+        _errorMessage = 'error_occurred'.tr;
       });
     } finally {
       if (mounted) {

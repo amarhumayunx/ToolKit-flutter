@@ -78,10 +78,8 @@ class _HomeScreenState extends State<HomeScreen> {
         context,
         message: 'press_again_to_exit'.tr,
       );
-
       return false;
     }
-
     SystemNavigator.pop();
     return true;
   }
@@ -307,7 +305,7 @@ class _HomeContentViewState extends State<HomeContentView>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          SectionHeading(title: 'Recents'.tr),
+                          SectionHeading(title: 'recents'.tr),
                           ValueListenableBuilder(
                             valueListenable:
                                 filesBox?.listenable() ?? ValueNotifier(null),
@@ -317,7 +315,7 @@ class _HomeContentViewState extends State<HomeContentView>
                                   ? GestureDetector(
                                       onTap: _navigateToRecentTab,
                                       child: Text(
-                                        'See All',
+                                        'see_all'.tr,
                                         style: GoogleFonts.inter(
                                           fontSize: 14,
                                           color: AppColors.primary,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../services/auth_service.dart';
@@ -153,7 +154,7 @@ class _VerifyPasswordScreenState extends State<VerifyPasswordScreen> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBar(
-        title: 'Verify Password',
+        title: 'verify_password'.tr,
         onBackPressed: () {
           Navigator.of(context).pop();
         },
@@ -230,7 +231,7 @@ class _VerifyPasswordScreenState extends State<VerifyPasswordScreen> {
           if (_isLoading)
             Container(
               color: Colors.black.withOpacity(0.3),
-              child:  Center(
+              child:  const Center(
                 child: CircularProgressIndicator( color:  AppColors.primary,),
               ),
             ),

@@ -4,8 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:toolkit/screens/compress_files_screen/compression_result_class.dart';
 import 'package:toolkit/widgets/tools/document_container.dart';
+import '../../provider/file_provider.dart';
 import '../../services/save_zip_png_service.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
@@ -39,6 +41,8 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
   List<File> _compressedFiles = [];
   String _saveButtonKey = 'initial';
   bool _isSaving = false;
+
+  List<int> _deleteOrignalIndices = [];
 
   File? convertedFile;
   String _currentFilePath = '';
@@ -197,6 +201,8 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
         await fileToDelete.delete();
       }
 
+      _deleteOrignalIndices.add(index);
+
       setState(() {
         _compressedFiles.removeAt(index);
         _savedFilePaths.remove(index);
@@ -211,21 +217,23 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
         }
       });
 
+      // Clear all files from the provider when a file is deleted
+      final fileProvider = Provider.of<FileProvider>(context, listen: false);
+      fileProvider.clearAllFiles();
+
       if (_compressedFiles.isEmpty && mounted) {
+        Navigator.of(context).pop(_deleteOrignalIndices);
         Navigator.of(context).pop();
+        AppSnackBar.show(context, message: 'file_deleted_successfully'.tr);
         return;
       }
 
-      if (mounted) {
-        AppSnackBar.show(context, message: 'file_deleted_successfully'.tr);
-      }
     } catch (e) {
       if (mounted) {
         AppSnackBar.show(context, message: '${'error_during_deletion'.tr}: ${e.toString()}');
       }
     }
   }
-
   Future<File?> _createZipFile() async {
     try {
       final zipDir = await getTemporaryDirectory();
@@ -368,7 +376,12 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async {
+      Navigator.of(context).pop(_deleteOrignalIndices);
+      return false;
+    },
+    child:  Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(title: 'compress_results'.tr),
       resizeToAvoidBottomInset: true,
@@ -477,6 +490,7 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
           ],
         ),
       ),
+    )
     );
   }
 }

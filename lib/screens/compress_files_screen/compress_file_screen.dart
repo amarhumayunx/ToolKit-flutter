@@ -25,7 +25,7 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
 
   final List<File> _selectedFiles = [];
   bool _isCompressing = false;
-  double _compressionQuality = 85;
+  double _compressionQuality = 50;
 
   String _formatFileSize(int bytes) {
     if (bytes < 1024) {
@@ -171,7 +171,20 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
             compressionResults: compressionResults,
           ),
         ),
-      );
+      ).then((deletedIndices) {
+        // Handle returned deleted file indices
+        if (deletedIndices != null && deletedIndices is List<int>) {
+          setState(() {
+            // Sort indices in descending order to avoid index shifting issues
+            deletedIndices.sort((a, b) => b.compareTo(a));
+            for (int index in deletedIndices) {
+              if (index < _selectedFiles.length) {
+                _selectedFiles.removeAt(index);
+              }
+            }
+          });
+        }
+      });
 
     } catch (e) {
       if (!mounted) return;

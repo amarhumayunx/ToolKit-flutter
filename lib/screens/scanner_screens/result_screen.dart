@@ -117,8 +117,9 @@ class _ResultScreenState extends State<ResultScreen>
     final fileProvider = Provider.of<FileProvider>(context, listen: false);
     fileProvider.clearAllFiles();
 
-    Navigator.pop(context);
-    Navigator.pop(context);
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
     AppSnackBar.show(context, message: 'file_deleted_successfully'.tr);
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:toolkit/widgets/settings_widgets/locked_files_tab.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/custom_appbar.dart';
@@ -11,7 +12,7 @@ class LockedFilesScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBar(
-        title: 'Locked Files',
+        title: 'locked_files'.tr,
         onBackPressed: () {
           Navigator.of(context).pop(false);
         },

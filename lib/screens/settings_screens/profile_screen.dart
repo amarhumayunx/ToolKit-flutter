@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:get/get.dart'; // Add this import for localization
 import '../../provider/profile_provider.dart';
 import '../../services/auth_service.dart';
 import '../../utils/app_colors.dart';
@@ -76,7 +77,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     Expanded(
                       child: Text(
-                        "Profile",
+                        "profile".tr,
                         style: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: 18,
@@ -120,11 +121,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             _buildProfilePictureSection(profileProvider),
                             const SizedBox(height: 30),
                             _buildProfileField(
-                              label: "Username",
-                              value: profileProvider.username ?? "Not set",
+                              label: "username".tr,
+                              value: profileProvider.username ?? "not_set".tr,
                               isEditable: isEditing,
                               onEdit: () => _showEditDialog(
-                                "Username",
+                                "username".tr,
                                 profileProvider.username ?? "",
                                     (value) {
                                   if (value.isNotEmpty) {
@@ -135,11 +136,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             const SizedBox(height: 20),
                             _buildProfileField(
-                              label: "Email",
-                              value: profileProvider.email ?? "Not set",
+                              label: "email".tr,
+                              value: profileProvider.email ?? "not_set".tr,
                               isEditable: isEditing,
                               onEdit: () => _showEditDialog(
-                                "Email",
+                                "email".tr,
                                 profileProvider.email ?? "",
                                     (value) {
                                   if (value.isNotEmpty) {
@@ -150,15 +151,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             const SizedBox(height: 20),
                             _buildProfileField(
-                              label: "Gender",
-                              value: profileProvider.gender ?? "Not set",
+                              label: "gender".tr,
+                              value: profileProvider.gender ?? "not_set".tr,
                               isEditable: isEditing,
                               onEdit: () => _showGenderDialog(profileProvider),
                             ),
                             const SizedBox(height: 20),
                             _buildProfileField(
-                              label: "Date of Birth",
-                              value: profileProvider.dateOfBirth ?? "Not set",
+                              label: "date_of_birth".tr,
+                              value: profileProvider.dateOfBirth ?? "not_set".tr,
                               isEditable: isEditing,
                               onEdit: () =>
                                   _showDatePickerDialog(profileProvider),
@@ -319,7 +320,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          "Choose Avatar",
+          "choose_avatar".tr,
           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
         ),
         content: SizedBox(
@@ -353,13 +354,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       if (mounted) {
                         Navigator.pop(context);
                         AppSnackBar.show(context,
-                            message: 'Avatar updated successfully');
+                            message: 'avatar_updated_successfully'.tr);
                       }
                     } catch (e) {
                       if (mounted) {
                         Navigator.pop(context);
                         AppSnackBar.show(context,
-                            message: 'Failed to update avatar: $e');
+                            message: '${"failed_to_update_avatar".tr}: $e');
                       }
                     }
                   } else {
@@ -394,7 +395,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              "Cancel",
+              "cancel".tr,
               style: GoogleFonts.inter(color: Colors.grey[600]),
             ),
           ),
@@ -412,7 +413,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          "Edit $field",
+          "${"edit".tr} $field",
           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
         ),
         content: TextField(
@@ -428,7 +429,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              "Cancel",
+              "cancel".tr,
               style: GoogleFonts.inter(color: Colors.grey[600]),
             ),
           ),
@@ -440,7 +441,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Navigator.pop(context);
             },
             child: Text(
-              "Save",
+              "save".tr,
               style: GoogleFonts.inter(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w600,
@@ -457,14 +458,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          "Select Gender",
+          "select_gender".tr,
           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: Text("Male", style: GoogleFonts.inter()),
+              title: Text("male".tr, style: GoogleFonts.inter()),
               leading: Radio<String>(
                 value: "Male",
                 groupValue: profileProvider.gender,
@@ -476,7 +477,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             ListTile(
-              title: Text("Female", style: GoogleFonts.inter()),
+              title: Text("female".tr, style: GoogleFonts.inter()),
               leading: Radio<String>(
                 value: "Female",
                 groupValue: profileProvider.gender,
@@ -488,7 +489,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             ListTile(
-              title: Text("Other", style: GoogleFonts.inter()),
+              title: Text("other".tr, style: GoogleFonts.inter()),
               leading: Radio<String>(
                 value: "Other",
                 groupValue: profileProvider.gender,
@@ -546,25 +547,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-// Add this method to your ProfileScreen class to replace the existing _showLogoutDialog method
-
   void _showLogoutDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          "Logout",
+          "logout".tr,
           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
         ),
         content: Text(
-          "Are you sure you want to logout?",
+          "are_you_sure_logout".tr,
           style: GoogleFonts.inter(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              "Cancel",
+              "cancel".tr,
               style: GoogleFonts.inter(color: Colors.grey[600]),
             ),
           ),
@@ -577,10 +576,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
                 profileProvider.loadProfileData(
                   avatar: '6',
-                  username: 'Not set',
-                  email: 'Not set',
-                  gender: 'Not set',
-                  dateOfBirth: 'Not set',
+                  username: 'not_set'.tr,
+                  email: 'not_set'.tr,
+                  gender: 'not_set'.tr,
+                  dateOfBirth: 'not_set'.tr,
                 );
 
                 // Sign out from auth service
@@ -595,7 +594,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Error during logout: $e'),
+                      content: Text('${"error_during_logout".tr}: $e'),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -603,7 +602,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }
             },
             child: Text(
-              "Logout",
+              "logout".tr,
               style: GoogleFonts.inter(
                 color: Colors.red,
                 fontWeight: FontWeight.w600,
@@ -628,9 +627,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       }
 
-      AppSnackBar.show(context, message: 'Profile updated successfully');
+      AppSnackBar.show(context, message: 'profile_updated_successfully'.tr);
     } catch (e) {
-      AppSnackBar.show(context, message: 'Failed to update profile: $e');
+      AppSnackBar.show(context, message: '${"failed_to_update_profile".tr}: $e');
     }
   }
 }
