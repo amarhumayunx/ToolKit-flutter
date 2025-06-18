@@ -156,7 +156,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     try {
       SystemChrome.setEnabledSystemUIMode(
         SystemUiMode.manual,
-        overlays: [SystemUiOverlay.bottom], // Only show navigation bar
+        overlays: [SystemUiOverlay.bottom],
       );
 
       final croppedFile = await ImageCropper().cropImage(
@@ -218,7 +218,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
         _preGenerateFilterPreviews();
       }
     } catch (e) {
-      debugPrint('error_cropping_image'.tr + ': $e');
+      debugPrint('${'error_cropping_image'.tr}: $e');
       if (mounted) {
         AppSnackBar.show(context, message: 'failed_to_crop_image'.tr);
       }

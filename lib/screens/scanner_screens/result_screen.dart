@@ -76,7 +76,7 @@ class _ResultScreenState extends State<ResultScreen>
       // Use the current file path instead of the original path
       await OpenFile.open(_currentFilePath);
     } catch (e) {
-      AppSnackBar.show(context, message: 'failed_to_open_document'.tr + ': $e');
+      AppSnackBar.show(context, message: '${'failed_to_open_document'.tr}: $e');
     }
   }
 
@@ -129,6 +129,17 @@ class _ResultScreenState extends State<ResultScreen>
     });
   }
 
+  // Method to handle save completion and clear files
+  void _handleSaveCompleted() {
+    // Clear all files from provider after successful save
+    final fileProvider = Provider.of<FileProvider>(context, listen: false);
+    fileProvider.clearAllFiles();
+
+    // Navigate back to previous screens
+    Navigator.of(context).pop(true);
+    Navigator.of(context).pop(true);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -179,9 +190,7 @@ class _ResultScreenState extends State<ResultScreen>
               child: SaveDocumentButton(
                 documentFile: File(_currentFilePath),
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                onSaveCompleted: () {
-                  Navigator.of(context).pop(true);
-                },
+                onSaveCompleted: _handleSaveCompleted,
               ),
             ),
         ],
