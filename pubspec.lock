@@ -287,7 +287,7 @@ packages:
     source: hosted
     version: "1.0.16"
   cross_file:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: cross_file
       sha256: "7caf6a750a0c04effbb52a676dce9a4a592e10ad35c34d6d2d0e4811160d5670"
@@ -310,14 +310,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
-  dart_pptx:
-    dependency: "direct main"
-    description:
-      name: dart_pptx
-      sha256: c24a99fa1dbeeeb638c43bc5bb5202fc1fc411982f6fa3ce8cc426a35afd2957
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.3"
   dart_style:
     dependency: transitive
     description:
@@ -346,26 +338,10 @@ packages:
     dependency: transitive
     description:
       name: device_info_plus_platform_interface
-      sha256: "0b04e02b30791224b31969eb1b50d723498f402971bff3630bca2ba839bd1ed2"
+      sha256: e1ea89119e34903dca74b883d0dd78eb762814f97fb6c76f35e9ff74d261a18f
       url: "https://pub.dev"
     source: hosted
-    version: "7.0.2"
-  dio:
-    dependency: "direct main"
-    description:
-      name: dio
-      sha256: "253a18bbd4851fecba42f7343a1df3a9a4c1d31a2c1b37e221086b4fa8c8dbc9"
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.8.0+1"
-  dio_web_adapter:
-    dependency: transitive
-    description:
-      name: dio_web_adapter
-      sha256: "7586e476d70caecaf1686d21eee7247ea43ef5c345eab9e0cc3583ff13378d78"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.1"
+    version: "7.0.3"
   docx_template:
     dependency: "direct main"
     description:
@@ -725,22 +701,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.3+1"
-  google_ml_kit:
-    dependency: "direct main"
-    description:
-      name: google_ml_kit
-      sha256: a2da12a62353a6cad71534b52ada3af14a5b842e6c9b1014ce4d243652b30f4b
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.20.0"
-  google_mlkit_barcode_scanning:
-    dependency: transitive
-    description:
-      name: google_mlkit_barcode_scanning
-      sha256: b38505df2d3fdf7830979d60fee55039c2f442d189b2e06fcb2fe494ba65d0db
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.14.1"
   google_mlkit_commons:
     dependency: transitive
     description:
@@ -749,102 +709,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.11.0"
-  google_mlkit_digital_ink_recognition:
-    dependency: transitive
-    description:
-      name: google_mlkit_digital_ink_recognition
-      sha256: "8d2b89401bdeeba97158377167429dbc5cb339ebbd21e0889dca773f1c79a884"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.14.1"
-  google_mlkit_entity_extraction:
-    dependency: transitive
-    description:
-      name: google_mlkit_entity_extraction
-      sha256: "145bc26422b7e62d50cc4eca1ac394d13ac6a97e4c09b8baf7ff058b64d2f9cc"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.15.1"
-  google_mlkit_face_detection:
-    dependency: transitive
-    description:
-      name: google_mlkit_face_detection
-      sha256: f336737d5b8a86797fd4368f42a5c26aeaa9c6dcc5243f0a16b5f6f663cfb70a
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.13.1"
-  google_mlkit_face_mesh_detection:
-    dependency: transitive
-    description:
-      name: google_mlkit_face_mesh_detection
-      sha256: "3683daed2463d9631c7f01b31bfc40d22a1fd4c0392d82a24ce275af06bc811f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.1"
-  google_mlkit_image_labeling:
-    dependency: transitive
-    description:
-      name: google_mlkit_image_labeling
-      sha256: "2cac5f7a02dcc23cd3357f89bf1a79df793ae3afce5035a896de467ffa0192e8"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.14.1"
-  google_mlkit_language_id:
-    dependency: transitive
-    description:
-      name: google_mlkit_language_id
-      sha256: fc57bca69cb1dcd8ef67b929f0315e9a8baa80c03c75f7a1226becd7ad2529ff
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.13.0"
-  google_mlkit_object_detection:
-    dependency: transitive
-    description:
-      name: google_mlkit_object_detection
-      sha256: "0f740f046d74faf81d9c44cdbe4accf33888ed9f877e30efbfad4578d45ebfcd"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.15.0"
-  google_mlkit_pose_detection:
-    dependency: transitive
-    description:
-      name: google_mlkit_pose_detection
-      sha256: "5ff5fe2a325427c49c02a884a2a888d2d10cbfe414f7ebf2af9777a5155171eb"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.14.0"
-  google_mlkit_selfie_segmentation:
-    dependency: transitive
-    description:
-      name: google_mlkit_selfie_segmentation
-      sha256: e05fc255265595a0fb11cd6a6a5393f106d6ec4d3a40cbc57ff22894eef235f1
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.10.0"
-  google_mlkit_smart_reply:
-    dependency: transitive
-    description:
-      name: google_mlkit_smart_reply
-      sha256: "0c3d737e46f20aa4d4953860ee5757e5250e58f90351f8e2afdeb1d609c7047e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.13.0"
   google_mlkit_text_recognition:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: google_mlkit_text_recognition
       sha256: "96173ad4dd7fd06c660e22ac3f9e9f1798a517fe7e48bee68eeec83853224224"
       url: "https://pub.dev"
     source: hosted
     version: "0.15.0"
-  google_mlkit_translation:
-    dependency: transitive
-    description:
-      name: google_mlkit_translation
-      sha256: "7287444a0abd994087a0b354dee952fcd198e57619ded4bba65496d418c9d84b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.13.0"
   google_sign_in:
     dependency: "direct main"
     description:
@@ -893,14 +765,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
-  hashcodes:
-    dependency: transitive
-    description:
-      name: hashcodes
-      sha256: "80f9410a5b3c8e110c4b7604546034749259f5d6dcca63e0d3c17c9258f1a651"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
   hive_ce:
     dependency: "direct main"
     description:
@@ -1037,14 +901,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1+1"
-  image_size_getter:
-    dependency: transitive
-    description:
-      name: image_size_getter
-      sha256: "9a299e3af2ebbcfd1baf21456c3c884037ff524316c97d8e56035ea8fdf35653"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.4.0"
   intl:
     dependency: "direct main"
     description:
@@ -1173,14 +1029,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
-  mustache_template:
-    dependency: transitive
-    description:
-      name: mustache_template
-      sha256: a46e26f91445bfb0b60519be280555b06792460b27b19e2b19ad5b9740df5d1c
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
   nested:
     dependency: transitive
     description:
@@ -1353,10 +1201,10 @@ packages:
     dependency: "direct main"
     description:
       name: pdfx
-      sha256: "466d8b2ee79f208330698f96b132b07c4a717afc815e5a394f065044cb001607"
+      sha256: "29db9b71d46bf2335e001f91693f2c3fbbf0760e4c2eb596bf4bafab211471c1"
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.1"
+    version: "2.9.2"
   permission_handler:
     dependency: "direct main"
     description:
@@ -1501,14 +1349,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-  recase:
-    dependency: transitive
-    description:
-      name: recase
-      sha256: e4eb4ec2dcdee52dcf99cb4ceabaffc631d7424ee55e56f280bc039737f89213
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.1.0"
   share_plus:
     dependency: "direct main"
     description:
@@ -1682,14 +1522,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.2"
-  tesseract_ocr:
-    dependency: "direct main"
-    description:
-      name: tesseract_ocr
-      sha256: "151a2834cea8798db63510aa783c4db2af147586050919cbbc18b287599249e3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.1"
   test_api:
     dependency: transitive
     description:

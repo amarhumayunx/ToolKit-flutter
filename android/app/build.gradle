@@ -41,13 +41,14 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so flutter run --release works.
             signingConfig = signingConfigs.debug
+            minifyEnabled true
+            shrinkResources true
         }
     }
 }
 
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
-
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
 
