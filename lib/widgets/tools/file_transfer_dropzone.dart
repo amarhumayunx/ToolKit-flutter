@@ -76,76 +76,89 @@ class FileTransferDropZone extends StatelessWidget {
   Widget _buildFileItem(FileModel file) {
     final fileExtension = path.extension(file.name).toLowerCase();
 
-    return Container(
-
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: _getFileTypeColor(fileExtension),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: Icon(
-                _getFileTypeIcon(fileExtension),
-                color: Colors.white,
-                size: 20,
+    return Stack(
+      clipBehavior: Clip.none, // This allows children to overflow
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: _getFileTypeColor(fileExtension),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Icon(
+                    _getFileTypeIcon(fileExtension),
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
               ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  file.name,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      file.name,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      file.size,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  file.size,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
-            ),
+              ),
+              // Add invisible spacer to balance layout
+              const SizedBox(width: 20),
+            ],
           ),
-          const SizedBox(width: 8),
-          GestureDetector(
+        ),
+        Positioned(
+          top: -6,
+          right: -8,
+          child: GestureDetector(
             onTap: onRemoveFile,
             child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(
-                color: Colors.red,
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
                 shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white, // Add white border for better visibility
+                  width: 1.5,
+                ),
               ),
               child: const Icon(
                 Icons.close,
-                size: 16,
+                size: 12,
                 color: Colors.white,
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -175,12 +188,9 @@ class FileTransferDropZone extends StatelessWidget {
       case '.docx':
         return Icons.description;
 
-
-
       case '.jpg':
       case '.jpeg':
       case '.png':
-
         return Icons.image;
       default:
         return Icons.insert_drive_file;

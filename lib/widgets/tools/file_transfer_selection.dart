@@ -43,7 +43,8 @@ class FileTransferSelectionSection extends StatelessWidget {
                     child: InkWell(
                       onTap: onSelectFiles,
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 4, left: 4, bottom: 4),
+                        padding:
+                            const EdgeInsets.only(top: 4, left: 4, bottom: 4),
                         child: Container(
                           decoration: BoxDecoration(
                             color: const Color(0xFF00A3A3),
@@ -79,7 +80,7 @@ class FileTransferSelectionSection extends StatelessWidget {
                         ),
                         child: Center(
                           child: Text(
-                            'Import File',
+                            'Scan QR Code',
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,

@@ -57,9 +57,9 @@ class _ToolsListViewState extends State<ToolsListView> {
   void _navigateToToolPage(BuildContext context, String toolId) {
     switch (toolId) {
       case 'ocr':
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const OcrScreen(),
-        ));
+        // Navigator.of(context).push(MaterialPageRoute(
+        //   builder: (context) => const OcrScreen(),
+        // ));
         break;
       case 'compress_files':
         Navigator.of(context).push(MaterialPageRoute(
