@@ -525,7 +525,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
+            colorScheme: const ColorScheme.light(
               primary: AppColors.primary, // Header background color
               onPrimary: Colors.white, // Header text color
               onSurface: Colors.black, // Body text color

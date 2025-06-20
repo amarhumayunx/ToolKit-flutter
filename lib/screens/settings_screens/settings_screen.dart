@@ -228,7 +228,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PhoneRecoveryScreen(),
+          builder: (context) => const PhoneRecoveryScreen(),
         ),
       );
 

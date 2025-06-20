@@ -4,82 +4,94 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:get/get.dart'; // GetX import for localization
+import 'package:get/get.dart';
+import 'package:toolkit/screens/convert_word_screen/word_format_selection_screen.dart';
+import 'package:toolkit/screens/convert_word_screen/word_save_screen.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
-import 'pdf_format_selection_screen.dart';
 
-class ConvertPdfMainScreen extends StatefulWidget {
-  const ConvertPdfMainScreen({super.key});
+class ConvertWordToPdfMainScreen extends StatefulWidget {
+  const ConvertWordToPdfMainScreen({super.key});
 
   @override
-  State<ConvertPdfMainScreen> createState() => _ConvertPdfMainScreenState();
+  State<ConvertWordToPdfMainScreen> createState() => _ConvertWordToPdfMainScreenState();
 }
 
-class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
-  File? _selectedPdf;
+class _ConvertWordToPdfMainScreenState extends State<ConvertWordToPdfMainScreen> {
+  File? _selectedWordFile;
   String? _errorMessage;
 
   void _clearSelectedFile() {
     setState(() {
-      _selectedPdf = null;
+      _selectedWordFile = null;
     });
   }
 
-  Future<void> _pickPdf() async {
+  Future<void> _pickWordFile() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['pdf'],
+        allowedExtensions: ['docx', 'doc'],
       );
 
       if (result != null) {
         final file = File(result.files.single.path!);
-        // Double check the extension in case the platform didn't filter properly
-        if (result.files.single.extension?.toLowerCase() != 'pdf') {
+        final extension = result.files.single.extension?.toLowerCase();
+
+        // Check if it's a supported Word document format
+        if (extension != 'docx' && extension != 'doc') {
           setState(() {
-            _errorMessage = 'please_select_pdf_only'.tr;
-            _selectedPdf = null;
+            _errorMessage = 'please_select_word_only'.tr;
+            _selectedWordFile = null;
           });
           return;
         }
 
-        setState(() {
-          _selectedPdf = file;
-          _errorMessage = null;
-        });
+        // For now, we'll primarily support DOCX format
+        if (extension == 'doc') {
+          setState(() {
+            _errorMessage = 'docx_format_preferred'.tr;
+            _selectedWordFile = file; // Still allow it but show warning
+          });
+        } else {
+          setState(() {
+            _selectedWordFile = file;
+            _errorMessage = null;
+          });
+        }
       }
     } catch (e) {
       setState(() {
-        _errorMessage = '${'error_selecting_pdf'.tr}: $e';
-        _selectedPdf = null;
+        _errorMessage = '${'error_selecting_word'.tr}: $e';
+        _selectedWordFile = null;
       });
     }
   }
 
-  void _removePdf() {
+  void _removeWordFile() {
     setState(() {
-      _selectedPdf = null;
+      _selectedWordFile = null;
+      _errorMessage = null;
     });
   }
 
-  Future<void> _convertPdf() async {
-    if (_selectedPdf == null) {
-      AppSnackBar.show(context, message: 'please_select_pdf_first'.tr);
+  Future<void> _convertWordFile() async {
+    if (_selectedWordFile == null) {
+      AppSnackBar.show(context, message: 'please_select_word_first'.tr);
       return;
     }
 
-    // Navigate to format selection screen with a callback
+    // Navigate to format selection screen instead of directly to save screen
     final shouldClearFile = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PdfFormatSelectionScreen(
-          selectedPdf: _selectedPdf!,
-          onFileDeleted: _clearSelectedFile, // Pass the callback
+        builder: (context) => WordFormatSelectionScreen(
+          selectedWordFile: _selectedWordFile!,
+          onFileDeleted: _clearSelectedFile,
         ),
       ),
     );
@@ -89,13 +101,12 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
       _clearSelectedFile();
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: ToolsAppBar(
-        title: 'convert_pdf'.tr,
+        title: 'convert_word_to_pdf'.tr,
       ),
       body: Column(
         children: [
@@ -106,19 +117,22 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const CustomSvgImage(
-                      imagePath: 'assets/images/convert_pdf_img.svg'),
+                      imagePath: 'assets/images/convert_word_img.svg'),
                   const SizedBox(height: 30),
                   InfoCard(
-                      title: 'convert_pdf_format'.tr,
-                      description: 'convert_pdf_description'.tr),
+                      title: 'convert_word_to_pdf_format'.tr,
+                      description: 'convert_word_to_pdf_description'.tr),
                   const SizedBox(height: 24),
-                  // Custom PDF selection container
-                  _buildPdfSelectionContainer(),
+                  // Custom Word file selection container
+                  _buildWordFileSelectionContainer(),
                   if (_errorMessage != null) ...[
                     const SizedBox(height: 8),
                     Text(
                       _errorMessage!,
-                      style: const TextStyle(color: Colors.red, fontSize: 10),
+                      style: TextStyle(
+                          color: _errorMessage!.contains('preferred') ? Colors.orange : Colors.red,
+                          fontSize: 10
+                      ),
                     ),
                   ],
                 ],
@@ -129,8 +143,8 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
             padding:
             const EdgeInsets.symmetric(horizontal: 30.0, vertical: 26.0),
             child: CustomGradientButton(
-              text: 'next'.tr,
-              onPressed: _convertPdf,
+              text: 'convert_to_pdf'.tr,
+              onPressed: _convertWordFile,
             ),
           ),
         ],
@@ -138,7 +152,7 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
     );
   }
 
-  Widget _buildPdfSelectionContainer() {
+  Widget _buildWordFileSelectionContainer() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -159,7 +173,7 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
             child: Padding(
               padding: const EdgeInsets.only(left: 14, top: 14),
               child: Text(
-                'select_file'.tr,
+                'select_word_file'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -167,12 +181,11 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
               ),
             ),
           ),
-          // PDF selection area
+          // Word file selection area
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: InkWell(
-              onTap: _selectedPdf == null ? _pickPdf : null,
-              // Only allow tap when no PDF is selected
+              onTap: _selectedWordFile == null ? _pickWordFile : null,
               child: DottedBorder(
                 color: AppColors.primary,
                 strokeWidth: 1.5,
@@ -188,7 +201,7 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
                     borderRadius: BorderRadius.circular(8),
                     color: AppColors.bgBoxColor,
                   ),
-                  child: _selectedPdf != null
+                  child: _selectedWordFile != null
                       ? Stack(
                     children: [
                       Center(
@@ -197,17 +210,17 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Padding(
-                                padding: EdgeInsets.only(top: 10),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10),
                                 child: Icon(
-                                  Icons.picture_as_pdf,
+                                  Icons.description,
                                   size: 30,
-                                  color: Colors.red,
+                                  color: Colors.blue[700],
                                 ),
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                _selectedPdf!.path.split('/').last,
+                                _selectedWordFile!.path.split('/').last,
                                 style: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w400,
@@ -225,7 +238,7 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
                         top: 8,
                         right: 8,
                         child: GestureDetector(
-                          onTap: _removePdf,
+                          onTap: _removeWordFile,
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
@@ -259,7 +272,7 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'click_to_choose_pdf'.tr,
+                        'click_to_choose_word'.tr,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           color: Colors.grey,

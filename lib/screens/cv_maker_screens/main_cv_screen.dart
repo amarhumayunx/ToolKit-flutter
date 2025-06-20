@@ -121,7 +121,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
       await _loadLanguagesData(convertedData);
       await _loadWebsitesData(convertedData);
     } catch (e) {
-      debugPrint('error_loading_edit_data'.tr + ': $e');
+      debugPrint('${'error_loading_edit_data'.tr}: $e');
     } finally {
       _isLoadingEditData = false;
     }
@@ -192,14 +192,14 @@ class _MainCVScreenState extends State<MainCVScreen> {
 
       if (!mounted) return;
 
-      debugPrint('loading_certification_data'.tr + '...');
+      debugPrint('${'loading_certification_data'.tr}...');
 
       // Get certification data using the helper method
       final certData = _getNestedListData('certifications');
-      debugPrint('certification_data'.tr + ': $certData');
+      debugPrint('${'certification_data'.tr}: $certData');
 
       if (certData != null && certData.isNotEmpty) {
-        debugPrint('processing'.tr + ' ${certData.length} ' + 'certification_items'.tr);
+        debugPrint('${'processing'.tr} ${certData.length} ${'certification_items'.tr}');
 
         final certProvider =
         Provider.of<CertificationProvider>(context, listen: false);
@@ -223,16 +223,16 @@ class _MainCVScreenState extends State<MainCVScreen> {
               certProvider.addCertificationItem(certificationItem);
             }
 
-            debugPrint('successfully_loaded'.tr + ' ${certData.length} ' + 'certifications'.tr);
+            debugPrint('${'successfully_loaded'.tr} ${certData.length} ${'certifications'.tr}');
           } catch (e) {
-            debugPrint('error_processing_certification_items'.tr + ': $e');
+            debugPrint('${'error_processing_certification_items'.tr}: $e');
           }
         });
       } else {
         debugPrint('no_certification_data_found'.tr);
       }
     } catch (e) {
-      debugPrint('error_in_load_certification_data'.tr + ': $e');
+      debugPrint('${'error_in_load_certification_data'.tr}: $e');
     } finally {
       _isLoadingEditData = false;
     }
@@ -245,12 +245,12 @@ class _MainCVScreenState extends State<MainCVScreen> {
       await Future.delayed(const Duration(milliseconds: 50));
       if (!mounted) return;
 
-      debugPrint('loading_skills_data'.tr + '...');
+      debugPrint('${'loading_skills_data'.tr}...');
       final skillsData = _getNestedListData('skills');
-      debugPrint('skills_data'.tr + ': $skillsData');
+      debugPrint('${'skills_data'.tr}: $skillsData');
 
       if (skillsData != null && skillsData.isNotEmpty) {
-        debugPrint('processing'.tr + ' ${skillsData.length} ' + 'skills'.tr);
+        debugPrint('${'processing'.tr} ${skillsData.length} ${'skills'.tr}');
 
         final skillsProvider =
         Provider.of<SkillsProvider>(context, listen: false);
@@ -265,16 +265,16 @@ class _MainCVScreenState extends State<MainCVScreen> {
               );
             }
 
-            debugPrint('successfully_loaded'.tr + ' ${skillsData.length} ' + 'skills'.tr);
+            debugPrint('${'successfully_loaded'.tr} ${skillsData.length} ${'skills'.tr}');
           } catch (e) {
-            debugPrint('error_processing_skills'.tr + ': $e');
+            debugPrint('${'error_processing_skills'.tr}: $e');
           }
         });
       } else {
         debugPrint('no_skills_data_found'.tr);
       }
     } catch (e) {
-      debugPrint('error_in_load_skills_data'.tr + ': $e');
+      debugPrint('${'error_in_load_skills_data'.tr}: $e');
     }
   }
 
@@ -286,12 +286,12 @@ class _MainCVScreenState extends State<MainCVScreen> {
       await Future.delayed(const Duration(milliseconds: 50));
       if (!mounted) return;
 
-      debugPrint('loading_languages_data'.tr + '...');
+      debugPrint('${'loading_languages_data'.tr}...');
       final languageData = _getNestedListData('languages');
-      debugPrint('languages_data'.tr + ': $languageData');
+      debugPrint('${'languages_data'.tr}: $languageData');
 
       if (languageData != null && languageData.isNotEmpty) {
-        debugPrint('processing'.tr + ' ${languageData.length} ' + 'language_items'.tr);
+        debugPrint('${'processing'.tr} ${languageData.length} ${'language_items'.tr}');
 
         final languageProvider =
         Provider.of<LanguageProvider>(context, listen: false);
@@ -310,16 +310,16 @@ class _MainCVScreenState extends State<MainCVScreen> {
               }
             }
 
-            debugPrint('successfully_loaded'.tr + ' ${languageData.length} ' + 'languages'.tr);
+            debugPrint('${'successfully_loaded'.tr} ${languageData.length} ${'languages'.tr}');
           } catch (e) {
-            debugPrint('error_processing_language_items'.tr + ': $e');
+            debugPrint('${'error_processing_language_items'.tr}: $e');
           }
         });
       } else {
         debugPrint('no_language_data_found'.tr);
       }
     } catch (e) {
-      debugPrint('error_in_load_languages_data'.tr + ': $e');
+      debugPrint('${'error_in_load_languages_data'.tr}: $e');
     } finally {
       _isLoadingEditData = false;
     }
@@ -329,15 +329,15 @@ class _MainCVScreenState extends State<MainCVScreen> {
     await Future.delayed(const Duration(milliseconds: 50));
     if (!mounted) return;
 
-    debugPrint('loading_websites_data'.tr + '...');
-    debugPrint('converted_data_keys'.tr + ': ${convertedData.keys}');
+    debugPrint('${'loading_websites_data'.tr}...');
+    debugPrint('${'converted_data_keys'.tr}: ${convertedData.keys}');
 
     // Check for both possible keys
     final websitesData = convertedData['websites'] ?? convertedData['website'];
-    debugPrint('websites_data'.tr + ': $websitesData');
+    debugPrint('${'websites_data'.tr}: $websitesData');
 
     if (websitesData != null) {
-      debugPrint('processing_websites_data'.tr + '...');
+      debugPrint('${'processing_websites_data'.tr}...');
 
       List<Website> websites = [];
 
@@ -363,7 +363,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
         }
       }
 
-      debugPrint('loaded'.tr + ' ${websites.length} ' + 'websites'.tr);
+      debugPrint('${'loaded'.tr} ${websites.length} ${'websites'.tr}');
       if (websites.isNotEmpty) {
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         userProvider.updateWebsites(websites);
@@ -377,8 +377,8 @@ class _MainCVScreenState extends State<MainCVScreen> {
   // Also, make sure your _getNestedListData method has proper debugging:
   List<Map<String, dynamic>>? _getNestedListData(String key) {
     final convertedData = _convertToStringMap(widget.editData);
-    debugPrint('get_nested_list_data_called_for_key'.tr + ': $key');
-    debugPrint('converted_data'.tr + ': $convertedData');
+    debugPrint('${'get_nested_list_data_called_for_key'.tr}: $key');
+    debugPrint('${'converted_data'.tr}: $convertedData');
 
     if (convertedData == null) {
       debugPrint('converted_data_is_null'.tr);
@@ -386,23 +386,23 @@ class _MainCVScreenState extends State<MainCVScreen> {
     }
 
     final nestedData = convertedData[key];
-    debugPrint('nested_data_for'.tr + ' $key: $nestedData');
-    debugPrint('nested_data_type'.tr + ': ${nestedData.runtimeType}');
+    debugPrint('${'nested_data_for'.tr} $key: $nestedData');
+    debugPrint('${'nested_data_type'.tr}: ${nestedData.runtimeType}');
 
     if (nestedData is List) {
-      debugPrint('processing_list_with'.tr + ' ${nestedData.length} ' + 'items'.tr);
+      debugPrint('${'processing_list_with'.tr} ${nestedData.length} ${'items'.tr}');
       final result = nestedData.map<Map<String, dynamic>>((item) {
-        debugPrint('processing_item'.tr + ': $item (${item.runtimeType})');
+        debugPrint('${'processing_item'.tr}: $item (${item.runtimeType})');
         if (item is Map) {
           final converted = Map<String, dynamic>.from(item);
-          debugPrint('converted_item'.tr + ': $converted');
+          debugPrint('${'converted_item'.tr}: $converted');
           return converted;
         }
         debugPrint('item_is_not_map_returning_empty_map'.tr);
         return <String, dynamic>{};
       }).toList();
 
-      debugPrint('final_result_for'.tr + ' $key: $result');
+      debugPrint('${'final_result_for'.tr} $key: $result');
       return result;
     }
 
@@ -418,7 +418,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
         return Map<String, dynamic>.from(
             data.map((key, value) => MapEntry(key.toString(), value)));
       } catch (e) {
-        debugPrint('error_converting_map'.tr + ': $e');
+        debugPrint('${'error_converting_map'.tr}: $e');
         return <String, dynamic>{};
       }
     }

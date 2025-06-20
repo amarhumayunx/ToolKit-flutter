@@ -5,6 +5,8 @@ class Language extends Translations {
   Map<String, Map<String, String>> get keys => {
     'en_US': {
 
+      'no_recent_documents_found':'No Recents document found',
+
       'add_phone_number': 'Add Your Phone Number',
       'phone_number_description': 'We\'ll use this to keep your account secure\nSelect any country code',
       'continue': 'Continue',
@@ -705,6 +707,8 @@ class Language extends Translations {
 
     'en_GB': {
 
+      'no_recent_documents_found':'No Recents document found',
+
       'add_phone_number': 'Add Your Phone Number',
       'phone_number_description': 'We\'ll use this to keep your account secure\nSelect any country code',
       'continue': 'Continue',
@@ -1398,6 +1402,7 @@ class Language extends Translations {
 
     'ur_PK': {
 
+      "no_recent_documents_found": "حال ہی میں کوئی دستاویزات نہیں ملیں",
       "add_phone_number": "اپنا فون نمبر شامل کریں",
       "phone_number_description": "ہم آپ کے اکاؤنٹ کو محفوظ رکھنے کے لیے اس کا استعمال کریں گے\nکسی بھی ملک کا کوڈ منتخب کریں",
       "continue": "جاری رکھیں",
@@ -2109,6 +2114,7 @@ class Language extends Translations {
     },
 
     'zh_CN': {
+      "no_recent_documents_found": "未找到最近的文档",
 
       "add_phone_number": "添加您的电话号码",
       "phone_number_description": "我们将使用此号码保护您的账户安全\n请选择国家代码",
@@ -2888,8 +2894,10 @@ class Language extends Translations {
       "password_required_for_locked_files": "Sie müssen zuerst ein Passwort festlegen, um auf gesperrte Dateien zuzugreifen.",
 
       "no_email_found": "Keine E-Mail für dieses Konto gefunden",
+      "no_recent_documents_found": "Keine aktuellen Dokumente gefunden",
 
-      "sign_in_required": "Anmeldung erforderlich",
+
+  "sign_in_required": "Anmeldung erforderlich",
       "please_sign_in_to_secure_documents": "Bitte melden Sie sich an, um Ihre Dokumente zu sichern.",
       "sign_in": "Anmelden",
       "notification_error": "Fehler beim Aktivieren der Benachrichtigungen",

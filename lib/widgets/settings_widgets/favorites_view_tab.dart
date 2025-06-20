@@ -138,7 +138,7 @@ class _FavoritesViewState extends State<FavoritesView> {
 
       AppSnackBar.show(context, message: 'file_renamed_successfully'.tr);
     } catch (e) {
-      AppSnackBar.show(context, message: 'error_renaming_file'.tr + ': $e');
+      AppSnackBar.show(context, message: '${'error_renaming_file'.tr}: $e');
     }
   }
 

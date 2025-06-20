@@ -7,7 +7,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:toolkit/services/file_encryption_service.dart';
 import 'package:toolkit/services/save_document_service.dart';
 
 import '../models/file_model.dart';

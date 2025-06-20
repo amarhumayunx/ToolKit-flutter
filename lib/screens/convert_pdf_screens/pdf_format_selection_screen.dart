@@ -64,10 +64,6 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
           final service = PdfToImageService();
           _convertedFile = await service.convertPdfToImage(widget.selectedPdf);
           break;
-        case 'Excel':
-          throw UnimplementedError('Excel conversion not implemented'.tr);
-        case 'PowerPoint':
-          throw UnimplementedError('PowerPoint conversion not implemented'.tr);
         default:
           throw Exception('Unsupported format'.tr);
       }

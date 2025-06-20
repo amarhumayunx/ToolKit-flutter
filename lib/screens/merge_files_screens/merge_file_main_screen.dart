@@ -174,7 +174,7 @@ class _MergeFileMainScreenState extends State<MergeFileMainScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CustomSvgImage(imagePath: 'assets/images/merge_file_img.svg'),
+                  const CustomSvgImage(imagePath: 'assets/images/merge_file_img.svg'),
                   const SizedBox(height: 30),
                   InfoCard(
                     title: 'merge_pdf_files'.tr,

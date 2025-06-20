@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive_ce/hive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce_flutter/adapters.dart';
 import 'package:intl/intl.dart';
@@ -351,7 +350,7 @@ class _HomeContentViewState extends State<HomeContentView>
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 20),
                                 child: Text(
-                                  'No recent documents found',
+                                  'no_recent_documents_found'.tr,
                                   style: GoogleFonts.inter(
                                     fontSize: 14,
                                     color: Colors.grey[600],

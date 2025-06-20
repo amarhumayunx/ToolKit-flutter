@@ -42,7 +42,7 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
   String _saveButtonKey = 'initial';
   bool _isSaving = false;
 
-  List<int> _deleteOrignalIndices = [];
+  final List<int> _deleteOrignalIndices = [];
 
   File? convertedFile;
   String _currentFilePath = '';

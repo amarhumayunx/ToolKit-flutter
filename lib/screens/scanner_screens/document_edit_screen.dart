@@ -490,7 +490,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
         if (mounted) {
           Navigator.pop(context); // Close loading dialog
 
-          AppSnackBar.show(context, message: 'failed_to_create_document'.tr + ': $e');
+          AppSnackBar.show(context, message: '${'failed_to_create_document'.tr}: $e');
         }
       }
     }

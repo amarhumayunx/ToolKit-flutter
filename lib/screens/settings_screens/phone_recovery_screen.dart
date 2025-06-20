@@ -11,7 +11,7 @@ import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
 
 class PhoneRecoveryScreen extends StatefulWidget {
-  const PhoneRecoveryScreen({Key? key}) : super(key: key);
+  const PhoneRecoveryScreen({super.key});
 
   @override
   State<PhoneRecoveryScreen> createState() => _PhoneRecoveryScreenState();
@@ -367,7 +367,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.primary),
+                          borderSide: const BorderSide(color: AppColors.primary),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -418,7 +418,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
                               ),
                               if (isSelected) ...[
                                 const SizedBox(width: 8),
-                                Icon(
+                                const Icon(
                                   Icons.check_circle,
                                   color: AppColors.primary,
                                   size: 20,

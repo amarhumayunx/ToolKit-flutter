@@ -280,7 +280,7 @@ class ResultDocumentContainer extends StatelessWidget {
         subject: 'document_from_ocr_tool'.tr,
       );
     } catch (e) {
-      AppSnackBar.show(context, message: 'error_sharing_file'.tr + ': $e');
+      AppSnackBar.show(context, message: '${'error_sharing_file'.tr}: $e');
     }
   }
 
@@ -462,7 +462,7 @@ class ResultDocumentContainer extends StatelessWidget {
                                   message: 'file_renamed_successfully'.tr);
                             } catch (e) {
                               setDialogState(() {
-                                errorMessage = 'error_renaming_file'.tr + ': $e';
+                                errorMessage = '${'error_renaming_file'.tr}: $e';
                               });
                             }
                           },

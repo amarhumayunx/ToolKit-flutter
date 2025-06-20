@@ -192,7 +192,7 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 100),
                     child: Text(
-                      'no_recent_documents_found'.tr, // Localized
+                      'no_recent_documents_found'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         color: Colors.grey[600],
