@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -134,7 +133,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
               children: [
                 const Spacer(flex: 2),
                 Text(
-                  'add_phone_number'.tr,
+                  'Add Your Phone Number',
                   style: GoogleFonts.inter(
                     fontSize: 32,
                     fontWeight: FontWeight.w500,
@@ -145,7 +144,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'phone_number_description'.tr,
+                  'We\'ll use this to keep your account secure\nSelect any country code',
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
@@ -174,7 +173,8 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                       InkWell(
                         onTap: _showCountryCodePicker,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 16),
                           decoration: const BoxDecoration(
                             border: Border(
                               right: BorderSide(
@@ -254,7 +254,8 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                 if (_errorMessage != null) ...[
                   const SizedBox(height: 12),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
                       color: Colors.red.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
@@ -301,39 +302,28 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                     ),
                     child: _isLoading
                         ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.primary,
-                        ),
-                      ),
-                    )
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.primary,
+                              ),
+                            ),
+                          )
                         : Text(
-                      'continue'.tr,
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                            'Continue',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                   ),
                 ),
 
                 const Spacer(flex: 2),
 
-                // Skip Button
-                TextButton(
-                  onPressed: _isLoading ? null : _handleSkip,
-                  child: Text(
-                    'skip_for_now'.tr,
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      color: Colors.white.withOpacity(0.8),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 60),
               ],
             ),
           ),
@@ -376,7 +366,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'select_country_code'.tr,
+                          'Select Country Code',
                           style: GoogleFonts.inter(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -397,15 +387,16 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                     child: TextField(
                       controller: _searchController,
                       decoration: InputDecoration(
-                        hintText: 'search_country'.tr,
+                        hintText: 'Search country or code...',
                         prefixIcon: const Icon(Icons.search),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE5E7EB)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.primary),
+                          borderSide: BorderSide(color: AppColors.primary),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -426,7 +417,8 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                       itemCount: _filteredCountryCodes.length,
                       itemBuilder: (context, index) {
                         final country = _filteredCountryCodes[index];
-                        final isSelected = country['code'] == _selectedCountryCode;
+                        final isSelected =
+                            country['code'] == _selectedCountryCode;
 
                         return ListTile(
                           selected: isSelected,
@@ -440,7 +432,9 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               color: const Color(0xFF1F2937),
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
                             ),
                           ),
                           trailing: Row(
@@ -451,12 +445,14 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                                 style: GoogleFonts.inter(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
-                                  color: isSelected ? AppColors.primary : const Color(0xFF6B7280),
+                                  color: isSelected
+                                      ? AppColors.primary
+                                      : const Color(0xFF6B7280),
                                 ),
                               ),
                               if (isSelected) ...[
                                 const SizedBox(width: 8),
-                                const Icon(
+                                Icon(
                                   Icons.check_circle,
                                   color: AppColors.primary,
                                   size: 20,
@@ -502,7 +498,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
 
   String _getCountryFlag(String countryCode) {
     final country = _countryCodes.firstWhere(
-          (c) => c['code'] == countryCode,
+      (c) => c['code'] == countryCode,
       orElse: () => {'flag': '🌍'},
     );
     return country['flag']!;
@@ -541,7 +537,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
       case '+62':
         return '812-3456-7890';
       default:
-        return 'enter_phone_number'.tr;
+        return 'Enter phone number';
     }
   }
 
@@ -611,7 +607,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
 
     if (phoneNumber.isEmpty) {
       setState(() {
-        _errorMessage = 'please_enter_phone_number'.tr;
+        _errorMessage = 'Please enter your phone number';
       });
       return;
     }
@@ -620,10 +616,8 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
       final minLength = _getMinLengthForCountry(_selectedCountryCode);
       final maxLength = _getMaxLengthForCountry(_selectedCountryCode);
       setState(() {
-        _errorMessage = 'invalid_phone_number'.trParams({
-          'minLength': minLength.toString(),
-          'maxLength': maxLength.toString()
-        });
+        _errorMessage =
+            'Please enter a valid phone number ($minLength-$maxLength digits)';
       });
       return;
     }
@@ -637,11 +631,13 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
       final formattedPhone = _formatPhoneNumber(phoneNumber);
 
       // Check if phone number already exists
-      final phoneExists = await _authService.isPhoneNumberExists(formattedPhone);
+      final phoneExists =
+          await _authService.isPhoneNumberExists(formattedPhone);
 
       if (phoneExists) {
         setState(() {
-          _errorMessage = 'phone_already_registered'.tr;
+          _errorMessage =
+              'This phone number is already registered with another account';
           _isLoading = false;
         });
         return;
@@ -652,18 +648,19 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
 
       if (success) {
         // Update ProfileProvider with phone number
-        final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+        final profileProvider =
+            Provider.of<ProfileProvider>(context, listen: false);
         profileProvider.updatePhoneNumber(formattedPhone);
 
         _navigateToProfile();
       } else {
         setState(() {
-          _errorMessage = 'failed_to_save_phone'.tr;
+          _errorMessage = 'Failed to save phone number. Please try again.';
         });
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'error_occurred'.tr;
+        _errorMessage = 'An error occurred. Please try again.';
       });
     } finally {
       if (mounted) {

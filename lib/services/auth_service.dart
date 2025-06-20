@@ -311,6 +311,81 @@ class AuthService {
     }
   }
 
+
+
+
+
+
+
+  // Add this method to your AuthService class
+
+// Method to validate if current user exists in Firestore
+  Future<bool> isCurrentUserValid() async {
+    try {
+      final user = currentUser;
+      if (user == null) return false;
+
+      final doc = await _firestore.collection('users').doc(user.uid).get();
+      return doc.exists;
+    } catch (e) {
+      print('Error validating current user: $e');
+      return false;
+    }
+  }
+
+// Method to sign out user if they don't exist in Firestore
+  Future<void> validateAndSignOutIfNeeded() async {
+    try {
+      final user = currentUser;
+      if (user == null) return;
+
+      final doc = await _firestore.collection('users').doc(user.uid).get();
+      if (!doc.exists) {
+        // User document doesn't exist, sign them out
+        await signOut();
+        print('User signed out due to missing Firestore document');
+      }
+    } catch (e) {
+      print('Error validating user and signing out: $e');
+      // If there's an error accessing Firestore, sign out to be safe
+      await signOut();
+    }
+  }
+
+// Enhanced getUserData method that validates user existence
+  Future<UserModel?> getUserDataWithValidation(String uid) async {
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      if (doc.exists) {
+        return UserModel.fromMap(doc.data()!);
+      } else {
+        // User document doesn't exist, sign out the current user if it matches
+        if (currentUser?.uid == uid) {
+          await signOut();
+        }
+        return null;
+      }
+    } catch (e) {
+      print('Error getting user data with validation: $e');
+      // If there's an error, sign out to be safe
+      if (currentUser?.uid == uid) {
+        await signOut();
+      }
+      return null;
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
   // Phone Authentication Methods
   Future<bool> sendOTP(String phoneNumber, {bool isResend = false}) async {
     try {
