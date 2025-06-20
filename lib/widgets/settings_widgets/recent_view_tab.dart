@@ -4,13 +4,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
-import 'package:get/get.dart'; // Add this import for .tr extension
+import 'package:get/get.dart';
 import 'package:toolkit/widgets/settings_widgets/sort_btn.dart';
 import 'package:toolkit/widgets/settings_widgets/result_document_container.dart';
 import '../../models/file_model.dart';
 import '../../services/save_document_service.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
+import 'package:open_file/open_file.dart';
 
 class RecentsViewTab extends StatefulWidget {
   final String searchQuery;
@@ -105,6 +106,19 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
     allFilesWithIndex.sort((a, b) => b.value.date.compareTo(a.value.date));
 
     return allFilesWithIndex.take(10).toList();
+  }
+
+  Future<void> _openFile(String filePath) async {
+    try {
+      final file = File(filePath);
+      if (await file.exists()) {
+        await OpenFile.open(filePath);
+      } else {
+        AppSnackBar.show(context, message: 'file_not_found'.tr);
+      }
+    } catch (e) {
+      AppSnackBar.show(context, message: '${'error_opening_file'.tr}: $e');
+    }
   }
 
   Future<void> _renameFile(int index, String newPath) async {
@@ -223,7 +237,9 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
                               onDelete: () => _deleteFile(index),
                               onFileRenamed: (newPath) => _renameFile(index, newPath),
                               onLockToggle: () => _toggleLock(index),
-                              onTap: widget.isSelectingFiles ? () => widget.onFileSelected?.call(file, index) : null,
+                              onTap: widget.isSelectingFiles
+                                  ? () => widget.onFileSelected?.call(file, index)
+                                  : () => _openFile(file.path),
                             )
                         ),
                         const SizedBox(height: 12),

@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
 import 'package:toolkit/models/file_model.dart';
 import 'package:toolkit/services/save_document_service.dart';
 import 'package:toolkit/widgets/settings_widgets/result_document_container.dart';
@@ -96,6 +99,19 @@ class _AllFilesViewState extends State<AllFilesView> {
           message: 'failed_toggle_file_lock'.tr,
         );
       }
+    }
+  }
+
+  Future<void> _openFile(String filePath) async {
+    try {
+      final file = File(filePath);
+      if (await file.exists()) {
+        await OpenFile.open(filePath);
+      } else {
+        AppSnackBar.show(context, message: 'file_not_found'.tr);
+      }
+    } catch (e) {
+      AppSnackBar.show(context, message: '${'error_opening_file'.tr}: $e');
     }
   }
 
@@ -278,9 +294,9 @@ class _AllFilesViewState extends State<AllFilesView> {
                           onDelete: () => _deleteFile(actualIndex),
                           onFileRenamed: (newPath) =>
                               _renameFile(actualIndex, newPath),
-                          onTap: widget.isSelectingFiles
-                              ? () => _handleFileSelection(file, actualIndex)
-                              : null,
+                            onTap: widget.isSelectingFiles
+                                ? () => widget.onFileSelected?.call(file, index)
+                                : () => _openFile(file.path),
                         ),
                         const SizedBox(height: 12),
                       ],

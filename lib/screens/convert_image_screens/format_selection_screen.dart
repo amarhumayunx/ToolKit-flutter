@@ -10,7 +10,7 @@ import '../../widgets/buttons/gradient_btn.dart';
 import 'save_screen.dart';
 
 class SelectFormatScreen extends StatefulWidget {
-  final List<File> selectedImages; // Changed to List<File>
+  final List<File> selectedImages;
 
   const SelectFormatScreen({super.key, required this.selectedImages});
 
@@ -55,7 +55,6 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
       ),
     );
 
-    // If file was deleted, pass this information back to main screen
     if (result == true) {
       Navigator.pop(context, true);
     }
@@ -81,7 +80,6 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
             ),
             const SizedBox(height: 10),
 
-            // Show multiple file containers or a summary
             if (widget.selectedImages.length == 1)
               _buildSingleFileContainer()
             else
@@ -214,7 +212,6 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
           children: [
             Row(
               children: [
-                // Show first few images as thumbnails
                 ...widget.selectedImages.take(3).map((image) =>
                     Container(
                       margin: const EdgeInsets.only(right: 8),

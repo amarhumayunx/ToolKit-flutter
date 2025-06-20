@@ -175,7 +175,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        padding: const EdgeInsets.only(right: 15),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -203,14 +203,6 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(
-                        Icons.more_vert,
-                        size: 16,
-                        color: Colors.grey[600],
-                      ),
-                    )
                   ],
                 ),
               ),
@@ -228,9 +220,6 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildFormatOption('word'.tr, 'assets/icons/word_icon.svg'),
-                _buildFormatOption('excel'.tr, 'assets/icons/excel_icon.svg'),
-                _buildFormatOption(
-                    'powerpoint'.tr, 'assets/icons/powerpoint_icon.svg'),
                 _buildFormatOption(
                     'image'.tr, 'assets/icons/convert_img_icon.svg'),
               ],

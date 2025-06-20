@@ -1,5 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationService {
@@ -25,7 +26,7 @@ class NotificationService {
       initSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
         // Handle notification tap
-        debugPrint('Notification tapped: ${response.payload}');
+        debugPrint('notification_tapped'.tr);
       },
     );
   }
@@ -65,7 +66,7 @@ class NotificationService {
 
       return permissionGranted;
     } catch (e) {
-      debugPrint('Error requesting permissions: $e');
+      debugPrint('error_requesting_permissions'.tr);
       return false;
     }
   }
@@ -75,7 +76,7 @@ class NotificationService {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getBool('notifications_enabled') ?? false;
     } catch (e) {
-      debugPrint('Error checking notification status: $e');
+      debugPrint('error_checking_notification_status'.tr);
       return false;
     }
   }
@@ -85,7 +86,7 @@ class NotificationService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('notifications_enabled', enabled);
     } catch (e) {
-      debugPrint('Error saving notification status: $e');
+      debugPrint('error_saving_notification_status'.tr);
     }
   }
 
@@ -96,34 +97,34 @@ class NotificationService {
   static Future<void> showExportNotification() async {
     // Check if notifications are enabled before showing
     if (!await areNotificationsEnabled()) {
-      debugPrint('Notifications are disabled, skipping notification');
+      debugPrint('notifications_disabled_skipping'.tr);
       return;
     }
 
-    const AndroidNotificationDetails androidDetails =
+    final AndroidNotificationDetails androidDetails =
     AndroidNotificationDetails(
       'export_channel',
-      'Export Notifications',
-      channelDescription: 'Notifications for export actions',
+      'export_notifications_channel_name'.tr,
+      channelDescription: 'export_notifications_channel_description'.tr,
       importance: Importance.max,
       priority: Priority.high,
       styleInformation: BigTextStyleInformation(
-        'Your CV has been exported as PDF!',
+        'cv_exported_successfully_message'.tr,
         htmlFormatBigText: false,
-        contentTitle: 'Export Complete ✅',
+        contentTitle: 'export_complete_title'.tr,
         htmlFormatContentTitle: false,
       ),
-      ticker: 'CV Export Complete',
+      ticker: 'cv_export_complete_ticker'.tr,
     );
 
-    const DarwinNotificationDetails iOSDetails = DarwinNotificationDetails(
-      subtitle: 'CV Export Complete',
+    final DarwinNotificationDetails iOSDetails = DarwinNotificationDetails(
+      subtitle: 'cv_export_complete_subtitle'.tr,
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
     );
 
-    const NotificationDetails notificationDetails = NotificationDetails(
+    final NotificationDetails notificationDetails = NotificationDetails(
       android: androidDetails,
       iOS: iOSDetails,
     );
@@ -131,28 +132,28 @@ class NotificationService {
     try {
       await _notificationsPlugin.show(
         0,
-        'Export Complete ✅',
-        'Your CV has been exported as PDF!',
+        'export_complete_title'.tr,
+        'cv_exported_successfully_message'.tr,
         notificationDetails,
         payload: 'export_complete',
       );
     } catch (e) {
-      debugPrint('Error showing export notification: $e');
+      debugPrint('error_showing_export_notification'.tr);
     }
   }
 
   static Future<void> showExportStartNotification() async {
     // Check if notifications are enabled before showing
     if (!await areNotificationsEnabled()) {
-      debugPrint('Notifications are disabled, skipping notification');
+      debugPrint('notifications_disabled_skipping'.tr);
       return;
     }
 
-    const AndroidNotificationDetails androidDetails =
+    final AndroidNotificationDetails androidDetails =
     AndroidNotificationDetails(
       'export_channel',
-      'Export Notifications',
-      channelDescription: 'Notifications for export actions',
+      'export_notifications_channel_name'.tr,
+      channelDescription: 'export_notifications_channel_description'.tr,
       importance: Importance.low,
       priority: Priority.low,
       ongoing: true,
@@ -160,14 +161,14 @@ class NotificationService {
       indeterminate: true,
     );
 
-    const DarwinNotificationDetails iOSDetails = DarwinNotificationDetails(
-      subtitle: 'Exporting CV...',
+    final DarwinNotificationDetails iOSDetails = DarwinNotificationDetails(
+      subtitle: 'exporting_cv_subtitle'.tr,
       presentAlert: false,
       presentBadge: false,
       presentSound: false,
     );
 
-    const NotificationDetails notificationDetails = NotificationDetails(
+    final NotificationDetails notificationDetails = NotificationDetails(
       android: androidDetails,
       iOS: iOSDetails,
     );
@@ -175,13 +176,13 @@ class NotificationService {
     try {
       await _notificationsPlugin.show(
         1,
-        'Exporting CV...',
-        'Please wait while we prepare your PDF',
+        'exporting_cv_title'.tr,
+        'exporting_cv_message'.tr,
         notificationDetails,
         payload: 'export_started',
       );
     } catch (e) {
-      debugPrint('Error showing export start notification: $e');
+      debugPrint('error_showing_export_start_notification'.tr);
     }
   }
 
@@ -189,40 +190,40 @@ class NotificationService {
     try {
       await _notificationsPlugin.cancel(1);
     } catch (e) {
-      debugPrint('Error canceling progress notification: $e');
+      debugPrint('error_canceling_progress_notification'.tr);
     }
   }
 
   static Future<void> showErrorNotification(String error) async {
     // Check if notifications are enabled before showing
     if (!await areNotificationsEnabled()) {
-      debugPrint('Notifications are disabled, skipping notification');
+      debugPrint('notifications_disabled_skipping'.tr);
       return;
     }
 
-    const AndroidNotificationDetails androidDetails =
+    final AndroidNotificationDetails androidDetails =
     AndroidNotificationDetails(
       'export_channel',
-      'Export Notifications',
-      channelDescription: 'Notifications for export actions',
+      'export_notifications_channel_name'.tr,
+      channelDescription: 'export_notifications_channel_description'.tr,
       importance: Importance.high,
       priority: Priority.high,
       styleInformation: BigTextStyleInformation(
-        'There was an error while exporting your CV. Please try again.',
+        'export_error_message'.tr,
         htmlFormatBigText: false,
-        contentTitle: 'Export Failed ❌',
+        contentTitle: 'export_failed_title'.tr,
         htmlFormatContentTitle: false,
       ),
     );
 
-    const DarwinNotificationDetails iOSDetails = DarwinNotificationDetails(
-      subtitle: 'Export Failed',
+    final DarwinNotificationDetails iOSDetails = DarwinNotificationDetails(
+      subtitle: 'export_failed_subtitle'.tr,
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
     );
 
-    const NotificationDetails notificationDetails = NotificationDetails(
+    final NotificationDetails notificationDetails = NotificationDetails(
       android: androidDetails,
       iOS: iOSDetails,
     );
@@ -230,13 +231,13 @@ class NotificationService {
     try {
       await _notificationsPlugin.show(
         2,
-        'Export Failed ❌',
-        'There was an error while exporting your CV',
+        'export_failed_title'.tr,
+        'export_error_brief_message'.tr,
         notificationDetails,
         payload: 'export_failed',
       );
     } catch (e) {
-      debugPrint('Error showing error notification: $e');
+      debugPrint('error_showing_error_notification'.tr);
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:toolkit/services/save_document_service.dart';
+import 'package:get/get.dart'; // GetX import for localization
 
 import '../models/file_model.dart';
 import '../utils/app_snackbar.dart';
@@ -54,19 +56,17 @@ class SaveFileService {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Permission Issue'),
-          content: const Text(
-              'Unable to save file. This might be due to permission restrictions on your device.\n\n'
-              'For Android 11+ users: Please allow the app to manage files and photos in your device settings.'),
+          title: Text('permission_issue'.tr),
+          content: Text('permission_issue_message'.tr),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel'),
+              child: Text('cancel'.tr),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('Open Settings'),
+              child: Text('open_settings'.tr),
               onPressed: () {
                 Navigator.of(context).pop();
                 openAppSettings();
@@ -137,7 +137,7 @@ class SaveFileService {
 
         String fileName = path.basename(imageFile.path);
         String uniqueFileName =
-            await _generateUniqueFileName(toolkitDir.path, fileName);
+        await _generateUniqueFileName(toolkitDir.path, fileName);
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
 
         await imageFile.copy(destinationPath);
@@ -145,17 +145,17 @@ class SaveFileService {
         // Save to Hive
         await _saveFileToHive(File(destinationPath), 'png');
 
-        AppSnackBar.show(context, message: 'Image saved to ${toolkitDir.path}');
+        AppSnackBar.show(context, message: 'image_saved_to'.trParams({'path': toolkitDir.path}));
       } else {
         await showPermissionHelperDialog(context);
       }
     } on PlatformException catch (e) {
       debugPrint('Platform Exception in saving PNG file: ${e.message}');
-      AppSnackBar.show(context, message: 'Failed to save image: ${e.message}');
+      AppSnackBar.show(context, message: 'failed_to_save_image'.trParams({'error': e.message ?? 'unknown_error'.tr}));
     } catch (e) {
       debugPrint('Error saving PNG file: $e');
       AppSnackBar.show(context,
-          message: 'Failed to save image: ${e.toString()}');
+          message: 'failed_to_save_image'.trParams({'error': e.toString()}));
     }
   }
 
@@ -174,7 +174,7 @@ class SaveFileService {
 
         String fileName = path.basename(zipFile.path);
         String uniqueFileName =
-            await _generateUniqueFileName(toolkitDir.path, fileName);
+        await _generateUniqueFileName(toolkitDir.path, fileName);
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
 
         await zipFile.copy(destinationPath);
@@ -183,18 +183,18 @@ class SaveFileService {
         await _saveFileToHive(File(destinationPath), 'zip');
 
         AppSnackBar.show(context,
-            message: 'ZIP file saved to ${toolkitDir.path}');
+            message: 'zip_file_saved_to'.trParams({'path': toolkitDir.path}));
       } else {
         await showPermissionHelperDialog(context);
       }
     } on PlatformException catch (e) {
       debugPrint('Platform Exception in saving ZIP file: ${e.message}');
       AppSnackBar.show(context,
-          message: 'Failed to save ZIP file: ${e.message}');
+          message: 'failed_to_save_zip'.trParams({'error': e.message ?? 'unknown_error'.tr}));
     } catch (e) {
       debugPrint('Error saving ZIP file: $e');
       AppSnackBar.show(context,
-          message: 'Failed to save ZIP file: ${e.toString()}');
+          message: 'failed_to_save_zip'.trParams({'error': e.toString()}));
     }
   }
 
@@ -243,7 +243,7 @@ class SaveFileService {
     } catch (e) {
       debugPrint('Error in saveFile: $e');
       AppSnackBar.show(context,
-          message: 'Failed to save file: ${e.toString()}');
+          message: 'failed_to_save_file'.trParams({'error': e.toString()}));
     }
   }
 
@@ -263,7 +263,7 @@ class SaveFileService {
 
         String fileName = path.basename(docFile.path);
         String uniqueFileName =
-            await _generateUniqueFileName(toolkitDir.path, fileName);
+        await _generateUniqueFileName(toolkitDir.path, fileName);
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
 
         await docFile.copy(destinationPath);
@@ -272,18 +272,18 @@ class SaveFileService {
         await _saveFileToHive(File(destinationPath), 'docx');
 
         AppSnackBar.show(context,
-            message: 'Document saved to ${toolkitDir.path}');
+            message: 'document_saved_to'.trParams({'path': toolkitDir.path}));
       } else {
         await showPermissionHelperDialog(context);
       }
     } on PlatformException catch (e) {
       debugPrint('Platform Exception in saving document file: ${e.message}');
       AppSnackBar.show(context,
-          message: 'Failed to save document: ${e.message}');
+          message: 'failed_to_save_document'.trParams({'error': e.message ?? 'unknown_error'.tr}));
     } catch (e) {
       debugPrint('Error saving document file: $e');
       AppSnackBar.show(context,
-          message: 'Failed to save document: ${e.toString()}');
+          message: 'failed_to_save_document'.trParams({'error': e.toString()}));
     }
   }
 
@@ -302,7 +302,7 @@ class SaveFileService {
 
         String fileName = path.basename(pdfFile.path);
         String uniqueFileName =
-            await _generateUniqueFileName(toolkitDir.path, fileName);
+        await _generateUniqueFileName(toolkitDir.path, fileName);
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
 
         await pdfFile.copy(destinationPath);
@@ -310,16 +310,16 @@ class SaveFileService {
         // Save to Hive
         await _saveFileToHive(File(destinationPath), 'pdf');
 
-        AppSnackBar.show(context, message: 'PDF saved to ${toolkitDir.path}');
+        AppSnackBar.show(context, message: 'pdf_saved_to'.trParams({'path': toolkitDir.path}));
       } else {
         await showPermissionHelperDialog(context);
       }
     } on PlatformException catch (e) {
       debugPrint('Platform Exception in saving PDF file: ${e.message}');
-      AppSnackBar.show(context, message: 'Failed to save PDF: ${e.message}');
+      AppSnackBar.show(context, message: 'failed_to_save_pdf'.trParams({'error': e.message ?? 'unknown_error'.tr}));
     } catch (e) {
       debugPrint('Error saving PDF file: $e');
-      AppSnackBar.show(context, message: 'Failed to save PDF: ${e.toString()}');
+      AppSnackBar.show(context, message: 'failed_to_save_pdf'.trParams({'error': e.toString()}));
     }
   }
 
@@ -339,23 +339,22 @@ class SaveFileService {
 
         String fileName = path.basename(file.path);
         String uniqueFileName =
-            await _generateUniqueFileName(toolkitDir.path, fileName);
+        await _generateUniqueFileName(toolkitDir.path, fileName);
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
 
         await file.copy(destinationPath);
 
         // Save to Hive
-        await _saveFileToHive(File(destinationPath),
-            path.extension(file.path).replaceAll('.', ''));
+        await _saveFileToHive(File(destinationPath), path.extension(file.path).replaceAll('.', ''));
 
-        AppSnackBar.show(context, message: 'File saved to ${toolkitDir.path}');
+        AppSnackBar.show(context, message: 'file_saved_to'.trParams({'path': toolkitDir.path}));
       } else {
         await showPermissionHelperDialog(context);
       }
     } catch (e) {
       debugPrint('Error saving generic file: $e');
       AppSnackBar.show(context,
-          message: 'Failed to save file: ${e.toString()}');
+          message: 'failed_to_save_file'.trParams({'error': e.toString()}));
     }
   }
 
@@ -376,14 +375,14 @@ class SaveFileService {
         // Save to Hive
         await _saveFileToHive(File(savedFilePath), fileType);
 
-        AppSnackBar.show(context, message: 'File saved successfully');
+        AppSnackBar.show(context, message: 'file_saved_successfully'.tr);
       } else {
-        AppSnackBar.show(context, message: 'File saving canceled');
+        AppSnackBar.show(context, message: 'file_saving_canceled'.tr);
       }
     } catch (e) {
       debugPrint('Error in _saveFileWithDialog: $e');
       AppSnackBar.show(context,
-          message: 'Failed to save file: ${e.toString()}');
+          message: 'failed_to_save_file'.trParams({'error': e.toString()}));
     }
   }
 }

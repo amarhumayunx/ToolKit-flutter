@@ -259,10 +259,6 @@ class _WordFormatSelectionScreenState extends State<WordFormatSelectionScreen> {
                 _buildFormatOption('Image', 'assets/icons/convert_img_icon.svg'),
               ],
             ),
-            if (selectedFormat != null) ...[
-              const SizedBox(height: 20),
-              _buildFormatInfo(),
-            ],
             const Spacer(),
             _buildConvertButton(),
           ],
@@ -280,8 +276,7 @@ class _WordFormatSelectionScreenState extends State<WordFormatSelectionScreen> {
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
-            offset: const Offset(0, 2),
-            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
@@ -289,19 +284,19 @@ class _WordFormatSelectionScreenState extends State<WordFormatSelectionScreen> {
         child: Row(
           children: [
             Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(8.0),
               child: Container(
                 width: 50,
                 height: 60,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.blue[50],
+                  borderRadius: BorderRadius.circular(4),
+                  color: Colors.transparent,
                 ),
                 child: Center(
-                  child: Icon(
-                    Icons.description,
-                    size: 30,
-                    color: Colors.blue[700],
+                  child: SvgPicture.asset(
+                    'assets/icons/word_icon.svg',
+                    width: 30,
+                    height: 30,
                   ),
                 ),
               ),
@@ -310,7 +305,7 @@ class _WordFormatSelectionScreenState extends State<WordFormatSelectionScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                padding: const EdgeInsets.only(right: 15),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -318,43 +313,26 @@ class _WordFormatSelectionScreenState extends State<WordFormatSelectionScreen> {
                     Text(
                       fileName,
                       style: GoogleFonts.inter(
-                        fontSize: 12,
+                        fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: Colors.black,
                       ),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '$formattedDate | $formattedTime',
+                      '$formattedDate | $formattedTime | $fileSize MB',
                       style: GoogleFonts.inter(
-                        fontSize: 10,
+                        fontSize: 9,
                         fontWeight: FontWeight.w400,
                         color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      fileSize,
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.blue[700],
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Icon(
-                Icons.more_vert,
-                size: 18,
-                color: Colors.grey[600],
-              ),
-            )
           ],
         ),
       ),
@@ -411,49 +389,6 @@ class _WordFormatSelectionScreenState extends State<WordFormatSelectionScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildFormatInfo() {
-    String infoText = '';
-    IconData infoIcon = Icons.info_outline;
-
-    switch (selectedFormat) {
-      case 'PDF':
-        infoIcon = Icons.picture_as_pdf;
-        break;
-      case 'Image':
-        infoIcon = Icons.image;
-        break;
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            infoIcon,
-            size: 20,
-            color: AppColors.primary,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              infoText,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: AppColors.primary.withOpacity(0.8),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

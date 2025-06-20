@@ -39,7 +39,6 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
 
       if (result != null) {
         final file = File(result.files.single.path!);
-        // Double check the extension in case the platform didn't filter properly
         if (result.files.single.extension?.toLowerCase() != 'pdf') {
           setState(() {
             _errorMessage = 'please_select_pdf_only'.tr;
@@ -73,7 +72,6 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
       return;
     }
 
-    // Navigate to format selection screen with a callback
     final shouldClearFile = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -84,7 +82,6 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
       ),
     );
 
-    // Clear the file if needed
     if (shouldClearFile == true) {
       _clearSelectedFile();
     }
@@ -172,7 +169,6 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
             padding: const EdgeInsets.all(16.0),
             child: InkWell(
               onTap: _selectedPdf == null ? _pickPdf : null,
-              // Only allow tap when no PDF is selected
               child: DottedBorder(
                 color: AppColors.primary,
                 strokeWidth: 1.5,

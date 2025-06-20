@@ -51,7 +51,6 @@ class _ConvertWordToPdfMainScreenState extends State<ConvertWordToPdfMainScreen>
           return;
         }
 
-        // For now, we'll primarily support DOCX format
         if (extension == 'doc') {
           setState(() {
             _errorMessage = 'docx_format_preferred'.tr;
@@ -117,7 +116,7 @@ class _ConvertWordToPdfMainScreenState extends State<ConvertWordToPdfMainScreen>
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const CustomSvgImage(
-                      imagePath: 'assets/images/convert_word_img.svg'),
+                      imagePath: 'assets/images/convert_pdf_img.svg'),
                   const SizedBox(height: 30),
                   InfoCard(
                       title: 'convert_word_to_pdf_format'.tr,

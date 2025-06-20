@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/save_zip_png_service.dart';
 import '../../utils/app_colors.dart';
@@ -16,7 +17,7 @@ class SaveFileButton extends StatelessWidget {
     super.key,
     required this.filePath,  // Updated parameter
     required this.fileType,
-    this.buttonText = 'Save',
+    this.buttonText = 'save',
     this.width,
     this.onSaveCompleted,
   });
@@ -54,7 +55,7 @@ class SaveFileButton extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
           ),
           child: Text(
-            buttonText,
+            buttonText.tr,
             style: GoogleFonts.inter(
               color: Colors.white,
               fontSize: 16,

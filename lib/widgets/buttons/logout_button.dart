@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../utils/app_colors.dart';
 
@@ -48,7 +49,7 @@ class LogoutButton extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  "Logout",
+                  "logout".tr,
                   style: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: 16,

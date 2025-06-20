@@ -61,14 +61,14 @@ class _VerifyPasswordScreenState extends State<VerifyPasswordScreen> {
           _isError = true;
           _password = '';
         });
-        AppSnackBar.show(context, message: 'Incorrect password. Please try again.');
+        AppSnackBar.show(context, message: 'incorrect_password_try_again'.tr);
       }
     } catch (e) {
       setState(() {
         _isError = true;
         _password = '';
       });
-      AppSnackBar.show(context, message: 'Error verifying password. Please try again.');
+      AppSnackBar.show(context, message: 'error_verifying_password'.tr);
     } finally {
       if (mounted) {
         setState(() {
@@ -167,7 +167,7 @@ class _VerifyPasswordScreenState extends State<VerifyPasswordScreen> {
               children: [
                 const SizedBox(height: 60),
                 Text(
-                  'Enter your 4-Digit Code',
+                  'enter_4_digit_code'.tr,
                   style: GoogleFonts.inter(
                     fontSize: 24,
                     fontWeight: FontWeight.w600,
@@ -176,7 +176,7 @@ class _VerifyPasswordScreenState extends State<VerifyPasswordScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Enter your password to access locked files',
+                  'enter_password_access_locked_files'.tr,
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     color: Colors.grey,
@@ -231,8 +231,8 @@ class _VerifyPasswordScreenState extends State<VerifyPasswordScreen> {
           if (_isLoading)
             Container(
               color: Colors.black.withOpacity(0.3),
-              child:  const Center(
-                child: CircularProgressIndicator( color:  AppColors.primary,),
+              child: const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
               ),
             ),
         ],

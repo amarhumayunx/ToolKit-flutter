@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_flutter/adapters.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -57,7 +58,7 @@ class SaveDocumentService {
         // Get the Toolkit folder path
         final toolkitDir = await _createToolkitFolder();
         if (toolkitDir == null) {
-          print('Error: Could not access Toolkit folder');
+          print('error_toolkit_folder_access'.tr);
           return false;
         }
 
@@ -103,7 +104,7 @@ class SaveDocumentService {
 
       return false;
     } catch (e) {
-      print('Error toggling file lock: $e');
+      print('error_toggle_file_lock'.tr);
       return false;
     }
   }
@@ -117,7 +118,7 @@ class SaveDocumentService {
           .where((file) => file.isLocked == showLocked)
           .toList();
     } catch (e) {
-      print('Error getting files by lock status: $e');
+      print('error_get_files_by_lock_status'.tr);
       return [];
     }
   }
@@ -151,7 +152,7 @@ class SaveDocumentService {
 
       return true;
     } catch (e) {
-      print('Error deleting file: $e');
+      print('error_delete_file'.tr);
       return false;
     }
   }
@@ -172,14 +173,11 @@ class SaveDocumentService {
 
       return null;
     } catch (e) {
-      print('Error renaming file: $e');
+      print('error_rename_file'.tr);
       return null;
     }
   }
 
-  // ... (keep all your existing methods for permission checking, folder creation, etc.)
-
-  /// Checks if storage permission is available or needed
   static Future<bool> checkAndRequestStoragePermission(
       BuildContext context) async {
     if (Platform.isAndroid) {
@@ -215,19 +213,17 @@ class SaveDocumentService {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Permission Issue'),
-          content: const Text(
-              'Unable to save document. This might be due to permission restrictions on your device.\n\n'
-                  'For Android 11+ users: Please allow the app to manage all files in your device settings.'),
+          title: Text('permission_issue_title'.tr),
+          content: Text('permission_issue_content'.tr),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel'),
+              child: Text('cancel'.tr),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('Open Settings'),
+              child: Text('open_settings'.tr),
               onPressed: () {
                 Navigator.of(context).pop();
                 openAppSettings();
@@ -262,7 +258,7 @@ class SaveDocumentService {
 
       return toolkitDir;
     } catch (e) {
-      debugPrint('Error creating Toolkit folder: $e');
+      debugPrint('error_create_toolkit_folder'.tr);
       return null;
     }
   }
@@ -274,7 +270,7 @@ class SaveDocumentService {
     try {
       String baseFileName = path.basename(documentFile.path);
       if (!baseFileName.toLowerCase().endsWith('.docx')) {
-        baseFileName = 'Document.docx';
+        baseFileName = 'document_default_name'.tr;
       }
 
       String uniqueFileName;
@@ -294,16 +290,16 @@ class SaveDocumentService {
       final savedFilePath = await FlutterFileDialog.saveFile(params: params);
 
       if (savedFilePath != null) {
-        AppSnackBar.show(context, message: 'Document saved successfully');
+        AppSnackBar.show(context, message: 'document_saved_successfully'.tr);
         return savedFilePath;
       } else {
-        AppSnackBar.show(context, message: 'Document saving canceled');
+        AppSnackBar.show(context, message: 'document_saving_canceled'.tr);
         return null;
       }
     } catch (e) {
-      debugPrint('Error in _saveFileWithDialog: $e');
+      debugPrint('error_save_file_dialog'.tr);
       AppSnackBar.show(context,
-          message: 'Failed to save document: ${e.toString()}');
+          message: 'failed_to_save_document'.tr);
       return null;
     }
   }
@@ -318,7 +314,7 @@ class SaveDocumentService {
       }
       return false;
     } catch (e) {
-      debugPrint('Error checking file existence: $e');
+      debugPrint('error_check_file_existence'.tr);
       return false;
     }
   }
@@ -339,7 +335,7 @@ class SaveDocumentService {
         if (toolkitDir != null) {
           String baseFileName = path.basename(documentFile.path);
           if (!baseFileName.toLowerCase().endsWith('.docx')) {
-            baseFileName = 'Document.docx';
+            baseFileName = 'document_default_name'.tr;
           }
 
           String uniqueFileName;
@@ -348,8 +344,7 @@ class SaveDocumentService {
 
             if (await _fileExistsInToolkitFolder(uniqueFileName)) {
               AppSnackBar.show(context,
-                  message:
-                  'File name already exists. Please choose a different name.');
+                  message: 'file_name_already_exists'.tr);
               return false;
             }
           } else {
@@ -363,7 +358,7 @@ class SaveDocumentService {
           savedFilePath = destinationPath;
 
           AppSnackBar.show(context,
-              message: 'Document saved to ${toolkitDir.path}');
+              message: 'document_saved_to_location'.tr);
         } else {
           savedFilePath = await _saveFileWithDialog(context, documentFile,
               skipTimestamp: skipTimestamp);
@@ -379,7 +374,7 @@ class SaveDocumentService {
           name: path.basename(savedFilePath),
           path: savedFilePath,
           date: DateTime.now(),
-          size: '${fileSize.toStringAsFixed(1)} MB',
+          size: '${fileSize.toStringAsFixed(1)} ${'mb'.tr}',
           isFavorite: false,
           isLocked: false,
           isEncrypted: false,
@@ -392,10 +387,10 @@ class SaveDocumentService {
       }
     } on PlatformException catch (e) {
       AppSnackBar.show(context,
-          message: 'Failed to save document: ${e.message}');
+          message: 'failed_to_save_document'.tr);
       return null;
     } catch (e) {
-      AppSnackBar.show(context, message: 'Failed to save document: $e');
+      AppSnackBar.show(context, message: 'failed_to_save_document'.tr);
       return null;
     }
   }
