@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive_ce/hive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce_flutter/adapters.dart';
 import 'package:intl/intl.dart';
@@ -78,10 +77,8 @@ class _HomeScreenState extends State<HomeScreen> {
         context,
         message: 'press_again_to_exit'.tr,
       );
-
       return false;
     }
-
     SystemNavigator.pop();
     return true;
   }
@@ -307,7 +304,7 @@ class _HomeContentViewState extends State<HomeContentView>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          SectionHeading(title: 'Recents'.tr),
+                          SectionHeading(title: 'recents'.tr),
                           ValueListenableBuilder(
                             valueListenable:
                                 filesBox?.listenable() ?? ValueNotifier(null),
@@ -317,7 +314,7 @@ class _HomeContentViewState extends State<HomeContentView>
                                   ? GestureDetector(
                                       onTap: _navigateToRecentTab,
                                       child: Text(
-                                        'See All',
+                                        'see_all'.tr,
                                         style: GoogleFonts.inter(
                                           fontSize: 14,
                                           color: AppColors.primary,
@@ -353,7 +350,7 @@ class _HomeContentViewState extends State<HomeContentView>
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 20),
                                 child: Text(
-                                  'No recent documents found',
+                                  'no_recent_documents_found'.tr,
                                   style: GoogleFonts.inter(
                                     fontSize: 14,
                                     color: Colors.grey[600],

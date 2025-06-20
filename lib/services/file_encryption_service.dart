@@ -69,7 +69,7 @@ class FileEncryptionService {
       // Generate unique encrypted filename
       final originalFileName = path.basename(originalFilePath);
       final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-      final encryptedFileName = 'enc_${timestamp}_${originalFileName}.encrypted';
+      final encryptedFileName = 'enc_${timestamp}_$originalFileName.encrypted';
       final encryptedFilePath = '${encryptedDir.path}/$encryptedFileName';
 
       // Write encrypted file

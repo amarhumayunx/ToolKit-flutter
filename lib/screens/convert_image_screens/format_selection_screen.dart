@@ -100,9 +100,6 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildFormatOption('word'.tr, 'assets/icons/word_icon.svg'),
-                _buildFormatOption('excel'.tr, 'assets/icons/excel_icon.svg'),
-                _buildFormatOption(
-                    'powerpoint'.tr, 'assets/icons/powerpoint_icon.svg'),
                 _buildFormatOption(
                   'pdf'.tr,
                   'assets/icons/convert_pdf.svg',

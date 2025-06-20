@@ -142,7 +142,7 @@ class _WebsitePageState extends State<WebsitePage> {
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
 
     return Column(

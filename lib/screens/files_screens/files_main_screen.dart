@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart'; // GetX ke liye import karna zaroori hai
 import '../../models/file_model.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/settings_widgets/all_files_tab.dart';
@@ -59,8 +60,8 @@ class _FilesMainScreenState extends State<FilesMainScreen>
 
         if (sizeInMB > 2) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('File size must be less than 2MB'),
+            SnackBar(
+              content: Text('file_size_limit_error'.tr), // Localized text
               backgroundColor: Colors.red,
             ),
           );
@@ -94,7 +95,7 @@ class _FilesMainScreenState extends State<FilesMainScreen>
                       autofocus: true,
                       cursorColor: AppColors.primary,
                       decoration: InputDecoration(
-                        hintText: 'Search files...',
+                        hintText: 'search_files_hint'.tr, // Localized hint text
                         hintStyle: GoogleFonts.inter(
                           fontSize: 14,
                           color: Colors.grey[500],
@@ -113,7 +114,7 @@ class _FilesMainScreenState extends State<FilesMainScreen>
                       children: [
                         const SizedBox(width: 8),
                         Text(
-                          'Files',
+                          'files_title'.tr, // Localized title
                           style: GoogleFonts.inter(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -170,10 +171,10 @@ class _FilesMainScreenState extends State<FilesMainScreen>
                   return null;
                 },
               ),
-              tabs: const [
-                Tab(text: 'RECENTS'),
-                Tab(text: 'FAVOURITES'),
-                Tab(text: 'ALL'),
+              tabs: [
+                Tab(text: 'recents_tab'.tr), // Localized tab text
+                Tab(text: 'favourites_tab'.tr), // Localized tab text
+                Tab(text: 'all_tab'.tr), // Localized tab text
               ],
             ),
             const SizedBox(height: 20),

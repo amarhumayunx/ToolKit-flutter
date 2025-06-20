@@ -309,13 +309,6 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  '${'selected_file'.tr}: $_fileName',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
               if (_isPdfFile && _isLoadingPreviews)
                 Padding(
                   padding: const EdgeInsets.all(8.0),

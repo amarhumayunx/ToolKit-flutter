@@ -98,7 +98,7 @@ class _SaveScreenState extends State<SaveScreen>
     } catch (e) {
       if (mounted) {
         AppSnackBar.show(context,
-            message: 'error_converting_file'.tr + ': ${e.toString()}');
+            message: '${'error_converting_file'.tr}: ${e.toString()}');
       }
     }
   }
@@ -202,12 +202,12 @@ class _SaveScreenState extends State<SaveScreen>
         final result = await OpenFile.open(_currentFilePath);
         if (result.type != ResultType.done && mounted) {
           AppSnackBar.show(context,
-              message: 'cannot_open_file'.tr + ': ${result.message}');
+              message: '${'cannot_open_file'.tr}: ${result.message}');
         }
       } catch (e) {
         if (mounted) {
           AppSnackBar.show(context,
-              message: 'error_opening_file'.tr + ': ${e.toString()}');
+              message: '${'error_opening_file'.tr}: ${e.toString()}');
         }
       }
     } else if (mounted) {
@@ -240,7 +240,7 @@ class _SaveScreenState extends State<SaveScreen>
         Navigator.of(context).popUntil((route) => route.isFirst);
       } catch (e) {
         AppSnackBar.show(context,
-            message: 'failed_to_save_file'.tr + ': ${e.toString()}');
+            message: '${'failed_to_save_file'.tr}: ${e.toString()}');
       }
     }
   }
@@ -265,7 +265,7 @@ class _SaveScreenState extends State<SaveScreen>
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'converted_file'.tr + ':',
+                        '${'converted_file'.tr}:',
                         style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,

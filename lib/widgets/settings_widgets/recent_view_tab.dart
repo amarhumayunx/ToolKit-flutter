@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'package:get/get.dart'; // Add this import for .tr extension
 import 'package:toolkit/widgets/settings_widgets/sort_btn.dart';
 import 'package:toolkit/widgets/settings_widgets/result_document_container.dart';
 import '../../models/file_model.dart';
@@ -80,12 +81,12 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
         setState(() {});
         AppSnackBar.show(context,
             message: updatedFile.isLocked
-                ? 'File locked and encrypted'
-                : 'File unlocked and decrypted');
+                ? 'file_locked_encrypted'.tr  // Localized
+                : 'file_unlocked_decrypted'.tr); // Localized
       } else {
         // Revert the lock status if encryption/decryption failed
         await filesBox.putAt(index, file);
-        AppSnackBar.show(context, message: 'Failed to toggle file lock');
+        AppSnackBar.show(context, message: 'failed_toggle_file_lock'.tr); // Localized
       }
     }
   }
@@ -105,7 +106,6 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
 
     return allFilesWithIndex.take(10).toList();
   }
-
 
   Future<void> _renameFile(int index, String newPath) async {
     try {
@@ -133,9 +133,9 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
             ));
       });
 
-      AppSnackBar.show(context, message: 'File renamed successfully');
+      AppSnackBar.show(context, message: 'file_renamed_successfully'.tr); // Localized
     } catch (e) {
-      AppSnackBar.show(context, message: 'Error renaming file: $e');
+      AppSnackBar.show(context, message: '${'error_renaming_file'.tr}: $e'); // Localized
     }
   }
 
@@ -144,10 +144,8 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
       filesBox.deleteAt(index);
     });
 
-    AppSnackBar.show(context, message: 'File deleted');
+    AppSnackBar.show(context, message: 'file_deleted'.tr); // Localized
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +192,7 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 100),
                     child: Text(
-                      'No recent documents found',
+                      'no_recent_documents_found'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         color: Colors.grey[600],
@@ -211,8 +209,8 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
                     child: Column(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(left: 6, right: 6),
-                           child:  ResultDocumentContainer(
+                            padding: const EdgeInsets.only(left: 6, right: 6),
+                            child:  ResultDocumentContainer(
                               documentName: file.name,
                               date: DateFormat('yy/MM/dd').format(file.date),
                               time: DateFormat('h:mma').format(file.date),
@@ -220,12 +218,12 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
                               isFavorite: file.isFavorite,
                               isLocked: file.isLocked,
                               filePath: file.path,
-                              isSelectable: widget.isSelectingFiles, // Add this
+                              isSelectable: widget.isSelectingFiles,
                               onFavoriteToggle: () => _toggleFavorite(index),
                               onDelete: () => _deleteFile(index),
                               onFileRenamed: (newPath) => _renameFile(index, newPath),
                               onLockToggle: () => _toggleLock(index),
-                              onTap: widget.isSelectingFiles ? () => widget.onFileSelected?.call(file, index) : null, // Add this
+                              onTap: widget.isSelectingFiles ? () => widget.onFileSelected?.call(file, index) : null,
                             )
                         ),
                         const SizedBox(height: 12),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../provider/profile_provider.dart';
@@ -105,7 +106,7 @@ class _ContinueWithGoogleScreenState extends State<ContinueWithGoogleScreen> {
               children: [
                 const Spacer(flex: 2),
                 Text(
-                  ' Smart Tools.\nOne Tap Away',
+                  'smart_tools_tagline'.tr,
                   style: GoogleFonts.inter(
                     fontSize: 48,
                     fontWeight: FontWeight.w500,
@@ -156,8 +157,8 @@ class _ContinueWithGoogleScreenState extends State<ContinueWithGoogleScreen> {
                           const SizedBox(width: 12),
                           Text(
                             _isLoading
-                                ? 'Signing in...'
-                                : 'Continue with Google',
+                                ? 'signing_in'.tr
+                                : 'continue_with_google'.tr,
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w400,
@@ -177,7 +178,7 @@ class _ContinueWithGoogleScreenState extends State<ContinueWithGoogleScreen> {
                           Navigator.pop(context);
                         },
                   child: Text(
-                    'Skip for now',
+                    'skip_for_now'.tr,
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -258,7 +259,7 @@ class _ContinueWithGoogleScreenState extends State<ContinueWithGoogleScreen> {
     } catch (e) {
       if (mounted) {
         AppSnackBar.show(context,
-            message: 'Failed to sign in with Google. Please try again.');
+            message: 'google_signin_failed'.tr);
       }
     } finally {
       if (mounted) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
@@ -28,7 +29,7 @@ class AllFilesView extends StatefulWidget {
 
 class _AllFilesViewState extends State<AllFilesView> {
   late Box<FileModel> filesBox;
-  String _sortBy = 'Recent';
+  String _sortBy = 'recent'.tr;
   bool _isLoading = true;
 
   @override
@@ -85,14 +86,14 @@ class _AllFilesViewState extends State<AllFilesView> {
         AppSnackBar.show(
           context,
           message: updatedFile.isLocked
-              ? 'File locked and encrypted'
-              : 'File unlocked and decrypted',
+              ? 'file_locked_encrypted'.tr
+              : 'file_unlocked_decrypted'.tr,
         );
       } else {
         await filesBox.putAt(index, file);
         AppSnackBar.show(
           context,
-          message: 'Failed to toggle file lock',
+          message: 'failed_toggle_file_lock'.tr,
         );
       }
     }
@@ -108,7 +109,7 @@ class _AllFilesViewState extends State<AllFilesView> {
 
         AppSnackBar.show(
           context,
-          message: 'File deleted successfully',
+          message: 'file_deleted_successfully'.tr,
         );
       }
     }
@@ -181,7 +182,7 @@ class _AllFilesViewState extends State<AllFilesView> {
     if (!_isFileSizeValid(file.size)) {
       AppSnackBar.show(
         context,
-        message: 'File size exceeds 2MB limit. Please select a smaller file.',
+        message: 'file_size_exceeds_limit'.tr,
       );
       return;
     }
@@ -200,9 +201,9 @@ class _AllFilesViewState extends State<AllFilesView> {
         .contains(widget.searchQuery.toLowerCase()))
         .toList();
 
-    if (_sortBy == 'Name') {
+    if (_sortBy == 'name'.tr) {
       allFiles.sort((a, b) => a.name.compareTo(b.name));
-    } else if (_sortBy == 'Date') {
+    } else if (_sortBy == 'date'.tr) {
       allFiles.sort((a, b) => b.date.compareTo(a.date));
     }
 
@@ -235,7 +236,7 @@ class _AllFilesViewState extends State<AllFilesView> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 100),
                     child: Text(
-                      'No files found',
+                      'no_files_found'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         color: Colors.grey[600],

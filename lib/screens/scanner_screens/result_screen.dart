@@ -76,7 +76,7 @@ class _ResultScreenState extends State<ResultScreen>
       // Use the current file path instead of the original path
       await OpenFile.open(_currentFilePath);
     } catch (e) {
-      AppSnackBar.show(context, message: 'failed_to_open_document'.tr + ': $e');
+      AppSnackBar.show(context, message: '${'failed_to_open_document'.tr}: $e');
     }
   }
 
@@ -117,8 +117,9 @@ class _ResultScreenState extends State<ResultScreen>
     final fileProvider = Provider.of<FileProvider>(context, listen: false);
     fileProvider.clearAllFiles();
 
-    Navigator.pop(context);
-    Navigator.pop(context);
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
     AppSnackBar.show(context, message: 'file_deleted_successfully'.tr);
   }
 
@@ -127,6 +128,17 @@ class _ResultScreenState extends State<ResultScreen>
     setState(() {
       _currentFilePath = newFilePath;
     });
+  }
+
+  // Method to handle save completion and clear files
+  void _handleSaveCompleted() {
+    // Clear all files from provider after successful save
+    final fileProvider = Provider.of<FileProvider>(context, listen: false);
+    fileProvider.clearAllFiles();
+
+    // Navigate back to previous screens
+    Navigator.of(context).pop(true);
+    Navigator.of(context).pop(true);
   }
 
   @override
@@ -179,9 +191,7 @@ class _ResultScreenState extends State<ResultScreen>
               child: SaveDocumentButton(
                 documentFile: File(_currentFilePath),
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                onSaveCompleted: () {
-                  Navigator.of(context).pop(true);
-                },
+                onSaveCompleted: _handleSaveCompleted,
               ),
             ),
         ],

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
@@ -15,7 +16,6 @@ class FavoritesView extends StatefulWidget {
   final Function(FileModel, int)? onFileSelected;
   final bool isSelectingFiles;
 
-
   const FavoritesView({super.key, required this.searchQuery,this.onFileSelected,
     this.isSelectingFiles = false,});
 
@@ -25,7 +25,7 @@ class FavoritesView extends StatefulWidget {
 
 class _FavoritesViewState extends State<FavoritesView> {
   late Box<FileModel> filesBox;
-  String _sortBy = 'Recent';
+  String _sortBy = 'recent'.tr; // Localized
   bool _isLoading = true;
 
   @override
@@ -77,18 +77,18 @@ class _FavoritesViewState extends State<FavoritesView> {
 
       // Then handle encryption/decryption
       final success =
-          await SaveDocumentService.toggleFileLock(updatedFile, index);
+      await SaveDocumentService.toggleFileLock(updatedFile, index);
 
       if (success) {
         setState(() {});
         AppSnackBar.show(context,
             message: updatedFile.isLocked
-                ? 'File locked and removed from favorites'
-                : 'File unlocked and decrypted');
+                ? 'file_locked_removed_favorites'.tr
+                : 'file_unlocked_decrypted'.tr);
       } else {
         // Revert the lock status if encryption/decryption failed
         await filesBox.putAt(index, file);
-        AppSnackBar.show(context, message: 'Failed to toggle file lock');
+        AppSnackBar.show(context, message: 'failed_toggle_file_lock'.tr);
       }
     }
   }
@@ -136,9 +136,9 @@ class _FavoritesViewState extends State<FavoritesView> {
             ));
       });
 
-      AppSnackBar.show(context, message: 'File renamed successfully');
+      AppSnackBar.show(context, message: 'file_renamed_successfully'.tr);
     } catch (e) {
-      AppSnackBar.show(context, message: 'Error renaming file: $e');
+      AppSnackBar.show(context, message: '${'error_renaming_file'.tr}: $e');
     }
   }
 
@@ -146,7 +146,7 @@ class _FavoritesViewState extends State<FavoritesView> {
     setState(() {
       filesBox.deleteAt(index);
     });
-    AppSnackBar.show(context, message: 'File deleted');
+    AppSnackBar.show(context, message: 'file_deleted'.tr);
   }
 
   @override
@@ -155,13 +155,13 @@ class _FavoritesViewState extends State<FavoritesView> {
 
     final filteredFiles = favoriteFilesWithIndex
         .where((entry) => entry.value.name
-            .toLowerCase()
-            .contains(widget.searchQuery.toLowerCase()))
+        .toLowerCase()
+        .contains(widget.searchQuery.toLowerCase()))
         .toList();
 
-    if (_sortBy == 'Name') {
+    if (_sortBy == 'name'.tr) {
       filteredFiles.sort((a, b) => a.value.name.compareTo(b.value.name));
-    } else if (_sortBy == 'Date') {
+    } else if (_sortBy == 'date'.tr) {
       filteredFiles.sort((a, b) => b.value.date.compareTo(a.value.date));
     }
 
@@ -188,55 +188,55 @@ class _FavoritesViewState extends State<FavoritesView> {
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : ListView(
-                  children: [
-                    if (filteredFiles.isEmpty)
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 100),
-                          child: Text(
-                            'No favorites found',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
-                          ),
+            children: [
+              if (filteredFiles.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 100),
+                    child: Text(
+                      'no_favorites_found'.tr,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+                )
+              else
+                ...filteredFiles.map((entry) {
+                  final index = entry.key;
+                  final file = entry.value;
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Column(
+                      children: [
+                        Padding(
+                            padding:
+                            const EdgeInsets.only(left: 6, right: 6),
+                            child:ResultDocumentContainer(
+                              documentName: file.name,
+                              date: DateFormat('yy/MM/dd').format(file.date),
+                              time: DateFormat('h:mma').format(file.date),
+                              size: file.size,
+                              isFavorite: file.isFavorite,
+                              isLocked: file.isLocked,
+                              filePath: file.path,
+                              isSelectable: widget.isSelectingFiles, // Add this
+                              onFavoriteToggle: () => _toggleFavorite(index),
+                              onDelete: () => _deleteFile(index),
+                              onFileRenamed: (newPath) => _renameFile(index, newPath),
+                              onLockToggle: () => _toggleLock(index),
+                              onTap: widget.isSelectingFiles ? () => widget.onFileSelected?.call(file, index) : null,
+                            )
                         ),
-                      )
-                    else
-                      ...filteredFiles.map((entry) {
-                        final index = entry.key;
-                        final file = entry.value;
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 5),
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 6, right: 6),
-                                child:ResultDocumentContainer(
-                                  documentName: file.name,
-                                  date: DateFormat('yy/MM/dd').format(file.date),
-                                  time: DateFormat('h:mma').format(file.date),
-                                  size: file.size,
-                                  isFavorite: file.isFavorite,
-                                  isLocked: file.isLocked,
-                                  filePath: file.path,
-                                  isSelectable: widget.isSelectingFiles, // Add this
-                                  onFavoriteToggle: () => _toggleFavorite(index),
-                                  onDelete: () => _deleteFile(index),
-                                  onFileRenamed: (newPath) => _renameFile(index, newPath),
-                                  onLockToggle: () => _toggleLock(index),
-                                  onTap: widget.isSelectingFiles ? () => widget.onFileSelected?.call(file, index) : null, // Add this
-                                )
-                              ),
-                              const SizedBox(height: 12),
-                            ],
-                          ),
-                        );
-                      }),
-                    const SizedBox(height: 100),
-                  ],
-                ),
+                        const SizedBox(height: 12),
+                      ],
+                    ),
+                  );
+                }),
+              const SizedBox(height: 100),
+            ],
+          ),
         ),
       ],
     );

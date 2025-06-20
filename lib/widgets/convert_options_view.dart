@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:toolkit/screens/convert_word_screen/convert_word_main_screen.dart';
 import '../screens/convert_image_screens/convert_img_main_screen.dart';
 import '../screens/convert_pdf_screens/convert_pdf_main_screen.dart';
 import 'tool_item.dart';
@@ -16,7 +17,10 @@ class ConvertOptionsView extends StatelessWidget {
       'icon': 'assets/icons/convert_img_icon.svg',
       'id': 'convert_image',
     },
-    // Add more conversion options here as needed
+    {
+      'icon': 'assets/icons/word_icon.svg',
+      'id':'convert_word',
+    },
   ];
 
   void _navigateToConvertPage(BuildContext context, String convertId) {
@@ -37,6 +41,12 @@ class ConvertOptionsView extends StatelessWidget {
           ),
         );
         break;
+      case 'convert_word':
+        Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ConvertWordToPdfMainScreen(),
+            )
+        );
       default:
       // Handle unknown conversion option
         ScaffoldMessenger.of(context).showSnackBar(
