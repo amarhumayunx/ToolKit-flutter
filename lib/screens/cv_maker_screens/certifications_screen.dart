@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:get/get.dart'; // Add this import for .tr extension
+import 'package:get/get.dart';
 import '../../models/certification_model.dart';
 import '../../provider/certification_provider.dart';
 import '../../utils/app_colors.dart';
@@ -23,11 +23,16 @@ class CertificationPage extends StatefulWidget {
 
 class _CertificationPageState extends State<CertificationPage> {
   final TextEditingController _certificationNameController =
-  TextEditingController();
+      TextEditingController();
   final TextEditingController _organizationNameController =
-  TextEditingController();
+      TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+
+  // Add focus nodes for better focus management
+  final FocusNode _certificationNameFocus = FocusNode();
+  final FocusNode _organizationNameFocus = FocusNode();
+  final FocusNode _descriptionFocus = FocusNode();
 
   bool hasCertification = false;
   bool showForm = false;
@@ -49,7 +54,7 @@ class _CertificationPageState extends State<CertificationPage> {
   void _loadInitialData() {
     if (widget.initialData != null && widget.initialData!.isNotEmpty) {
       final certProvider =
-      Provider.of<CertificationProvider>(context, listen: false);
+          Provider.of<CertificationProvider>(context, listen: false);
 
       // Clear any existing data
       certProvider.clearCertificationItems();
@@ -83,11 +88,22 @@ class _CertificationPageState extends State<CertificationPage> {
     _organizationNameController.dispose();
     _dateController.dispose();
     _descriptionController.dispose();
+    _certificationNameFocus.dispose();
+    _organizationNameFocus.dispose();
+    _descriptionFocus.dispose();
     super.dispose();
   }
 
   void _selectDate(
       BuildContext context, TextEditingController controller) async {
+    // Clear focus from all fields before opening date picker
+    _certificationNameFocus.unfocus();
+    _organizationNameFocus.unfocus();
+    _descriptionFocus.unfocus();
+
+    // Also clear focus from the primary focus
+    FocusScope.of(context).unfocus();
+
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -97,28 +113,34 @@ class _CertificationPageState extends State<CertificationPage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: AppColors.primary,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: Colors.black,
-            ),
+                  primary: AppColors.primary,
+                  onPrimary: Colors.white,
+                  surface: Colors.white,
+                  onSurface: Colors.black,
+                ),
           ),
           child: child!,
         );
       },
     );
+
     if (picked != null) {
       setState(() {
         // Format date as DD/MM/YYYY to include the day
         controller.text =
-        "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+            "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+      });
+
+      // Ensure no field gets focus after date selection
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FocusScope.of(context).unfocus();
       });
     }
   }
 
   void _saveCertification() {
     final certificationProvider =
-    Provider.of<CertificationProvider>(context, listen: false);
+        Provider.of<CertificationProvider>(context, listen: false);
 
     final newItem = CertificationItem(
       certificationName: _certificationNameController.text,
@@ -151,7 +173,7 @@ class _CertificationPageState extends State<CertificationPage> {
 
   void _editCertification(int index) {
     final certificationProvider =
-    Provider.of<CertificationProvider>(context, listen: false);
+        Provider.of<CertificationProvider>(context, listen: false);
     final item = certificationProvider.certificationItems[index];
 
     setState(() {
@@ -166,7 +188,7 @@ class _CertificationPageState extends State<CertificationPage> {
 
   void _deleteCertification(int index) {
     final certificationProvider =
-    Provider.of<CertificationProvider>(context, listen: false);
+        Provider.of<CertificationProvider>(context, listen: false);
     certificationProvider.removeCertificationItem(index);
 
     setState(() {
@@ -300,56 +322,45 @@ class _CertificationPageState extends State<CertificationPage> {
   }
 
   Widget _buildCertificationForm() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.30),
-            blurRadius: 2,
-            offset: const Offset(0, 0),
-          ),
-        ],
+    return Theme(
+      data: Theme.of(context).copyWith(
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: AppColors.primary,
+          selectionColor: AppColors.primary.withOpacity(0.3),
+          selectionHandleColor: AppColors.primary,
+        ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Certification Name
-            CustomTextField(
-              label: 'certification_name'.tr,
-              hint: 'enter_certification_name'.tr,
-              controller: _certificationNameController,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.30),
+              blurRadius: 2,
+              offset: const Offset(0, 0),
             ),
-            const SizedBox(height: 16),
-
-            // Organization Name
-            CustomTextField(
-              label: 'organization_name'.tr,
-              hint: 'enter_organization_name'.tr,
-              controller: _organizationNameController,
-            ),
-            const SizedBox(height: 16),
-
-            // Date field
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'date'.tr,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.black,
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Certification Name
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'certification_name'.tr,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.black,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: () => _selectDate(context, _dateController),
-                  child: Container(
-                    width: 148,
+                  const SizedBox(height: 8),
+                  Container(
                     decoration: BoxDecoration(
                       boxShadow: [
                         BoxShadow(
@@ -362,10 +373,11 @@ class _CertificationPageState extends State<CertificationPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: TextFormField(
-                      controller: _dateController,
-                      enabled: false,
+                      controller: _certificationNameController,
+                      focusNode: _certificationNameFocus,
+                      cursorColor: AppColors.primary,
                       decoration: InputDecoration(
-                        hintText: 'date_placeholder'.tr, // '00/00/00'
+                        hintText: 'enter_certification_name'.tr,
                         hintStyle: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w300,
@@ -379,88 +391,188 @@ class _CertificationPageState extends State<CertificationPage> {
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+                ],
+              ),
+              const SizedBox(height: 16),
 
-            // Description
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      'description'.tr,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.black,
+              // Organization Name
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'organization_name'.tr,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.30),
+                          blurRadius: 2,
+                          offset: const Offset(0, 0),
+                        ),
+                      ],
+                      color: AppColors.bgBoxColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: TextFormField(
+                      controller: _organizationNameController,
+                      focusNode: _organizationNameFocus,
+                      cursorColor: AppColors.primary,
+                      decoration: InputDecoration(
+                        hintText: 'enter_organization_name'.tr,
+                        hintStyle: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w300,
+                          color: AppColors.fieldHintColor,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'optional'.tr, // '( Optional )'
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w300,
-                        color: AppColors.fieldHintColor,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Date field
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'date'.tr,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => _selectDate(context, _dateController),
+                    child: Container(
+                      width: 148,
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.30),
+                            blurRadius: 2,
+                            offset: const Offset(0, 0),
+                          ),
+                        ],
+                        color: AppColors.bgBoxColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: TextFormField(
+                        controller: _dateController,
+                        enabled: false,
+                        decoration: InputDecoration(
+                          hintText: 'date_placeholder'.tr,
+                          hintStyle: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w300,
+                            color: AppColors.fieldHintColor,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  height: 186,
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.30),
-                        blurRadius: 2,
-                        offset: const Offset(0, 0),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Description
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'description'.tr,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'optional'.tr,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w300,
+                          color: AppColors.fieldHintColor,
+                        ),
                       ),
                     ],
-                    color: AppColors.bgBoxColor,
-                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: TextFormField(
-                    controller: _descriptionController,
-                    cursorColor: AppColors.primary,
-                    maxLines: 7,
-                    maxLength: 150,
-                    decoration: InputDecoration(
-                      hintText: 'certification_description_hint'.tr,
-                      hintStyle: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w300,
-                        color: AppColors.fieldHintColor,
-                      ),
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      counterText: '',
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
+                  const SizedBox(height: 8),
+                  Container(
+                    height: 186,
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.30),
+                          blurRadius: 2,
+                          offset: const Offset(0, 0),
+                        ),
+                      ],
+                      color: AppColors.bgBoxColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: TextFormField(
+                      controller: _descriptionController,
+                      focusNode: _descriptionFocus,
+                      cursorColor: AppColors.primary,
+                      maxLines: 7,
+                      maxLength: 150,
+                      decoration: InputDecoration(
+                        hintText: 'certification_description_hint'.tr,
+                        hintStyle: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w300,
+                          color: AppColors.fieldHintColor,
+                        ),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        counterText: '',
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            const Divider(
-              height: 1,
-              thickness: 1,
-              color: AppColors.dividerColor,
-            ),
-            const SizedBox(height: 20),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Divider(
+                height: 1,
+                thickness: 1,
+                color: AppColors.dividerColor,
+              ),
+              const SizedBox(height: 20),
 
-            SaveButton(
-              onPressed: _saveCertification,
-            ),
-          ],
+              SaveButton(
+                onPressed: _saveCertification,
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -79,7 +79,8 @@ class _DocumentContainerState extends State<DocumentContainer> {
                   ),
                   child: Center(
                     child: SvgPicture.asset(
-                      _getFileIcon(_currentFilePath), // Dynamic icon based on file extension
+                      _getFileIcon(_currentFilePath),
+                      // Dynamic icon based on file extension
                       width: 30,
                       height: 30,
                     ),
@@ -89,28 +90,32 @@ class _DocumentContainerState extends State<DocumentContainer> {
               Container(width: 1, color: Colors.grey.shade300),
               const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      _currentFilePath.split('/').last,
-                      style: GoogleFonts.inter(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _currentFilePath.split('/').last,
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      widget.date ?? DateTime.now().toString().substring(0, 16),
-                      style: GoogleFonts.inter(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.grey[600],
+                      const SizedBox(height: 2),
+                      Text(
+                        widget.date ??
+                            DateTime.now().toString().substring(0, 16),
+                        style: GoogleFonts.inter(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey[600],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               if (widget.onDelete != null || widget.onFileRenamed != null)

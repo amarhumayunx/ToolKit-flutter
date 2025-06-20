@@ -21,9 +21,9 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
   final List<TextEditingController> _otpControllers =
-  List.generate(6, (index) => TextEditingController());
+      List.generate(6, (index) => TextEditingController());
   final List<FocusNode> _otpFocusNodes =
-  List.generate(6, (index) => FocusNode());
+      List.generate(6, (index) => FocusNode());
 
   final AuthService _authService = AuthService();
 
@@ -132,7 +132,8 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
       final minLength = _getMinLengthForCountry(_selectedCountryCode);
       final maxLength = _getMaxLengthForCountry(_selectedCountryCode);
       setState(() {
-        _errorMessage = 'Please enter a valid phone number ($minLength-$maxLength digits)';
+        _errorMessage =
+            'Please enter a valid phone number ($minLength-$maxLength digits)';
       });
       return;
     }
@@ -143,7 +144,8 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
     });
 
     try {
-      final fullPhoneNumber = '$_selectedCountryCode${_phoneController.text.trim()}';
+      final fullPhoneNumber =
+          '$_selectedCountryCode${_phoneController.text.trim()}';
       final userId = await _authService.findUserByPhoneNumber(fullPhoneNumber);
 
       if (userId == null) {
@@ -196,7 +198,8 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
   }
 
   Future<void> _verifyOtp() async {
-    String otpCode = _otpControllers.map((controller) => controller.text).join();
+    String otpCode =
+        _otpControllers.map((controller) => controller.text).join();
 
     if (otpCode.length != 6) {
       setState(() {
@@ -247,7 +250,8 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
           errorMessage = 'The verification code entered is invalid';
           break;
         case 'session-expired':
-          errorMessage = 'The verification session has expired. Please request a new OTP';
+          errorMessage =
+              'The verification session has expired. Please request a new OTP';
           break;
         default:
           errorMessage = e.message ?? 'Failed to verify OTP';
@@ -276,8 +280,10 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
     });
 
     try {
-      final fullPhoneNumber = '$_selectedCountryCode${_phoneController.text.trim()}';
-      final success = await _authService.sendOTP(fullPhoneNumber, isResend: true);
+      final fullPhoneNumber =
+          '$_selectedCountryCode${_phoneController.text.trim()}';
+      final success =
+          await _authService.sendOTP(fullPhoneNumber, isResend: true);
 
       if (success) {
         AppSnackBar.show(context, message: 'otp_resent'.tr);
@@ -356,29 +362,40 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
                   // Search Field
                   Padding(
                     padding: const EdgeInsets.all(16),
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: 'search_country'.tr,
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.primary),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                        textSelectionTheme: TextSelectionThemeData(
+                          cursorColor: AppColors.primary,
+                          selectionColor: AppColors.primary.withOpacity(0.3),
+                          selectionHandleColor: AppColors.primary,
                         ),
                       ),
-                      onChanged: (value) {
-                        setModalState(() {
-                          _filterCountries(value);
-                        });
-                      },
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: 'search_country'.tr,
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                const BorderSide(color: Color(0xFFE5E7EB)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                const BorderSide(color: AppColors.primary),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
+                        onChanged: (value) {
+                          setModalState(() {
+                            _filterCountries(value);
+                          });
+                        },
+                      ),
                     ),
                   ),
 
@@ -388,7 +405,8 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
                       itemCount: _filteredCountryCodes.length,
                       itemBuilder: (context, index) {
                         final country = _filteredCountryCodes[index];
-                        final isSelected = country['code'] == _selectedCountryCode;
+                        final isSelected =
+                            country['code'] == _selectedCountryCode;
 
                         return ListTile(
                           selected: isSelected,
@@ -402,7 +420,9 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               color: const Color(0xFF1F2937),
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
                             ),
                           ),
                           trailing: Row(
@@ -413,7 +433,9 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
                                 style: GoogleFonts.inter(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
-                                  color: isSelected ? AppColors.primary : const Color(0xFF6B7280),
+                                  color: isSelected
+                                      ? AppColors.primary
+                                      : const Color(0xFF6B7280),
                                 ),
                               ),
                               if (isSelected) ...[
@@ -471,52 +493,82 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
 
   int _getMinLengthForCountry(String countryCode) {
     switch (countryCode) {
-      case '+1': return 10;
-      case '+44': return 10;
-      case '+91': return 10;
-      case '+92': return 10;
-      case '+86': return 11;
-      case '+7': return 10;
-      default: return 7;
+      case '+1':
+        return 10;
+      case '+44':
+        return 10;
+      case '+91':
+        return 10;
+      case '+92':
+        return 10;
+      case '+86':
+        return 11;
+      case '+7':
+        return 10;
+      default:
+        return 7;
     }
   }
 
   int _getMaxLengthForCountry(String countryCode) {
     switch (countryCode) {
-      case '+1': return 10;
-      case '+44': return 11;
-      case '+91': return 10;
-      case '+92': return 10;
-      case '+86': return 11;
-      case '+7': return 10;
-      default: return 15;
+      case '+1':
+        return 10;
+      case '+44':
+        return 11;
+      case '+91':
+        return 10;
+      case '+92':
+        return 10;
+      case '+86':
+        return 11;
+      case '+7':
+        return 10;
+      default:
+        return 15;
     }
   }
 
   String _getPhoneHint(String countryCode) {
     switch (countryCode) {
-      case '+1': return '(555) 000-0000';
-      case '+44': return '7911 123456';
-      case '+91': return '98765 43210';
-      case '+92': return '300 1234567';
-      case '+33': return '6 12 34 56 78';
-      case '+49': return '171 2345678';
-      case '+86': return '138 0013 8000';
-      case '+81': return '90 1234 5678';
-      case '+61': return '4 1234 5678';
-      case '+55': return '11 91234-5678';
-      case '+7': return '912 345-67-89';
-      case '+966': return '50 123 4567';
-      case '+971': return '50 123 4567';
-      case '+234': return '802 123 4567';
-      case '+62': return '812-3456-7890';
-      default: return 'Enter phone number';
+      case '+1':
+        return '(555) 000-0000';
+      case '+44':
+        return '7911 123456';
+      case '+91':
+        return '98765 43210';
+      case '+92':
+        return '300 1234567';
+      case '+33':
+        return '6 12 34 56 78';
+      case '+49':
+        return '171 2345678';
+      case '+86':
+        return '138 0013 8000';
+      case '+81':
+        return '90 1234 5678';
+      case '+61':
+        return '4 1234 5678';
+      case '+55':
+        return '11 91234-5678';
+      case '+7':
+        return '912 345-67-89';
+      case '+966':
+        return '50 123 4567';
+      case '+971':
+        return '50 123 4567';
+      case '+234':
+        return '802 123 4567';
+      case '+62':
+        return '812-3456-7890';
+      default:
+        return 'Enter phone number';
     }
   }
 
   String _getCountryFlag(String countryCode) {
     final country = _countryCodes.firstWhere(
-          (c) => c['code'] == countryCode,
+      (c) => c['code'] == countryCode,
       orElse: () => {'flag': '🌍'},
     );
     return country['flag']!;
@@ -651,7 +703,8 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
               InkWell(
                 onTap: _showCountryCodePicker,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   decoration: const BoxDecoration(
                     border: Border(
                       right: BorderSide(
@@ -688,28 +741,37 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
               ),
               // Phone Number Input
               Expanded(
-                child: TextField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  cursorColor: AppColors.primary,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(15),
-                  ],
-                  decoration: InputDecoration(
-                    hintText: _getPhoneHint(_selectedCountryCode),
-                    hintStyle: GoogleFonts.inter(
-                      color: const Color(0xFFA0A0A0),
-                      fontSize: 16,
+                child: Theme(
+                  data: Theme.of(context).copyWith(
+                    textSelectionTheme: TextSelectionThemeData(
+                      cursorColor: AppColors.primary,
+                      selectionColor: AppColors.primary.withOpacity(0.3),
+                      selectionHandleColor: AppColors.primary,
                     ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 16),
                   ),
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A1A),
+                  child: TextField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    cursorColor: AppColors.primary,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(15),
+                    ],
+                    decoration: InputDecoration(
+                      hintText: _getPhoneHint(_selectedCountryCode),
+                      hintStyle: GoogleFonts.inter(
+                        color: const Color(0xFFA0A0A0),
+                        fontSize: 16,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 16),
+                    ),
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF1A1A1A),
+                    ),
                   ),
                 ),
               ),
@@ -814,25 +876,34 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
                   ),
                 ],
               ),
-              child: TextField(
-                controller: _otpControllers[index],
-                focusNode: _otpFocusNodes[index],
-                keyboardType: TextInputType.number,
-                cursorColor: AppColors.primary,
-                textAlign: TextAlign.center,
-                maxLength: 1,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  counterText: '',
-                  contentPadding: EdgeInsets.zero,
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  textSelectionTheme: TextSelectionThemeData(
+                    cursorColor: AppColors.primary,
+                    selectionColor: AppColors.primary.withOpacity(0.3),
+                    selectionHandleColor: AppColors.primary,
+                  ),
                 ),
-                style: GoogleFonts.inter(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
+                child: TextField(
+                  controller: _otpControllers[index],
+                  focusNode: _otpFocusNodes[index],
+                  keyboardType: TextInputType.number,
+                  cursorColor: AppColors.primary,
+                  textAlign: TextAlign.center,
+                  maxLength: 1,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    counterText: '',
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                  onChanged: (value) => _onOtpChanged(value, index),
                 ),
-                onChanged: (value) => _onOtpChanged(value, index),
               ),
             );
           }),

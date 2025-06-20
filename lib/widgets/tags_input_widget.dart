@@ -15,7 +15,7 @@ class TagInputWidget<T> extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final int maxItems; // Add maxItems parameter
-  final int  minItemsRequired;
+  final int minItemsRequired;
 
   const TagInputWidget({
     super.key,
@@ -39,7 +39,8 @@ class TagInputWidget<T> extends StatefulWidget {
 
 class _TagInputWidgetState<T> extends State<TagInputWidget<T>> {
   void _addItem() {
-    if (widget.controller.text.trim().isNotEmpty && widget.items.length < widget.maxItems) {
+    if (widget.controller.text.trim().isNotEmpty &&
+        widget.items.length < widget.maxItems) {
       widget.onAdd(widget.controller.text.trim());
       widget.controller.clear();
       widget.focusNode.requestFocus();
@@ -91,7 +92,8 @@ class _TagInputWidgetState<T> extends State<TagInputWidget<T>> {
   }
 
   Widget _buildInputField() {
-    bool canAddMore = widget.items.length < widget.maxItems; // Use maxItems parameter
+    bool canAddMore =
+        widget.items.length < widget.maxItems; // Use maxItems parameter
 
     return Focus(
       onKey: (FocusNode node, RawKeyEvent event) {
@@ -130,24 +132,33 @@ class _TagInputWidgetState<T> extends State<TagInputWidget<T>> {
                     color: AppColors.bgBoxColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: TextFormField(
-                    controller: widget.controller,
-                    focusNode: widget.focusNode,
-                    cursorColor: AppColors.primary,
-                    enabled: canAddMore,
-                    decoration: InputDecoration(
-                      hintText: canAddMore
-                          ? widget.hintText
-                          : 'Maximum ${widget.inputLabel.toLowerCase()}s reached',
-                      hintStyle: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w300,
-                        color: Colors.grey,
+                  child: Theme(
+                    data: Theme.of(context).copyWith(
+                      textSelectionTheme: TextSelectionThemeData(
+                        cursorColor: AppColors.primary,
+                        selectionColor: AppColors.primary.withOpacity(0.3),
+                        selectionHandleColor: AppColors.primary,
                       ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
+                    ),
+                    child: TextFormField(
+                      controller: widget.controller,
+                      focusNode: widget.focusNode,
+                      cursorColor: AppColors.primary,
+                      enabled: canAddMore,
+                      decoration: InputDecoration(
+                        hintText: canAddMore
+                            ? widget.hintText
+                            : 'Maximum ${widget.inputLabel.toLowerCase()}s reached',
+                        hintStyle: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w300,
+                          color: Colors.grey,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ),
@@ -162,21 +173,21 @@ class _TagInputWidgetState<T> extends State<TagInputWidget<T>> {
                   decoration: BoxDecoration(
                     gradient: canAddMore
                         ? const LinearGradient(
-                      colors: [
-                        AppColors.gradientStart,
-                        AppColors.gradientEnd,
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    )
+                            colors: [
+                              AppColors.gradientStart,
+                              AppColors.gradientEnd,
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          )
                         : LinearGradient(
-                      colors: [
-                        Colors.grey[300]!,
-                        Colors.grey[400]!,
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
+                            colors: [
+                              Colors.grey[300]!,
+                              Colors.grey[400]!,
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -226,26 +237,26 @@ class _TagInputWidgetState<T> extends State<TagInputWidget<T>> {
             const SizedBox(height: 16),
             widget.items.isEmpty
                 ? Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
-                child: Text(
-                  widget.emptyMessage,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w300,
-                    color: Colors.grey,
-                  ),
-                ),
-              ),
-            )
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20.0),
+                      child: Text(
+                        widget.emptyMessage,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w300,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  )
                 : Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: List.generate(
-                widget.items.length,
-                    (index) => _buildTag(widget.items[index], index),
-              ),
-            ),
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: List.generate(
+                      widget.items.length,
+                      (index) => _buildTag(widget.items[index], index),
+                    ),
+                  ),
           ],
         ),
       ),

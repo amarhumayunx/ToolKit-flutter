@@ -239,7 +239,8 @@ class _MergeResultScreenState extends State<MergeResultScreen>
               right: 20,
               bottom: MediaQuery.of(context).padding.bottom,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
                 child: SaveFileButton(
                   filePath: _currentFilePath,
                   fileType: 'pdf',

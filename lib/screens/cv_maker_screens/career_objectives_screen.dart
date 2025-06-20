@@ -186,6 +186,7 @@ class CareerObjectivesPageState extends State<CareerObjectivesPage> {
   }
 
   // Custom objective field with larger height
+  // Custom objective field with larger height
   Widget _buildObjectiveField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,26 +213,35 @@ class CareerObjectivesPageState extends State<CareerObjectivesPage> {
             color: AppColors.bgBoxColor,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: TextFormField(
-            controller: _objectiveController,
-            maxLines: 8,
-            maxLength: 200,
-            cursorColor: AppColors.primary,
-            decoration: InputDecoration(
-              hintText: 'type_career_objectives_hint'.tr,
-              hintStyle: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.w300,
-                color: AppColors.fieldHintColor,
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              textSelectionTheme: TextSelectionThemeData(
+                cursorColor: AppColors.primary,
+                selectionHandleColor: AppColors.primary,
+                selectionColor: AppColors.primary.withOpacity(0.3),
               ),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              disabledBorder: InputBorder.none,
-              counterText: '',
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
+            ),
+            child: TextFormField(
+              controller: _objectiveController,
+              maxLines: 8,
+              maxLength: 200,
+              cursorColor: AppColors.primary,
+              decoration: InputDecoration(
+                hintText: 'type_career_objectives_hint'.tr,
+                hintStyle: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w300,
+                  color: AppColors.fieldHintColor,
+                ),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                counterText: '',
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
             ),
           ),

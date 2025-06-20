@@ -47,11 +47,11 @@ class FileTransferSelectionSection extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00BCD4).withOpacity(0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(Icons.qr_code_scanner,
-                    color: Color(0xFF00BCD4), size: 24),
+                    color: AppColors.primary, size: 24),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -87,7 +87,7 @@ class FileTransferSelectionSection extends StatelessWidget {
                         const ContinueWithGoogleScreen()));
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00BCD4),
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(

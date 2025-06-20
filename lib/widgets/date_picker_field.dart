@@ -99,7 +99,7 @@ class DateField extends StatelessWidget {
             errorText!,
             style: GoogleFonts.inter(
               color: Colors.red,
-              fontSize: 12,
+              fontSize: 8,
               fontWeight: FontWeight.w400,
             ),
           )

@@ -44,18 +44,7 @@ class _QRCodeScannerScreenState extends State<QRCodeScannerScreen> {
 
   Future<void> _requestCameraPermission() async {
     final status = await Permission.camera.request();
-    if (status != PermissionStatus.granted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('camera_permission_required'.tr),
-          backgroundColor: Colors.red,
-          action: SnackBarAction(
-            label: 'settings'.tr,
-            onPressed: openAppSettings,
-          ),
-        ),
-      );
-    }
+    if (status != PermissionStatus.granted) {}
   }
 
   Future<void> _createScanRecord(String qrId, Map<String, dynamic> fileData,
@@ -287,12 +276,6 @@ class _QRCodeScannerScreenState extends State<QRCodeScannerScreen> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );
     _resetScanner();
   }
 
@@ -537,18 +520,7 @@ class _QRCodeScannerScreenState extends State<QRCodeScannerScreen> {
   }
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
-    if (!p) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('camera_permission_required'.tr),
-          backgroundColor: Colors.red,
-          action: SnackBarAction(
-            label: 'settings'.tr,
-            onPressed: openAppSettings,
-          ),
-        ),
-      );
-    }
+    if (!p) {}
   }
 
   @override

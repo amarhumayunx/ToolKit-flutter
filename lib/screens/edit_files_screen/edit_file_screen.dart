@@ -24,20 +24,23 @@ class EditFileScreen extends StatefulWidget {
 class _EditFileScreenState extends State<EditFileScreen> {
   final ImagePicker _picker = ImagePicker();
 
-  Future<void> _pickImages() async {
+  Future<void> _pickImage() async {
     try {
-      final List<XFile> pickedFiles = await _picker.pickMultiImage(
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
         imageQuality: 85,
       );
 
-      if (pickedFiles.isNotEmpty) {
+      if (pickedFile != null) {
         final fileProvider = Provider.of<FileProvider>(context, listen: false);
-        final newFiles = pickedFiles.map((file) => File(file.path)).toList();
-        fileProvider.addFiles(newFiles);
+        final newFile = File(pickedFile.path);
+        // Clear existing files and add the new single file
+        fileProvider.clearAllFiles();
+        fileProvider.addFiles([newFile]);
       }
     } catch (e) {
       if (mounted) {
-        AppSnackBar.show(context, message: '${'error_selecting_images'.tr}: $e');
+        AppSnackBar.show(context, message: '${'error_selecting_image'.tr}: $e');
       }
     }
   }
@@ -54,11 +57,14 @@ class _EditFileScreenState extends State<EditFileScreen> {
 
       if (capturedImages != null && capturedImages.isNotEmpty) {
         final fileProvider = Provider.of<FileProvider>(context, listen: false);
-        fileProvider.addFiles(capturedImages);
+        // Take only the first captured image
+        fileProvider.clearAllFiles();
+        fileProvider.addFiles([capturedImages.first]);
       }
     } catch (e) {
       if (mounted) {
-        AppSnackBar.show(context, message: '${'error_capturing_document'.tr}: $e');
+        AppSnackBar.show(context,
+            message: '${'error_capturing_document'.tr}: $e');
       }
     }
   }
@@ -72,16 +78,16 @@ class _EditFileScreenState extends State<EditFileScreen> {
     }
   }
 
-  Future<void> _editFiles() async {
+  Future<void> _editFile() async {
     final fileProvider = Provider.of<FileProvider>(context, listen: false);
 
     if (!fileProvider.hasFiles) {
-      AppSnackBar.show(context, message: 'please_select_at_least_one_image'.tr);
+      AppSnackBar.show(context, message: 'please_select_an_image'.tr);
       return;
     }
 
     try {
-      // Navigate to BatchResultScreen with the selected files
+      // Navigate to BatchResultScreen with the selected file
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -92,7 +98,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
       );
     } catch (e) {
       if (mounted) {
-        AppSnackBar.show(context, message: '${'error_processing_files'.tr}: $e');
+        AppSnackBar.show(context, message: '${'error_processing_file'.tr}: $e');
       }
     }
   }
@@ -102,7 +108,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: ToolsAppBar(
-        title: 'edit_files'.tr,
+        title: 'edit_file'.tr, // Changed from 'edit_files' to 'edit_file'
       ),
       body: Column(
         children: [
@@ -117,8 +123,10 @@ class _EditFileScreenState extends State<EditFileScreen> {
                   ),
                   const SizedBox(height: 30),
                   InfoCard(
-                    title: 'edit_files'.tr,
-                    description: 'edit_files_description'.tr,
+                    title: 'edit_file'.tr,
+                    // Changed from 'edit_files' to 'edit_file'
+                    description:
+                        'edit_file_description'.tr, // Changed description key
                   ),
                   const SizedBox(height: 24),
                   // Combined container with shadow
@@ -138,8 +146,10 @@ class _EditFileScreenState extends State<EditFileScreen> {
                       children: [
                         // File selection section
                         FileSelectionSection(
-                          sectionTitle: 'choose_images'.tr,
-                          onSelectFiles: _pickImages,
+                          sectionTitle: 'choose_image'.tr,
+                          // Changed from 'choose_images' to 'choose_image'
+                          onSelectFiles: _pickImage,
+                          // Changed method name
                           onScanNew: _scanNewDocument,
                         ),
                         // Dotted file drop zone - Now using Consumer to listen to provider changes
@@ -150,9 +160,10 @@ class _EditFileScreenState extends State<EditFileScreen> {
                             builder: (context, fileProvider, child) {
                               return DottedFileDropZone(
                                 selectedImages: fileProvider.selectedFiles,
-                                onTap: _pickImages,
+                                onTap: _pickImage, // Changed method name
                                 onRemoveImage: _removeFile,
-                                emptyStateText: 'click_to_choose_images_from_gallery'.tr,
+                                emptyStateText:
+                                    'Click to choose image'.tr, // Changed text
                               );
                             },
                           ),
@@ -166,10 +177,10 @@ class _EditFileScreenState extends State<EditFileScreen> {
           ),
           Padding(
             padding:
-            const EdgeInsets.symmetric(horizontal: 30.0, vertical: 26.0),
+                const EdgeInsets.symmetric(horizontal: 30.0, vertical: 26.0),
             child: CustomGradientButton(
               text: 'next'.tr,
-              onPressed: _editFiles,
+              onPressed: _editFile, // Changed method name
             ),
           ),
         ],
