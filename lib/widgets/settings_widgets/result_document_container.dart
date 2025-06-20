@@ -12,7 +12,7 @@ class ResultDocumentContainer extends StatelessWidget {
   final String documentName;
   final String date;
   final String time;
-  final String size;
+  final String? size;
   final bool isFavorite;
   final bool isLocked;
   final String filePath;
@@ -30,7 +30,7 @@ class ResultDocumentContainer extends StatelessWidget {
     required this.documentName,
     required this.date,
     required this.time,
-    required this.size,
+    this.size, // Make size optional
     required this.isFavorite,
     required this.isLocked,
     required this.filePath,
@@ -44,8 +44,123 @@ class ResultDocumentContainer extends StatelessWidget {
     this.onTap,
   });
 
+  String _getFileSize() {
+    if (size != null && size!.isNotEmpty) {
+      return size!;
+    }
+
+    try {
+      final file = File(filePath);
+      if (file.existsSync()) {
+        final bytes = file.lengthSync();
+        return _formatBytes(bytes);
+      }
+    } catch (e) {
+      // If error occurs, return default
+    }
+    return '0 KB';
+  }
+
+  String _formatBytes(int bytes) {
+    if (bytes < 1024) {
+      // For files smaller than 1KB, show in bytes and as 0.001 MB
+      double mbSize = bytes / (1024 * 1024);
+      return '$bytes B | ${mbSize.toStringAsFixed(3)} MB';
+    } else if (bytes < 1024 * 1024) {
+      // For files smaller than 1MB, show in KB and MB
+      double kbSize = bytes / 1024;
+      double mbSize = bytes / (1024 * 1024);
+      return '${kbSize.toStringAsFixed(1)} KB | ${mbSize.toStringAsFixed(2)} MB';
+    } else if (bytes < 1024 * 1024 * 1024) {
+      // For files smaller than 1GB, show in MB and GB
+      double mbSize = bytes / (1024 * 1024);
+      double gbSize = bytes / (1024 * 1024 * 1024);
+      return '${mbSize.toStringAsFixed(1)} MB | ${gbSize.toStringAsFixed(2)} GB';
+    } else {
+      // For files 1GB or larger, show in GB and TB
+      double gbSize = bytes / (1024 * 1024 * 1024);
+      double tbSize = bytes / (1024 * 1024 * 1024 * 1024);
+      return '${gbSize.toStringAsFixed(1)} GB | ${tbSize.toStringAsFixed(2)} TB';
+    }
+  }
+
+
+  Map<String, dynamic> _getDocumentIcon() {
+    final fileExtension = path.extension(filePath).toLowerCase();
+
+    switch (fileExtension) {
+      case '.jpg':
+      case '.jpeg':
+      case '.png':
+        return {'path': 'assets/icons/convert_img_icon.svg', 'isSvg': true};
+
+      case '.pdf':
+        return {'path': 'assets/icons/convert_pdf.svg', 'isSvg': true};
+
+      case '.doc':
+      case '.docx':
+        return {'path': 'assets/icons/word_icon.svg', 'isSvg': true};
+
+      case '.zip':
+      case '.rar':
+      case '.7z':
+        return {'path': 'assets/icons/zip.svg', 'isSvg': true};
+
+      default:
+        return {'path': documentImage, 'isSvg': false};
+    }
+  }
+
+  Widget _buildIconWidget(Map<String, dynamic> iconData) {
+    final String iconPath = iconData['path'];
+    final bool isSvg = iconData['isSvg'];
+
+    try {
+      if (isSvg) {
+        return SvgPicture.asset(
+          iconPath,
+          fit: BoxFit.contain,
+          width: 40,
+          height: 40,
+          placeholderBuilder: (BuildContext context) => Container(
+            width: 40,
+            height: 40,
+            color: Colors.grey[300],
+            child: const Icon(Icons.description, color: Colors.grey),
+          ),
+        );
+      } else {
+        return Image.asset(
+          iconPath,
+          fit: BoxFit.contain,
+          width: 40,
+          height: 40,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              width: 40,
+              height: 40,
+              color: Colors.grey[300],
+              child: const Icon(Icons.description, color: Colors.grey),
+            );
+          },
+        );
+      }
+    } catch (e) {
+      // Fallback widget in case of any error
+      return Container(
+        width: 40,
+        height: 40,
+        color: Colors.grey[300],
+        child: const Icon(Icons.description, color: Colors.grey),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final iconData = _getDocumentIcon();
+    final fileSize = _getFileSize();
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -71,18 +186,15 @@ class ResultDocumentContainer extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: Container(
                   width: 50,
-                  height: 60,
+                  height: 50,
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: Colors.transparent,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Center(
                     child: Stack(
                       children: [
-                        Image.asset(
-                          documentImage,
-                          fit: BoxFit.fill,
-                        ),
+                        _buildIconWidget(iconData),
                         if (isLocked)
                           const Positioned(
                             bottom: 2,
@@ -118,7 +230,7 @@ class ResultDocumentContainer extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '$date | $time | $size',
+                      '$date | $time | $fileSize',
                       style: GoogleFonts.inter(
                         fontSize: 9,
                         fontWeight: FontWeight.w400,
@@ -129,12 +241,15 @@ class ResultDocumentContainer extends StatelessWidget {
                 ),
               ),
               if (!isSelectable) ...[
-                GestureDetector(
-                  onTap: onFavoriteToggle,
-                  child: Icon(
-                    isFavorite ? Icons.star : Icons.star_border,
-                    color: isFavorite ? Colors.amber : Colors.grey,
-                    size: 24,
+                Padding(
+                  padding: const EdgeInsets.only(left: 10, right: 5),
+                  child: GestureDetector(
+                    onTap: onFavoriteToggle,
+                    child: Icon(
+                      isFavorite ? Icons.star : Icons.star_border,
+                      color: isFavorite ? Colors.amber : Colors.grey,
+                      size: 24,
+                    ),
                   ),
                 ),
                 PopupMenuButton<String>(

@@ -8,6 +8,7 @@ import 'package:archive/archive.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:image/image.dart' as img;
 import 'package:pdfx/pdfx.dart' as pdfx;
+import 'package:get/get.dart'; // Add this import for .tr extension
 
 import 'compression_result_class.dart';
 
@@ -38,19 +39,18 @@ class FileCompressor {
           return CompressionResult(
               file: file,
               wasCompressed: false,
-              message: 'File type not supported for compression',
+              message: 'file_type_not_supported'.tr,
               originalSize: 0,
               compressedSize: 0
           );
       }
     } catch (e) {
-      print('Error compressing file: $e');
       return CompressionResult(
           file: file,
           wasCompressed: false,
-          message: 'Error occurred during compression',
-        compressedSize: 0,
-        originalSize: 0
+          message: 'compression_error_occurred'.tr,
+          compressedSize: 0,
+          originalSize: 0
       );
     }
   }
@@ -63,11 +63,10 @@ class FileCompressor {
         CompressionResult result = await compressFileWithStatus(file, quality: quality);
         results.add(result);
       } catch (e) {
-        print('Error processing file ${file.path}: $e');
         results.add(CompressionResult(
             file: file,
             wasCompressed: false,
-            message: 'Processing failed',
+            message: 'processing_failed'.tr,
             compressedSize: 0,
             originalSize: 0
         ));
@@ -89,7 +88,6 @@ class FileCompressor {
           compressedFiles.add(file);
         }
       } catch (e) {
-        print('Error processing file ${file.path}: $e');
         compressedFiles.add(file);
       }
     }
@@ -101,15 +99,15 @@ class FileCompressor {
     final result = await compressFileWithStatus(file, quality: quality);
     return result.file;
   }
+
   static Future<CompressionResult> _compressImageWithStatus(File file, {int quality = 85}) async {
     if (!file.existsSync()) {
-      print('File does not exist: ${file.path}');
       return CompressionResult(
-          file: file,
-          wasCompressed: false,
-          message: 'File not found',
-          originalSize: 0,
-          compressedSize: 0,
+        file: file,
+        wasCompressed: false,
+        message: 'file_not_found'.tr,
+        originalSize: 0,
+        compressedSize: 0,
       );
     }
 
@@ -134,23 +132,21 @@ class FileCompressor {
       );
 
       if (result == null) {
-        print('Compression returned null result for: ${file.path}');
         return CompressionResult(
-            file: file,
-            wasCompressed: false,
-            message: 'Compression failed',
-            originalSize: 0,
-            compressedSize: 0,
+          file: file,
+          wasCompressed: false,
+          message: 'compression_failed'.tr,
+          originalSize: 0,
+          compressedSize: 0,
         );
       }
 
       final resultFile = File(result.path);
       if (!resultFile.existsSync() || resultFile.lengthSync() <= 0) {
-        print('Compressed file is empty or does not exist: ${result.path}');
         return CompressionResult(
             file: file,
             wasCompressed: false,
-            message: 'Compression failed',
+            message: 'compression_failed'.tr,
             originalSize: 0,
             compressedSize: 0
         );
@@ -160,56 +156,51 @@ class FileCompressor {
       final reduction = ((originalSize - compressedSize) / originalSize * 100);
 
       if (compressedSize >= originalSize) {
-        print('Compression increased file size or no change: ${file.path}');
         await resultFile.delete();
         return CompressionResult(
             file: file,
             wasCompressed: false,
-            message: 'File is already compressed or optimized',
+            message: 'file_already_compressed_optimized'.tr,
             compressedSize: originalSize,
             originalSize: originalSize
         );
       }
 
       if (reduction > 5) {
-        print('Successfully compressed: ${file.path}');
-        print('Original: ${getReadableFileSize(originalSize)} → Compressed: ${getReadableFileSize(compressedSize)}');
         return CompressionResult(
             file: resultFile,
             wasCompressed: true,
-            message: 'Successfully compressed',
+            message: 'compression_successful'.tr,
             compressedSize: compressedSize,
             originalSize: originalSize
         );
       } else {
-        print('Image is already compressed: ${file.path}');
         await resultFile.delete();
         return CompressionResult(
             file: file,
             wasCompressed: false,
-            message: 'File is already compressed',
+            message: 'file_already_compressed'.tr,
             compressedSize: compressedSize,
-          originalSize: originalSize
+            originalSize: originalSize
         );
       }
     } catch (e) {
-      print('Error compressing image: $e');
       return CompressionResult(
           file: file,
           wasCompressed: false,
-          message: 'Error occurred during compression',
-        compressedSize: 0,
-        originalSize: 0
+          message: 'compression_error_occurred'.tr,
+          compressedSize: 0,
+          originalSize: 0
       );
     }
   }
+
   static Future<CompressionResult> compressPdfWithStatus(File file, {int quality = 85}) async {
     if (!file.existsSync()) {
-      print('PDF file does not exist: ${file.path}');
       return CompressionResult(
           file: file,
           wasCompressed: false,
-          message: 'File not found',
+          message: 'file_not_found'.tr,
           compressedSize: 0,
           originalSize: 0
       );
@@ -246,8 +237,6 @@ class FileCompressor {
       }
 
       imageQuality = imageQuality.clamp(25, 95);
-
-      print('Compressing with scale: $scale, quality: $imageQuality');
 
       for (int i = 0; i < pdfDocument.pagesCount; i++) {
         final page = await pdfDocument.getPage(i + 1);
@@ -293,52 +282,40 @@ class FileCompressor {
       final compressedSize = resultFile.lengthSync();
       final reduction = ((originalSize - compressedSize) / originalSize * 100);
 
-      print('PDF compression results:');
-      print('Original: ${getReadableFileSize(originalSize)}');
-      print('Compressed: ${getReadableFileSize(compressedSize)}');
-      print('Reduction: ${reduction.toStringAsFixed(2)}%');
-
-
-      if (compressedSize >= originalSize)
-        {
-          print('Compression increased file size, using original');
-          await resultFile.delete();
-          return CompressionResult(
-              file: file,
-              wasCompressed: false,
-              message: 'File is already optimized',
-              originalSize: originalSize,
-              compressedSize: originalSize
-          );
-        }
-      else if (reduction > 5) {
-        print('Successfully compressed PDF');
-        return CompressionResult(
-            file: resultFile,
-            wasCompressed: true,
-            message: 'Successfully compressed',
-          originalSize: originalSize,
-          compressedSize: compressedSize,
-        );
-      } else {
-        print('PDF is already optimized');
+      if (compressedSize >= originalSize) {
         await resultFile.delete();
         return CompressionResult(
             file: file,
             wasCompressed: false,
-            message: 'PDF is already optimized',
+            message: 'file_already_optimized'.tr,
+            originalSize: originalSize,
+            compressedSize: originalSize
+        );
+      } else if (reduction > 5) {
+        return CompressionResult(
+          file: resultFile,
+          wasCompressed: true,
+          message: 'compression_successful'.tr,
+          originalSize: originalSize,
+          compressedSize: compressedSize,
+        );
+      } else {
+        await resultFile.delete();
+        return CompressionResult(
+          file: file,
+          wasCompressed: false,
+          message: 'pdf_already_optimized'.tr,
           originalSize: originalSize,
           compressedSize: compressedSize,
         );
       }
     } catch (e) {
-      print('Error compressing PDF: $e');
       return CompressionResult(
-          file: file,
-          wasCompressed: false,
-          message: 'Error occurred during compression',
-          originalSize: 0,
-          compressedSize: 0,
+        file: file,
+        wasCompressed: false,
+        message: 'compression_error_occurred'.tr,
+        originalSize: 0,
+        compressedSize: 0,
       );
     } finally {
       await pdfDocument?.close();
@@ -391,16 +368,11 @@ class FileCompressor {
       final compressedSize = resultFile.lengthSync();
       final reduction = ((originalSize - compressedSize) / originalSize * 100);
 
-      print('Word document compression results:');
-      print('Original: ${_formatSizefordocx(originalSize)}');
-      print('Compressed: ${_formatSizefordocx(compressedSize)}');
-      print('Reduction: ${reduction.toStringAsFixed(1)}%');
-
       if (reduction > 5) {
         return CompressionResult(
-            file: resultFile,
-            wasCompressed: true,
-            message: 'Successfully compressed',
+          file: resultFile,
+          wasCompressed: true,
+          message: 'compression_successful'.tr,
           compressedSize: compressedSize,
           originalSize: originalSize,
         );
@@ -409,19 +381,18 @@ class FileCompressor {
         return CompressionResult(
             file: file,
             wasCompressed: false,
-            message: 'Document is already optimized',
-          originalSize: originalSize,
-          compressedSize: compressedSize
+            message: 'document_already_optimized'.tr,
+            originalSize: originalSize,
+            compressedSize: compressedSize
         );
       }
     } catch (e) {
-      print('Error compressing Word document: $e');
       return CompressionResult(
           file: file,
           wasCompressed: false,
-          message: 'Error occurred during compression',
-        compressedSize: 0,
-        originalSize: 0
+          message: 'compression_error_occurred'.tr,
+          compressedSize: 0,
+          originalSize: 0
       );
     }
   }
@@ -461,16 +432,11 @@ class FileCompressor {
       final compressedSize = resultFile.lengthSync();
       final reduction = ((originalSize - compressedSize) / originalSize * 100);
 
-      print('PPTX compression results:');
-      print('Original: ${getReadableFileSize(originalSize)}');
-      print('Compressed: ${getReadableFileSize(compressedSize)}');
-      print('Reduction: ${reduction.toStringAsFixed(1)}%');
-
       if (reduction > 5) {
         return CompressionResult(
             file: resultFile,
             wasCompressed: true,
-            message: 'Successfully compressed',
+            message: 'compression_successful'.tr,
             compressedSize: compressedSize,
             originalSize: originalSize
         );
@@ -479,17 +445,16 @@ class FileCompressor {
         return CompressionResult(
             file: file,
             wasCompressed: false,
-            message: 'Presentation is already optimized',
+            message: 'presentation_already_optimized'.tr,
             compressedSize: compressedSize,
             originalSize: originalSize
         );
       }
     } catch (e) {
-      print('PPTX compression error: $e');
       return CompressionResult(
           file: file,
           wasCompressed: false,
-          message: 'Error occurred during compression',
+          message: 'compression_error_occurred'.tr,
           compressedSize: 0,
           originalSize: 0
       );
@@ -515,10 +480,10 @@ class FileCompressor {
 
       return Uint8List.fromList(img.encodeJpg(resizedImage, quality: quality.clamp(20, 60)));
     } catch (e) {
-      print('Error in aggressive image compression: $e');
       return imageBytes;
     }
   }
+
   static Future<Uint8List> _compressImageBytes(Uint8List imageBytes, {int quality = 85}) async {
     try {
       final image = img.decodeImage(imageBytes);
@@ -541,7 +506,6 @@ class FileCompressor {
 
       return Uint8List.fromList(img.encodeJpg(processedImage, quality: compressQuality));
     } catch (e) {
-      print('Error processing image bytes: $e');
       return imageBytes;
     }
   }
@@ -565,15 +529,15 @@ class FileCompressor {
   }
 
   static String _formatSizefordocx(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    if (bytes < 1024) return '$bytes ${'bytes'.tr}';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} ${'kb'.tr}';
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} ${'mb'.tr}';
   }
 
   static String getReadableFileSize(int bytes) {
-    if (bytes <= 0) return "0 B";
+    if (bytes <= 0) return "0 ${'bytes'.tr}";
 
-    const suffixes = ["B", "KB", "MB", "GB", "TB"];
+    final suffixes = ["bytes".tr, "kb".tr, "mb".tr, "gb".tr, "tb".tr];
     int i = 0;
     double size = bytes.toDouble();
 

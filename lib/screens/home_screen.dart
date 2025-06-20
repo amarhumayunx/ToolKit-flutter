@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce_flutter/adapters.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'package:open_file/open_file.dart'; // Add this package to pubspec.yaml
 
 import 'package:toolkit/utils/app_colors.dart';
 
@@ -199,18 +200,55 @@ class _HomeContentViewState extends State<HomeContentView>
       await filesBox!.putAt(index, updatedFile);
 
       final success =
-          await SaveDocumentService.toggleFileLock(updatedFile, index);
+      await SaveDocumentService.toggleFileLock(updatedFile, index);
 
       if (success) {
         setState(() {});
         AppSnackBar.show(context,
             message: updatedFile.isLocked
-                ? 'File locked and encrypted'
-                : 'File unlocked and decrypted');
+                ? 'file_locked_encrypted'.tr
+                : 'file_unlocked_decrypted'.tr);
       } else {
         await filesBox!.putAt(index, file);
-        AppSnackBar.show(context, message: 'Failed to toggle file lock');
+        AppSnackBar.show(context, message: 'failed_toggle_file_lock'.tr);
       }
+    }
+  }
+
+  // Add this method to handle file opening
+  Future<void> _openFile(String filePath) async {
+    try {
+      final file = File(filePath);
+
+      // Check if file exists
+      if (!await file.exists()) {
+        AppSnackBar.show(context, message: 'file_not_found'.tr);
+        return;
+      }
+
+      // Try to open the file
+      final result = await OpenFile.open(filePath);
+
+      // Handle the result
+      switch (result.type) {
+        case ResultType.done:
+        // File opened successfully
+          break;
+        case ResultType.noAppToOpen:
+          AppSnackBar.show(context, message: 'no_app_to_open_file'.tr);
+          break;
+        case ResultType.fileNotFound:
+          AppSnackBar.show(context, message: 'file_not_found'.tr);
+          break;
+        case ResultType.permissionDenied:
+          AppSnackBar.show(context, message: 'permission_denied_open_file'.tr);
+          break;
+        case ResultType.error:
+          AppSnackBar.show(context, message: '${'error_opening_file'.tr}: ${result.message}');
+          break;
+      }
+    } catch (e) {
+      AppSnackBar.show(context, message: '${'error_opening_file'.tr}: $e');
     }
   }
 
@@ -240,9 +278,9 @@ class _HomeContentViewState extends State<HomeContentView>
             ));
       });
 
-      AppSnackBar.show(context, message: 'File renamed successfully');
+      AppSnackBar.show(context, message: 'file_renamed_successfully'.tr);
     } catch (e) {
-      AppSnackBar.show(context, message: 'Error renaming file: $e');
+      AppSnackBar.show(context, message: '${'error_renaming_file'.tr}: $e');
     }
   }
 
@@ -250,7 +288,7 @@ class _HomeContentViewState extends State<HomeContentView>
     setState(() {
       filesBox!.deleteAt(index);
     });
-    AppSnackBar.show(context, message: 'File deleted');
+    AppSnackBar.show(context, message: 'file_deleted'.tr);
   }
 
   void _navigateToRecentTab() {
@@ -307,21 +345,21 @@ class _HomeContentViewState extends State<HomeContentView>
                           SectionHeading(title: 'recents'.tr),
                           ValueListenableBuilder(
                             valueListenable:
-                                filesBox?.listenable() ?? ValueNotifier(null),
+                            filesBox?.listenable() ?? ValueNotifier(null),
                             builder: (context, box, widget) {
                               final recentFilesWithIndex = _getRecentFiles();
                               return recentFilesWithIndex.isNotEmpty
                                   ? GestureDetector(
-                                      onTap: _navigateToRecentTab,
-                                      child: Text(
-                                        'see_all'.tr,
-                                        style: GoogleFonts.inter(
-                                          fontSize: 14,
-                                          color: AppColors.primary,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    )
+                                onTap: _navigateToRecentTab,
+                                child: Text(
+                                  'see_all'.tr,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              )
                                   : const SizedBox.shrink();
                             },
                           ),
@@ -332,7 +370,7 @@ class _HomeContentViewState extends State<HomeContentView>
                       // Recent documents list with ValueListenableBuilder
                       ValueListenableBuilder(
                         valueListenable:
-                            filesBox?.listenable() ?? ValueNotifier(null),
+                        filesBox?.listenable() ?? ValueNotifier(null),
                         builder: (context, box, widget) {
                           final recentFilesWithIndex = _getRecentFiles();
 
@@ -348,7 +386,7 @@ class _HomeContentViewState extends State<HomeContentView>
                             return Center(
                               child: Padding(
                                 padding:
-                                    const EdgeInsets.symmetric(vertical: 20),
+                                const EdgeInsets.symmetric(vertical: 20),
                                 child: Text(
                                   'no_recent_documents_found'.tr,
                                   style: GoogleFonts.inter(
@@ -369,7 +407,7 @@ class _HomeContentViewState extends State<HomeContentView>
                                 child: ResultDocumentContainer(
                                   documentName: file.name,
                                   date:
-                                      DateFormat('yy/MM/dd').format(file.date),
+                                  DateFormat('yy/MM/dd').format(file.date),
                                   time: DateFormat('h:mma').format(file.date),
                                   size: file.size,
                                   isFavorite: file.isFavorite,
@@ -381,6 +419,8 @@ class _HomeContentViewState extends State<HomeContentView>
                                   onFileRenamed: (newPath) =>
                                       _renameFile(index, newPath),
                                   onLockToggle: () => _toggleLock(index),
+                                  // Add the onTap callback to open files
+                                  onTap: () => _openFile(file.path),
                                 ),
                               );
                             }).toList(),

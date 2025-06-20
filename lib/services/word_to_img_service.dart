@@ -1,20 +1,21 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:convert';
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:archive/archive.dart';
 import 'package:xml/xml.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:image/image.dart' as img;
 
 class WordToImageService {
 
-  /// Converts a Word document to an image file
   Future<File> convertWordToImage(File wordFile, {
     int width = 800,
     int height = 1200,
-    int fontSize = 16,
-    String outputFormat = 'png',
+    double fontSize = 16.0,
+    String outputFormat = 'jpg',
   }) async {
     try {
       // Read the Word file
@@ -24,25 +25,19 @@ class WordToImageService {
       // Extract text content from the Word document
       String textContent = await _extractTextFromDocx(archive);
 
-      // Create an image with the text content
-      final image = img.Image(width: width, height: height);
-      img.fill(image, color: img.ColorRgb8(255, 255, 255)); // White background
-
-      // Process and render text
-      await _renderTextOnImage(image, textContent, fontSize, width, height);
+      // Create image from text
+      final imageBytes = await _createImageFromText(
+          textContent,
+          width,
+          height,
+          fontSize,
+          outputFormat == 'jpg'
+      );
 
       // Create output file path
       final outputDir = await getTemporaryDirectory();
       final fileName = wordFile.path.split('/').last.replaceAll('.docx', '.${outputFormat}');
       final outputFile = File('${outputDir.path}/$fileName');
-
-      // Encode and save image
-      List<int> imageBytes;
-      if (outputFormat.toLowerCase() == 'jpg' || outputFormat.toLowerCase() == 'jpeg') {
-        imageBytes = img.encodeJpg(image, quality: 90);
-      } else {
-        imageBytes = img.encodePng(image);
-      }
 
       await outputFile.writeAsBytes(imageBytes);
 
@@ -57,15 +52,19 @@ class WordToImageService {
   Future<List<File>> convertWordToMultipleImages(File wordFile, {
     int width = 800,
     int height = 1200,
-    int fontSize = 16,
-    int linesPerPage = 50,
+    double fontSize = 16.0,
+    int linesPerPage = 45,
+    bool createZip = true,
   }) async {
     try {
       final bytes = await wordFile.readAsBytes();
       final archive = ZipDecoder().decodeBytes(bytes);
 
       String textContent = await _extractTextFromDocx(archive);
-      final lines = _wrapText(textContent, width ~/ (fontSize * 0.6).round());
+
+      // Calculate characters per line based on width and font size
+      final charsPerLine = (width / (fontSize * 0.6)).floor();
+      final lines = _wrapText(textContent, charsPerLine);
 
       List<File> imageFiles = [];
       final outputDir = await getTemporaryDirectory();
@@ -74,21 +73,29 @@ class WordToImageService {
       // Split text into pages
       for (int pageIndex = 0; pageIndex < lines.length; pageIndex += linesPerPage) {
         final pageLines = lines.skip(pageIndex).take(linesPerPage).toList();
+        final pageText = pageLines.join('\n');
 
         // Create image for this page
-        final image = img.Image(width: width, height: height);
-        img.fill(image, color: img.ColorRgb8(255, 255, 255));
-
-        await _renderLinesOnImage(image, pageLines, fontSize);
+        final imageBytes = await _createImageFromText(
+            pageText,
+            width,
+            height,
+            fontSize,
+            true // Always use JPG for multiple pages
+        );
 
         // Save page image
-        final pageFileName = '${baseFileName}_page_${(pageIndex ~/ linesPerPage) + 1}.png';
+        final pageFileName = '${baseFileName}_page_${(pageIndex ~/ linesPerPage) + 1}.jpg';
         final pageFile = File('${outputDir.path}/$pageFileName');
 
-        final imageBytes = img.encodePng(image);
         await pageFile.writeAsBytes(imageBytes);
-
         imageFiles.add(pageFile);
+      }
+
+      // Create ZIP file if requested and multiple pages exist
+      if (createZip && imageFiles.length > 1) {
+        final zipFile = await _createZipFile(imageFiles, baseFileName);
+        return [zipFile];
       }
 
       return imageFiles;
@@ -96,6 +103,84 @@ class WordToImageService {
     } catch (e) {
       throw Exception('Failed to convert Word to multiple images: $e');
     }
+  }
+
+  /// Creates a ZIP file containing all image files
+  Future<File> _createZipFile(List<File> imageFiles, String baseName) async {
+    try {
+      final outputDir = await getTemporaryDirectory();
+      final zipFile = File('${outputDir.path}/${baseName}_pages.zip');
+
+      final encoder = ZipEncoder();
+      final archive = Archive();
+
+      for (final imageFile in imageFiles) {
+        final imageBytes = await imageFile.readAsBytes();
+        final fileName = imageFile.path.split('/').last;
+        archive.addFile(ArchiveFile(fileName, imageBytes.length, imageBytes));
+      }
+
+      final zipBytes = encoder.encode(archive);
+      await zipFile.writeAsBytes(zipBytes!);
+
+      // Clean up individual image files
+      for (final imageFile in imageFiles) {
+        if (await imageFile.exists()) {
+          await imageFile.delete();
+        }
+      }
+
+      return zipFile;
+    } catch (e) {
+      throw Exception('Failed to create ZIP file: $e');
+    }
+  }
+
+  /// Creates an image from text using Flutter's text rendering
+  Future<Uint8List> _createImageFromText(
+      String text,
+      int width,
+      int height,
+      double fontSize,
+      bool isJpg
+      ) async {
+    // Create a custom painter to render text
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    // Fill background
+    final backgroundPaint = Paint()..color = Colors.white;
+    canvas.drawRect(Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()), backgroundPaint);
+
+    // Create text painter
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: fontSize,
+          fontFamily: 'Arial',
+          height: 1.4, // Line height
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.left,
+    );
+
+    // Layout the text with constraints
+    textPainter.layout(maxWidth: width - 80.0); // 40px padding on each side
+
+    // Draw the text on canvas
+    textPainter.paint(canvas, const Offset(40, 40)); // 40px padding from top-left
+
+    // Convert to image
+    final picture = recorder.endRecording();
+    final image = await picture.toImage(width, height);
+    final byteData = await image.toByteData(
+        format: isJpg ? ui.ImageByteFormat.png : ui.ImageByteFormat.png
+    );
+
+    return byteData!.buffer.asUint8List();
   }
 
   /// Extracts all embedded images from Word document
@@ -141,16 +226,16 @@ class WordToImageService {
     }
   }
 
-  /// Shares multiple image files
-  Future<void> shareMultipleDocuments(List<File> imageFiles) async {
+  /// Shares multiple image files or ZIP file
+  Future<void> shareMultipleDocuments(List<File> files) async {
     try {
-      final xFiles = imageFiles.map((file) => XFile(file.path)).toList();
+      final xFiles = files.map((file) => XFile(file.path)).toList();
       await Share.shareXFiles(
         xFiles,
         text: 'Converted Images from Word Document',
       );
     } catch (e) {
-      throw Exception('Failed to share images: $e');
+      throw Exception('Failed to share files: $e');
     }
   }
 
@@ -173,107 +258,78 @@ class WordToImageService {
   // Private helper methods
 
   Future<String> _extractTextFromDocx(Archive archive) async {
-    // Find document.xml
-    for (final file in archive) {
-      if (file.name == 'word/document.xml') {
-        final xmlContent = utf8.decode(file.content as List<int>);
-        final document = XmlDocument.parse(xmlContent);
+    try {
+      // Find document.xml
+      for (final file in archive) {
+        if (file.name == 'word/document.xml') {
+          final xmlContent = utf8.decode(file.content as List<int>);
+          final document = XmlDocument.parse(xmlContent);
 
-        // Extract text from all <w:t> elements
-        final textElements = document.findAllElements('w:t');
-        final textBuffer = StringBuffer();
+          // Extract text from all <w:t> elements with better formatting
+          final textElements = document.findAllElements('w:t');
+          final paragraphs = document.findAllElements('w:p');
 
-        for (final element in textElements) {
-          textBuffer.write(element.innerText);
-          textBuffer.write(' ');
+          final textBuffer = StringBuffer();
+
+          for (final paragraph in paragraphs) {
+            final textInParagraph = paragraph.findAllElements('w:t');
+            if (textInParagraph.isNotEmpty) {
+              for (final textElement in textInParagraph) {
+                textBuffer.write(textElement.innerText);
+              }
+              textBuffer.write('\n\n'); // Add paragraph break
+            }
+          }
+
+          final result = textBuffer.toString().trim();
+          return result.isEmpty ? 'No text content found in document' : result;
         }
-
-        return textBuffer.toString().trim();
       }
-    }
 
-    return 'No text content found in document';
-  }
-
-  Future<void> _renderTextOnImage(img.Image image, String text, int fontSize, int width, int height) async {
-    final lines = _wrapText(text, width ~/ (fontSize * 0.6).round());
-    await _renderLinesOnImage(image, lines, fontSize);
-  }
-
-  Future<void> _renderLinesOnImage(img.Image image, List<String> lines, int fontSize) async {
-    int y = 50;
-    final lineHeight = fontSize + 8;
-    final textColor = img.ColorRgb8(0, 0, 0); // Black text
-
-    for (final line in lines) {
-      if (y + lineHeight > image.height - 50) break; // Don't overflow
-
-      // Simple text rendering using rectangles (basic implementation)
-      _drawTextLine(image, line, 50, y, fontSize, textColor);
-      y += lineHeight;
-    }
-  }
-
-  void _drawTextLine(img.Image image, String text, int x, int y, int fontSize, img.Color color) {
-    // This is a basic text representation using rectangles
-    // For production use, consider using a proper text rendering library
-
-    final charWidth = (fontSize * 0.6).round();
-    int currentX = x;
-
-    for (int i = 0; i < text.length && currentX < image.width - 50; i++) {
-      final char = text[i];
-      if (char != ' ') {
-        // Draw a simple rectangle for each character
-        _drawCharacter(image, char, currentX, y, fontSize, color);
-      }
-      currentX += charWidth;
-    }
-  }
-
-  void _drawCharacter(img.Image image, String char, int x, int y, int fontSize, img.Color color) {
-    // Very basic character representation
-    // In production, you'd want to use actual font rendering
-
-    final charWidth = (fontSize * 0.6).round();
-    final charHeight = fontSize;
-
-    // Draw different patterns based on character type
-    if (char.contains(RegExp(r'[A-Z]'))) {
-      // Capital letters - taller rectangle
-      img.fillRect(image, x1: x, y1: y, x2: x + charWidth, y2: y + charHeight, color: color);
-    } else if (char.contains(RegExp(r'[a-z]'))) {
-      // Lowercase letters - shorter rectangle
-      img.fillRect(image, x1: x, y1: y + (charHeight ~/ 4), x2: x + charWidth, y2: y + charHeight, color: color);
-    } else if (char.contains(RegExp(r'[0-9]'))) {
-      // Numbers - medium rectangle
-      img.fillRect(image, x1: x, y1: y + (charHeight ~/ 6), x2: x + charWidth, y2: y + charHeight, color: color);
-    } else {
-      // Special characters - small rectangle
-      img.fillRect(image, x1: x, y1: y + (charHeight ~/ 2), x2: x + charWidth, y2: y + charHeight, color: color);
+      return 'No document.xml found in Word file';
+    } catch (e) {
+      return 'Error extracting text: $e';
     }
   }
 
   List<String> _wrapText(String text, int maxCharsPerLine) {
-    final words = text.split(' ');
     final lines = <String>[];
-    StringBuffer currentLine = StringBuffer();
+    final paragraphs = text.split('\n');
 
-    for (final word in words) {
-      if (currentLine.length + word.length + 1 <= maxCharsPerLine) {
-        if (currentLine.isNotEmpty) currentLine.write(' ');
-        currentLine.write(word);
-      } else {
-        if (currentLine.isNotEmpty) {
-          lines.add(currentLine.toString());
-          currentLine = StringBuffer();
-        }
-        currentLine.write(word);
+    for (final paragraph in paragraphs) {
+      if (paragraph.trim().isEmpty) {
+        lines.add(''); // Empty line for paragraph breaks
+        continue;
       }
-    }
 
-    if (currentLine.isNotEmpty) {
-      lines.add(currentLine.toString());
+      final words = paragraph.split(' ');
+      StringBuffer currentLine = StringBuffer();
+
+      for (final word in words) {
+        if (currentLine.length + word.length + 1 <= maxCharsPerLine) {
+          if (currentLine.isNotEmpty) currentLine.write(' ');
+          currentLine.write(word);
+        } else {
+          if (currentLine.isNotEmpty) {
+            lines.add(currentLine.toString());
+            currentLine = StringBuffer();
+          }
+
+          // Handle very long words
+          if (word.length > maxCharsPerLine) {
+            // Split long words
+            for (int i = 0; i < word.length; i += maxCharsPerLine) {
+              lines.add(word.substring(i, (i + maxCharsPerLine).clamp(0, word.length)));
+            }
+          } else {
+            currentLine.write(word);
+          }
+        }
+      }
+
+      if (currentLine.isNotEmpty) {
+        lines.add(currentLine.toString());
+      }
     }
 
     return lines;
@@ -284,29 +340,6 @@ class WordToImageService {
   }
 
   bool _isImageFile(String extension) {
-    return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'].contains(extension);
+    return ['jpg', 'jpeg', 'png'].contains(extension);
   }
 }
-
-// Usage example:
-/*
-void main() async {
-  final service = WordToImageService();
-  final wordFile = File('path/to/document.docx');
-
-  // Convert to single image
-  final imageFile = await service.convertWordToImage(wordFile);
-  print('Converted to: ${imageFile.path}');
-
-  // Convert to multiple images (pages)
-  final multipleImages = await service.convertWordToMultipleImages(wordFile);
-  print('Created ${multipleImages.length} page images');
-
-  // Extract embedded images
-  final extractedImages = await service.extractImagesFromWord(wordFile);
-  print('Extracted ${extractedImages.length} images');
-
-  // Share the converted image
-  await service.shareDocument(imageFile);
-}
-*/

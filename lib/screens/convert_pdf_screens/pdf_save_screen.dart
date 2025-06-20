@@ -42,12 +42,12 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
   bool _isZipFile = false;
   bool _isSinglePageImage = false;
   int _currentImageIndex = 0;
-  late String _currentFilePath; // Track current file path
+  late String _currentFilePath;
 
   @override
   void initState() {
     super.initState();
-    _currentFilePath = widget.convertedFile.path; // Initialize with original path
+    _currentFilePath = widget.convertedFile.path;
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
@@ -136,7 +136,7 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
 
   bool _isImageFile(String filename) {
     final extension = filename.toLowerCase().split('.').last;
-    return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].contains(extension);
+    return ['jpg', 'jpeg', 'png'].contains(extension);
   }
 
   String get fileName {

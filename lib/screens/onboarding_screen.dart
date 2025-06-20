@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,25 +22,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<OnboardingContent> _contents = [
     OnboardingContent(
-      title: 'Scan & Convert',
-      description:
-      'Quickly scan and convert PDFs effortlessly with high-quality results.',
+      title: 'scan_convert'.tr,
+      description: 'scan_convert_desc'.tr,
       image: 'assets/images/onboarding_images/1.svg',
       imageHeight: 230,
       imageWidth: 224,
     ),
     OnboardingContent(
-      title: 'Edit & Enhance',
-      description:
-      'Seamless edits, smart annotations for effective document refinement.',
+      title: 'edit_enhance'.tr,
+      description: 'edit_enhance_desc'.tr,
       image: 'assets/images/onboarding_images/2.svg',
       imageHeight: 218,
       imageWidth: 200,
     ),
     OnboardingContent(
-      title: 'Protect & Share',
-      description:
-      'Keep your documents confidential and secure from sharing with ease.',
+      title: 'protect_share'.tr,
+      description: 'protect_share_desc'.tr,
       image: 'assets/images/onboarding_images/3.svg',
       imageHeight: 240,
       imageWidth: 200,
@@ -125,7 +123,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           child: TextButton(
                             onPressed: _navigateToHome,
                             child: Text(
-                              'SKIP',
+                              'skip'.tr,
                               style: GoogleFonts.inter(
                                 color: Colors.black,
                                 fontSize: 16,

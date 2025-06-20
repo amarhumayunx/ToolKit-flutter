@@ -35,16 +35,15 @@ class _SaveScreenState extends State<SaveScreen>
   late Animation<double> _progressAnimation;
   File? convertedFile;
   String currentFileName = '';
-  late String _currentFilePath; // Track current file path
+  late String _currentFilePath;
 
   @override
   void initState() {
     super.initState();
-    // Use the first image's name as the base name
     final originalName =
         widget.selectedImages.first.path.split('/').last.split('.').first;
     currentFileName = originalName;
-    _currentFilePath = ''; // Initialize empty, will be set in _convertFile
+    _currentFilePath = '';
 
     _animationController = AnimationController(
       vsync: this,
@@ -142,7 +141,6 @@ class _SaveScreenState extends State<SaveScreen>
         ),
       );
     }
-    // Option 2: One image per page for better quality and centering
     else {
       for (pw.MemoryImage image in images) {
         pdf.addPage(

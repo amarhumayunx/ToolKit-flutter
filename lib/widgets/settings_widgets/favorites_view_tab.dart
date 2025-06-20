@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as path;
 import 'package:toolkit/widgets/settings_widgets/sort_btn.dart';
 import 'package:toolkit/widgets/settings_widgets/result_document_container.dart';
@@ -56,6 +57,20 @@ class _FavoritesViewState extends State<FavoritesView> {
       }
     });
   }
+
+  Future<void> _openFile(String filePath) async {
+    try {
+      final file = File(filePath);
+      if (await file.exists()) {
+        await OpenFile.open(filePath);
+      } else {
+        AppSnackBar.show(context, message: 'file_not_found'.tr);
+      }
+    } catch (e) {
+      AppSnackBar.show(context, message: '${'error_opening_file'.tr}: $e');
+    }
+  }
+
 
   Future<void> _toggleLock(int index) async {
     final file = filesBox.getAt(index);
@@ -226,7 +241,9 @@ class _FavoritesViewState extends State<FavoritesView> {
                               onDelete: () => _deleteFile(index),
                               onFileRenamed: (newPath) => _renameFile(index, newPath),
                               onLockToggle: () => _toggleLock(index),
-                              onTap: widget.isSelectingFiles ? () => widget.onFileSelected?.call(file, index) : null,
+                              onTap: widget.isSelectingFiles
+                                  ? () => widget.onFileSelected?.call(file, index)
+                                  : () => _openFile(file.path),
                             )
                         ),
                         const SizedBox(height: 12),
