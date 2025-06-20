@@ -41,8 +41,8 @@ class _ToolsListViewState extends State<ToolsListView> {
 
       // Calculate which page we're on based on scroll position
       final int page = (offset /
-          maxScrollExtent *
-          ((tools.length / _itemsPerPage).ceil() - 1))
+              maxScrollExtent *
+              ((tools.length / _itemsPerPage).ceil() - 1))
           .round();
 
       if (page != _currentPage) {
@@ -89,13 +89,13 @@ class _ToolsListViewState extends State<ToolsListView> {
       case 'file_transfer':
         Navigator.of(context).push(MaterialPageRoute(
           builder: (context) => const FileTransferScreen(),
-        )
-        );
+        ));
         break;
       default:
-      // Handle unknown tool
+        // Handle unknown tool
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('tool_not_implemented'.trParams({'tool': toolId}))),
+          SnackBar(
+              content: Text('tool_not_implemented'.trParams({'tool': toolId}))),
         );
     }
   }
@@ -156,11 +156,11 @@ class _ToolsListViewState extends State<ToolsListView> {
                 padding: const EdgeInsets.only(right: 6),
                 child: ToolItem(
                   icon: tools[index]['icon']!,
-                  name: tools[index]['id']!.tr, // Use id field with .tr for translation
+                  name: tools[index]['id']!.tr,
+                  // Use id field with .tr for translation
                   onTap: () {
                     // Navigate to the appropriate tool page using the 'id' field
-                    _navigateToToolPage(
-                        context, tools[index]['id']!);
+                    _navigateToToolPage(context, tools[index]['id']!);
                   },
                 ),
               );
@@ -173,7 +173,7 @@ class _ToolsListViewState extends State<ToolsListView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
             pagesCount,
-                (index) => Padding(
+            (index) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 3),
               child: Container(
                 width: 8,

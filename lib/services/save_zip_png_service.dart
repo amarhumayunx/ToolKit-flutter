@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,7 +6,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:toolkit/services/file_encryption_service.dart';
 import 'package:toolkit/services/save_document_service.dart';
 
 import '../models/file_model.dart';
@@ -59,7 +57,7 @@ class SaveFileService {
           title: const Text('Permission Issue'),
           content: const Text(
               'Unable to save file. This might be due to permission restrictions on your device.\n\n'
-                  'For Android 11+ users: Please allow the app to manage files and photos in your device settings.'),
+              'For Android 11+ users: Please allow the app to manage files and photos in your device settings.'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancel'),
@@ -139,7 +137,7 @@ class SaveFileService {
 
         String fileName = path.basename(imageFile.path);
         String uniqueFileName =
-        await _generateUniqueFileName(toolkitDir.path, fileName);
+            await _generateUniqueFileName(toolkitDir.path, fileName);
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
 
         await imageFile.copy(destinationPath);
@@ -176,7 +174,7 @@ class SaveFileService {
 
         String fileName = path.basename(zipFile.path);
         String uniqueFileName =
-        await _generateUniqueFileName(toolkitDir.path, fileName);
+            await _generateUniqueFileName(toolkitDir.path, fileName);
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
 
         await zipFile.copy(destinationPath);
@@ -265,7 +263,7 @@ class SaveFileService {
 
         String fileName = path.basename(docFile.path);
         String uniqueFileName =
-        await _generateUniqueFileName(toolkitDir.path, fileName);
+            await _generateUniqueFileName(toolkitDir.path, fileName);
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
 
         await docFile.copy(destinationPath);
@@ -304,7 +302,7 @@ class SaveFileService {
 
         String fileName = path.basename(pdfFile.path);
         String uniqueFileName =
-        await _generateUniqueFileName(toolkitDir.path, fileName);
+            await _generateUniqueFileName(toolkitDir.path, fileName);
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
 
         await pdfFile.copy(destinationPath);
@@ -341,13 +339,14 @@ class SaveFileService {
 
         String fileName = path.basename(file.path);
         String uniqueFileName =
-        await _generateUniqueFileName(toolkitDir.path, fileName);
+            await _generateUniqueFileName(toolkitDir.path, fileName);
         final destinationPath = '${toolkitDir.path}/$uniqueFileName';
 
         await file.copy(destinationPath);
 
         // Save to Hive
-        await _saveFileToHive(File(destinationPath), path.extension(file.path).replaceAll('.', ''));
+        await _saveFileToHive(File(destinationPath),
+            path.extension(file.path).replaceAll('.', ''));
 
         AppSnackBar.show(context, message: 'File saved to ${toolkitDir.path}');
       } else {

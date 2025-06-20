@@ -62,21 +62,101 @@ class _SettingsScreenState extends State<SettingsScreen>
     }
   }
 
+  // Add this method to validate user state immediately
+  Future<void> _validateUserState() async {
+    try {
+      await _authService.validateAndSignOutIfNeeded();
+
+      final user = _authService.currentUser;
+      if (user != null) {
+        final userData = await _authService.getUserDataWithValidation(user.uid);
+
+        if (userData != null) {
+          // User is valid, update states
+          if (mounted) {
+            setState(() {
+              _isUserAuthenticated = true;
+            });
+            await _loadPasswordStatus();
+          }
+        } else {
+          // User document doesn't exist, reset states
+          if (mounted) {
+            setState(() {
+              _isUserAuthenticated = false;
+              _isPasswordSet = false;
+            });
+          }
+        }
+      } else {
+        // User is not authenticated, reset states
+        if (mounted) {
+          setState(() {
+            _isUserAuthenticated = false;
+            _isPasswordSet = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error validating user state: $e');
+      if (mounted) {
+        setState(() {
+          _isUserAuthenticated = false;
+          _isPasswordSet = false;
+        });
+      }
+    }
+  }
+
+// Update the _initialize method in your SettingsScreen
+
   Future<void> _initialize() async {
     await _loadNotificationStatus();
     _initializeLanguageController();
+
+    // Validate user before setting up auth listener
+    await _authService.validateAndSignOutIfNeeded();
+
     _setupAuthListener();
     await _loadInitialData();
   }
 
+// Also update the _loadInitialData method to handle user validation
   Future<void> _loadInitialData() async {
-    final user = _authService.currentUser;
-    if (user != null) {
+    try {
+      // Validate user first
+      await _authService.validateAndSignOutIfNeeded();
+
+      final user = _authService.currentUser;
+      if (user != null) {
+        // Check if user document exists
+        final userData = await _authService.getUserDataWithValidation(user.uid);
+
+        if (userData != null) {
+          setState(() {
+            _isUserAuthenticated = true;
+          });
+          await _loadPasswordStatus();
+          await _loadProfileData();
+        } else {
+          // User document doesn't exist, user was signed out
+          setState(() {
+            _isUserAuthenticated = false;
+            _isPasswordSet = false;
+          });
+        }
+      } else {
+        setState(() {
+          _isUserAuthenticated = false;
+          _isPasswordSet = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading initial data: $e');
       setState(() {
-        _isUserAuthenticated = true;
+        _isUserAuthenticated = false;
+        _isPasswordSet = false;
       });
-      await _loadPasswordStatus();
-      await _loadProfileData();
     }
   }
 
@@ -99,8 +179,11 @@ class _SettingsScreenState extends State<SettingsScreen>
     });
   }
 
-// Update the _navigateToLockedFiles method in _SettingsScreenState
+// Update the _navigateToLockedFiles method to validate user state first
   Future<void> _navigateToLockedFiles() async {
+    // Validate user state before proceeding
+    await _validateUserState();
+
     if (!_isUserAuthenticated) {
       _showAuthenticationRequiredDialog();
       return;
@@ -185,7 +268,11 @@ class _SettingsScreenState extends State<SettingsScreen>
     }
   }
 
+  // Update the _navigateToSetPasswordScreen method to validate user state first
   Future<void> _navigateToSetPasswordScreen() async {
+    // Validate user state before proceeding
+    await _validateUserState();
+
     if (!_isUserAuthenticated) {
       _showAuthenticationRequiredDialog();
       return;
@@ -208,8 +295,11 @@ class _SettingsScreenState extends State<SettingsScreen>
     }
   }
 
-  // Add method to handle password recovery navigation
+  // Update the _navigateToPasswordRecovery method to validate user state first
   Future<void> _navigateToPasswordRecovery() async {
+    // Validate user state before proceeding
+    await _validateUserState();
+
     if (!_isUserAuthenticated) {
       _showAuthenticationRequiredDialog();
       return;

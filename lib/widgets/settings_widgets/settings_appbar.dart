@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:toolkit/screens/settings_screens/profile_screen.dart';
-import 'package:toolkit/screens/settings_screens/phone_number_screen.dart'; // Add this import
+import 'package:toolkit/screens/settings_screens/phone_number_screen.dart';
 import '../../provider/profile_provider.dart';
 import '../../screens/settings_screens/continue_with_google_screen.dart';
 import '../../services/auth_service.dart';
@@ -111,20 +111,23 @@ class SettingsAppBar extends StatelessWidget implements PreferredSizeWidget {
   void _handleProfileTap(BuildContext context) async {
     try {
       final AuthService authService = AuthService();
+      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
 
-      // Use authStateChanges stream to get real-time auth state
-      final user = await authService.authStateChanges.first;
-      final profileProvider =
-      Provider.of<ProfileProvider>(context, listen: false);
+      // First validate if current user is still valid
+      await authService.validateAndSignOutIfNeeded();
+
+      // Now check the auth state after validation
+      final user = authService.currentUser;
 
       if (user != null) {
-        // User is logged in, load fresh data and check phone number
+        // User is still logged in after validation, try to load data
         try {
-          final userData = await authService.getUserData(user.uid);
-          final hasPhoneNumber = await authService.hasPhoneNumber();
+          final userData = await authService.getUserDataWithValidation(user.uid);
 
           if (userData != null) {
-            // Update provider with fresh data from Firestore
+            // User data exists, load it and check phone number
+            final hasPhoneNumber = await authService.hasPhoneNumber();
+
             profileProvider.loadProfileData(
               avatar: userData.avatarId ?? '6',
               username: userData.displayName,
@@ -133,55 +136,45 @@ class SettingsAppBar extends StatelessWidget implements PreferredSizeWidget {
               dateOfBirth: userData.dateOfBirth,
               phoneNumber: userData.phoneNumber,
             );
-          } else {
-            // Fallback to user auth data if Firestore data is missing
-            profileProvider.loadProfileData(
-              avatar: profileProvider.selectedAvatar ?? '6',
-              username: user.displayName ?? 'Not set',
-              email: user.email ?? 'Not set',
-              gender: 'Not set',
-              dateOfBirth: 'Not set',
-            );
-          }
 
-          // Check if user has phone number before navigating
-          if (hasPhoneNumber) {
-            // User has phone number, navigate to profile screen
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ProfileScreen(),
-              ),
-            );
+            // Navigate based on phone number status
+            if (hasPhoneNumber) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ProfileScreen(),
+                ),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PhoneNumberScreen(),
+                ),
+              );
+            }
           } else {
-            // User doesn't have phone number, navigate to phone number screen
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const PhoneNumberScreen(),
-              ),
-            );
+            // User data doesn't exist (user was deleted), navigate to sign-in
+            _navigateToSignIn(context, profileProvider);
           }
         } catch (e) {
           print('Error loading user data: $e');
-          // If there's an error loading data, navigate to sign-in screen
+          // Error occurred, navigate to sign-in screen
           _navigateToSignIn(context, profileProvider);
         }
       } else {
-        // User is not logged in, clear profile data and navigate to Google sign-in
+        // User is not logged in (was signed out during validation), navigate to sign-in
         _navigateToSignIn(context, profileProvider);
       }
     } catch (e) {
       print('Error in profile tap: $e');
       // Navigate to sign-in screen on any error
-      final profileProvider =
-      Provider.of<ProfileProvider>(context, listen: false);
+      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
       _navigateToSignIn(context, profileProvider);
     }
   }
 
-  void _navigateToSignIn(
-      BuildContext context, ProfileProvider profileProvider) {
+  void _navigateToSignIn(BuildContext context, ProfileProvider profileProvider) {
     // Clear any existing profile data
     profileProvider.loadProfileData(
       avatar: '6',

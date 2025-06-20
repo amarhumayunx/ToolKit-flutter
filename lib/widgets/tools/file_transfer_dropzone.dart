@@ -45,29 +45,29 @@ class FileTransferDropZone extends StatelessWidget {
           ),
           child: showEmptyState
               ? Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset(
-                'assets/images/red_qr_code.svg',
-                height: 30,
-                width: 30,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                emptyStateText,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
-                  color: Colors.grey,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ],
-          )
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      'assets/images/red_qr_code.svg',
+                      height: 30,
+                      width: 30,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      emptyStateText,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        color: Colors.grey,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                )
               : Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: _buildFileItem(selectedFile!),
-          ),
+                  padding: const EdgeInsets.all(16.0),
+                  child: _buildFileItem(selectedFile!),
+                ),
         ),
       ),
     );
@@ -143,10 +143,10 @@ class FileTransferDropZone extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
-                color: AppColors.primary,
+                color: Colors.grey[350],
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white, // Add white border for better visibility
+                  color: Colors.white,
                   width: 1.5,
                 ),
               ),
