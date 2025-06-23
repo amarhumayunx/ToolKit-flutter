@@ -1,6 +1,5 @@
 import 'dart:io';
 
-
 import 'package:flutter/material.dart';
 
 class DocumentPreviewScreen extends StatelessWidget {

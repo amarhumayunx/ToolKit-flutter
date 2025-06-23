@@ -235,12 +235,12 @@ class _MergeResultScreenState extends State<MergeResultScreen>
           ),
           if (_animationCompleted)
             Positioned(
-              left: 20,
-              right: 20,
+              left: 0,
+              right: 0,
               bottom: MediaQuery.of(context).padding.bottom,
               child: Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                    const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
                 child: SaveFileButton(
                   filePath: _currentFilePath,
                   fileType: 'pdf',

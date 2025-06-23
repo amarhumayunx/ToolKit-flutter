@@ -200,7 +200,7 @@ class _MergeFileMainScreenState extends State<MergeFileMainScreen> {
           ),
           Padding(
             padding:
-            const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+            const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
             child: CustomGradientButton(
               text: 'merge_files'.tr,
               onPressed: _mergePdfs,

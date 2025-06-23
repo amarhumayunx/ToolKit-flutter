@@ -66,7 +66,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
     _animationController.forward();
   }
 
-  int _getTextSizeInBytes (String Text){
+  int _getTextSizeInBytes(String Text) {
     return utf8.encode(Text).length;
   }
 
@@ -122,14 +122,14 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
         setState(() {
           _isSaving = false;
         });
-        AppSnackBar.show(
-            context,
-            message: '${'text_too_large'.tr}: ${_formatFileSize(textSizeBytes)}. ${'max_allowed'.tr}: ${_formatFileSize(maxTextSizeBytes)}'
-        );
+        AppSnackBar.show(context,
+            message:
+                '${'text_too_large'.tr}: ${_formatFileSize(textSizeBytes)}. ${'max_allowed'.tr}: ${_formatFileSize(maxTextSizeBytes)}');
         return;
       }
 
-      final filePath = await _wordDocumentService.createWordDocument(_textController.text);
+      final filePath =
+          await _wordDocumentService.createWordDocument(_textController.text);
 
       // Check created file size
       final fileSizeBytes = await _getFileSizeInBytes(filePath);
@@ -145,10 +145,9 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
           _isSaving = false;
         });
 
-        AppSnackBar.show(
-            context,
-            message: '${'file_too_large'.tr}: ${_formatFileSize(fileSizeBytes)}. ${'max_allowed'.tr}: ${_formatFileSize(maxFileSizeBytes)}'
-        );
+        AppSnackBar.show(context,
+            message:
+                '${'file_too_large'.tr}: ${_formatFileSize(fileSizeBytes)}. ${'max_allowed'.tr}: ${_formatFileSize(maxFileSizeBytes)}');
         return;
       }
 
@@ -158,11 +157,9 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
       });
 
       // Show success message with file size
-      AppSnackBar.show(
-          context,
-          message: '${'file_created_successfully'.tr} (${_formatFileSize(fileSizeBytes)})'
-      );
-
+      AppSnackBar.show(context,
+          message:
+              '${'file_created_successfully'.tr} (${_formatFileSize(fileSizeBytes)})');
     } catch (e) {
       setState(() {
         _isSaving = false;
@@ -170,6 +167,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
       AppSnackBar.show(context, message: '${'error_saving_file'.tr}: $e');
     }
   }
+
   Future<void> _handleFileDeleted() async {
     try {
       if (_savedFilePath != null) {
@@ -348,7 +346,9 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isNearLimit ? Colors.orange.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+        color: isNearLimit
+            ? Colors.orange.withOpacity(0.1)
+            : Colors.grey.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -377,8 +377,11 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
+      // Remove the maxHeight constraint that was causing issues
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.5,
+        minHeight: 200, // Set minimum height instead
+        maxHeight: MediaQuery.of(context).size.height *
+            0.4, // Keep reasonable max height
       ),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -413,25 +416,36 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
           ),
           const SizedBox(height: 8),
           Expanded(
-            child: TextField(
-              controller: _textController,
-              maxLines: null,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
+            child: Scrollbar(
+              // Add scrollbar for better UX
+              child: SingleChildScrollView(
+                // Wrap TextField in SingleChildScrollView
+                child: TextField(
+                  controller: _textController,
+                  maxLines: null,
+                  // Allow unlimited lines
+                  minLines: 8,
+                  // Set minimum lines to ensure good height
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  onChanged: (value) {
+                    setState(() {}); // Refresh size info when text changes
+                  },
+                ),
               ),
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-              ),
-              onChanged: (value) {
-                setState(() {}); // Refresh size info when text changes
-              },
             ),
           ),
         ],
       ),
     );
   }
+
   Widget _buildLoadingContainer() {
     return AnimatedLoadingContainer(
       animationController: _animationController,

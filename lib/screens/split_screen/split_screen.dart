@@ -353,7 +353,7 @@ class _SplitScreenState extends State<SplitScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 26.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
             child: Column(
               children: [
                 _isProcessing

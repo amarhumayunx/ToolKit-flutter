@@ -409,8 +409,8 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
                 ),
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
                 child: CustomGradientButton(
                   text: 'rearrange'.tr,
                   onPressed: _navigateToResults,

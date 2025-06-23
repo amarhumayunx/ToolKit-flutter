@@ -194,27 +194,4 @@ class _ToolsListViewState extends State<ToolsListView> {
   }
 }
 
-// You'll need to create these pages
-class OcrPage extends StatelessWidget {
-  const OcrPage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('OCR')),
-      body: const Center(child: Text('OCR Tool Page')),
-    );
-  }
-}
-
-class CompressFilesPage extends StatelessWidget {
-  const CompressFilesPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Compress Files')),
-      body: const Center(child: Text('Compress Files Tool Page')),
-    );
-  }
-}

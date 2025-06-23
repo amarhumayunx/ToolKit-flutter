@@ -438,7 +438,7 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
           ),
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
             child: CustomGradientButton(
               text: _isGeneratingQR
                   ? 'Generating QR Code...'.tr

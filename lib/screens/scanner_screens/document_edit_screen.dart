@@ -17,7 +17,6 @@ import '../../widgets/scanner_widgets/document_preview.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/scanner_widgets/filter_selector.dart';
 
-// Filter provider to manage filter state
 class FilterProvider extends ChangeNotifier {
   String _selectedFilter = 'original'.tr;
   final Map<String, File> _filterCache = {};
@@ -77,35 +76,25 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
   bool _isFiltering = false;
   double _rotationAngle = 0;
   bool _hasChanges = false;
-
-  // Animation controller for filter scanning effect
   late AnimationController _animationController;
   late Animation<double> _animation;
   bool _isApplyingFilter = false;
-
-  // Current image index for batch mode
   late int _currentIndex;
-
-  // Edit history stack for undo/redo functionality
   List<File> _editHistory = [];
   int _currentHistoryIndex = 0;
-
-  // Filter options
-  List<String> get _filterOptions => [
-    'original'.tr,
-    'cool_tone'.tr,
-    'warm_tone'.tr,
-    'grayscale'.tr,
-    'blue_light'.tr,
-    'sepia'.tr,
-    'soft_pastel'.tr
-  ];
-
-  // Pre-computed filter thumbnails
   final Map<String, File> _filterPreviews = {};
   bool _previewsReady = false;
-
   late FilterProvider _filterProvider;
+
+  List<String> get _filterOptions => [
+        'original'.tr,
+        'cool_tone'.tr,
+        'warm_tone'.tr,
+        'grayscale'.tr,
+        'blue_light'.tr,
+        'sepia'.tr,
+        'soft_pastel'.tr
+      ];
 
   @override
   void initState() {
@@ -113,14 +102,11 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     _processedImage = widget.imageFile;
     _currentIndex = widget.currentIndex ?? 0;
     _filterProvider = FilterProvider();
-
-    // Add original image to history
     _editHistory.add(widget.imageFile);
 
-    // Initialize animation controller with fixed duration
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000), // Exactly 2 seconds
+      duration: const Duration(milliseconds: 1000),
     );
 
     _animation = Tween<double>(begin: 0, end: 1).animate(_animationController)
@@ -128,7 +114,6 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
         setState(() {});
       })
       ..addStatusListener((status) {
-        // When animation completes, ensure we update the UI
         if (status == AnimationStatus.completed) {
           setState(() {
             _isApplyingFilter = false;
@@ -136,7 +121,6 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
         }
       });
 
-    // Pre-compute filter previews in the background
     _preGenerateFilterPreviews();
   }
 
@@ -210,10 +194,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
           _hasChanges = true;
         });
 
-        // Add to edit history
         _addToHistory(File(croppedFile.path));
-
-        // Clear filter cache as cropped image needs new filter previews
         _filterProvider.clearCache();
         _preGenerateFilterPreviews();
       }
@@ -250,14 +231,9 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     });
 
     try {
-      // Load the image
       final imageBytes = await _processedImage!.readAsBytes();
       final image = img.decodeImage(imageBytes)!;
-
-      // Rotate the image
       final rotatedImage = img.copyRotate(image, angle: 90);
-
-      // Save the rotated image
       final newPath = await _saveTempImage(rotatedImage);
 
       setState(() {
@@ -266,14 +242,10 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
         _hasChanges = true;
       });
 
-      // Add to edit history (trim future history if navigating back)
       _addToHistory(File(newPath));
-
-      // Clear filter cache as rotated image needs new filter previews
       _filterProvider.clearCache();
       _preGenerateFilterPreviews();
     } catch (e) {
-      // Handle any errors
       if (kDebugMode) {
         print('${'error_rotating_image'.tr}: $e');
       }
@@ -285,12 +257,10 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
   }
 
   void _addToHistory(File imageFile) {
-    // Remove any forward history if we're not at the end
     if (_currentHistoryIndex < _editHistory.length - 1) {
       _editHistory = _editHistory.sublist(0, _currentHistoryIndex + 1);
     }
 
-    // Add new edit to history
     _editHistory.add(imageFile);
     _currentHistoryIndex = _editHistory.length - 1;
   }
@@ -316,12 +286,9 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
   }
 
   Future<void> _applyFilter(String filterName) async {
-    // Set selected filter immediately
     _filterProvider.setFilter(filterName);
 
-    // Skip animation for Original filter
     if (filterName != 'original'.tr) {
-      // Start scanning animation
       setState(() {
         _isApplyingFilter = true;
       });
@@ -329,87 +296,136 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
       _animationController.forward();
     }
 
-    // Check if we already have this filter cached
-    if (_filterProvider.filterCache.containsKey(filterName)) {
-      setState(() {
-        _processedImage = _filterProvider.filterCache[filterName];
-        _hasChanges = true;
-      });
+    if (widget.isBatchMode && widget.batchImages != null) {
+      try {
+        List<File> filteredBatchImages = [];
 
-      // Add to edit history
-      _addToHistory(_filterProvider.filterCache[filterName]!);
+        for (int i = 0; i < widget.batchImages!.length; i++) {
+          final imageFile = widget.batchImages![i];
+          final cacheKey = '${imageFile.path}_$filterName';
 
-      // Skip animation for Original filter
-      if (filterName == 'original'.tr) {
+          if (_filterProvider.filterCache.containsKey(cacheKey)) {
+            filteredBatchImages.add(_filterProvider.filterCache[cacheKey]!);
+            continue;
+          }
+
+          final imageBytes = await imageFile.readAsBytes();
+          var image = img.decodeImage(imageBytes)!;
+
+          if (filterName == 'sepia'.tr) {
+            image = img.sepia(image);
+            image = img.adjustColor(image, contrast: 1.3);
+          } else if (filterName == 'cool_tone'.tr) {
+            image = img.colorOffset(image, blue: 20, green: 10);
+            image = img.adjustColor(image, contrast: 1.2, gamma: 1.0);
+          } else if (filterName == 'warm_tone'.tr) {
+            image = img.colorOffset(image, red: 20, green: 10);
+            image = img.adjustColor(image, contrast: 1.2, gamma: 1.0);
+          } else if (filterName == 'grayscale'.tr) {
+            image = img.grayscale(image);
+            image = img.adjustColor(image, contrast: 1.4);
+          } else if (filterName == 'blue_light'.tr) {
+            image = img.colorOffset(image, blue: 30);
+            image = img.adjustColor(image, contrast: 1.25);
+          } else if (filterName == 'soft_pastel'.tr) {
+            image = img.adjustColor(image, saturation: 0.5, contrast: 1.1);
+          } else {
+            image = img.adjustColor(image, contrast: 1.1);
+          }
+
+          final newPath = await _saveTempImage(image);
+          File filteredImage = File(newPath);
+
+          _filterProvider.addToCache(cacheKey, filteredImage);
+          filteredBatchImages.add(filteredImage);
+        }
+
+        if (mounted) {
+          setState(() {
+            widget.batchImages!.clear();
+            widget.batchImages!.addAll(filteredBatchImages);
+            _processedImage = filteredBatchImages[_currentIndex];
+            _hasChanges = true;
+          });
+        }
+
+        _addToHistory(_processedImage!);
+      } catch (e) {
+        if (kDebugMode) {
+          print('${'error_applying_filter'.tr}: $e');
+        }
+        if (mounted) {
+          AppSnackBar.show(context, message: 'failed_to_apply_filter'.tr);
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isApplyingFilter = false;
+          });
+        }
+      }
+    } else {
+      // Single image mode
+      final cacheKey = '${_processedImage!.path}_$filterName';
+      if (_filterProvider.filterCache.containsKey(cacheKey)) {
+        setState(() {
+          _processedImage = _filterProvider.filterCache[cacheKey];
+          _hasChanges = true;
+        });
+        _addToHistory(_filterProvider.filterCache[cacheKey]!);
+        return;
+      }
+
+      try {
+        final imageBytes = await _processedImage!.readAsBytes();
+        var image = img.decodeImage(imageBytes)!;
+
+        if (filterName == 'sepia'.tr) {
+          image = img.sepia(image);
+          image = img.adjustColor(image, contrast: 1.3);
+        } else if (filterName == 'cool_tone'.tr) {
+          image = img.colorOffset(image, blue: 20, green: 10);
+          image = img.adjustColor(image, contrast: 1.2, gamma: 1.0);
+        } else if (filterName == 'warm_tone'.tr) {
+          image = img.colorOffset(image, red: 20, green: 10);
+          image = img.adjustColor(image, contrast: 1.2, gamma: 1.0);
+        } else if (filterName == 'grayscale'.tr) {
+          image = img.grayscale(image);
+          image = img.adjustColor(image, contrast: 1.4);
+        } else if (filterName == 'blue_light'.tr) {
+          image = img.colorOffset(image, blue: 30);
+          image = img.adjustColor(image, contrast: 1.25);
+        } else if (filterName == 'soft_pastel'.tr) {
+          image = img.adjustColor(image, saturation: 0.5, contrast: 1.1);
+        } else {
+          image = img.adjustColor(image, contrast: 1.1);
+        }
+
+        final newPath = await _saveTempImage(image);
+        File filteredImage = File(newPath);
+
+        _filterProvider.addToCache(cacheKey, filteredImage);
+
+        setState(() {
+          _processedImage = filteredImage;
+          _hasChanges = true;
+        });
+
+        _addToHistory(filteredImage);
+
+        if (filterName == 'original'.tr) {
+          setState(() {
+            _isApplyingFilter = false;
+          });
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('${'error_applying_filter'.tr}: $e');
+        }
         setState(() {
           _isApplyingFilter = false;
         });
       }
-      return;
-    }
-
-    // If not cached, generate it
-    try {
-      // Load the original image from history (first item)
-      final originalImageBytes = await _editHistory.first.readAsBytes();
-      var image = img.decodeImage(originalImageBytes)!;
-
-      // Apply rotation if any
-      if (_rotationAngle != 0) {
-        image = img.copyRotate(image, angle: _rotationAngle.toInt());
-      }
-
-      // Apply selected filter with enhanced contrast for text
-      if (filterName == 'sepia'.tr) {
-        image = img.sepia(image);
-        image = img.adjustColor(image, contrast: 1.3);
-      } else if (filterName == 'cool_tone'.tr) {
-        image = img.colorOffset(image, blue: 20, green: 10);
-        image = img.adjustColor(image, contrast: 1.2, gamma: 1.0);
-      } else if (filterName == 'warm_tone'.tr) {
-        image = img.colorOffset(image, red: 20, green: 10);
-        image = img.adjustColor(image, contrast: 1.2, gamma: 1.0);
-      } else if (filterName == 'grayscale'.tr) {
-        image = img.grayscale(image);
-        image = img.adjustColor(image, contrast: 1.4);
-      } else if (filterName == 'blue_light'.tr) {
-        image = img.colorOffset(image, blue: 30);
-        image = img.adjustColor(image, contrast: 1.25);
-      } else if (filterName == 'soft_pastel'.tr) {
-        image = img.adjustColor(image, saturation: 0.5, contrast: 1.1);
-      } else {
-        // Original or default
-        image = img.adjustColor(image, contrast: 1.1);
-      }
-
-      // Save the filtered image
-      final newPath = await _saveTempImage(image);
-      File filteredImage = File(newPath);
-
-      // Cache the result
-      _filterProvider.addToCache(filterName, filteredImage);
-
-      setState(() {
-        _processedImage = filteredImage;
-        _hasChanges = true;
-      });
-
-      // Add to edit history
-      _addToHistory(filteredImage);
-
-      // For Original filter, immediately set applying to false
-      if (filterName == 'original'.tr) {
-        setState(() {
-          _isApplyingFilter = false;
-        });
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('${'error_applying_filter'.tr}: $e');
-      }
-      setState(() {
-        _isApplyingFilter = false;
-      });
     }
   }
 
@@ -425,18 +441,15 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     final directory = await getApplicationDocumentsDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final newPath = '${directory.path}/edited_document_$timestamp.jpg';
-
-    // Save the processed image
     await _processedImage!.copy(newPath);
 
-    // Navigate back with the saved document
     if (mounted) {
       Navigator.pop(context, File(newPath));
     }
   }
 
   void _retakePhoto() {
-    Navigator.pop(context, null); // Return null to indicate retake
+    Navigator.pop(context, null);
   }
 
   void _toggleFilterView() {
@@ -445,14 +458,12 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     });
   }
 
-  // Update the _handleSave method in DocumentEditScreen
   void _handleSave() async {
     if (_isFiltering) {
       setState(() {
         _isFiltering = false;
       });
     } else {
-      // Show loading indicator
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -464,7 +475,6 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
       );
 
       try {
-        // Get all images to include in the document
         List<File> imagesToSave = [];
         if (widget.isBatchMode && widget.batchImages != null) {
           imagesToSave = widget.batchImages!;
@@ -472,13 +482,11 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
           imagesToSave = [_processedImage!];
         }
 
-        // Create Word document
         final wordFile =
-        await WordImagesService.createWordDocument(imagesToSave);
+            await WordImagesService.createWordDocument(imagesToSave);
 
-        // Navigate to result screen
         if (mounted) {
-          Navigator.pop(context); // Close loading dialog
+          Navigator.pop(context);
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -488,23 +496,19 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
         }
       } catch (e) {
         if (mounted) {
-          Navigator.pop(context); // Close loading dialog
-
-          AppSnackBar.show(context, message: '${'failed_to_create_document'.tr}: $e');
+          Navigator.pop(context);
+          AppSnackBar.show(context,
+              message: '${'failed_to_create_document'.tr}: $e');
         }
       }
     }
   }
 
   Future<File> _generateFilterPreview(String filterName) async {
-    // Load the original image from history (first item)
     final originalImageBytes = await _editHistory.first.readAsBytes();
     var image = img.decodeImage(originalImageBytes)!;
-
-    // Resize for thumbnail
     image = img.copyResize(image, width: 100);
 
-    // Apply selected filter
     if (filterName == 'sepia'.tr) {
       image = img.sepia(image);
     } else if (filterName == 'cool_tone'.tr) {
@@ -518,9 +522,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
     } else if (filterName == 'soft_pastel'.tr) {
       image = img.adjustColor(image, saturation: 0.5, contrast: 0.9);
     }
-    // Original - no filter applied
 
-    // Save the filtered image
     final directory = await getTemporaryDirectory();
     final newPath =
         '${directory.path}/preview_${filterName}_${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -557,20 +559,16 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
           ),
           body: Column(
             children: [
-              // Document preview area
               Expanded(
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Document image with rotation
                     if (_processedImage != null)
                       Center(
                         child: DocumentPreview(
                           image: _processedImage!,
                         ),
                       ),
-
-                    // Undo/Redo buttons under the image
                     Positioned(
                       bottom: 38,
                       child: Container(
@@ -603,15 +601,15 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
                             ),
                             GestureDetector(
                               onTap:
-                              _currentHistoryIndex < _editHistory.length - 1
-                                  ? _redo
-                                  : null,
+                                  _currentHistoryIndex < _editHistory.length - 1
+                                      ? _redo
+                                      : null,
                               child: SvgPicture.asset(
                                 'assets/icons/redo_icon.svg',
                                 width: 16,
                                 height: 16,
-                                color:
-                                _currentHistoryIndex < _editHistory.length - 1
+                                color: _currentHistoryIndex <
+                                        _editHistory.length - 1
                                     ? AppColors.primary
                                     : Colors.grey.shade400,
                               ),
@@ -620,8 +618,6 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
                         ),
                       ),
                     ),
-
-                    // Filter animation overlay
                     if (_isApplyingFilter)
                       Positioned.fill(
                         child: LayoutBuilder(
@@ -647,22 +643,9 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
                           },
                         ),
                       ),
-
-                    // Loading indicator for rotation
-                    if (_isRotating)
-                      Container(
-                        color: Colors.black26,
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ),
-
-              // Edit tools area
               Container(
                 height: 100,
                 decoration: BoxDecoration(
@@ -681,7 +664,6 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
                 ),
                 child: Column(
                   children: [
-                    // Conditional content - show either filters or edit tools
                     if (_isFiltering)
                       Expanded(
                         child: FilterSelector(
@@ -692,7 +674,6 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
                         ),
                       )
                     else
-                    // Default edit tool buttons
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Row(

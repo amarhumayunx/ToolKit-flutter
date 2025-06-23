@@ -414,7 +414,7 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
             if (_animationCompleted && hasValidFile)
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   child: CustomGradientButton(
                     key: ValueKey(_saveButtonKey),
                     text: _isSaving ? 'saving'.tr : 'save'.tr,

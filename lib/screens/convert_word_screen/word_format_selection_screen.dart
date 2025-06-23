@@ -253,9 +253,12 @@ class _WordFormatSelectionScreenState extends State<WordFormatSelectionScreen> {
             ),
             const SizedBox(height: 15),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 _buildFormatOption('PDF', 'assets/icons/convert_pdf.svg'),
+                SizedBox(
+                  width: 16,
+                ),
                 _buildFormatOption('Image', 'assets/icons/convert_img_icon.svg'),
               ],
             ),

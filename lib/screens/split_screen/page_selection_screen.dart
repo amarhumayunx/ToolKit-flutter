@@ -344,8 +344,8 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
               ),
 
               const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal:6.0, vertical: 10.0),
                 child: CustomGradientButton(
                   text: ('split'.tr),
                   onPressed: _onSplitPressed,

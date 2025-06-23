@@ -138,7 +138,7 @@ class _ResultScreenState extends State<ResultScreen>
 
     // Navigate back to previous screens
     Navigator.of(context).pop(true);
-    Navigator.of(context).pop(true);
+    // Navigator.of(context).pop(true);
   }
 
   @override
@@ -178,7 +178,10 @@ class _ResultScreenState extends State<ResultScreen>
                       onFileRenamed: _handleFileRenamed, // Add this callback
                     ),
                   ],
-                  SizedBox(height: MediaQuery.of(context).padding.bottom + 320),
+                  SizedBox(height: MediaQuery
+                      .of(context)
+                      .padding
+                      .bottom + 320),
                 ],
               ),
             ),
@@ -187,10 +190,14 @@ class _ResultScreenState extends State<ResultScreen>
             Positioned(
               left: 20,
               right: 20,
-              bottom: MediaQuery.of(context).padding.bottom,
+              bottom: MediaQuery
+                  .of(context)
+                  .padding
+                  .bottom,
               child: SaveDocumentButton(
                 documentFile: File(_currentFilePath),
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0, vertical: 20),
                 onSaveCompleted: _handleSaveCompleted,
               ),
             ),

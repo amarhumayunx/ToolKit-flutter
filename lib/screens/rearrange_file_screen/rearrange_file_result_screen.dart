@@ -501,7 +501,7 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
             if (_animationCompleted && hasValidFiles && !_errorOccurred && _processingComplete)
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   child: CustomGradientButton(
                     key: Key(_saveButtonKey),
                     text: _isSaving
