@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:io';
 import '../tools/file_options_menu.dart';
 
 class DocumentContainer extends StatefulWidget {
@@ -25,11 +26,44 @@ class DocumentContainer extends StatefulWidget {
 
 class _DocumentContainerState extends State<DocumentContainer> {
   late String _currentFilePath;
+  String? _fileSize;
 
   @override
   void initState() {
     super.initState();
     _currentFilePath = widget.filePath;
+    _getFileSize();
+  }
+
+  // Function to get file size
+  Future<void> _getFileSize() async {
+    try {
+      final file = File(_currentFilePath);
+      if (await file.exists()) {
+        final size = await file.length();
+        setState(() {
+          _fileSize = _formatFileSize(size);
+        });
+      }
+    } catch (e) {
+      // Handle error silently or set default size
+      setState(() {
+        _fileSize = 'Unknown';
+      });
+    }
+  }
+
+  // Function to format file size in human readable format
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) {
+      return '${bytes} B';
+    } else if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    } else if (bytes < 1024 * 1024 * 1024) {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    } else {
+      return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
+    }
   }
 
   // Function to get the appropriate icon based on file extension
@@ -106,8 +140,7 @@ class _DocumentContainerState extends State<DocumentContainer> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        widget.date ??
-                            DateTime.now().toString().substring(0, 16),
+                        _buildFileInfoText(),
                         style: GoogleFonts.inter(
                           fontSize: 9,
                           fontWeight: FontWeight.w400,
@@ -126,6 +159,8 @@ class _DocumentContainerState extends State<DocumentContainer> {
                     setState(() {
                       _currentFilePath = newName;
                     });
+                    // Recalculate file size for renamed file
+                    _getFileSize();
                     if (widget.onFileRenamed != null) {
                       widget.onFileRenamed!(newName);
                     }
@@ -136,5 +171,12 @@ class _DocumentContainerState extends State<DocumentContainer> {
         ),
       ),
     );
+  }
+
+  // Function to build the file info text with date and size
+  String _buildFileInfoText() {
+    final date = widget.date ?? DateTime.now().toString().substring(0, 16);
+    final size = _fileSize ?? 'Loading...';
+    return '$date | $size';
   }
 }

@@ -69,12 +69,12 @@ class _OcrScreenState extends State<OcrScreen> {
       if (image == null) return imageFile;
 
       if (image.width < 300 || image.height < 300) {
-        final scale = 300 / (image.width < image.height ? image.width : image.height);
+        final scale =
+            300 / (image.width < image.height ? image.width : image.height);
         image = img.copyResize(image,
             width: (image.width * scale).round(),
             height: (image.height * scale).round(),
-            interpolation: img.Interpolation.cubic
-        );
+            interpolation: img.Interpolation.cubic);
       }
 
       image = img.grayscale(image);
@@ -89,7 +89,8 @@ class _OcrScreenState extends State<OcrScreen> {
       // Save the processed image temporarily
       final processedBytes = img.encodePng(image);
       final tempDir = Directory.systemTemp;
-      final processedFile = File('${tempDir.path}/processed_${DateTime.now().millisecondsSinceEpoch}.png');
+      final processedFile = File(
+          '${tempDir.path}/processed_${DateTime.now().millisecondsSinceEpoch}.png');
       await processedFile.writeAsBytes(processedBytes);
 
       return processedFile;
@@ -130,11 +131,8 @@ class _OcrScreenState extends State<OcrScreen> {
 
   // Simple sharpening filter
   img.Image _sharpenImage(img.Image image) {
-    return img.convolution(image, filter: [
-      0, -1, 0,
-      -1, 5, -1,
-      0, -1, 0
-    ], div: 3);
+    return img.convolution(image,
+        filter: [0, -1, 0, -1, 5, -1, 0, -1, 0], div: 3);
   }
 
   // Clean up extracted text
@@ -164,27 +162,29 @@ class _OcrScreenState extends State<OcrScreen> {
 
     try {
       // Create text recognizer with Latin script for better accuracy
-      final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+      final textRecognizer =
+          TextRecognizer(script: TextRecognitionScript.latin);
 
       StringBuffer combinedText = StringBuffer();
       bool textFound = false;
       List<File> tempFiles = []; // Keep track of temporary preprocessed files
 
       for (int i = 0; i < _selectedImages.length; i++) {
-
         // Preprocess image for better OCR
         final preprocessedImage = await _preprocessImage(_selectedImages[i]);
         tempFiles.add(preprocessedImage);
 
         final inputImage = InputImage.fromFilePath(preprocessedImage.path);
-        final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
+        final RecognizedText recognizedText =
+            await textRecognizer.processImage(inputImage);
 
         if (recognizedText.text.isNotEmpty) {
           textFound = true;
 
           // Add image separator if multiple images
           if (_selectedImages.length > 1) {
-            combinedText.writeln('image_header'.trParams({'number': (i + 1).toString()}));
+            combinedText.writeln(
+                'image_header'.trParams({'number': (i + 1).toString()}));
           }
 
           // Clean and add the extracted text
@@ -198,7 +198,8 @@ class _OcrScreenState extends State<OcrScreen> {
 
       // Clean up temporary files
       for (final tempFile in tempFiles) {
-        if (tempFile.path != _selectedImages[tempFiles.indexOf(tempFile)].path) {
+        if (tempFile.path !=
+            _selectedImages[tempFiles.indexOf(tempFile)].path) {
           try {
             await tempFile.delete();
           } catch (e) {
@@ -216,7 +217,8 @@ class _OcrScreenState extends State<OcrScreen> {
         final shouldClear = await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ExtractedTextScreen(extractedText: _extractedText),
+            builder: (context) =>
+                ExtractedTextScreen(extractedText: _extractedText),
           ),
         );
 
@@ -228,7 +230,8 @@ class _OcrScreenState extends State<OcrScreen> {
       }
     } catch (e) {
       print('error_in_ocr'.trParams({'error': e.toString()}));
-      AppSnackBar.show(context, message: 'error_processing_images'.trParams({'error': e.toString()}));
+      AppSnackBar.show(context,
+          message: 'error_processing_images'.trParams({'error': e.toString()}));
       setState(() {
         _isProcessing = false;
       });
@@ -264,7 +267,8 @@ class _OcrScreenState extends State<OcrScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const CustomSvgImage(imagePath: 'assets/images/ocr_image.svg'),
+                  const CustomSvgImage(
+                      imagePath: 'assets/images/ocr_image.svg'),
                   const SizedBox(height: 30),
                   InfoCard(
                     title: 'extract_text_from_files'.tr,
@@ -297,7 +301,8 @@ class _OcrScreenState extends State<OcrScreen> {
                             selectedImages: _selectedImages,
                             onTap: () => _pickImages(ImageSource.gallery),
                             onRemoveImage: _removeImage,
-                            isEmpty: _shouldClearImages || _selectedImages.isEmpty,
+                            isEmpty:
+                                _shouldClearImages || _selectedImages.isEmpty,
                             emptyStateText: 'click_to_choose_files'.tr,
                           ),
                         ),
@@ -309,14 +314,13 @@ class _OcrScreenState extends State<OcrScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
             child: CustomGradientButton(
               text: _isProcessing ? 'processing'.tr : 'extract_text'.tr,
               onPressed: _isProcessing ? null : _extractTextFromImages,
             ),
           ),
-
-
         ],
       ),
     );

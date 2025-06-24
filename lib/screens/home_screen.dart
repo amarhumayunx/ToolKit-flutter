@@ -409,7 +409,7 @@ class _HomeContentViewState extends State<HomeContentView>
                                   date:
                                   DateFormat('yy/MM/dd').format(file.date),
                                   time: DateFormat('h:mma').format(file.date),
-                                  size: file.size,
+
                                   isFavorite: file.isFavorite,
                                   isLocked: file.isLocked,
                                   filePath: file.path,

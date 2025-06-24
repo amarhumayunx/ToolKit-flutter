@@ -106,9 +106,6 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
 
   // Simple country detection based on common patterns
   void _detectUserCountry() {
-    // You can implement more sophisticated detection here
-    // For now, we'll keep US as default for broader appeal
-    // You could use packages like 'geolocator' or 'geocoding' for better detection
   }
 
   @override
@@ -126,182 +123,196 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(flex: 2),
-                Text(
-                  'Add Your Phone Number',
-                  style: GoogleFonts.inter(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                    height: 1.2,
+          child: Column(
+            children: [
+              // Back arrow button at the top left
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
                   ),
-                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  'We\'ll use this to keep your account secure\nSelect any country code',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white.withOpacity(0.8),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const Spacer(flex: 1),
-
-                // Phone Number Input Field with Country Code Selector
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Country Code Selector
-                      InkWell(
-                        onTap: _showCountryCodePicker,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 16),
-                          decoration: const BoxDecoration(
-                            border: Border(
-                              right: BorderSide(
-                                color: Color(0xFFE5E7EB),
-                                width: 1,
+                      const Spacer(flex: 1),
+                      Text(
+                        'Add Your Phone Number',
+                        style: GoogleFonts.inter(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                          height: 1.2,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'We\'ll use this to keep your account secure\nSelect any country code',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white.withOpacity(0.8),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const Spacer(flex: 1),
+
+                      // Phone Number Input Field with Country Code Selector
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            // Country Code Selector
+                            InkWell(
+                              onTap: _showCountryCodePicker,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 16),
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(
+                                      color: Color(0xFFE5E7EB),
+                                      width: 1,
+                                    ),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      _getCountryFlag(_selectedCountryCode),
+                                      style: const TextStyle(fontSize: 20),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      _selectedCountryCode,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 16,
+                                        color: const Color(0xFF1F2937),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    const Icon(
+                                      Icons.arrow_drop_down,
+                                      color: Color(0xFF6B7280),
+                                      size: 20,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                _getCountryFlag(_selectedCountryCode),
-                                style: const TextStyle(fontSize: 20),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                _selectedCountryCode,
+                            // Phone Number Input
+                            Expanded(
+                              child: TextField(
+                                controller: _phoneController,
+                                cursorColor: AppColors.primary,
+                                keyboardType: TextInputType.phone,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(15),
+                                ],
                                 style: GoogleFonts.inter(
                                   fontSize: 16,
                                   color: const Color(0xFF1F2937),
-                                  fontWeight: FontWeight.w500,
                                 ),
+                                decoration: InputDecoration(
+                                  hintText: _getPhoneHint(_selectedCountryCode),
+                                  hintStyle: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    color: const Color(0xFF9CA3AF),
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _errorMessage = null;
+                                  });
+                                },
                               ),
-                              const SizedBox(width: 4),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      if (_errorMessage != null) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.red.withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            children: [
                               const Icon(
-                                Icons.arrow_drop_down,
-                                color: Color(0xFF6B7280),
-                                size: 20,
+                                Icons.error_outline,
+                                color: Colors.red,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _errorMessage!,
+                                  style: GoogleFonts.inter(
+                                    color: Colors.red,
+                                    fontSize: 14,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                      // Phone Number Input
-                      Expanded(
-                        child: TextField(
-                          controller: _phoneController,
-                          cursorColor: AppColors.primary,
-                          keyboardType: TextInputType.phone,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(15),
-                          ],
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            color: const Color(0xFF1F2937),
-                          ),
-                          decoration: InputDecoration(
-                            hintText: _getPhoneHint(_selectedCountryCode),
-                            hintStyle: GoogleFonts.inter(
-                              fontSize: 16,
-                              color: const Color(0xFF9CA3AF),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                            fillColor: Colors.white,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 16,
-                            ),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              _errorMessage = null;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                if (_errorMessage != null) ...[
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red.withOpacity(0.3)),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          color: Colors.red,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            _errorMessage!,
-                            style: GoogleFonts.inter(
-                              color: Colors.red,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
                       ],
-                    ),
-                  ),
-                ],
 
-                const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
-                // Continue Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleContinue,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: AppColors.primary,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      disabledBackgroundColor: Colors.white.withOpacity(0.7),
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
+                      // Continue Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _handleContinue,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: AppColors.primary,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            disabledBackgroundColor: Colors.white.withOpacity(0.7),
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
                             width: 24,
                             height: 24,
                             child: CircularProgressIndicator(
@@ -311,26 +322,31 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                               ),
                             ),
                           )
-                        : Text(
+                              : Text(
                             'Continue',
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
+                        ),
+                      ),
+
+                      const Spacer(flex: 2),
+
+                      const SizedBox(height: 60),
+                    ],
                   ),
                 ),
-
-                const Spacer(flex: 2),
-
-                const SizedBox(height: 60),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
+
+
 
   void _showCountryCodePicker() {
     _filteredCountryCodes = List.from(_countryCodes);

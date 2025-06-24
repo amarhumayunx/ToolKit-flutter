@@ -82,7 +82,7 @@ class _AllFilesViewState extends State<AllFilesView> {
       await filesBox.putAt(index, updatedFile);
 
       final success =
-      await SaveDocumentService.toggleFileLock(updatedFile, index);
+          await SaveDocumentService.toggleFileLock(updatedFile, index);
 
       if (success) {
         setState(() {});
@@ -211,11 +211,11 @@ class _AllFilesViewState extends State<AllFilesView> {
     final allFiles = _isLoading
         ? <FileModel>[]
         : filesBox.values
-        .where((file) => !file.isLocked)
-        .where((file) => file.name
-        .toLowerCase()
-        .contains(widget.searchQuery.toLowerCase()))
-        .toList();
+            .where((file) => !file.isLocked)
+            .where((file) => file.name
+                .toLowerCase()
+                .contains(widget.searchQuery.toLowerCase()))
+            .toList();
 
     if (_sortBy == 'name'.tr) {
       allFiles.sort((a, b) => a.name.compareTo(b.name));
@@ -246,66 +246,66 @@ class _AllFilesViewState extends State<AllFilesView> {
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : ListView(
-            children: [
-              if (allFiles.isEmpty)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 100),
-                    child: Text(
-                      'no_files_found'.tr,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ),
-                )
-              else
-                ...allFiles.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final file = entry.value;
-
-                  int actualIndex = -1;
-                  for (int i = 0; i < filesBox.length; i++) {
-                    final boxFile = filesBox.getAt(i);
-                    if (boxFile != null && boxFile.path == file.path) {
-                      actualIndex = i;
-                      break;
-                    }
-                  }
-
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 6, right: 6),
-                    child: Column(
-                      children: [
-                        ResultDocumentContainer(
-                          documentName: file.name,
-                          date: DateFormat('yy/MM/dd').format(file.date),
-                          time: DateFormat('h:mma').format(file.date),
-                          size: file.size,
-                          isFavorite: file.isFavorite,
-                          isLocked: file.isLocked,
-                          filePath: file.displayPath,
-                          isSelectable: widget.isSelectingFiles,
-                          isSelected: _isFileSelected(file),
-                          onFavoriteToggle: () =>
-                              _toggleFavorite(actualIndex),
-                          onLockToggle: () => _toggleLock(actualIndex),
-                          onDelete: () => _deleteFile(actualIndex),
-                          onFileRenamed: (newPath) =>
-                              _renameFile(actualIndex, newPath),
-                            onTap: widget.isSelectingFiles
-                                ? () => widget.onFileSelected?.call(file, index)
-                                : () => _openFile(file.path),
+                  children: [
+                    if (allFiles.isEmpty)
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 100),
+                          child: Text(
+                            'no_files_found'.tr,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: 12),
-                      ],
-                    ),
-                  );
-                }),
-              const SizedBox(height: 100),
-            ],
-          ),
+                      )
+                    else
+                      ...allFiles.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final file = entry.value;
+
+                        int actualIndex = -1;
+                        for (int i = 0; i < filesBox.length; i++) {
+                          final boxFile = filesBox.getAt(i);
+                          if (boxFile != null && boxFile.path == file.path) {
+                            actualIndex = i;
+                            break;
+                          }
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 6, right: 6),
+                          child: Column(
+                            children: [
+                              ResultDocumentContainer(
+                                documentName: file.name,
+                                date: DateFormat('yy/MM/dd').format(file.date),
+                                time: DateFormat('h:mma').format(file.date),
+                                isFavorite: file.isFavorite,
+                                isLocked: file.isLocked,
+                                filePath: file.displayPath,
+                                isSelectable: widget.isSelectingFiles,
+                                isSelected: _isFileSelected(file),
+                                onFavoriteToggle: () =>
+                                    _toggleFavorite(actualIndex),
+                                onLockToggle: () => _toggleLock(actualIndex),
+                                onDelete: () => _deleteFile(actualIndex),
+                                onFileRenamed: (newPath) =>
+                                    _renameFile(actualIndex, newPath),
+                                onTap: widget.isSelectingFiles
+                                    ? () =>
+                                        widget.onFileSelected?.call(file, index)
+                                    : () => _openFile(file.path),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+                          ),
+                        );
+                      }),
+                    const SizedBox(height: 100),
+                  ],
+                ),
         ),
       ],
     );

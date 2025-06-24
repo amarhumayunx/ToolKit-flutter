@@ -58,7 +58,7 @@ class SettingsAppBar extends StatelessWidget implements PreferredSizeWidget {
             return GestureDetector(
               onTap: onProfilePressed ?? () => _handleProfileTap(context),
               child: Container(
-                margin: const EdgeInsets.only(right: 16),
+                margin: const EdgeInsets.only(right: 16,left: 16),
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
