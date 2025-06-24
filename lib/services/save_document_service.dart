@@ -385,7 +385,7 @@ class SaveDocumentService {
         showPermissionHelperDialog(context);
         return null;
       }
-    } on PlatformException catch (e) {
+    } on PlatformException {
       AppSnackBar.show(context,
           message: 'failed_to_save_document'.tr);
       return null;

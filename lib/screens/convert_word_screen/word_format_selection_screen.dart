@@ -39,7 +39,7 @@ class _WordFormatSelectionScreenState extends State<WordFormatSelectionScreen> {
 
   String get fileSize {
     final sizeInBytes = widget.selectedWordFile.lengthSync();
-    if (sizeInBytes < 1024) return '${sizeInBytes} B';
+    if (sizeInBytes < 1024) return '$sizeInBytes B';
     if (sizeInBytes < 1024 * 1024) return '${(sizeInBytes / 1024).toStringAsFixed(1)} KB';
     return '${(sizeInBytes / (1024 * 1024)).toStringAsFixed(2)} MB';
   }
@@ -53,7 +53,7 @@ class _WordFormatSelectionScreenState extends State<WordFormatSelectionScreen> {
     final modifiedDate = widget.selectedWordFile.lastModifiedSync();
     final hour = modifiedDate.hour == 0 ? 12 : (modifiedDate.hour > 12 ? modifiedDate.hour - 12 : modifiedDate.hour);
     final period = modifiedDate.hour < 12 ? 'AM' : 'PM';
-    return '${hour}:${modifiedDate.minute.toString().padLeft(2, '0')} $period';
+    return '$hour:${modifiedDate.minute.toString().padLeft(2, '0')} $period';
   }
 
   Future<void> _convertFile() async {

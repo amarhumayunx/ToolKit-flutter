@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:archive/archive.dart';
 import 'package:xml/xml.dart';
@@ -36,7 +35,7 @@ class WordToImageService {
 
       // Create output file path
       final outputDir = await getTemporaryDirectory();
-      final fileName = wordFile.path.split('/').last.replaceAll('.docx', '.${outputFormat}');
+      final fileName = wordFile.path.split('/').last.replaceAll('.docx', '.$outputFormat');
       final outputFile = File('${outputDir.path}/$fileName');
 
       await outputFile.writeAsBytes(imageBytes);

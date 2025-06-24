@@ -184,7 +184,7 @@ class FileTransferSelectionSection extends StatelessWidget {
                                     style: GoogleFonts.inter(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w500,
-                                        color: Color(0xFF00A3A3))),
+                                        color: const Color(0xFF00A3A3))),
                               ],
                             ),
                           ),

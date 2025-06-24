@@ -142,7 +142,7 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
       return await snapshot.ref.getDownloadURL();
     } catch (e) {
       print('Error uploading file to storage: $e');
-      throw e;
+      rethrow;
     }
   }
 

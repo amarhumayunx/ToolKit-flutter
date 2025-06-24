@@ -61,7 +61,6 @@ class _RecentsViewTabState extends State<RecentsViewTab> {
   Future<void> _toggleLock(int index) async {
     final file = filesBox.getAt(index);
     if (file != null) {
-      // First update the lock status
       final updatedFile = FileModel(
         name: file.name,
         path: file.path,

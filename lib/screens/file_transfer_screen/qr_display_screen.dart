@@ -71,7 +71,7 @@ class _QrCodeDisplayScreenState extends State<QrCodeDisplayScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // QR Code
-                          Container(
+                          SizedBox(
                             width: 190,
                             height: 190,
                             child: PrettyQrView.data(
@@ -144,7 +144,7 @@ class _QrCodeDisplayScreenState extends State<QrCodeDisplayScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 80,
                   )
                 ],

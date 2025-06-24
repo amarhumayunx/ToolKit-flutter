@@ -13,7 +13,6 @@ import 'package:hive_ce/hive.dart';
 import '../../models/file_model.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/custom_appbar.dart';
-import '../../widgets/tools/tools_app_bar.dart';
 import '../../utils/app_colors.dart';
 import 'qr_result_screen.dart';
 
@@ -375,14 +374,14 @@ class _QRCodeScannerScreenState extends State<QRCodeScannerScreen> {
                         child: Container(
                           width: 40,
                           height: 40,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             border: Border(
                               top: BorderSide(
                                   color: AppColors.primary, width: 8),
                               left: BorderSide(
                                   color: AppColors.primary, width: 8),
                             ),
-                            borderRadius: const BorderRadius.only(
+                            borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(12),
                             ),
                           ),
@@ -396,14 +395,14 @@ class _QRCodeScannerScreenState extends State<QRCodeScannerScreen> {
                         child: Container(
                           width: 40,
                           height: 40,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             border: Border(
                               top: BorderSide(
                                   color: AppColors.primary, width: 8),
                               right: BorderSide(
                                   color: AppColors.primary, width: 8),
                             ),
-                            borderRadius: const BorderRadius.only(
+                            borderRadius: BorderRadius.only(
                               topRight: Radius.circular(12),
                             ),
                           ),
@@ -417,14 +416,14 @@ class _QRCodeScannerScreenState extends State<QRCodeScannerScreen> {
                         child: Container(
                           width: 40,
                           height: 40,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
                                   color: AppColors.primary, width: 8),
                               left: BorderSide(
                                   color: AppColors.primary, width: 8),
                             ),
-                            borderRadius: const BorderRadius.only(
+                            borderRadius: BorderRadius.only(
                               bottomLeft: Radius.circular(12),
                             ),
                           ),
@@ -438,14 +437,14 @@ class _QRCodeScannerScreenState extends State<QRCodeScannerScreen> {
                         child: Container(
                           width: 40,
                           height: 40,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
                                   color: AppColors.primary, width: 8),
                               right: BorderSide(
                                   color: AppColors.primary, width: 8),
                             ),
-                            borderRadius: const BorderRadius.only(
+                            borderRadius: BorderRadius.only(
                               bottomRight: Radius.circular(12),
                             ),
                           ),
@@ -495,7 +494,7 @@ class _QRCodeScannerScreenState extends State<QRCodeScannerScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        CircularProgressIndicator(
+                        const CircularProgressIndicator(
                           valueColor:
                               AlwaysStoppedAnimation<Color>(AppColors.primary),
                           strokeWidth: 3,
