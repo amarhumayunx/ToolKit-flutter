@@ -31,7 +31,6 @@ void main() async {
     ),
   );
 
-  // Initialize Hive
   await Hive.initFlutter();
 
   runApp(
@@ -64,6 +63,14 @@ class MyApp extends StatelessWidget {
       translations: Language(),
       locale: _getStoredLocale(),
       fallbackLocale: const Locale('en', 'US'),
+
+      builder: (context, child) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: child!,
+        );
+      },
+
       theme: ThemeData(
         primaryColor: const Color(0xFF00BFA5),
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -101,10 +108,8 @@ class _AppInitializerState extends State<AppInitializer> {
 
   Future<void> _initializeApp() async {
     try {
-      // Initialize notifications
       await NotificationService.initialize(context);
 
-      // Check if onboarding has been shown before
       await _checkOnboardingStatus();
     } catch (e) {
       debugPrint('Error initializing app: $e');

@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,17 +25,20 @@ class LanguageController extends GetxController {
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           Get.updateLocale(currentLocale.value);
+          _forceLayoutDirection();
         });
       }
     } catch (e) {
       print('Error loading saved language: $e');
     }
   }
+
   Future<void> changeLanguage(String languageCode, String countryCode, String languageName) async {
     try {
       currentLocale.value = Locale(languageCode, countryCode);
       currentLanguage.value = languageName;
       Get.updateLocale(currentLocale.value);
+      _forceLayoutDirection();
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('language_code', languageCode);
@@ -47,7 +49,20 @@ class LanguageController extends GetxController {
     }
   }
 
-  // Fixed language options - using static names instead of .tr
+  void _forceLayoutDirection() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.context != null) {
+        print('Layout direction forced to LTR for language: ${currentLanguage.value}');
+      }
+    });
+  }
+
+  bool get isCurrentLanguageRTL {
+    return currentLocale.value.languageCode == 'ur' ||
+        currentLocale.value.languageCode == 'ar' ||
+        currentLocale.value.languageCode == 'fa';
+  }
+
   List<Map<String, String>> get languageOptions => [
     {
       'name': 'English (US)',

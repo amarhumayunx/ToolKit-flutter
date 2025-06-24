@@ -5,6 +5,44 @@ class Language extends Translations {
   Map<String, Map<String, String>> get keys => {
     'en_US': {
 
+      "camera_permission_denied": "Camera permission denied. Please enable camera access in settings.",
+      "camera_permission_permanently_denied": "Camera permission permanently denied. Please enable camera access in device settings.",
+      "camera_permission_required": "Camera permission is required to use the scanner",
+      "failed_request_camera_permission": "Failed to request camera permission: ",
+      "no_cameras_found": "No cameras found on this device",
+      "camera_permission_denied_check": "Camera permission denied. Please check app permissions.",
+      "camera_in_use": "Camera is being used by another app. Please close other camera apps and try again.",
+      "camera_not_available": "Camera not available on this device.",
+      "failed_initialize_camera": "Failed to initialize camera. Please try again.",
+      "camera_error_restart": "Camera error: Please restart the app or check if camera is working in other apps.",
+
+      "camera_error": "Camera Error",
+      "initializing_camera": "Initializing camera...",
+      "setting_up_camera": "Setting up camera...",
+      "open_settings": "Open Settings",
+      "retry": "Retry",
+      "discard_batch": "Discard Batch?",
+      "changing_scan_type_discard_batch": "Changing scan type will discard your current batch of images. Do you want to continue?",
+      "cancel": "Cancel",
+      "discard": "Discard",
+
+      "business_card": "Business Card",
+      "single": "Single",
+      "batch": "Batch",
+      "id_card": "ID Card",
+      "passport": "Passport",
+      "legal": "Legal",
+      "letter": "Letter",
+
+      "camera_not_ready": "Camera not ready. Please wait.",
+      "failed_capture_image": "Failed to capture image. Please try again.",
+      "failed_capture_id_card": "Failed to capture ID card image. Please try again.",
+      "failed_pick_image_gallery": "Failed to pick image from gallery",
+      "added_images_to_batch": "Added  images to batch. Total: ",
+
+      "failed_toggle_flash": "Failed to toggle flash: ",
+      "failed_capture_within_frame": "Failed to capture within frame",
+
       "file_locked_encrypted": "File locked and encrypted",
       "file_unlocked_decrypted": "File unlocked and decrypted",
       "failed_toggle_file_lock": "Failed to toggle file lock",
@@ -857,6 +895,44 @@ class Language extends Translations {
 
     'en_GB': {
 
+      "camera_permission_denied": "Camera permission denied. Please enable camera access in settings.",
+      "camera_permission_permanently_denied": "Camera permission permanently denied. Please enable camera access in device settings.",
+      "camera_permission_required": "Camera permission is required to use the scanner",
+      "failed_request_camera_permission": "Failed to request camera permission: ",
+      "no_cameras_found": "No cameras found on this device",
+      "camera_permission_denied_check": "Camera permission denied. Please check app permissions.",
+      "camera_in_use": "Camera is being used by another app. Please close other camera apps and try again.",
+      "camera_not_available": "Camera not available on this device.",
+      "failed_initialize_camera": "Failed to initialize camera. Please try again.",
+      "camera_error_restart": "Camera error: Please restart the app or check if camera is working in other apps.",
+
+      "camera_error": "Camera Error",
+      "initializing_camera": "Initializing camera...",
+      "setting_up_camera": "Setting up camera...",
+      "open_settings": "Open Settings",
+      "retry": "Retry",
+      "discard_batch": "Discard Batch?",
+      "changing_scan_type_discard_batch": "Changing scan type will discard your current batch of images. Do you want to continue?",
+      "cancel": "Cancel",
+      "discard": "Discard",
+
+      "business_card": "Business Card",
+      "single": "Single",
+      "batch": "Batch",
+      "id_card": "ID Card",
+      "passport": "Passport",
+      "legal": "Legal",
+      "letter": "Letter",
+
+      "camera_not_ready": "Camera not ready. Please wait.",
+      "failed_capture_image": "Failed to capture image. Please try again.",
+      "failed_capture_id_card": "Failed to capture ID card image. Please try again.",
+      "failed_pick_image_gallery": "Failed to pick image from gallery",
+      "added_images_to_batch": "Added images to batch. Total: ",
+
+      "failed_toggle_flash": "Failed to toggle flash: ",
+      "failed_capture_within_frame": "Failed to capture within frame",
+
       "file_locked_encrypted": "File locked and encrypted",
       "file_unlocked_decrypted": "File unlocked and decrypted",
       "failed_toggle_file_lock": "Failed to toggle file lock",
@@ -1701,6 +1777,44 @@ class Language extends Translations {
     },
 
     'ur_PK': {
+
+      "camera_permission_denied": "کیمرہ اجازت مسترد کر دی گئی۔ براہ کرم سیٹنگز میں کیمرہ کی رسائی فعال کریں۔",
+      "camera_permission_permanently_denied": "کیمرہ کی اجازت مستقل طور پر مسترد کر دی گئی ہے۔ براہ کرم ڈیوائس سیٹنگز میں جا کر کیمرہ کی رسائی فعال کریں۔",
+      "camera_permission_required": "سکینر استعمال کرنے کے لیے کیمرہ کی اجازت درکار ہے",
+      "failed_request_camera_permission": "کیمرہ اجازت کی درخواست ناکام: ",
+      "no_cameras_found": "اس ڈیوائس پر کوئی کیمرہ موجود نہیں",
+      "camera_permission_denied_check": "کیمرہ اجازت مسترد کی گئی۔ براہ کرم ایپ کی اجازتیں چیک کریں۔",
+      "camera_in_use": "کیمرہ کسی دوسری ایپ کے ذریعے استعمال ہو رہا ہے۔ براہ کرم دیگر کیمرہ ایپس بند کریں اور دوبارہ کوشش کریں۔",
+      "camera_not_available": "اس ڈیوائس پر کیمرہ دستیاب نہیں۔",
+      "failed_initialize_camera": "کیمرہ شروع کرنے میں ناکامی۔ دوبارہ کوشش کریں۔",
+      "camera_error_restart": "کیمرہ کی خرابی: براہ کرم ایپ کو دوبارہ شروع کریں یا چیک کریں کہ کیمرہ دیگر ایپس میں کام کر رہا ہے یا نہیں۔",
+
+      "camera_error": "کیمرہ خرابی",
+      "initializing_camera": "کیمرہ شروع کیا جا رہا ہے...",
+      "setting_up_camera": "کیمرہ سیٹ اپ ہو رہا ہے...",
+      "open_settings": "سیٹنگز کھولیں",
+      "retry": "دوبارہ کوشش کریں",
+      "discard_batch": "بیچ کو ترک کریں؟",
+      "changing_scan_type_discard_batch": "سکین کی قسم تبدیل کرنے سے موجودہ بیچ کی تصاویر حذف ہو جائیں گی۔ کیا آپ جاری رکھنا چاہتے ہیں؟",
+      "cancel": "منسوخ کریں",
+      "discard": "ترک کریں",
+
+      "business_card": "بزنس کارڈ",
+      "single": "سنگل",
+      "batch": "بیچ",
+      "id_card": "شناختی کارڈ",
+      "passport": "پاسپورٹ",
+      "legal": "لیگل",
+      "letter": "لیٹر",
+
+      "camera_not_ready": "کیمرہ تیار نہیں ہے۔ براہ کرم انتظار کریں۔",
+      "failed_capture_image": "تصویر لینے میں ناکامی۔ دوبارہ کوشش کریں۔",
+      "failed_capture_id_card": "شناختی کارڈ کی تصویر لینے میں ناکامی۔ دوبارہ کوشش کریں۔",
+      "failed_pick_image_gallery": "گیلری سے تصویر لینے میں ناکامی",
+      "added_images_to_batch": " تصاویر بیچ میں شامل کی گئیں۔ کل: ",
+
+      "failed_toggle_flash": "فلیش کو تبدیل کرنے میں ناکامی: ",
+      "failed_capture_within_frame": "فریم کے اندر تصویر لینے میں ناکامی",
 
       "file_locked_encrypted": "فائل لاک اور انکرپٹ کر دی گئی ہے",
       "file_unlocked_decrypted": "فائل ان لاک اور ڈکرپٹ کر دی گئی ہے",
@@ -2564,6 +2678,44 @@ class Language extends Translations {
 
     'zh_CN': {
 
+      "camera_permission_denied": "摄像头权限被拒。请在设置中启用摄像头访问权限。",
+      "camera_permission_permanently_denied": "摄像头权限被永久拒绝。请在设备设置中启用摄像头访问权限。",
+      "camera_permission_required": "使用扫描仪需要摄像头权限",
+      "failed_request_camera_permission": "请求摄像头权限失败: ",
+      "no_cameras_found": "该设备未发现摄像头",
+      "camera_permission_denied_check": "摄像头权限被拒。请检查应用权限。",
+      "camera_in_use": "摄像头被其他应用占用。请关闭其他摄像头应用后重试。",
+      "camera_not_available": "此设备不支持摄像头。",
+      "failed_initialize_camera": "初始化摄像头失败。请重试。",
+      "camera_error_restart": "摄像头错误：请重启应用或检查摄像头在其他应用中是否可用。",
+
+      "camera_error": "摄像头错误",
+      "initializing_camera": "初始化摄像头中...",
+      "setting_up_camera": "设置摄像头中...",
+      "open_settings": "打开设置",
+      "retry": "重试",
+      "discard_batch": "放弃批量处理？",
+      "changing_scan_type_discard_batch": "更改扫描类型将丢弃当前图像。是否继续？",
+      "cancel": "取消",
+      "discard": "放弃",
+
+      "business_card": "名片",
+      "single": "单张",
+      "batch": "批量",
+      "id_card": "身份证",
+      "passport": "护照",
+      "legal": "法律文件",
+      "letter": "信件",
+
+      "camera_not_ready": "摄像头未准备好，请稍候。",
+      "failed_capture_image": "拍照失败。请再试一次。",
+      "failed_capture_id_card": "拍摄身份证失败。请再试一次。",
+      "failed_pick_image_gallery": "从图库选择图片失败",
+      "added_images_to_batch": "已添加  张图片到批次。总数：",
+
+      "failed_toggle_flash": "切换闪光灯失败: ",
+      "failed_capture_within_frame": "未能在框架内捕捉图像",
+
       "file_locked_encrypted": "文件已锁定并加密",
       "file_unlocked_decrypted": "文件已解锁并解密",
       "failed_toggle_file_lock": "切换文件锁定失败",
@@ -3415,6 +3567,44 @@ class Language extends Translations {
     },
 
     'de_DE': {
+
+      "camera_permission_denied": "Kamerazugriff verweigert. Bitte aktivieren Sie den Kamerazugriff in den Einstellungen.",
+      "camera_permission_permanently_denied": "Kamerazugriff dauerhaft verweigert. Bitte aktivieren Sie den Kamerazugriff in den Geräteeinstellungen.",
+      "camera_permission_required": "Kamerazugriff wird benötigt, um den Scanner zu verwenden",
+      "failed_request_camera_permission": "Fehler beim Anfordern der Kameraberechtigung: ",
+      "no_cameras_found": "Keine Kameras auf diesem Gerät gefunden",
+      "camera_permission_denied_check": "Kamerazugriff verweigert. Bitte überprüfen Sie die App-Berechtigungen.",
+      "camera_in_use": "Die Kamera wird von einer anderen App verwendet. Bitte schließen Sie andere Kamera-Apps und versuchen Sie es erneut.",
+      "camera_not_available": "Kamera auf diesem Gerät nicht verfügbar.",
+      "failed_initialize_camera": "Initialisierung der Kamera fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "camera_error_restart": "Kamerafehler: Bitte starten Sie die App neu oder prüfen Sie, ob die Kamera in anderen Apps funktioniert.",
+
+      "camera_error": "Kamerafehler",
+      "initializing_camera": "Kamera wird initialisiert...",
+      "setting_up_camera": "Kamera wird eingerichtet...",
+      "open_settings": "Einstellungen öffnen",
+      "retry": "Erneut versuchen",
+      "discard_batch": "Batch verwerfen?",
+      "changing_scan_type_discard_batch": "Durch Ändern des Scan-Typs wird der aktuelle Batch verworfen. Möchten Sie fortfahren?",
+      "cancel": "Abbrechen",
+      "discard": "Verwerfen",
+
+      "business_card": "Visitenkarte",
+      "single": "Einzeln",
+      "batch": "Batch",
+      "id_card": "Ausweis",
+      "passport": "Reisepass",
+      "legal": "Rechtlich",
+      "letter": "Brief",
+
+      "camera_not_ready": "Kamera ist noch nicht bereit. Bitte warten.",
+      "failed_capture_image": "Bildaufnahme fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "failed_capture_id_card": "ID-Kartenaufnahme fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "failed_pick_image_gallery": "Bild aus Galerie konnte nicht ausgewählt werden",
+      "added_images_to_batch": " Bilder zum Batch hinzugefügt. Gesamt: ",
+
+      "failed_toggle_flash": "Fehler beim Umschalten des Blitzes: ",
+      "failed_capture_within_frame": "Bild konnte nicht im Rahmen aufgenommen werden",
 
       "file_locked_encrypted": "Datei gesperrt und verschlüsselt",
       "file_unlocked_decrypted": "Datei entsperrt und entschlüsselt",
