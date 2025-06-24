@@ -95,9 +95,12 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
             ),
             const SizedBox(height: 10),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 _buildFormatOption('word'.tr, 'assets/icons/word_icon.svg'),
+                SizedBox(
+                  width: 16,
+                ),
                 _buildFormatOption(
                   'pdf'.tr,
                   'assets/icons/convert_pdf.svg',

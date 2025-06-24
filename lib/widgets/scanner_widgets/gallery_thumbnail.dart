@@ -6,6 +6,7 @@ class ThumbnailGallery extends StatelessWidget {
   final List<File> images;
   final int selectedIndex;
   final ValueChanged<int> onImageSelected;
+  final ValueChanged<int>? onImageDeleted; // NEW: Delete callback
   final ScrollController scrollController;
   final VoidCallback onScrollLeft;
   final VoidCallback onScrollRight;
@@ -17,6 +18,7 @@ class ThumbnailGallery extends StatelessWidget {
     required this.images,
     required this.selectedIndex,
     required this.onImageSelected,
+    this.onImageDeleted, // NEW: Optional delete callback
     required this.scrollController,
     required this.onScrollLeft,
     required this.onScrollRight,
@@ -69,22 +71,22 @@ class ThumbnailGallery extends StatelessWidget {
                   index: index,
                   isSelected: index == selectedIndex,
                   onTap: () => onImageSelected(index),
+                  onDelete: onImageDeleted != null ? () => onImageDeleted!(index) : null, // NEW: Pass delete callback
+                  showDeleteButton: images.length > 1, // NEW: Only show delete if more than 1 image
                 );
               },
             ),
           ),
 
-          // Right arrow - FIXED THIS PART
+          // Right arrow
           IconButton(
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
             icon: Icon(
               Icons.chevron_right,
-              // CHANGE THIS LINE: Add images.length > 1 condition
               color: (images.length > 1 && canScrollRight) ? AppColors.primary : Colors.grey.shade400,
               size: 30,
             ),
-            // CHANGE THIS LINE: Add images.length > 1 condition
             onPressed: (images.length > 1 && canScrollRight) ? onScrollRight : null,
           ),
         ],
@@ -98,6 +100,8 @@ class ThumbnailItem extends StatelessWidget {
   final int index;
   final bool isSelected;
   final VoidCallback onTap;
+  final VoidCallback? onDelete; // NEW: Delete callback
+  final bool showDeleteButton; // NEW: Whether to show delete button
 
   const ThumbnailItem({
     super.key,
@@ -105,6 +109,8 @@ class ThumbnailItem extends StatelessWidget {
     required this.index,
     required this.isSelected,
     required this.onTap,
+    this.onDelete, // NEW: Optional delete callback
+    this.showDeleteButton = true, // NEW: Default to showing delete button
   });
 
   @override
@@ -139,7 +145,7 @@ class ThumbnailItem extends StatelessWidget {
             // Index badge
             Positioned(
               top: 58,
-              left: 48,
+              left:-8,
               child: Container(
                 width: 18,
                 height: 18,
@@ -159,6 +165,29 @@ class ThumbnailItem extends StatelessWidget {
                 ),
               ),
             ),
+            // NEW: Delete button
+            if (showDeleteButton && onDelete != null)
+              Positioned(
+                top: -5,
+                right: 5,
+                child: GestureDetector(
+                  onTap: onDelete,
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1),
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 14,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

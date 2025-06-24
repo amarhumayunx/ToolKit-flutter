@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -37,6 +38,8 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
   late AnimationController _animationController;
   late Animation<double> _progressAnimation;
   final WordDocumentService _wordDocumentService = WordDocumentService();
+  static const int maxFileSizeBytes = 100 * 1024 * 1024;
+  static const int maxTextSizeBytes = 500 * 1024 * 1024;
 
   @override
   void initState() {
@@ -63,6 +66,32 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
     _animationController.forward();
   }
 
+  int _getTextSizeInBytes(String Text) {
+    return utf8.encode(Text).length;
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) {
+      return '$bytes B';
+    } else if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    } else {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    }
+  }
+
+  Future<int> _getFileSizeInBytes(String filePath) async {
+    try {
+      final file = File(filePath);
+      if (await file.exists()) {
+        return await file.length();
+      }
+      return 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
   Future<void> _handleLoadingComplete() async {
     setState(() {
       _isLoading = false;
@@ -86,13 +115,51 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
         _isSaving = true;
       });
 
+      // Check text size before creating document
+      final textSizeBytes = _getTextSizeInBytes(_textController.text);
+
+      if (textSizeBytes > maxTextSizeBytes) {
+        setState(() {
+          _isSaving = false;
+        });
+        AppSnackBar.show(context,
+            message:
+                '${'text_too_large'.tr}: ${_formatFileSize(textSizeBytes)}. ${'max_allowed'.tr}: ${_formatFileSize(maxTextSizeBytes)}');
+        return;
+      }
+
       final filePath =
-      await _wordDocumentService.createWordDocument(_textController.text);
+          await _wordDocumentService.createWordDocument(_textController.text);
+
+      // Check created file size
+      final fileSizeBytes = await _getFileSizeInBytes(filePath);
+
+      if (fileSizeBytes > maxFileSizeBytes) {
+        // Delete the oversized file
+        final file = File(filePath);
+        if (await file.exists()) {
+          await file.delete();
+        }
+
+        setState(() {
+          _isSaving = false;
+        });
+
+        AppSnackBar.show(context,
+            message:
+                '${'file_too_large'.tr}: ${_formatFileSize(fileSizeBytes)}. ${'max_allowed'.tr}: ${_formatFileSize(maxFileSizeBytes)}');
+        return;
+      }
 
       setState(() {
         _isSaving = false;
         _savedFilePath = filePath;
       });
+
+      // Show success message with file size
+      AppSnackBar.show(context,
+          message:
+              '${'file_created_successfully'.tr} (${_formatFileSize(fileSizeBytes)})');
     } catch (e) {
       setState(() {
         _isSaving = false;
@@ -272,12 +339,49 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
     );
   }
 
+  Widget _buildTextSizeInfo() {
+    final textSize = _getTextSizeInBytes(_textController.text);
+    final isNearLimit = textSize > (maxTextSizeBytes * 0.8);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: isNearLimit
+            ? Colors.orange.withOpacity(0.1)
+            : Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.info_outline,
+            size: 16,
+            color: isNearLimit ? Colors.orange : Colors.grey[600],
+          ),
+          const SizedBox(width: 4),
+          Text(
+            'Text size: ${_formatFileSize(textSize)}',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: isNearLimit ? Colors.orange : Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTextContainer() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
+      // Remove the maxHeight constraint that was causing issues
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.5,
+        minHeight: 200, // Set minimum height instead
+        maxHeight: MediaQuery.of(context).size.height *
+            0.4, // Keep reasonable max height
       ),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -290,32 +394,50 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
           )
         ],
       ),
-      child: Stack(
+      child: Column(
         children: [
-          TextField(
-            controller: _textController,
-            maxLines: null,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-            ),
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.only(right: 40),
-            ),
-          ),
-          Positioned(
-            top: -2,
-            right: 0,
-            child: IconButton(
-              onPressed: _copyToClipboard,
-              icon: const Icon(
-                Icons.content_copy,
-                size: 25,
+          // Add size info at the top
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildTextSizeInfo(),
+              IconButton(
+                onPressed: _copyToClipboard,
+                icon: const Icon(
+                  Icons.content_copy,
+                  size: 25,
+                ),
+                style: IconButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  animationDuration: const Duration(milliseconds: 300),
+                ),
               ),
-              style: IconButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                animationDuration: const Duration(milliseconds: 300),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: Scrollbar(
+              // Add scrollbar for better UX
+              child: SingleChildScrollView(
+                // Wrap TextField in SingleChildScrollView
+                child: TextField(
+                  controller: _textController,
+                  maxLines: null,
+                  // Allow unlimited lines
+                  minLines: 8,
+                  // Set minimum lines to ensure good height
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  onChanged: (value) {
+                    setState(() {}); // Refresh size info when text changes
+                  },
+                ),
               ),
             ),
           ),

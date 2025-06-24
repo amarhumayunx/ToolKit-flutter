@@ -131,7 +131,7 @@ class _RearrangeFileScreenState extends State<RearrangeFileScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 26.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 26.0),
             child: CustomGradientButton(
               text: 'rearrange_file'.tr,
               onPressed: selectedFiles.isNotEmpty

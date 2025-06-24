@@ -141,6 +141,7 @@ class _PersonalInfoFormState extends State<PersonalInfoForm> {
           hint: 'your_email'.tr,
           keyboardType: TextInputType.emailAddress,
           controller: widget.emailController,
+
           onChanged: (value) {
             Provider.of<UserProvider>(context, listen: false)
                 .updateUserData(email: value);

@@ -13,6 +13,10 @@ import '../../controllers/language_controller.dart';
 import '../../provider/profile_provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/notification_service.dart';
+import '../../services/privacy_policy.dart';
+import '../../services/rate_us.dart';
+import '../../services/share_service.dart';
+import '../../services/support_feedback_service.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/gradient_background.dart';
 import '../../widgets/settings_widgets/settings_appbar.dart';
@@ -198,20 +202,22 @@ class _SettingsScreenState extends State<SettingsScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('cancel'.tr,
-              style: const TextStyle(
-                color: Colors.black
-              ),),
+              child: Text(
+                'cancel'.tr,
+                style: const TextStyle(color: Colors.black),
+              ),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context, true);
                 _navigateToSetPasswordScreen();
               },
-              child: Text('set_password'.tr, style:
-                const TextStyle(
+              child: Text(
+                'set_password'.tr,
+                style: const TextStyle(
                   color: AppColors.primary,
-                ),),
+                ),
+              ),
             ),
           ],
         ),
@@ -311,7 +317,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     }
 
     final profileProvider =
-    Provider.of<ProfileProvider>(context, listen: false);
+        Provider.of<ProfileProvider>(context, listen: false);
     final userEmail = profileProvider.email;
 
     if (userEmail != null && userEmail.isNotEmpty) {
@@ -345,7 +351,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       if (user != null) {
         final userData = await _authService.getUserData(user.uid);
         final profileProvider =
-        Provider.of<ProfileProvider>(context, listen: false);
+            Provider.of<ProfileProvider>(context, listen: false);
 
         if (userData != null) {
           profileProvider.loadProfileData(
@@ -368,7 +374,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     } catch (e) {
       print('Error loading profile data in settings: $e');
       final profileProvider =
-      Provider.of<ProfileProvider>(context, listen: false);
+          Provider.of<ProfileProvider>(context, listen: false);
       if (profileProvider.selectedAvatar == null) {
         profileProvider.loadProfileData(
           avatar: '6',
@@ -454,7 +460,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
               child: Text(
                 'sign_in'.tr,
@@ -534,6 +540,20 @@ class _SettingsScreenState extends State<SettingsScreen>
     }
   }
 
+  // Add this method to handle support and feedback email
+  Future<void> _handleSupportFeedback() async {
+    try {
+      await Utils.launchEmail();
+    } catch (e) {
+      if (mounted) {
+        AppSnackBar.show(context,
+            message: 'could_not_launch_email'.tr.isNotEmpty
+                ? 'could_not_launch_email'.tr
+                : 'Could not launch email app');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -576,14 +596,61 @@ class _SettingsScreenState extends State<SettingsScreen>
                       ),
                       SettingTile(
                         title: 'support_feedback'.tr,
-                        onTap: () {},
+                        onTap:
+                            _handleSupportFeedback, // Updated to call email function
                       ),
                       const SizedBox(height: 4),
-                      SettingTile(title: 'privacy_policy'.tr, onTap: () {}),
+                      SettingTile(
+                        title: 'privacy_policy'.tr,
+                        onTap: () async {
+                          try {
+                            await PrivacyPolicyService.openPrivacyPolicy();
+                          } catch (e) {
+                            if (mounted) {
+                              AppSnackBar.show(context,
+                                  message: 'could_not_open_privacy_policy'
+                                          .tr
+                                          .isNotEmpty
+                                      ? 'could_not_open_privacy_policy'.tr
+                                      : 'Could not open privacy policy');
+                            }
+                          }
+                        },
+                      ),
                       const SizedBox(height: 4),
-                      SettingTile(title: 'rate_us'.tr, onTap: () {}),
+                      SettingTile(
+                        title: 'rate_us'.tr,
+                        onTap: () async {
+                          try {
+                            await UrlLauncherService.launchAppStore();
+                          } catch (e) {
+                            if (mounted) {
+                              AppSnackBar.show(
+                                context,
+                                message: 'could_not_open_store'.tr.isNotEmpty
+                                    ? 'could_not_open_store'.tr
+                                    : 'Could not open app store',
+                              );
+                            }
+                          }
+                        },
+                      ),
                       const SizedBox(height: 4),
-                      SettingTile(title: 'share'.tr, onTap: () {}),
+                      SettingTile(
+                        title: 'share'.tr,
+                        onTap: () {
+                          try {
+                            ShareService.shareApp();
+                          } catch (e) {
+                            if (mounted) {
+                              AppSnackBar.show(context,
+                                  message: 'could_not_share_app'.tr.isNotEmpty
+                                      ? 'could_not_share_app'.tr
+                                      : 'Could not share app');
+                            }
+                          }
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -658,52 +725,52 @@ class _SettingsScreenState extends State<SettingsScreen>
                   border: Border.all(color: Colors.grey.withOpacity(0.1)),
                 ),
                 child: Obx(() => DropdownButton2<String>(
-                  value: languageController.currentLanguage.value,
-                  iconStyleData: IconStyleData(
-                    icon: SvgPicture.asset(
-                      'assets/icons/arrow_up_down_icon.svg',
-                      height: 16,
-                      width: 16,
-                    ),
-                  ),
-                  dropdownStyleData: DropdownStyleData(
-                    elevation: 16,
-                    width: MediaQuery.of(context).size.width * 0.79,
-                    useSafeArea: true,
-                    offset: const Offset(-10, 0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.white,
-                    ),
-                  ),
-                  isExpanded: true,
-                  underline: Container(),
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.gradientEnd,
-                  ),
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      final selected = languageController.languageOptions
-                          .firstWhere((lang) => lang['name'] == newValue);
-                      languageController.changeLanguage(
-                        selected['code']!,
-                        selected['country']!,
-                        selected['name']!,
-                      );
-                    }
-                  },
-                  items: languageController.languageOptions
-                      .map<DropdownMenuItem<String>>((lang) {
-                    return DropdownMenuItem<String>(
-                      value: lang['name'],
-                      child: Text(
-                        lang['name']!,
+                      value: languageController.currentLanguage.value,
+                      iconStyleData: IconStyleData(
+                        icon: SvgPicture.asset(
+                          'assets/icons/arrow_up_down_icon.svg',
+                          height: 16,
+                          width: 16,
+                        ),
                       ),
-                    );
-                  }).toList(),
-                )),
+                      dropdownStyleData: DropdownStyleData(
+                        elevation: 16,
+                        width: MediaQuery.of(context).size.width * 0.79,
+                        useSafeArea: true,
+                        offset: const Offset(-10, 0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white,
+                        ),
+                      ),
+                      isExpanded: true,
+                      underline: Container(),
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.gradientEnd,
+                      ),
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          final selected = languageController.languageOptions
+                              .firstWhere((lang) => lang['name'] == newValue);
+                          languageController.changeLanguage(
+                            selected['code']!,
+                            selected['country']!,
+                            selected['name']!,
+                          );
+                        }
+                      },
+                      items: languageController.languageOptions
+                          .map<DropdownMenuItem<String>>((lang) {
+                        return DropdownMenuItem<String>(
+                          value: lang['name'],
+                          child: Text(
+                            lang['name']!,
+                          ),
+                        );
+                      }).toList(),
+                    )),
               ),
             ),
         ],
@@ -787,7 +854,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            _isPasswordSet ? 'change_password'.tr : 'set_password'.tr,
+                            _isPasswordSet
+                                ? 'change_password'.tr
+                                : 'set_password'.tr,
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -845,7 +914,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                 ),
                                 child: Row(
                                   mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'forgot_password'.tr,

@@ -242,40 +242,7 @@ class AuthService {
       print('Error syncing user data after phone auth: $e');
     }
   }
-  Future<void> _saveUserToFirestore(User user) async {
-    try {
-      final userDoc = _firestore.collection('users').doc(user.uid);
-      final docSnapshot = await userDoc.get();
 
-      final now = DateTime.now();
-
-      if (!docSnapshot.exists) {
-        final userModel = UserModel(
-          uid: user.uid,
-          email: user.email ?? '',
-          displayName: user.displayName ?? '',
-          createdAt: now,
-          lastSignIn: now,
-          gender: 'Not set',
-          dateOfBirth: 'Not set',
-          avatarId: '6',
-          hasPassword: false,
-          phoneNumber: user.phoneNumber, // Include phone number if available
-        );
-
-        await userDoc.set(userModel.toMap());
-      } else {
-        await userDoc.update({
-          'lastSignIn': now.toIso8601String(),
-          'displayName': user.displayName ?? '',
-          'phoneNumber': user.phoneNumber, // Update phone number if available
-        });
-      }
-    } catch (e) {
-      print('Error saving user to Firestore: $e');
-      rethrow;
-    }
-  }
   Future<UserModel?> getUserData(String uid) async {
     try {
       final doc = await _firestore.collection('users').doc(uid).get();
@@ -310,6 +277,10 @@ class AuthService {
       rethrow;
     }
   }
+
+
+
+
 
 
 
@@ -505,6 +476,22 @@ class AuthService {
       return false;
     }
   }
+// Add these methods to your AuthService class
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   Future<bool> hasPhoneNumber() async {
     try {
@@ -645,4 +632,181 @@ class AuthService {
     // This method can be called after password reset to refresh the UI
     // The UI should listen to this and update accordingly
   }
+
+
+  // Add this enhanced method to replace the existing _saveUserToFirestore
+  Future<void> _saveUserToFirestore(User user) async {
+    try {
+      final userDoc = _firestore.collection('users').doc(user.uid);
+      final docSnapshot = await userDoc.get();
+
+      final now = DateTime.now();
+
+      if (!docSnapshot.exists) {
+        // New user - create with default values
+        final userModel = UserModel(
+          uid: user.uid,
+          email: user.email ?? '',
+          displayName: user.displayName ?? '',
+          createdAt: now,
+          lastSignIn: now,
+          gender: 'Not set',
+          dateOfBirth: 'Not set',
+          avatarId: '6',
+          hasPassword: false,
+          phoneNumber: user.phoneNumber, // Only set if Google provides it
+        );
+
+        await userDoc.set(userModel.toMap());
+      } else {
+        // Existing user - only update specific fields, preserve phone number
+        final existingData = docSnapshot.data()!;
+        final updateData = <String, dynamic>{
+          'lastSignIn': now.toIso8601String(),
+          'displayName': user.displayName ?? existingData['displayName'] ?? '',
+        };
+
+        // Only update phone number if it's provided by Google AND existing one is null/empty
+        if (user.phoneNumber != null && user.phoneNumber!.isNotEmpty) {
+          final existingPhone = existingData['phoneNumber'];
+          if (existingPhone == null || existingPhone.toString().isEmpty) {
+            updateData['phoneNumber'] = user.phoneNumber;
+          }
+        }
+
+        await userDoc.update(updateData);
+      }
+    } catch (e) {
+      print('Error saving user to Firestore: $e');
+      rethrow;
+    }
+  }
+
+// Method to find user by email address
+  Future<UserModel?> findUserByEmail(String email) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        return UserModel.fromMap(querySnapshot.docs.first.data());
+      }
+      return null;
+    } catch (e) {
+      print('Error finding user by email: $e');
+      return null;
+    }
+  }
+
+// Method to check if email already exists with phone number
+  Future<bool> emailExistsWithPhoneNumber(String email) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        final userData = querySnapshot.docs.first.data();
+        final phoneNumber = userData['phoneNumber'];
+        return phoneNumber != null && phoneNumber.toString().isNotEmpty;
+      }
+      return false;
+    } catch (e) {
+      print('Error checking email with phone number: $e');
+      return false;
+    }
+  }
+
+// Enhanced method to merge Google user with existing Firestore data
+  Future<UserModel?>
+
+
+  mergeGoogleUserWithExistingData(User googleUser) async {
+    try {
+      if (googleUser.email == null) return null;
+
+      // First check if there's an existing user with this email
+      final existingUser = await findUserByEmail(googleUser.email!);
+
+      if (existingUser != null) {
+        // User exists, merge the accounts carefully preserving existing data
+        final mergedData = {
+          'uid': googleUser.uid, // Update with new auth uid
+          'email': googleUser.email!, // Keep the email
+          'displayName': googleUser.displayName ?? existingUser.displayName,
+          'lastSignIn': DateTime.now().toIso8601String(),
+          'mergedFromEmail': existingUser.email,
+          'accountMergedAt': DateTime.now().toIso8601String(),
+          // Preserve all existing data - don't overwrite with null values
+          'phoneNumber': existingUser.phoneNumber, // Keep existing phone number
+          'gender': existingUser.gender,
+          'dateOfBirth': existingUser.dateOfBirth,
+          'avatarId': existingUser.avatarId,
+          'hasPassword': existingUser.hasPassword,
+          'createdAt': existingUser.createdAt.toIso8601String(),
+          'phoneNumberAddedAt': existingUser.toMap()['phoneNumberAddedAt'], // Preserve timestamp
+        };
+
+        // Only add non-null values to avoid overwriting existing data with null
+        if (existingUser.toMap().containsKey('passwordSetAt')) {
+          mergedData['passwordSetAt'] = existingUser.toMap()['passwordSetAt'];
+        }
+        if (existingUser.toMap().containsKey('password')) {
+          mergedData['password'] = existingUser.toMap()['password'];
+        }
+
+        await _firestore.collection('users').doc(googleUser.uid).set(
+            mergedData,
+            SetOptions(merge: true)
+        );
+
+        // If the existing user had a different UID, mark the old document
+        if (existingUser.uid != googleUser.uid) {
+          try {
+            await _firestore.collection('users').doc(existingUser.uid).update({
+              'accountMergedTo': googleUser.uid,
+              'mergedAt': DateTime.now().toIso8601String(),
+            });
+          } catch (e) {
+            print('Could not update old document: $e');
+          }
+        }
+
+        // Return the merged user data with new UID
+        return UserModel(
+          uid: googleUser.uid,
+          email: existingUser.email,
+          displayName: googleUser.displayName ?? existingUser.displayName,
+          createdAt: existingUser.createdAt,
+          lastSignIn: DateTime.now(),
+          gender: existingUser.gender,
+          dateOfBirth: existingUser.dateOfBirth,
+          avatarId: existingUser.avatarId,
+          hasPassword: existingUser.hasPassword,
+          phoneNumber: existingUser.phoneNumber, // Preserve existing phone number
+        );
+      } else {
+        // No existing user, create new one
+        await _saveUserToFirestore(googleUser);
+        return await getUserData(googleUser.uid);
+      }
+    } catch (e) {
+      print('Error merging Google user with existing data: $e');
+      return null;
+    }
+  }
+
+
+
+
+
+
+
+
+
 }

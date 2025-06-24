@@ -45,29 +45,29 @@ class FileTransferDropZone extends StatelessWidget {
           ),
           child: showEmptyState
               ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset(
-                      'assets/images/red_qr_code.svg',
-                      height: 30,
-                      width: 30,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      emptyStateText,
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        color: Colors.grey,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: _buildFileItem(selectedFile!),
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                'assets/images/red_qr_code.svg',
+                height: 30,
+                width: 30,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                emptyStateText,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  color: Colors.grey,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w400,
                 ),
+              ),
+            ],
+          )
+              : Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: _buildFileItem(selectedFile!),
+          ),
         ),
       ),
     );

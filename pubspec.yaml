@@ -68,6 +68,7 @@ dependencies:
   google_sign_in: ^6.3.0
   cloud_firestore: ^5.6.8
   shared_preferences: any
+  url_launcher: ^6.3.1
 
 
   uuid: any

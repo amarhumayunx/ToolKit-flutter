@@ -5,6 +5,7 @@ import '../../widgets/batch_app_bar.dart';
 import '../../widgets/scanner_widgets/document_preview.dart';
 import '../../widgets/scanner_widgets/gallery_thumbnail.dart';
 import 'document_edit_screen.dart';
+
 class BatchResultScreen extends StatefulWidget {
   final List<File> batchImages;
 
@@ -77,6 +78,30 @@ class _BatchResultScreenState extends State<BatchResultScreen> {
     });
   }
 
+  // NEW: Delete image functionality
+  void _deleteImage(int index) {
+    if (_processedImages.length <= 1) {
+      // If it's the last image, navigate back
+      Navigator.pop(context);
+      return;
+    }
+
+    setState(() {
+      _processedImages.removeAt(index);
+
+      // Adjust selected index if necessary
+      if (_selectedImageIndex >= _processedImages.length) {
+        _selectedImageIndex = _processedImages.length - 1;
+      } else if (_selectedImageIndex > index) {
+        _selectedImageIndex--;
+      }
+
+      // Update scroll buttons
+      _canScrollLeft = _selectedImageIndex > 0;
+      _canScrollRight = _selectedImageIndex < _processedImages.length - 1;
+    });
+  }
+
   void _updateScrollButtons() {
     if (_scrollController.hasClients) {
       setState(() {
@@ -117,13 +142,22 @@ class _BatchResultScreenState extends State<BatchResultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // If no images left, show empty state or navigate back
+    if (_processedImages.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pop(context);
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFEEECEC),
       appBar: BatchAppBar(
         onNextPressed: _navigateToEditScreen,
         onBackPressed: () => Navigator.pop(context),
         actionText: 'next'.tr,
-
       ),
       body: Column(
         children: [
@@ -131,6 +165,7 @@ class _BatchResultScreenState extends State<BatchResultScreen> {
           Expanded(
             child: DocumentPreview(
               image: _processedImages[_selectedImageIndex],
+              onClose: () => _deleteImage(_selectedImageIndex), // NEW: Delete on close
             ),
           ),
           // Thumbnail gallery
@@ -138,6 +173,7 @@ class _BatchResultScreenState extends State<BatchResultScreen> {
             images: _processedImages,
             selectedIndex: _selectedImageIndex,
             onImageSelected: _selectImage,
+            onImageDeleted: _deleteImage, // NEW: Pass delete callback
             scrollController: _scrollController,
             onScrollLeft: _scrollLeft,
             onScrollRight: _scrollRight,

@@ -398,7 +398,7 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
             Positioned(
               left: 20,
               right: 20,
-              bottom: MediaQuery.of(context).padding.bottom,
+              bottom: MediaQuery.of(context).padding.bottom+10,
               child: SaveFileButton(
                 filePath: _currentFilePath,
                 fileType: fileTypeForSaving,
@@ -408,7 +408,9 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
                 },
               ),
             ),
+
         ],
+
       ),
     );
   }

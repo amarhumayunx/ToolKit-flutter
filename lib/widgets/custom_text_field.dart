@@ -72,39 +72,50 @@ class CustomTextField extends StatelessWidget {
             color: AppColors.bgBoxColor,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: TextFormField(
-            autofocus: autofocus,
-            focusNode: focusNode,
-            textInputAction: textInputAction ??
-                (nextFocus != null ? TextInputAction.next : TextInputAction.done),
-            onFieldSubmitted: (_) {
-              if (nextFocus != null) {
-                FocusScope.of(context).requestFocus(nextFocus);
-              } else {
-                FocusScope.of(context).unfocus();
-              }
-            },
-            onChanged: onChanged,
-            controller: controller,
-            keyboardType: keyboardType,
-            validator: validator,
-            textCapitalization: TextCapitalization.sentences,
-            cursorColor: AppColors.primary,
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.w300,
-                color: AppColors.fieldHintColor,
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              textSelectionTheme: TextSelectionThemeData(
+                cursorColor: AppColors.primary,
+                selectionColor: AppColors.primary.withOpacity(0.3),
+                selectionHandleColor: AppColors.primary,
               ),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-              errorStyle: GoogleFonts.inter(
-                fontSize: 12,
-                color: Colors.red,
+            ),
+            child: TextFormField(
+              autofocus: autofocus,
+              focusNode: focusNode,
+              textInputAction: textInputAction ??
+                  (nextFocus != null
+                      ? TextInputAction.next
+                      : TextInputAction.done),
+              onFieldSubmitted: (_) {
+                if (nextFocus != null) {
+                  FocusScope.of(context).requestFocus(nextFocus);
+                } else {
+                  FocusScope.of(context).unfocus();
+                }
+              },
+              onChanged: onChanged,
+              controller: controller,
+              keyboardType: keyboardType,
+              validator: validator,
+              textCapitalization: TextCapitalization.sentences,
+              cursorColor: AppColors.primary,
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w300,
+                  color: AppColors.fieldHintColor,
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                errorStyle: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: Colors.red,
+                ),
               ),
             ),
           ),

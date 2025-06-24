@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_svg/svg.dart';
@@ -33,45 +32,30 @@ class _ScannerScreenState extends State<ScannerScreen>
   File? _imageFile;
   String _errorMessage = '';
   bool _isLoading = true;
-  String? _selectedScanType = 'Batch'; // default selected
+  String? _selectedScanType = 'Batch';
   int _retryCount = 0;
   static const int maxRetryCount = 3;
-
-  // Recent images list - to show in place of image icon
   final List<File> _recentImages = [];
-
-  // List to store batch mode images
   List<File> _batchImages = [];
-
-  // Batch mode status
   bool _isBatchModeActive = false;
-
-  // For bottom container height tracking
   final GlobalKey _bottomContainerKey = GlobalKey();
   double _bottomContainerHeight = 150;
-
-  // Added for new features
   bool _isFlashOn = false;
   bool _isGridVisible = true;
   final ImagePicker _imagePicker = ImagePicker();
 
-  // Document type crop dimensions - used for frame visualization only
+  // Document type crop dimensions
   static const double businessCardCropWidth = 324;
   static const double businessCardCropHeight = 194;
-
   static const double passportCropWidth = 304;
   static const double passportCropHeight = 304;
-
   static const double legalCropWidth = 350;
   static const double legalCropHeight = 572;
-
   static const double letterCropWidth = 324;
   static const double letterCropHeight = 421;
-
   static const double idCardCropWidth = 304;
   static const double idCardCropHeight = 194;
 
-  // ID Card scanning state
   List<File> _idCardImages = [];
 
   @override
@@ -79,8 +63,6 @@ class _ScannerScreenState extends State<ScannerScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _initializeCamera();
-
-    // Add post-frame callback to measure container height
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _measureBottomContainerHeight();
     });
@@ -133,7 +115,6 @@ class _ScannerScreenState extends State<ScannerScreen>
         }
         break;
       case AppLifecycleState.inactive:
-      // Don't dispose, just pause preview
         try {
           cameraController.pausePreview();
         } catch (e) {
@@ -144,8 +125,7 @@ class _ScannerScreenState extends State<ScannerScreen>
         _disposeCamera();
         break;
       case AppLifecycleState.hidden:
-        // TODO: Handle this case.
-        throw UnimplementedError();
+        break;
     }
   }
 
@@ -210,10 +190,7 @@ class _ScannerScreenState extends State<ScannerScreen>
         _errorMessage = '';
       });
 
-      // Dispose existing controller first
       await _disposeCamera();
-
-      // Check if cameras are available
       cameras = await availableCameras();
 
       if (cameras.isEmpty) {
@@ -225,7 +202,6 @@ class _ScannerScreenState extends State<ScannerScreen>
         return;
       }
 
-      // Initialize camera controller
       _controller = CameraController(
         cameras[0],
         ResolutionPreset.high,
@@ -235,13 +211,12 @@ class _ScannerScreenState extends State<ScannerScreen>
 
       await _controller!.initialize();
 
-      // Check if widget is still mounted before setState
       if (!mounted) return;
 
       setState(() {
         _isCameraInitialized = true;
         _isLoading = false;
-        _retryCount = 0; // Reset retry count on success
+        _retryCount = 0;
       });
 
       print('Camera initialized successfully');
@@ -256,7 +231,6 @@ class _ScannerScreenState extends State<ScannerScreen>
         _isCameraInitialized = false;
       });
 
-      // Auto-retry with exponential backoff if under retry limit
       if (_retryCount < maxRetryCount) {
         _retryCount++;
         final delay = Duration(seconds: _retryCount * 2);
@@ -322,7 +296,6 @@ class _ScannerScreenState extends State<ScannerScreen>
       });
       print('Error toggling flash: $e');
 
-      // Revert flash state on error
       setState(() {
         _isFlashOn = !_isFlashOn;
       });
@@ -408,12 +381,10 @@ class _ScannerScreenState extends State<ScannerScreen>
       final String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
       final File originalImage = File(photo.path);
 
-      // Get screen dimensions
       final screenWidth = MediaQuery.of(context).size.width;
       final screenHeight =
           MediaQuery.of(context).size.height - _bottomContainerHeight;
 
-      // Handle different document types
       if (_selectedScanType == 'Business Card' ||
           _selectedScanType == 'Passport' ||
           _selectedScanType == 'Legal' ||
@@ -447,7 +418,6 @@ class _ScannerScreenState extends State<ScannerScreen>
             frameHeight = 0;
         }
 
-        // Capture within frame
         final File? framedImage = await FrameCaptureService.captureWithinFrame(
           originalImage: originalImage,
           frameWidth: frameWidth,
@@ -460,12 +430,10 @@ class _ScannerScreenState extends State<ScannerScreen>
           throw Exception('Failed to capture within frame');
         }
 
-        // Enhance the document image
         final File? enhancedImage =
         await FrameCaptureService.enhanceDocumentImage(framedImage);
         final File savedImage = enhancedImage ?? framedImage;
 
-        // Save to permanent storage
         final File permanentFile =
         await savedImage.copy('${directory.path}/$fileName');
 
@@ -555,7 +523,7 @@ class _ScannerScreenState extends State<ScannerScreen>
           isLegal: _selectedScanType == 'Legal',
           isLetter: _selectedScanType == 'Letter',
           isIdCard: _selectedScanType == 'Id Card',
-          cropRect: null, // Removed cropRect passing
+          cropRect: null,
         ),
       ),
     );
@@ -571,7 +539,7 @@ class _ScannerScreenState extends State<ScannerScreen>
           imageFile: _idCardImages[0],
           isBatchMode: false,
           isIdCard: true,
-          cropRect: null, // Removed cropRect passing
+          cropRect: null,
         ),
       ),
     );
@@ -849,7 +817,6 @@ class _ScannerScreenState extends State<ScannerScreen>
         isGridVisible: _isGridVisible,
         showGridIcon:
         _selectedScanType == 'Single' || _selectedScanType == 'Batch',
-        // Only show for Single and Batch
         onClosePressed: () => Navigator.pop(context),
         onFlashPressed: _toggleFlash,
         onGridPressed: _toggleGrid,
@@ -858,7 +825,6 @@ class _ScannerScreenState extends State<ScannerScreen>
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            // Calculate the document crop rectangle based on selected type
             final screenWidth = constraints.maxWidth;
             final screenHeight = constraints.maxHeight - _bottomContainerHeight;
 
@@ -866,7 +832,6 @@ class _ScannerScreenState extends State<ScannerScreen>
             double cropHeight;
             String documentType = 'single';
 
-            // Set frame dimensions based on document type (for visual guidance only)
             switch (_selectedScanType) {
               case 'Business Card':
                 cropWidth = businessCardCropWidth;
@@ -898,13 +863,11 @@ class _ScannerScreenState extends State<ScannerScreen>
                 cropHeight = 0;
             }
 
-            // Calculate the position to center the crop area
             final left = (screenWidth - cropWidth) / 2;
             final top = (screenHeight - cropHeight) / 2;
 
             return Stack(
               children: [
-                // Camera preview - with adjusted height to end at bottom container
                 Positioned(
                   top: 0,
                   left: 0,
@@ -913,7 +876,6 @@ class _ScannerScreenState extends State<ScannerScreen>
                   child: CameraPreview(_controller!),
                 ),
 
-                // Show the appropriate scan type overlay
                 if (_selectedScanType == 'Business Card' ||
                     _selectedScanType == 'Passport' ||
                     _selectedScanType == 'Legal' ||
@@ -937,7 +899,6 @@ class _ScannerScreenState extends State<ScannerScreen>
                       bottomPadding: _bottomContainerHeight,
                     ),
 
-                // Bottom controls container
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -946,7 +907,7 @@ class _ScannerScreenState extends State<ScannerScreen>
                     key: _bottomContainerKey,
                     height: 150,
                     padding:
-                        const EdgeInsets.only(top: 16, left: 16, right: 16),
+                    const EdgeInsets.only(top: 16, left: 16, right: 16),
                     decoration: const BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.only(
@@ -963,7 +924,6 @@ class _ScannerScreenState extends State<ScannerScreen>
                     clipBehavior: Clip.antiAlias,
                     child: Column(
                       children: [
-                        // Scan types
                         SizedBox(
                           height: 40,
                           child: ListView(
@@ -992,14 +952,12 @@ class _ScannerScreenState extends State<ScannerScreen>
                             ],
                           ),
                         ),
-                        // Camera controls
                         Padding(
                           padding: const EdgeInsets.only(
                               top: 4, left: 22, right: 22),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              // Gallery option
                               IconButton(
                                 icon: SvgPicture.asset(
                                   'assets/icons/gallery_option_icon.svg',
@@ -1008,7 +966,6 @@ class _ScannerScreenState extends State<ScannerScreen>
                                 ),
                                 onPressed: _pickImageFromGallery,
                               ),
-                              // Capture button
                               GestureDetector(
                                 onTap: _captureImage,
                                 child: Container(
@@ -1032,74 +989,73 @@ class _ScannerScreenState extends State<ScannerScreen>
                               ),
 
                               (_isBatchModeActive && _batchImages.isNotEmpty) ||
-                                      _recentImages.isNotEmpty
+                                  _recentImages.isNotEmpty
                                   ? GestureDetector(
-                                      onTap: _isBatchModeActive
-                                          ? _completeBatchCapture
-                                          : _viewRecentImage,
-                                      child: Container(
-                                        width: 40,
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          border: Border.all(
-                                            color: AppColors.primary
-                                                .withOpacity(0.3),
-                                            width: 1,
+                                onTap: _isBatchModeActive
+                                    ? _completeBatchCapture
+                                    : _viewRecentImage,
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    borderRadius:
+                                    BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AppColors.primary
+                                          .withOpacity(0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: _isBatchModeActive
+                                      ? Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius:
+                                        BorderRadius.circular(
+                                            7),
+                                        child: Image.file(
+                                          _batchImages.last,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 0,
+                                        right: 0,
+                                        child: Container(
+                                          padding:
+                                          const EdgeInsets.all(
+                                              2),
+                                          decoration:
+                                          const BoxDecoration(
+                                            color:
+                                            AppColors.primary,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Text(
+                                            '${_batchImages.length}',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight:
+                                              FontWeight.bold,
+                                            ),
                                           ),
                                         ),
-                                        child: _isBatchModeActive
-                                            ? Stack(
-                                                fit: StackFit.expand,
-                                                children: [
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            7),
-                                                    child: Image.file(
-                                                      _batchImages.last,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  ),
-                                                  Positioned(
-                                                    top: 0,
-                                                    right: 0,
-                                                    child: Container(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              2),
-                                                      decoration:
-                                                          const BoxDecoration(
-                                                        color:
-                                                            AppColors.primary,
-                                                        shape: BoxShape.circle,
-                                                      ),
-                                                      child: Text(
-                                                        '${_batchImages.length}',
-                                                        style: const TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 10,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              )
-                                            : ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(7),
-                                                child: Image.file(
-                                                  _recentImages[0],
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
                                       ),
-                                    )
+                                    ],
+                                  )
+                                      : ClipRRect(
+                                    borderRadius:
+                                    BorderRadius.circular(7),
+                                    child: Image.file(
+                                      _recentImages[0],
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              )
                                   : const SizedBox(width: 40, height: 40),
-                              // Maintain layout spacing
                             ],
                           ),
                         ),

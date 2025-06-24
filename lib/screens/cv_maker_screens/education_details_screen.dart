@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import '../../models/education_item_model.dart';
 import '../../provider/education_provider.dart';
+import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/add_another_button.dart';
 import '../../widgets/cv_widgets/education_form_widget.dart';
@@ -82,7 +83,10 @@ class EducationDetailPageState extends State<EducationDetailPage> {
 
   Future<void> _selectDate(BuildContext context, TextEditingController controller,
       FocusNode focusNode, bool isStartDate) async {
-    focusNode.unfocus();
+    // Unfocus any currently focused field before opening date picker
+    FocusScope.of(context).unfocus();
+
+    // Add a small delay to ensure focus is properly removed
     await Future.delayed(const Duration(milliseconds: 100));
 
     final DateTime? picked = await showDatePicker(
@@ -90,6 +94,23 @@ class EducationDetailPageState extends State<EducationDetailPage> {
       initialDate: isStartDate ? DateTime.now() : (startDate ?? DateTime.now()),
       firstDate: DateTime(1950),
       lastDate: DateTime(2100),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null) {
@@ -120,19 +141,13 @@ class EducationDetailPageState extends State<EducationDetailPage> {
         controller.text =
         "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString().substring(2)}";
       });
-    }
 
-    if (isStartDate) {
-      if (!isCompleted) {
-        FocusScope.of(context).requestFocus(_endDateFocus);
-      } else {
-        FocusScope.of(context).requestFocus(_descriptionFocus);
-      }
-    } else {
-      FocusScope.of(context).requestFocus(_descriptionFocus);
+      // After setting the date, ensure no field gets focus
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FocusScope.of(context).unfocus();
+      });
     }
   }
-
   void _saveEducation() {
     if (!isCompleted &&
         startDate != null &&

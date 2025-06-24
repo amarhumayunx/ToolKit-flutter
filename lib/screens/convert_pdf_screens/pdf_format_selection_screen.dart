@@ -15,7 +15,8 @@ class PdfFormatSelectionScreen extends StatefulWidget {
   final File selectedPdf;
   final VoidCallback? onFileDeleted;
 
-  const PdfFormatSelectionScreen({super.key, required this.selectedPdf, this.onFileDeleted});
+  const PdfFormatSelectionScreen(
+      {super.key, required this.selectedPdf, this.onFileDeleted});
 
   @override
   State<PdfFormatSelectionScreen> createState() =>
@@ -217,9 +218,12 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
             ),
             const SizedBox(height: 10),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 _buildFormatOption('word'.tr, 'assets/icons/word_icon.svg'),
+                SizedBox(
+                  width: 16,
+                ),
                 _buildFormatOption(
                     'image'.tr, 'assets/icons/convert_img_icon.svg'),
               ],

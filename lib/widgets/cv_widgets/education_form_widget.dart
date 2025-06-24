@@ -50,38 +50,6 @@ class EducationFormWidget extends StatefulWidget {
 }
 
 class _EducationFormWidgetState extends State<EducationFormWidget> {
-  Future<void> _selectDate(
-      BuildContext context, TextEditingController controller) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime(2100),
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.primary, // Purple header
-              onPrimary: Colors.white, // Header text color
-              onSurface: Colors.black, // Body text color
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.primary, // Button text color
-              ),
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null) {
-      final formattedDate = DateFormat('dd/MM/yy').format(picked);
-      controller.text = formattedDate;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -130,7 +98,8 @@ class _EducationFormWidgetState extends State<EducationFormWidget> {
                     label: 'start_date'.tr,
                     controller: widget.startDateController,
                     focusNode: widget.startDateFocus,
-                    onTap: () => _selectDate(context, widget.startDateController),
+                    onTap: () => widget.onDateSelected(
+                        context, widget.startDateController, true),
                   ),
                 ),
                 const SizedBox(width: 20),
@@ -141,7 +110,8 @@ class _EducationFormWidgetState extends State<EducationFormWidget> {
                       label: 'end_date'.tr,
                       controller: widget.endDateController,
                       focusNode: widget.endDateFocus,
-                      onTap: () => _selectDate(context, widget.endDateController),
+                      onTap: () => widget.onDateSelected(
+                          context, widget.endDateController, false),
                       errorText: widget.dateError,
                     ),
                   ),

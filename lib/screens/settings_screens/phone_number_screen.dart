@@ -396,7 +396,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.primary),
+                          borderSide: BorderSide(color: AppColors.primary),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -452,7 +452,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                               ),
                               if (isSelected) ...[
                                 const SizedBox(width: 8),
-                                const Icon(
+                                Icon(
                                   Icons.check_circle,
                                   color: AppColors.primary,
                                   size: 20,

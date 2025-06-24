@@ -33,30 +33,35 @@ class _ContinueWithGoogleScreenState extends State<ContinueWithGoogleScreen> {
     try {
       final user = _authService.currentUser;
       if (user != null) {
-        // User is already logged in, load data and check if phone number exists
-        final profileProvider =
-            Provider.of<ProfileProvider>(context, listen: false);
-        final userData = await _authService.getUserData(user.uid);
-        final hasPhoneNumber = await _authService.hasPhoneNumber();
+        // User is already logged in, load data and check navigation
+        await _loadUserDataAndNavigate(user.uid);
+      }
+    } catch (e) {
+      print('Error checking existing login: $e');
+      // Continue with normal flow if error occurs
+    }
+  }
 
-        if (userData != null) {
-          profileProvider.loadProfileData(
-            email: userData.email,
-            username: userData.displayName,
-            gender: userData.gender,
-            dateOfBirth: userData.dateOfBirth,
-            avatar: userData.avatarId,
-            phoneNumber: userData.phoneNumber,
-          );
-        } else {
-          profileProvider.loadProfileData(
-            email: user.email,
-            username: user.displayName,
-            gender: 'Not set',
-            dateOfBirth: 'Not set',
-            avatar: '1',
-          );
-        }
+  Future<void> _loadUserDataAndNavigate(String uid) async {
+    try {
+      final profileProvider =
+          Provider.of<ProfileProvider>(context, listen: false);
+      final userData = await _authService.getUserData(uid);
+
+      if (userData != null) {
+        // Load profile data
+        profileProvider.loadProfileData(
+          email: userData.email,
+          username: userData.displayName,
+          gender: userData.gender,
+          dateOfBirth: userData.dateOfBirth,
+          avatar: userData.avatarId,
+          phoneNumber: userData.phoneNumber,
+        );
+
+        // Check if user has phone number to determine navigation
+        final hasPhoneNumber =
+            userData.phoneNumber != null && userData.phoneNumber!.isNotEmpty;
 
         if (mounted) {
           if (hasPhoneNumber) {
@@ -77,10 +82,28 @@ class _ContinueWithGoogleScreenState extends State<ContinueWithGoogleScreen> {
             );
           }
         }
+      } else {
+        // Handle case where user data doesn't exist
+        final user = _authService.currentUser;
+        if (user != null && mounted) {
+          profileProvider.loadProfileData(
+            email: user.email,
+            username: user.displayName,
+            gender: 'Not set',
+            dateOfBirth: 'Not set',
+            avatar: '6',
+          );
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const PhoneNumberScreen(),
+            ),
+          );
+        }
       }
     } catch (e) {
-      print('Error checking existing login: $e');
-      // Continue with normal flow if error occurs
+      print('Error loading user data and navigating: $e');
     }
   }
 
@@ -207,38 +230,59 @@ class _ContinueWithGoogleScreenState extends State<ContinueWithGoogleScreen> {
       final userCredential = await _authService.signInWithGoogle();
 
       if (userCredential != null && userCredential.user != null) {
+        final googleUser = userCredential.user!;
+
+        print('Google user signed in: ${googleUser.email}');
+
+        // Check if email already exists with phone number BEFORE any operations
+        bool emailHasPhoneNumber = false;
+        if (googleUser.email != null) {
+          emailHasPhoneNumber =
+              await _authService.emailExistsWithPhoneNumber(googleUser.email!);
+          print('Email exists with phone number: $emailHasPhoneNumber');
+        }
+
+        // Merge Google user with existing Firestore data if exists
+        final mergedUserData =
+            await _authService.mergeGoogleUserWithExistingData(googleUser);
+        print('Merged user data phone: ${mergedUserData?.phoneNumber}');
+
         final profileProvider =
             Provider.of<ProfileProvider>(context, listen: false);
 
-        // Load user data from Firestore
-        final userModel =
-            await _authService.getUserData(userCredential.user!.uid);
-        final hasPhoneNumber = await _authService.hasPhoneNumber();
-
-        if (userModel != null) {
-          // Load all profile data including phone number
+        if (mergedUserData != null) {
+          // Load merged profile data
           profileProvider.loadProfileData(
-            email: userModel.email,
-            username: userModel.displayName,
-            gender: userModel.gender,
-            dateOfBirth: userModel.dateOfBirth,
-            avatar: userModel.avatarId,
-            phoneNumber: userModel.phoneNumber,
+            email: mergedUserData.email,
+            username: mergedUserData.displayName,
+            gender: mergedUserData.gender,
+            dateOfBirth: mergedUserData.dateOfBirth,
+            avatar: mergedUserData.avatarId,
+            phoneNumber: mergedUserData.phoneNumber,
           );
+
+          print('Profile loaded with phone: ${mergedUserData.phoneNumber}');
         } else {
-          // If user data doesn't exist, load with default values
+          // Fallback to basic Google user data
           profileProvider.loadProfileData(
-            email: userCredential.user!.email,
-            username: userCredential.user!.displayName,
+            email: googleUser.email,
+            username: googleUser.displayName,
             gender: 'Not set',
             dateOfBirth: 'Not set',
-            avatar: '1',
+            avatar: '6',
           );
         }
 
         if (mounted) {
+          // Navigate based on whether the merged user has a phone number
+          final hasPhoneNumber = mergedUserData?.phoneNumber != null &&
+              mergedUserData!.phoneNumber!.isNotEmpty;
+
+          print('Has phone number for navigation: $hasPhoneNumber');
+
           if (hasPhoneNumber) {
-            // User already has phone number, go directly to profile
+            // User has phone number, go directly to profile
+            print('Navigating to ProfileScreen');
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -247,6 +291,7 @@ class _ContinueWithGoogleScreenState extends State<ContinueWithGoogleScreen> {
             );
           } else {
             // User doesn't have phone number, go to phone number screen
+            print('Navigating to PhoneNumberScreen');
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -257,9 +302,9 @@ class _ContinueWithGoogleScreenState extends State<ContinueWithGoogleScreen> {
         }
       }
     } catch (e) {
+      print('Error in Google sign in: $e');
       if (mounted) {
-        AppSnackBar.show(context,
-            message: 'google_signin_failed'.tr);
+        AppSnackBar.show(context, message: 'google_signin_failed'.tr);
       }
     } finally {
       if (mounted) {

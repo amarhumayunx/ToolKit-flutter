@@ -8,6 +8,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:toolkit/screens/file_transfer_screen/qr_display_screen.dart';
 import 'package:crypto/crypto.dart';
 import '../../models/file_model.dart';
+import '../../utils/app_colors.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/file_transfer_dropzone.dart';
@@ -153,7 +155,9 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
       return;
     }
 
+    // Check if no file is selected and show snackbar
     if (_selectedFile == null) {
+      AppSnackBar.show(context, message: 'Please select a file first'.tr);
       return;
     }
 
@@ -168,7 +172,6 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
 
       if (existingFile != null) {
         // File already exists, reuse existing QR code
-
         final existingData = existingFile['data'];
         final qrId = existingFile['qrId'];
 
@@ -254,6 +257,18 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
       setState(() => _isGeneratingQR = false);
     } catch (e) {
       setState(() => _isGeneratingQR = false);
+      // Optional: Show error snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error generating QR code: $e'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      );
     }
   }
 
@@ -269,11 +284,11 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00BCD4).withOpacity(0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(Icons.qr_code,
-                    color: Color(0xFF00BCD4), size: 24),
+                    color: AppColors.primary, size: 24),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -309,7 +324,7 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
                             const ContinueWithGoogleScreen()));
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00BCD4),
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -423,7 +438,7 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
           ),
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
             child: CustomGradientButton(
               text: _isGeneratingQR
                   ? 'Generating QR Code...'.tr

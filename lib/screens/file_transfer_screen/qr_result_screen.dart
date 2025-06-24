@@ -10,6 +10,7 @@ import '../../utils/app_colors.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import '../../widgets/tools/document_container.dart';
+import 'file_transfer_screen.dart';
 
 class QRResultScreen extends StatefulWidget {
   final FileModel fileModel;
@@ -69,21 +70,12 @@ class _QRResultScreenState extends State<QRResultScreen>
   Future<void> _openDocument() async {
     try {
       final result = await OpenFile.open(widget.fileModel.path);
-      if (result.type != ResultType.done) {
-        Get.snackbar(
-          'error'.tr,
-          'could_not_open_file'.tr,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
-    } catch (e) {
-      Get.snackbar(
-        'error'.tr,
-        'error_opening_file'.tr,
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
+      if (result.type != ResultType.done) {}
+    } catch (e) {}
   }
+
+  // Add this import at the top of your QRResultScreen file:
+// import '../file_transfer_screen/file_transfer_screen.dart';
 
   Future<void> _downloadFile() async {
     if (_isDownloading) return;
@@ -96,11 +88,6 @@ class _QRResultScreenState extends State<QRResultScreen>
       final file = File(widget.fileModel.path);
 
       if (!await file.exists()) {
-        Get.snackbar(
-          'error'.tr,
-          'File not found',
-          snackPosition: SnackPosition.BOTTOM,
-        );
         return;
       }
 
@@ -142,31 +129,27 @@ class _QRResultScreenState extends State<QRResultScreen>
       }
 
       if (success) {
-        Get.snackbar(
-          'success'.tr,
-          'File downloaded successfully to Toolkit folder',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-      } else {
-        Get.snackbar(
-          'error'.tr,
-          'Failed to download file',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
+        // Navigate to FileTransferScreen and clear selected file
+        _navigateToFileTransferScreen();
+      } else {}
     } catch (e) {
-      Get.snackbar(
-        'error'.tr,
-        'Error downloading file: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-      );
     } finally {
       setState(() {
         _isDownloading = false;
       });
     }
+  }
+
+  void _navigateToFileTransferScreen() {
+    // Navigate to FileTransferScreen and clear intermediate screens but keep main/home screen
+    Get.offUntil(
+      GetPageRoute(page: () => const FileTransferScreen()),
+      (route) => route
+          .isFirst, // This keeps the first route (usually your main/home screen)
+    );
+
+    // Alternative: If you know your main screen route name
+    // Get.offNamedUntil('/fileTransfer', ModalRoute.withName('/main'));
   }
 
   @override

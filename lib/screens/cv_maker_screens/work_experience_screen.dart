@@ -31,10 +31,22 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
   final TextEditingController _projectController = TextEditingController();
   final TextEditingController _projectUrlController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+
+  // Add FocusNodes for better focus management
+  final FocusNode _positionFocusNode = FocusNode();
+  final FocusNode _companyFocusNode = FocusNode();
+  final FocusNode _startDateFocusNode = FocusNode();
+  final FocusNode _endDateFocusNode = FocusNode();
+  final FocusNode _projectFocusNode = FocusNode();
+  final FocusNode _projectUrlFocusNode = FocusNode();
+  final FocusNode _descriptionFocusNode = FocusNode();
+
   bool validate() {
-    final provider = Provider.of<WorkExperienceProvider>(context, listen: false);
+    final provider =
+        Provider.of<WorkExperienceProvider>(context, listen: false);
     return provider.workExperienceItems.isNotEmpty;
   }
+
   bool isCurrent = false;
   bool showForm = false;
   List<String> projectsList = [];
@@ -42,6 +54,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
   DateTime? startDate;
   DateTime? endDate;
   String? dateError;
+
   @override
   void initState() {
     super.initState();
@@ -52,7 +65,8 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
 
   void _loadInitialData() {
     if (widget.initialData != null && widget.initialData!.isNotEmpty) {
-      final workExpProvider = Provider.of<WorkExperienceProvider>(context, listen: false);
+      final workExpProvider =
+          Provider.of<WorkExperienceProvider>(context, listen: false);
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // Clear any existing data
@@ -76,6 +90,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
       });
     }
   }
+
   @override
   void dispose() {
     _positionController.dispose();
@@ -85,10 +100,27 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
     _projectController.dispose();
     _projectUrlController.dispose();
     _descriptionController.dispose();
+
+    // Dispose focus nodes
+    _positionFocusNode.dispose();
+    _companyFocusNode.dispose();
+    _startDateFocusNode.dispose();
+    _endDateFocusNode.dispose();
+    _projectFocusNode.dispose();
+    _projectUrlFocusNode.dispose();
+    _descriptionFocusNode.dispose();
+
     super.dispose();
   }
 
-  void _selectDate(BuildContext context, TextEditingController controller, bool isStartDate) async {
+  void _selectDate(BuildContext context, TextEditingController controller,
+      bool isStartDate) async {
+    // Unfocus any currently focused field before opening date picker
+    FocusScope.of(context).unfocus();
+
+    // Add a small delay to ensure focus is properly removed
+    await Future.delayed(const Duration(milliseconds: 100));
+
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: isStartDate ? DateTime.now() : (startDate ?? DateTime.now()),
@@ -142,7 +174,12 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
       // Format date as DD/MM/YY to match the UI design
       setState(() {
         controller.text =
-        "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString().substring(2)}";
+            "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString().substring(2)}";
+      });
+
+      // After setting the date, ensure no field gets focus
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FocusScope.of(context).unfocus();
       });
     }
   }
@@ -152,10 +189,15 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
 
     setState(() {
       projectsList.add(_projectController.text);
-      projectUrlsList.add(_projectUrlController.text); // Make sure this is being added
+      projectUrlsList
+          .add(_projectUrlController.text); // Make sure this is being added
       _projectController.clear();
       _projectUrlController.clear();
     });
+
+    // Clear focus after adding project
+    _projectFocusNode.unfocus();
+    _projectUrlFocusNode.unfocus();
   }
 
   void _removeProject(int index) {
@@ -189,7 +231,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
     }
 
     final provider =
-    Provider.of<WorkExperienceProvider>(context, listen: false);
+        Provider.of<WorkExperienceProvider>(context, listen: false);
 
     provider.addWorkExperience(
       WorkExperienceItem(
@@ -220,11 +262,14 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
       endDate = null;
       dateError = null;
     });
+
+    // Clear all focus after saving
+    FocusScope.of(context).unfocus();
   }
 
   void _editWorkExperience(BuildContext context, int index) {
     final provider =
-    Provider.of<WorkExperienceProvider>(context, listen: false);
+        Provider.of<WorkExperienceProvider>(context, listen: false);
     final item = provider.workExperienceItems[index];
 
     // Parse the dates when editing
@@ -266,7 +311,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
 
   void _deleteWorkExperience(BuildContext context, int index) {
     final provider =
-    Provider.of<WorkExperienceProvider>(context, listen: false);
+        Provider.of<WorkExperienceProvider>(context, listen: false);
     provider.deleteWorkExperience(index);
   }
 
@@ -290,6 +335,9 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
         dateError = null;
       }
     });
+
+    // Clear focus when toggling form
+    FocusScope.of(context).unfocus();
   }
 
   @override
@@ -305,7 +353,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
               child: SingleChildScrollView(
                 child: Padding(
                   padding:
-                  const EdgeInsets.only(left: 26, right: 26, bottom: 8),
+                      const EdgeInsets.only(left: 26, right: 26, bottom: 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -488,6 +536,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
               label: 'position'.tr,
               hint: 'enter_position'.tr,
               controller: _positionController,
+              focusNode: _positionFocusNode,
             ),
             const SizedBox(height: 16),
 
@@ -496,11 +545,11 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
               label: 'company_name'.tr,
               hint: 'enter_company'.tr,
               controller: _companyController,
+              focusNode: _companyFocusNode,
             ),
             const SizedBox(height: 16),
 
             // Dates row
-            // In the _buildWorkExperienceForm method:
             Row(
               children: [
                 // Start date
@@ -508,7 +557,9 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                   child: DateField(
                     label: 'start_date'.tr,
                     controller: _startDateController,
-                    onTap: () => _selectDate(context, _startDateController, true),
+                    focusNode: _startDateFocusNode,
+                    onTap: () =>
+                        _selectDate(context, _startDateController, true),
                   ),
                 ),
                 const SizedBox(width: 20),
@@ -518,7 +569,9 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                     child: DateField(
                       label: 'end_date'.tr,
                       controller: _endDateController,
-                      onTap: () => _selectDate(context, _endDateController, false),
+                      focusNode: _endDateFocusNode,
+                      onTap: () =>
+                          _selectDate(context, _endDateController, false),
                       errorText: dateError,
                     ),
                   ),
@@ -550,6 +603,8 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                           _endDateController.clear();
                           endDate = null;
                           dateError = null;
+                          // Clear focus from end date field
+                          _endDateFocusNode.unfocus();
                         }
                       });
                     },
@@ -588,7 +643,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                   children: [
                     // Project name field
                     Container(
-                      width: double.infinity, // Takes full width
+                      width: double.infinity,
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
@@ -600,20 +655,30 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                         color: AppColors.bgBoxColor,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: TextFormField(
-                        controller: _projectController,
-                        cursorColor: AppColors.primary,
-                        decoration: InputDecoration(
-                          hintText: 'project_name_hint'.tr,
-                          hintStyle: GoogleFonts.inter(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w300,
-                            color: AppColors.fieldHintColor,
+                      child: Theme(
+                        data: Theme.of(context).copyWith(
+                          textSelectionTheme: TextSelectionThemeData(
+                            cursorColor: AppColors.primary,
+                            selectionHandleColor: AppColors.primary,
+                            selectionColor: AppColors.primary.withOpacity(0.3),
                           ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+                        ),
+                        child: TextFormField(
+                          controller: _projectController,
+                          focusNode: _projectFocusNode,
+                          cursorColor: AppColors.primary,
+                          decoration: InputDecoration(
+                            hintText: 'project_name_hint'.tr,
+                            hintStyle: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w300,
+                              color: AppColors.fieldHintColor,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                           ),
                         ),
                       ),
@@ -637,20 +702,31 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                               color: AppColors.bgBoxColor,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: TextFormField(
-                              controller: _projectUrlController,
-                              cursorColor: AppColors.primary,
-                              decoration: InputDecoration(
-                                hintText: 'project_url_hint'.tr,
-                                hintStyle: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w300,
-                                  color: AppColors.fieldHintColor,
+                            child: Theme(
+                              data: Theme.of(context).copyWith(
+                                textSelectionTheme: TextSelectionThemeData(
+                                  cursorColor: AppColors.primary,
+                                  selectionHandleColor: AppColors.primary,
+                                  selectionColor:
+                                      AppColors.primary.withOpacity(0.3),
                                 ),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
+                              ),
+                              child: TextFormField(
+                                controller: _projectUrlController,
+                                focusNode: _projectUrlFocusNode,
+                                cursorColor: AppColors.primary,
+                                decoration: InputDecoration(
+                                  hintText: 'project_url_hint'.tr,
+                                  hintStyle: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w300,
+                                    color: AppColors.fieldHintColor,
+                                  ),
+                                  border: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
                                 ),
                               ),
                             ),
@@ -713,7 +789,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           projectsList[index],
@@ -729,7 +805,7 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                                               fontSize: 12,
                                               color: Colors.blue,
                                               decoration:
-                                              TextDecoration.underline,
+                                                  TextDecoration.underline,
                                             ),
                                           ),
                                       ],
@@ -795,26 +871,36 @@ class _WorkExperiencePageState extends State<WorkExperiencePage> {
                     color: AppColors.bgBoxColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: TextFormField(
-                    controller: _descriptionController,
-                    cursorColor: AppColors.primary,
-                    maxLines: 5,
-                    maxLength: 150,
-                    decoration: InputDecoration(
-                      hintText: 'description_hint'.tr,
-                      hintStyle: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w300,
-                        color: AppColors.fieldHintColor,
+                  child: Theme(
+                    data: Theme.of(context).copyWith(
+                      textSelectionTheme: TextSelectionThemeData(
+                        cursorColor: AppColors.primary,
+                        selectionHandleColor: AppColors.primary,
+                        selectionColor: AppColors.primary.withOpacity(0.3),
                       ),
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      counterText: '',
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
+                    ),
+                    child: TextFormField(
+                      controller: _descriptionController,
+                      focusNode: _descriptionFocusNode,
+                      cursorColor: AppColors.primary,
+                      maxLines: 5,
+                      maxLength: 150,
+                      decoration: InputDecoration(
+                        hintText: 'description_hint'.tr,
+                        hintStyle: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w300,
+                          color: AppColors.fieldHintColor,
+                        ),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        counterText: '',
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ),
