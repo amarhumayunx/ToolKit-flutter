@@ -25,19 +25,27 @@ class CreateCVButton extends StatelessWidget {
           color: AppColors.primary,
           borderRadius: BorderRadius.circular(16),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SvgPicture.asset(
               'assets/icons/pencil_cv.svg',
+              height: 20,
+              width: 20,
             ),
-            Text(
-              'create_your_cv'.tr,
-              style: GoogleFonts.inter(
-                color: AppColors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+            Expanded(
+              child: Text(
+                'create_your_cv'.tr,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.notoSans(
+                  color: AppColors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  height: 1.2,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

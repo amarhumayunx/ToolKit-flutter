@@ -221,7 +221,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 _buildFormatOption('word'.tr, 'assets/icons/word_icon.svg'),
-                SizedBox(
+                const SizedBox(
                   width: 16,
                 ),
                 _buildFormatOption(

@@ -132,7 +132,6 @@ class _QRResultScreenState extends State<QRResultScreen>
         // Navigate to FileTransferScreen and clear selected file
         _navigateToFileTransferScreen();
       } else {}
-    } catch (e) {
     } finally {
       setState(() {
         _isDownloading = false;

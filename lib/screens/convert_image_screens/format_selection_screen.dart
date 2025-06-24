@@ -98,7 +98,7 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 _buildFormatOption('word'.tr, 'assets/icons/word_icon.svg'),
-                SizedBox(
+                const SizedBox(
                   width: 16,
                 ),
                 _buildFormatOption(

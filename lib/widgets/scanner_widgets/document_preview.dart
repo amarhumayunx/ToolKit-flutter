@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 
-import '../../utils/app_colors.dart';
 
 class DocumentPreview extends StatelessWidget {
   final File image;

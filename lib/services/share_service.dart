@@ -13,7 +13,7 @@ class ShareService {
     if (Platform.isIOS) {
       Share.share(
         message,
-        sharePositionOrigin: Rect.fromLTWH(0, 0, 100, 100),
+        sharePositionOrigin: const Rect.fromLTWH(0, 0, 100, 100),
       );
     } else {
       Share.share(message);
