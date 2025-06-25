@@ -17,7 +17,9 @@ import 'package:toolkit/provider/user_provider.dart';
 import 'package:toolkit/provider/work_experience_provider.dart';
 import 'package:toolkit/screens/onboarding_screen.dart';
 import 'package:toolkit/screens/home_screen.dart';
+import 'package:toolkit/screens/splash_screen/splash_screen.dart';
 import 'package:toolkit/services/notification_service.dart';
+import 'package:toolkit/utils/app_colors.dart';
 import 'localization/language.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -97,7 +99,6 @@ class AppInitializer extends StatefulWidget {
 }
 
 class _AppInitializerState extends State<AppInitializer> {
-  bool _isLoading = true;
   bool _showOnboarding = true;
 
   @override
@@ -113,10 +114,6 @@ class _AppInitializerState extends State<AppInitializer> {
       await _checkOnboardingStatus();
     } catch (e) {
       debugPrint('Error initializing app: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
@@ -131,14 +128,6 @@ class _AppInitializerState extends State<AppInitializer> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
-    return _showOnboarding ? const OnboardingScreen() : const HomeScreen();
+    return const SplashScreen();
   }
 }

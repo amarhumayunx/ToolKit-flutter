@@ -80,11 +80,19 @@ dependencies:
   pretty_qr_code: ^3.4.0
   firebase_storage: ^12.4.7
   crypto: any
+  flutter_native_splash: ^2.4.4
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   change_app_package_name: ^1.5.0
+
+flutter_icons:
+  android: true
+  ios: true
+  remove_alpha_icon: true
+  image_path: "assets/images/toolkitappicon.png"
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

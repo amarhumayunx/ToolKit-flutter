@@ -25,7 +25,7 @@ class CreateCVButton extends StatelessWidget {
           color: AppColors.primary,
           borderRadius: BorderRadius.circular(16),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 100),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
