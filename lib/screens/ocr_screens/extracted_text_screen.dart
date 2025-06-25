@@ -157,9 +157,6 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
       });
 
       // Show success message with file size
-      AppSnackBar.show(context,
-          message:
-              '${'file_created_successfully'.tr} (${_formatFileSize(fileSizeBytes)})');
     } catch (e) {
       setState(() {
         _isSaving = false;
@@ -339,40 +336,6 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
     );
   }
 
-  Widget _buildTextSizeInfo() {
-    final textSize = _getTextSizeInBytes(_textController.text);
-    final isNearLimit = textSize > (maxTextSizeBytes * 0.8);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: isNearLimit
-            ? Colors.orange.withOpacity(0.1)
-            : Colors.grey.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.info_outline,
-            size: 16,
-            color: isNearLimit ? Colors.orange : Colors.grey[600],
-          ),
-          const SizedBox(width: 4),
-          Text(
-            'Text size: ${_formatFileSize(textSize)}',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: isNearLimit ? Colors.orange : Colors.grey[600],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildTextContainer() {
     return Container(
       width: double.infinity,
@@ -391,21 +354,20 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
             color: Colors.black.withOpacity(0.10),
             blurRadius: 10,
             offset: const Offset(0, 1),
-          )
+          ),
         ],
       ),
       child: Column(
         children: [
           // Add size info at the top
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              _buildTextSizeInfo(),
               IconButton(
                 onPressed: _copyToClipboard,
                 icon: const Icon(
                   Icons.content_copy,
-                  size: 25,
+                  size: 20,
                 ),
                 style: IconButton.styleFrom(
                   foregroundColor: AppColors.primary,

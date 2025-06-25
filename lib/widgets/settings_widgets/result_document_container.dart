@@ -4,15 +4,15 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path/path.dart' as path;
 import 'package:share_plus/share_plus.dart';
-import 'package:get/get.dart'; // Add this import for localization
+import 'package:get/get.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 
-class ResultDocumentContainer extends StatelessWidget {
+class ResultDocumentContainer extends StatefulWidget {
   final String documentName;
   final String date;
   final String time;
-  final String? size;
+
   final bool isFavorite;
   final bool isLocked;
   final String filePath;
@@ -30,7 +30,6 @@ class ResultDocumentContainer extends StatelessWidget {
     required this.documentName,
     required this.date,
     required this.time,
-    this.size, // Make size optional
     required this.isFavorite,
     required this.isLocked,
     required this.filePath,
@@ -44,49 +43,59 @@ class ResultDocumentContainer extends StatelessWidget {
     this.onTap,
   });
 
-  String _getFileSize() {
-    if (size != null && size!.isNotEmpty) {
-      return size!;
-    }
+  @override
+  State<ResultDocumentContainer> createState() => _ResultDocumentContainerState();
+}
 
+class _ResultDocumentContainerState extends State<ResultDocumentContainer> {
+  String? _fileSize;
+
+  @override
+  void initState() {
+    super.initState();
+    _getFileSize();
+  }
+
+  Future<void> _getFileSize() async {
     try {
-      final file = File(filePath);
-      if (file.existsSync()) {
-        final bytes = file.lengthSync();
-        return _formatBytes(bytes);
+      final file = File(widget.filePath);
+      if (await file.exists()) {
+        final size = await file.length();
+        setState(() {
+          _fileSize = _formatBytes(size);
+        });
       }
     } catch (e) {
-      // If error occurs, return default
+      setState(() {
+        _fileSize = 'Unknown';
+      });
     }
-    return '0 KB';
   }
 
   String _formatBytes(int bytes) {
+    if (bytes <= 0) return '0 KB';
+
     if (bytes < 1024) {
-      // For files smaller than 1KB, show in bytes and as 0.001 MB
-      double mbSize = bytes / (1024 * 1024);
-      return '$bytes B | ${mbSize.toStringAsFixed(3)} MB';
-    } else if (bytes < 1024 * 1024) {
-      // For files smaller than 1MB, show in KB and MB
+      // For files smaller than 1KB, show in KB with 3 decimal places
       double kbSize = bytes / 1024;
-      double mbSize = bytes / (1024 * 1024);
-      return '${kbSize.toStringAsFixed(1)} KB | ${mbSize.toStringAsFixed(2)} MB';
+      return '${kbSize.toStringAsFixed(3)} KB';
+    } else if (bytes < 1024 * 1024) {
+      // For files smaller than 1MB, show in KB with 1 decimal place
+      double kbSize = bytes / 1024;
+      return '${kbSize.toStringAsFixed(1)} KB';
     } else if (bytes < 1024 * 1024 * 1024) {
-      // For files smaller than 1GB, show in MB and GB
+      // For files smaller than 1GB, show in MB with 2 decimal places
       double mbSize = bytes / (1024 * 1024);
-      double gbSize = bytes / (1024 * 1024 * 1024);
-      return '${mbSize.toStringAsFixed(1)} MB | ${gbSize.toStringAsFixed(2)} GB';
+      return '${mbSize.toStringAsFixed(2)} MB';
     } else {
-      // For files 1GB or larger, show in GB and TB
+      // For files 1GB or larger, show in GB with 2 decimal places
       double gbSize = bytes / (1024 * 1024 * 1024);
-      double tbSize = bytes / (1024 * 1024 * 1024 * 1024);
-      return '${gbSize.toStringAsFixed(1)} GB | ${tbSize.toStringAsFixed(2)} TB';
+      return '${gbSize.toStringAsFixed(2)} GB';
     }
   }
 
-
   Map<String, dynamic> _getDocumentIcon() {
-    final fileExtension = path.extension(filePath).toLowerCase();
+    final fileExtension = path.extension(widget.filePath).toLowerCase();
 
     switch (fileExtension) {
       case '.jpg':
@@ -107,7 +116,7 @@ class ResultDocumentContainer extends StatelessWidget {
         return {'path': 'assets/icons/zip.svg', 'isSvg': true};
 
       default:
-        return {'path': documentImage, 'isSvg': false};
+        return {'path': widget.documentImage, 'isSvg': false};
     }
   }
 
@@ -156,13 +165,19 @@ class ResultDocumentContainer extends StatelessWidget {
     }
   }
 
+  String _buildFileInfoText() {
+    final date = widget.date;
+    final time = widget.time;
+    final size = _fileSize ?? 'Loading...';
+    return '$date | $time | $size';
+  }
+
   @override
   Widget build(BuildContext context) {
     final iconData = _getDocumentIcon();
-    final fileSize = _getFileSize();
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -175,7 +190,7 @@ class ResultDocumentContainer extends StatelessWidget {
             ),
           ],
           // Only show border when selectable AND selected
-          border: (isSelectable && isSelected)
+          border: (widget.isSelectable && widget.isSelected)
               ? Border.all(color: AppColors.primary, width: 2)
               : null,
         ),
@@ -195,7 +210,7 @@ class ResultDocumentContainer extends StatelessWidget {
                     child: Stack(
                       children: [
                         _buildIconWidget(iconData),
-                        if (isLocked)
+                        if (widget.isLocked)
                           const Positioned(
                             bottom: 2,
                             right: 2,
@@ -221,7 +236,7 @@ class ResultDocumentContainer extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      documentName,
+                      widget.documentName,
                       style: GoogleFonts.inter(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -230,7 +245,7 @@ class ResultDocumentContainer extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '$date | $time | $fileSize',
+                      _buildFileInfoText(),
                       style: GoogleFonts.inter(
                         fontSize: 9,
                         fontWeight: FontWeight.w400,
@@ -240,14 +255,14 @@ class ResultDocumentContainer extends StatelessWidget {
                   ],
                 ),
               ),
-              if (!isSelectable) ...[
+              if (!widget.isSelectable) ...[
                 Padding(
                   padding: const EdgeInsets.only(left: 10, right: 5),
                   child: GestureDetector(
-                    onTap: onFavoriteToggle,
+                    onTap: widget.onFavoriteToggle,
                     child: Icon(
-                      isFavorite ? Icons.star : Icons.star_border,
-                      color: isFavorite ? Colors.amber : Colors.grey,
+                      widget.isFavorite ? Icons.star : Icons.star_border,
+                      color: widget.isFavorite ? Colors.amber : Colors.grey,
                       size: 24,
                     ),
                   ),
@@ -268,10 +283,10 @@ class ResultDocumentContainer extends StatelessWidget {
                         await _shareFile(context);
                         break;
                       case 'lock':
-                        if (onLockToggle != null) onLockToggle!();
+                        if (widget.onLockToggle != null) widget.onLockToggle!();
                         break;
                       case 'delete':
-                        if (onDelete != null) onDelete!();
+                        if (widget.onDelete != null) widget.onDelete!();
                         break;
                     }
                   },
@@ -317,7 +332,7 @@ class ResultDocumentContainer extends StatelessWidget {
                       ),
                       _buildMenuItem(
                         value: 'lock',
-                        text: isLocked ? 'unlock'.tr : 'lock'.tr,
+                        text: widget.isLocked ? 'unlock'.tr : 'lock'.tr,
                       ),
                       const PopupMenuItem<String>(
                         enabled: false,
@@ -350,7 +365,7 @@ class ResultDocumentContainer extends StatelessWidget {
                 const SizedBox(width: 8),
                 Icon(
                   Icons.check_circle,
-                  color: isSelected ? AppColors.primary : Colors.transparent,
+                  color: widget.isSelected ? AppColors.primary : Colors.transparent,
                   size: 24,
                 ),
               ],
@@ -383,14 +398,14 @@ class ResultDocumentContainer extends StatelessWidget {
 
   Future<void> _shareFile(BuildContext context) async {
     try {
-      final file = File(filePath);
+      final file = File(widget.filePath);
       if (!await file.exists()) {
         AppSnackBar.show(context, message: 'file_not_found'.tr);
         return;
       }
 
       await Share.shareXFiles(
-        [XFile(filePath)],
+        [XFile(widget.filePath)],
         text: 'sharing_document_from_ocr_tool'.tr,
         subject: 'document_from_ocr_tool'.tr,
       );
@@ -410,9 +425,9 @@ class ResultDocumentContainer extends StatelessWidget {
   }
 
   Future<void> _showRenameDialog(BuildContext context) async {
-    if (onFileRenamed == null) return;
+    if (widget.onFileRenamed == null) return;
 
-    final fileName = File(filePath).uri.pathSegments.last;
+    final fileName = File(widget.filePath).uri.pathSegments.last;
     final fileNameWithoutExt = path.basenameWithoutExtension(fileName);
     final fileExtension = path.extension(fileName);
     final controller = TextEditingController(text: fileNameWithoutExt);
@@ -550,9 +565,9 @@ class ResultDocumentContainer extends StatelessWidget {
                                 errorMessage = null;
                               });
 
-                              final file = File(filePath);
+                              final file = File(widget.filePath);
                               final newFileName = '$newName$fileExtension';
-                              final directoryPath = path.dirname(filePath);
+                              final directoryPath = path.dirname(widget.filePath);
 
                               final fileExists = await _fileExistsInDirectory(
                                   directoryPath, newFileName);
@@ -568,8 +583,8 @@ class ResultDocumentContainer extends StatelessWidget {
                               path.join(directoryPath, newFileName);
                               await file.rename(newPath);
 
-                              if (onFileRenamed != null) {
-                                onFileRenamed!(newPath);
+                              if (widget.onFileRenamed != null) {
+                                widget.onFileRenamed!(newPath);
                               }
 
                               Navigator.of(context).pop();
@@ -577,7 +592,8 @@ class ResultDocumentContainer extends StatelessWidget {
                                   message: 'file_renamed_successfully'.tr);
                             } catch (e) {
                               setDialogState(() {
-                                errorMessage = '${'error_renaming_file'.tr}: $e';
+                                errorMessage =
+                                '${'error_renaming_file'.tr}: $e';
                               });
                             }
                           },

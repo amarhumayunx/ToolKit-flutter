@@ -20,10 +20,18 @@ import '../../widgets/scanner_widgets/filter_selector.dart';
 class FilterProvider extends ChangeNotifier {
   String _selectedFilter = 'original'.tr;
   final Map<String, File> _filterCache = {};
+  File? _baseImage;
 
   String get selectedFilter => _selectedFilter;
 
   Map<String, File> get filterCache => _filterCache;
+
+  File? get baseImage => _baseImage;
+
+  void setBaseImage(File image) {
+    _baseImage = image;
+    notifyListeners();
+  }
 
   void setFilter(String filterName) {
     _selectedFilter = filterName;
@@ -85,6 +93,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
   final Map<String, File> _filterPreviews = {};
   bool _previewsReady = false;
   late FilterProvider _filterProvider;
+  File? _baseImage;
 
   List<String> get _filterOptions => [
         'original'.tr,
@@ -100,8 +109,9 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
   void initState() {
     super.initState();
     _processedImage = widget.imageFile;
+    _baseImage = widget.imageFile;
     _currentIndex = widget.currentIndex ?? 0;
-    _filterProvider = FilterProvider();
+    _filterProvider = FilterProvider()..setBaseImage(_baseImage!);
     _editHistory.add(widget.imageFile);
 
     _animationController = AnimationController(
@@ -191,6 +201,8 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
       if (croppedFile != null) {
         setState(() {
           _processedImage = File(croppedFile.path);
+          _baseImage = File(croppedFile.path);
+          _filterProvider.setBaseImage(_baseImage!);
           _hasChanges = true;
         });
 
@@ -239,6 +251,8 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
       setState(() {
         _rotationAngle += 90;
         _processedImage = File(newPath);
+        _baseImage = File(newPath);
+        _filterProvider.setBaseImage(_baseImage!);
         _hasChanges = true;
       });
 
@@ -288,85 +302,24 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
   Future<void> _applyFilter(String filterName) async {
     _filterProvider.setFilter(filterName);
 
-    if (filterName != 'original'.tr) {
+    if (filterName == 'original'.tr) {
       setState(() {
-        _isApplyingFilter = true;
+        _processedImage = _baseImage;
+        _hasChanges = true;
       });
-      _animationController.reset();
-      _animationController.forward();
+      _addToHistory(_baseImage!);
+      return;
     }
 
-    if (widget.isBatchMode && widget.batchImages != null) {
-      try {
-        List<File> filteredBatchImages = [];
+    setState(() {
+      _isApplyingFilter = true;
+    });
+    _animationController.reset();
+    _animationController.forward();
 
-        for (int i = 0; i < widget.batchImages!.length; i++) {
-          final imageFile = widget.batchImages![i];
-          final cacheKey = '${imageFile.path}_$filterName';
+    try {
+      final cacheKey = '${_baseImage!.path}_$filterName';
 
-          if (_filterProvider.filterCache.containsKey(cacheKey)) {
-            filteredBatchImages.add(_filterProvider.filterCache[cacheKey]!);
-            continue;
-          }
-
-          final imageBytes = await imageFile.readAsBytes();
-          var image = img.decodeImage(imageBytes)!;
-
-          if (filterName == 'sepia'.tr) {
-            image = img.sepia(image);
-            image = img.adjustColor(image, contrast: 1.3);
-          } else if (filterName == 'cool_tone'.tr) {
-            image = img.colorOffset(image, blue: 20, green: 10);
-            image = img.adjustColor(image, contrast: 1.2, gamma: 1.0);
-          } else if (filterName == 'warm_tone'.tr) {
-            image = img.colorOffset(image, red: 20, green: 10);
-            image = img.adjustColor(image, contrast: 1.2, gamma: 1.0);
-          } else if (filterName == 'grayscale'.tr) {
-            image = img.grayscale(image);
-            image = img.adjustColor(image, contrast: 1.4);
-          } else if (filterName == 'blue_light'.tr) {
-            image = img.colorOffset(image, blue: 30);
-            image = img.adjustColor(image, contrast: 1.25);
-          } else if (filterName == 'soft_pastel'.tr) {
-            image = img.adjustColor(image, saturation: 0.5, contrast: 1.1);
-          } else {
-            image = img.adjustColor(image, contrast: 1.1);
-          }
-
-          final newPath = await _saveTempImage(image);
-          File filteredImage = File(newPath);
-
-          _filterProvider.addToCache(cacheKey, filteredImage);
-          filteredBatchImages.add(filteredImage);
-        }
-
-        if (mounted) {
-          setState(() {
-            widget.batchImages!.clear();
-            widget.batchImages!.addAll(filteredBatchImages);
-            _processedImage = filteredBatchImages[_currentIndex];
-            _hasChanges = true;
-          });
-        }
-
-        _addToHistory(_processedImage!);
-      } catch (e) {
-        if (kDebugMode) {
-          print('${'error_applying_filter'.tr}: $e');
-        }
-        if (mounted) {
-          AppSnackBar.show(context, message: 'failed_to_apply_filter'.tr);
-        }
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isApplyingFilter = false;
-          });
-        }
-      }
-    } else {
-      // Single image mode
-      final cacheKey = '${_processedImage!.path}_$filterName';
       if (_filterProvider.filterCache.containsKey(cacheKey)) {
         setState(() {
           _processedImage = _filterProvider.filterCache[cacheKey];
@@ -376,52 +329,50 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
         return;
       }
 
-      try {
-        final imageBytes = await _processedImage!.readAsBytes();
-        var image = img.decodeImage(imageBytes)!;
+      final imageBytes = await _baseImage!.readAsBytes();
+      var image = img.decodeImage(imageBytes)!;
 
-        if (filterName == 'sepia'.tr) {
-          image = img.sepia(image);
-          image = img.adjustColor(image, contrast: 1.3);
-        } else if (filterName == 'cool_tone'.tr) {
-          image = img.colorOffset(image, blue: 20, green: 10);
-          image = img.adjustColor(image, contrast: 1.2, gamma: 1.0);
-        } else if (filterName == 'warm_tone'.tr) {
-          image = img.colorOffset(image, red: 20, green: 10);
-          image = img.adjustColor(image, contrast: 1.2, gamma: 1.0);
-        } else if (filterName == 'grayscale'.tr) {
-          image = img.grayscale(image);
-          image = img.adjustColor(image, contrast: 1.4);
-        } else if (filterName == 'blue_light'.tr) {
-          image = img.colorOffset(image, blue: 30);
-          image = img.adjustColor(image, contrast: 1.25);
-        } else if (filterName == 'soft_pastel'.tr) {
-          image = img.adjustColor(image, saturation: 0.5, contrast: 1.1);
-        } else {
-          image = img.adjustColor(image, contrast: 1.1);
-        }
+      if (filterName == 'sepia'.tr) {
+        image = img.sepia(image);
+        image = img.adjustColor(image, contrast: 1.3);
+      } else if (filterName == 'cool_tone'.tr) {
+        image = img.colorOffset(image, blue: 20, green: 10);
+        image = img.adjustColor(image, contrast: 1.2, gamma: 1.0);
+      } else if (filterName == 'warm_tone'.tr) {
+        image = img.colorOffset(image, red: 20, green: 10);
+        image = img.adjustColor(image, contrast: 1.2, gamma: 1.0);
+      } else if (filterName == 'grayscale'.tr) {
+        image = img.grayscale(image);
+        image = img.adjustColor(image, contrast: 1.4);
+      } else if (filterName == 'blue_light'.tr) {
+        image = img.colorOffset(image, blue: 30);
+        image = img.adjustColor(image, contrast: 1.25);
+      } else if (filterName == 'soft_pastel'.tr) {
+        image = img.adjustColor(image, saturation: 0.5, contrast: 1.1);
+      } else {
+        image = img.adjustColor(image, contrast: 1.1);
+      }
 
-        final newPath = await _saveTempImage(image);
-        File filteredImage = File(newPath);
+      final newPath = await _saveTempImage(image);
+      File filteredImage = File(newPath);
 
-        _filterProvider.addToCache(cacheKey, filteredImage);
+      _filterProvider.addToCache(cacheKey, filteredImage);
 
-        setState(() {
-          _processedImage = filteredImage;
-          _hasChanges = true;
-        });
+      setState(() {
+        _processedImage = filteredImage;
+        _hasChanges = true;
+      });
 
-        _addToHistory(filteredImage);
-
-        if (filterName == 'original'.tr) {
-          setState(() {
-            _isApplyingFilter = false;
-          });
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('${'error_applying_filter'.tr}: $e');
-        }
+      _addToHistory(filteredImage);
+    } catch (e) {
+      if (kDebugMode) {
+        print('${'error_applying_filter'.tr}: $e');
+      }
+      if (mounted) {
+        AppSnackBar.show(context, message: 'failed_to_apply_filter'.tr);
+      }
+    } finally {
+      if (mounted) {
         setState(() {
           _isApplyingFilter = false;
         });
@@ -505,7 +456,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
   }
 
   Future<File> _generateFilterPreview(String filterName) async {
-    final originalImageBytes = await _editHistory.first.readAsBytes();
+    final originalImageBytes = await _baseImage!.readAsBytes();
     var image = img.decodeImage(originalImageBytes)!;
     image = img.copyResize(image, width: 100);
 

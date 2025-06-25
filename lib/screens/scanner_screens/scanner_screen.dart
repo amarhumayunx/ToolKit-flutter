@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
@@ -33,7 +32,7 @@ class _ScannerScreenState extends State<ScannerScreen>
   File? _imageFile;
   String _errorMessage = '';
   bool _isLoading = true;
-  String? _selectedScanType = 'batch';
+  String? _selectedScanType = 'Batch';
   int _retryCount = 0;
   static const int maxRetryCount = 3;
   final List<File> _recentImages = [];
@@ -56,6 +55,7 @@ class _ScannerScreenState extends State<ScannerScreen>
   static const double letterCropHeight = 421;
   static const double idCardCropWidth = 304;
   static const double idCardCropHeight = 194;
+
   List<File> _idCardImages = [];
 
   @override
@@ -145,8 +145,7 @@ class _ScannerScreenState extends State<ScannerScreen>
 
       if (status.isDenied) {
         setState(() {
-          _errorMessage =
-              'camera_permission_denied_message'.tr;
+          _errorMessage = 'Camera permission denied. Please enable camera access in settings.';
           _isLoading = false;
           _isCameraPermissionGranted = false;
         });
@@ -155,8 +154,7 @@ class _ScannerScreenState extends State<ScannerScreen>
 
       if (status.isPermanentlyDenied) {
         setState(() {
-          _errorMessage =
-              'camera_permission_permanently_denied_message'.tr;
+          _errorMessage = 'Camera permission permanently denied. Please enable camera access in device settings.';
           _isLoading = false;
           _isCameraPermissionGranted = false;
         });
@@ -171,14 +169,13 @@ class _ScannerScreenState extends State<ScannerScreen>
         await _initializeControllerAfterPermission();
       } else {
         setState(() {
-          _errorMessage = 'camera_permission_required_message'.tr;
+          _errorMessage = 'Camera permission is required to use the scanner';
           _isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
-        _errorMessage =
-        '${'failed_to_request_camera_permission'.tr}: ${e.toString()}';
+        _errorMessage = 'Failed to request camera permission: ${e.toString()}';
         _isLoading = false;
         _isCameraPermissionGranted = false;
       });
@@ -198,7 +195,7 @@ class _ScannerScreenState extends State<ScannerScreen>
 
       if (cameras.isEmpty) {
         setState(() {
-          _errorMessage = 'no_cameras_found_message'.tr;
+          _errorMessage = 'No cameras found on this device';
           _isLoading = false;
           _isCameraInitialized = false;
         });
@@ -237,9 +234,7 @@ class _ScannerScreenState extends State<ScannerScreen>
       if (_retryCount < maxRetryCount) {
         _retryCount++;
         final delay = Duration(seconds: _retryCount * 2);
-        print(
-            'Retrying camera initialization in ${delay
-                .inSeconds} seconds (attempt $_retryCount)');
+        print('Retrying camera initialization in ${delay.inSeconds} seconds (attempt $_retryCount)');
 
         Future.delayed(delay, () {
           if (mounted && _isCameraPermissionGranted && !_isCameraInitialized) {
@@ -254,15 +249,15 @@ class _ScannerScreenState extends State<ScannerScreen>
     final errorString = error.toString().toLowerCase();
 
     if (errorString.contains('permission')) {
-      return 'camera_permission_check_message'.tr;
+      return 'Camera permission denied. Please check app permissions.';
     } else if (errorString.contains('already in use') || errorString.contains('busy')) {
-      return 'camera_in_use_message'.tr;
+      return 'Camera is being used by another app. Please close other camera apps and try again.';
     } else if (errorString.contains('not available') || errorString.contains('not found')) {
-      return 'camera_not_available_message'.tr;
+      return 'Camera not available on this device.';
     } else if (errorString.contains('initialization')) {
-      return 'camera_initialization_failed_message'.tr;
+      return 'Failed to initialize camera. Please try again.';
     } else {
-      return 'camera_error_generic_message'.tr;
+      return 'Camera error: Please restart the app or check if camera is working in other apps.';
     }
   }
 
@@ -297,7 +292,7 @@ class _ScannerScreenState extends State<ScannerScreen>
       );
     } catch (e) {
       setState(() {
-        _errorMessage = 'failed_to_toggle_flash'.tr + ': ${e.toString()}';
+        _errorMessage = 'Failed to toggle flash: ${e.toString()}';
       });
       print('Error toggling flash: $e');
 
@@ -315,7 +310,7 @@ class _ScannerScreenState extends State<ScannerScreen>
 
   Future<void> _pickImageFromGallery() async {
     try {
-      if (_selectedScanType == 'batch') {
+      if (_selectedScanType == 'Batch') {
         final List<XFile> pickedFiles = await _imagePicker.pickMultiImage();
 
         if (pickedFiles.isNotEmpty) {
@@ -328,7 +323,8 @@ class _ScannerScreenState extends State<ScannerScreen>
             });
 
             AppSnackBar.show(context,
-                message: '${'added_images_to_batch'.tr} ${selectedImages.length} ${'images'.tr}. ${'total'.tr}: ${_batchImages.length}');
+                message:
+                'Added ${selectedImages.length} images to batch. Total: ${_batchImages.length}');
           } else {
             setState(() {
               _batchImages = selectedImages;
@@ -338,7 +334,7 @@ class _ScannerScreenState extends State<ScannerScreen>
             _navigateToBatchPreviewScreen();
           }
         }
-      } else if (_selectedScanType == 'id_card') {
+      } else if (_selectedScanType == 'Id Card') {
         final XFile? pickedFile = await _imagePicker.pickImage(
           source: ImageSource.gallery,
         );
@@ -367,15 +363,15 @@ class _ScannerScreenState extends State<ScannerScreen>
         }
       }
     } catch (e) {
-      print('${'error_picking_image_from_gallery'.tr}: $e');
+      print('Error picking image from gallery: $e');
       AppSnackBar.show(context,
-          message: 'failed_to_pick_image_from_gallery'.tr);
+          message: 'Failed to pick image from gallery');
     }
   }
 
   Future<void> _captureImage() async {
     if (_controller == null || !_controller!.value.isInitialized) {
-      AppSnackBar.show(context, message: 'camera_not_ready_message'.tr);
+      AppSnackBar.show(context, message: 'Camera not ready. Please wait.');
       return;
     }
 
@@ -386,36 +382,34 @@ class _ScannerScreenState extends State<ScannerScreen>
       final File originalImage = File(photo.path);
 
       final screenWidth = MediaQuery.of(context).size.width;
-      final screenHeight = MediaQuery.of(context).size.height - _bottomContainerHeight;
+      final screenHeight =
+          MediaQuery.of(context).size.height - _bottomContainerHeight;
 
-      // Check for specific document types using keys directly
-      if (_selectedScanType == 'business_card' ||
-          _selectedScanType == 'passport' ||
-          _selectedScanType == 'legal' ||
-          _selectedScanType == 'letter' ||
-          _selectedScanType == 'id_card') {
-
+      if (_selectedScanType == 'Business Card' ||
+          _selectedScanType == 'Passport' ||
+          _selectedScanType == 'Legal' ||
+          _selectedScanType == 'Letter' ||
+          _selectedScanType == 'Id Card') {
         double frameWidth, frameHeight;
 
-        // Use switch with keys directly
         switch (_selectedScanType) {
-          case 'business_card':
+          case 'Business Card':
             frameWidth = businessCardCropWidth;
             frameHeight = businessCardCropHeight;
             break;
-          case 'passport':
+          case 'Passport':
             frameWidth = passportCropWidth;
             frameHeight = passportCropHeight;
             break;
-          case 'legal':
+          case 'Legal':
             frameWidth = legalCropWidth;
             frameHeight = legalCropHeight;
             break;
-          case 'letter':
+          case 'Letter':
             frameWidth = letterCropWidth;
             frameHeight = letterCropHeight;
             break;
-          case 'id_card':
+          case 'Id Card':
             frameWidth = idCardCropWidth;
             frameHeight = idCardCropHeight;
             break;
@@ -436,15 +430,18 @@ class _ScannerScreenState extends State<ScannerScreen>
           throw Exception('Failed to capture within frame');
         }
 
-        final File? enhancedImage = await FrameCaptureService.enhanceDocumentImage(framedImage);
+        final File? enhancedImage =
+        await FrameCaptureService.enhanceDocumentImage(framedImage);
         final File savedImage = enhancedImage ?? framedImage;
-        final File permanentFile = await savedImage.copy('${directory.path}/$fileName');
+
+        final File permanentFile =
+        await savedImage.copy('${directory.path}/$fileName');
 
         setState(() {
           _recentImages.insert(0, permanentFile);
         });
 
-        if (_selectedScanType == 'id_card') {
+        if (_selectedScanType == 'Id Card') {
           setState(() {
             _idCardImages.add(permanentFile);
           });
@@ -455,15 +452,17 @@ class _ScannerScreenState extends State<ScannerScreen>
           });
           _navigateToPreviewScreen(permanentFile);
         }
-      } else if (_selectedScanType == 'batch') {
-        final File savedImage = await originalImage.copy('${directory.path}/$fileName');
+      } else if (_selectedScanType == 'Batch') {
+        final File savedImage =
+        await originalImage.copy('${directory.path}/$fileName');
         setState(() {
           _batchImages.add(savedImage);
           _isBatchModeActive = true;
           _recentImages.insert(0, savedImage);
         });
       } else {
-        final File savedImage = await originalImage.copy('${directory.path}/$fileName');
+        final File savedImage =
+        await originalImage.copy('${directory.path}/$fileName');
         setState(() {
           _imageFile = savedImage;
           _recentImages.insert(0, savedImage);
@@ -472,25 +471,60 @@ class _ScannerScreenState extends State<ScannerScreen>
       }
     } catch (e) {
       print('Error capturing image: $e');
-      AppSnackBar.show(context, message: 'failed_to_capture_image_try_again'.tr);
+      AppSnackBar.show(context,
+          message: 'Failed to capture image. Please try again.');
     }
+  }
+
+  Future<void> _captureIdCardImage() async {
+    if (_controller == null || !_controller!.value.isInitialized) {
+      return;
+    }
+
+    try {
+      final XFile photo = await _controller!.takePicture();
+      final directory = await getApplicationDocumentsDirectory();
+      final String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final File savedImage =
+      await File(photo.path).copy('${directory.path}/$fileName');
+
+      setState(() {
+        _idCardImages.add(savedImage);
+        _recentImages.insert(0, savedImage);
+      });
+
+      _navigateToIdCardPreviewScreen();
+    } catch (e) {
+      print('Error capturing ID card image: $e');
+      AppSnackBar.show(context,
+          message: 'Failed to capture ID card image. Please try again.');
+    }
+  }
+
+  double _getPreviewTopOffset() {
+    return MediaQuery.of(context).padding.top + kToolbarHeight;
+  }
+
+  double _getPreviewHeight() {
+    return MediaQuery.of(context).size.height -
+        _bottomContainerHeight -
+        _getPreviewTopOffset();
   }
 
   void _navigateToPreviewScreen(File imageFile) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            DocumentEditScreen(
-              imageFile: imageFile,
-              isBatchMode: false,
-              isBusinessCard: _selectedScanType == 'business_card',
-              isPassport: _selectedScanType == 'passport',
-              isLegal: _selectedScanType == 'legal',
-              isLetter: _selectedScanType == 'letter',
-              isIdCard: _selectedScanType == 'id_card',
-              cropRect: null,
-            ),
+        builder: (context) => DocumentEditScreen(
+          imageFile: imageFile,
+          isBatchMode: false,
+          isBusinessCard: _selectedScanType == 'Business Card',
+          isPassport: _selectedScanType == 'Passport',
+          isLegal: _selectedScanType == 'Legal',
+          isLetter: _selectedScanType == 'Letter',
+          isIdCard: _selectedScanType == 'Id Card',
+          cropRect: null,
+        ),
       ),
     );
   }
@@ -501,13 +535,12 @@ class _ScannerScreenState extends State<ScannerScreen>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            DocumentEditScreen(
-              imageFile: _idCardImages[0],
-              isBatchMode: false,
-              isIdCard: true,
-              cropRect: null,
-            ),
+        builder: (context) => DocumentEditScreen(
+          imageFile: _idCardImages[0],
+          isBatchMode: false,
+          isIdCard: true,
+          cropRect: null,
+        ),
       ),
     );
   }
@@ -518,20 +551,19 @@ class _ScannerScreenState extends State<ScannerScreen>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            DocumentEditScreen(
-              imageFile: _batchImages[0],
-              isBatchMode: true,
-              batchImages: _batchImages,
-              currentIndex: 0,
-            ),
+        builder: (context) => DocumentEditScreen(
+          imageFile: _batchImages[0],
+          isBatchMode: true,
+          batchImages: _batchImages,
+          currentIndex: 0,
+        ),
       ),
     );
   }
 
   void _viewRecentImage() {
     if (_recentImages.isNotEmpty) {
-      if (_selectedScanType == 'id_card' && _idCardImages.isNotEmpty) {
+      if (_selectedScanType == 'Id Card' && _idCardImages.isNotEmpty) {
         _navigateToIdCardPreviewScreen();
       } else {
         _navigateToPreviewScreen(_recentImages[0]);
@@ -544,57 +576,56 @@ class _ScannerScreenState extends State<ScannerScreen>
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              BatchResultScreen(
-                batchImages: _batchImages,
-              ),
+          builder: (context) => BatchResultScreen(
+            batchImages: _batchImages,
+          ),
         ),
       );
     }
   }
 
   void _selectScanType(String scanType) {
-    if (_selectedScanType == 'batch' &&
-        scanType != 'batch' &&
+    if (_selectedScanType == 'Batch' &&
+        scanType != 'Batch' &&
         _batchImages.isNotEmpty) {
       showDialog(
         context: context,
-        builder: (context) =>
-            AlertDialog(
-              title: Text('discard_batch_title'.tr),
-              content: Text(
-                  'discard_batch_message'.tr),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('cancel'.tr,
-                      style: GoogleFonts.inter(color: AppColors.primary)),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    setState(() {
-                      _selectedScanType = scanType;
-                      _batchImages = [];
-                      _isBatchModeActive = false;
-                      _idCardImages = [];
-                    });
-                  },
-                  child: Text('discard'.tr,
-                      style: GoogleFonts.inter(color: AppColors.primary)),
-                ),
-              ],
+        builder: (context) => AlertDialog(
+          title: const Text('Discard Batch?'),
+          content: const Text(
+              'Changing scan type will discard your current batch of images. '
+                  'Do you want to continue?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel',
+                  style: GoogleFonts.inter(color: AppColors.primary)),
             ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {
+                  _selectedScanType = scanType;
+                  _batchImages = [];
+                  _isBatchModeActive = false;
+                  _idCardImages = [];
+                });
+              },
+              child: Text('Discard',
+                  style: GoogleFonts.inter(color: AppColors.primary)),
+            ),
+          ],
+        ),
       );
     } else {
       setState(() {
         _selectedScanType = scanType;
-        if (scanType == 'batch') {
+        if (scanType == 'Batch') {
           _isBatchModeActive = false;
           _batchImages = [];
-        } else if (scanType == 'id_card') {
+        } else if (scanType == 'Id Card') {
           _idCardImages = [];
         }
       });
@@ -605,7 +636,7 @@ class _ScannerScreenState extends State<ScannerScreen>
     return GestureDetector(
       onTap: () => _selectScanType(label),
       child: Text(
-        label.tr, // Only translate for display
+        label,
         style: GoogleFonts.inter(
             color: isSelected ? AppColors.primary : AppColors.saveDateColor,
             fontWeight: FontWeight.w500,
@@ -625,7 +656,7 @@ class _ScannerScreenState extends State<ScannerScreen>
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'camera_error'.tr,
+          'Camera Error',
           style: GoogleFonts.inter(
             color: Colors.black,
             fontWeight: FontWeight.w600,
@@ -645,7 +676,7 @@ class _ScannerScreenState extends State<ScannerScreen>
               ),
               const SizedBox(height: 24),
               Text(
-                _errorMessage.tr,
+                _errorMessage,
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   color: Colors.black87,
@@ -653,7 +684,7 @@ class _ScannerScreenState extends State<ScannerScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-              if (_errorMessage.contains('permission'.tr))
+              if (_errorMessage.contains('permission'))
                 Column(
                   children: [
                     SizedBox(
@@ -668,7 +699,7 @@ class _ScannerScreenState extends State<ScannerScreen>
                           ),
                         ),
                         child: Text(
-                          'open_settings'.tr,
+                          'Open Settings',
                           style: GoogleFonts.inter(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
@@ -684,7 +715,7 @@ class _ScannerScreenState extends State<ScannerScreen>
                 child: ElevatedButton(
                   onPressed: _retryInitialization,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _errorMessage.contains('permission'.tr)
+                    backgroundColor: _errorMessage.contains('permission')
                         ? Colors.grey[300]
                         : AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -693,9 +724,9 @@ class _ScannerScreenState extends State<ScannerScreen>
                     ),
                   ),
                   child: Text(
-                    'retry'.tr,
+                    'Retry',
                     style: GoogleFonts.inter(
-                      color: _errorMessage.contains('permission'.tr)
+                      color: _errorMessage.contains('permission')
                           ? Colors.grey[700]
                           : Colors.white,
                       fontWeight: FontWeight.w600,
@@ -723,7 +754,7 @@ class _ScannerScreenState extends State<ScannerScreen>
             onPressed: () => Navigator.pop(context),
           ),
         ),
-        body: Center(
+        body: const Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -732,7 +763,7 @@ class _ScannerScreenState extends State<ScannerScreen>
               ),
               SizedBox(height: 16),
               Text(
-                'initializing_camera'.tr,
+                'Initializing camera...',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.black54,
@@ -759,17 +790,17 @@ class _ScannerScreenState extends State<ScannerScreen>
             onPressed: () => Navigator.pop(context),
           ),
         ),
-        body: Center(
+        body: const Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircularProgressIndicator(
+              CircularProgressIndicator(
                 color: AppColors.primary,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Text(
-                'setting_up_camera'.tr,
-                style: const TextStyle(
+                'Setting up camera...',
+                style: TextStyle(
                   fontSize: 16,
                   color: Colors.black54,
                 ),
@@ -785,7 +816,7 @@ class _ScannerScreenState extends State<ScannerScreen>
         isFlashOn: _isFlashOn,
         isGridVisible: _isGridVisible,
         showGridIcon:
-        _selectedScanType == 'single' || _selectedScanType == 'batch',
+        _selectedScanType == 'Single' || _selectedScanType == 'Batch',
         onClosePressed: () => Navigator.pop(context),
         onFlashPressed: _toggleFlash,
         onGridPressed: _toggleGrid,
@@ -801,29 +832,28 @@ class _ScannerScreenState extends State<ScannerScreen>
             double cropHeight;
             String documentType = 'single';
 
-            // Use switch with keys directly
             switch (_selectedScanType) {
-              case 'business_card':
+              case 'Business Card':
                 cropWidth = businessCardCropWidth;
                 cropHeight = businessCardCropHeight;
                 documentType = 'business_card';
                 break;
-              case 'passport':
+              case 'Passport':
                 cropWidth = passportCropWidth;
                 cropHeight = passportCropHeight;
                 documentType = 'passport';
                 break;
-              case 'legal':
+              case 'Legal':
                 cropWidth = legalCropWidth;
                 cropHeight = legalCropHeight;
                 documentType = 'legal';
                 break;
-              case 'letter':
+              case 'Letter':
                 cropWidth = letterCropWidth;
                 cropHeight = letterCropHeight;
                 documentType = 'letter';
                 break;
-              case 'id_card':
+              case 'Id Card':
                 cropWidth = idCardCropWidth;
                 cropHeight = idCardCropHeight;
                 documentType = 'id_card';
@@ -845,11 +875,12 @@ class _ScannerScreenState extends State<ScannerScreen>
                   bottom: _bottomContainerHeight - 20,
                   child: CameraPreview(_controller!),
                 ),
-                if (_selectedScanType == 'business_card' ||
-                    _selectedScanType == 'passport' ||
-                    _selectedScanType == 'legal' ||
-                    _selectedScanType == 'letter' ||
-                    _selectedScanType == 'id_card')
+
+                if (_selectedScanType == 'Business Card' ||
+                    _selectedScanType == 'Passport' ||
+                    _selectedScanType == 'Legal' ||
+                    _selectedScanType == 'Letter' ||
+                    _selectedScanType == 'Id Card')
                   DocumentCropFrame(
                     width: cropWidth,
                     height: cropHeight,
@@ -857,16 +888,17 @@ class _ScannerScreenState extends State<ScannerScreen>
                     top: top,
                     documentType: documentType,
                   )
-                else if (_selectedScanType == 'batch')
+                else if (_selectedScanType == 'Batch')
                   BatchScan(
                     isGridVisible: _isGridVisible,
                     bottomPadding: _bottomContainerHeight,
                   )
-                else if (_selectedScanType == 'single')
+                else if (_selectedScanType == 'Single')
                     SingleScan(
                       isGridVisible: _isGridVisible,
                       bottomPadding: _bottomContainerHeight,
                     ),
+
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -897,26 +929,26 @@ class _ScannerScreenState extends State<ScannerScreen>
                           child: ListView(
                             scrollDirection: Axis.horizontal,
                             children: [
-                              _buildScanTypeButton('business_card',
-                                  _selectedScanType == 'business_card'),
+                              _buildScanTypeButton('Business Card',
+                                  _selectedScanType == 'Business Card'),
                               const SizedBox(width: 18),
                               _buildScanTypeButton(
-                                  'single', _selectedScanType == 'single'),
+                                  'Single', _selectedScanType == 'Single'),
                               const SizedBox(width: 18),
                               _buildScanTypeButton(
-                                  'batch', _selectedScanType == 'batch'),
+                                  'Batch', _selectedScanType == 'Batch'),
                               const SizedBox(width: 18),
                               _buildScanTypeButton(
-                                  'id_card', _selectedScanType == 'id_card'),
-                              const SizedBox(width: 18),
-                              _buildScanTypeButton('passport',
-                                  _selectedScanType == 'passport'),
+                                  'Id Card', _selectedScanType == 'Id Card'),
                               const SizedBox(width: 18),
                               _buildScanTypeButton(
-                                  'legal', _selectedScanType == 'legal'),
+                                  'Passport', _selectedScanType == 'Passport'),
                               const SizedBox(width: 18),
                               _buildScanTypeButton(
-                                  'letter', _selectedScanType == 'letter'),
+                                  'Legal', _selectedScanType == 'Legal'),
+                              const SizedBox(width: 18),
+                              _buildScanTypeButton(
+                                  'Letter', _selectedScanType == 'Letter'),
                             ],
                           ),
                         ),
@@ -955,6 +987,7 @@ class _ScannerScreenState extends State<ScannerScreen>
                                   ),
                                 ),
                               ),
+
                               (_isBatchModeActive && _batchImages.isNotEmpty) ||
                                   _recentImages.isNotEmpty
                                   ? GestureDetector(

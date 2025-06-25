@@ -122,23 +122,34 @@ class _ContinueWithGoogleScreenState extends State<ContinueWithGoogleScreen> {
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(flex: 2),
-                Text(
-                  'smart_tools_tagline'.tr,
-                  style: GoogleFonts.inter(
-                    fontSize: 48,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                    height: 1.2,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Back arrow button at the top left
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ),
-                const Spacer(flex: 3),
-                Container(
+              ),
+              const Spacer(flex: 1), // Adjusted spacer
+              Text(
+                'smart_tools_tagline'.tr,
+                style: GoogleFonts.inter(
+                  fontSize: 48,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                  height: 1.2,
+                ),
+              ),
+              const Spacer(flex: 3),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Container(
                   width: double.infinity,
                   height: 50,
                   decoration: BoxDecoration(
@@ -193,28 +204,28 @@ class _ContinueWithGoogleScreenState extends State<ContinueWithGoogleScreen> {
                     ),
                   ),
                 ),
-                const Spacer(flex: 2),
-                TextButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () {
-                          Navigator.pop(context);
-                        },
-                  child: Text(
-                    'skip_for_now'.tr,
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white.withOpacity(_isLoading ? 0.4 : 0.8),
-                      decoration: TextDecoration.underline,
-                      decorationColor:
-                          Colors.white.withOpacity(_isLoading ? 0.4 : 0.8),
-                    ),
+              ),
+              const Spacer(flex: 2),
+              TextButton(
+                onPressed: _isLoading
+                    ? null
+                    : () {
+                        Navigator.pop(context);
+                      },
+                child: Text(
+                  'skip_for_now'.tr,
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withOpacity(_isLoading ? 0.4 : 0.8),
+                    decoration: TextDecoration.underline,
+                    decorationColor:
+                        Colors.white.withOpacity(_isLoading ? 0.4 : 0.8),
                   ),
                 ),
-                const SizedBox(height: 20),
-              ],
-            ),
+              ),
+              const SizedBox(height: 20),
+            ],
           ),
         ),
       ),
