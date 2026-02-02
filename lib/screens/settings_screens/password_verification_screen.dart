@@ -6,6 +6,8 @@ import '../../services/auth_service.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/custom_appbar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 
 class VerifyPasswordScreen extends StatefulWidget {
   final VoidCallback onVerified;
@@ -225,6 +227,8 @@ class _VerifyPasswordScreenState extends State<VerifyPasswordScreen> {
                   ],
                 ),
                 const Spacer(),
+                // Add bottom padding for ad
+                const SizedBox(height: 60),
               ],
             ),
           ),
@@ -235,6 +239,15 @@ class _VerifyPasswordScreenState extends State<VerifyPasswordScreen> {
                 child: CircularProgressIndicator(color: AppColors.primary),
               ),
             ),
+          // Banner ad at bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: BannerAdWidget(
+              adUnitId: AdConfig.bannerAdPasswordVerificationScreen,
+            ),
+          ),
         ],
       ),
     );

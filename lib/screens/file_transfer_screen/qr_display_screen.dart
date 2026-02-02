@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/custom_appbar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 
 class QrCodeDisplayScreen extends StatefulWidget {
   final String qrData;
@@ -150,8 +152,14 @@ class _QrCodeDisplayScreenState extends State<QrCodeDisplayScreen> {
                 ],
               ),
             ),
+            // Add bottom padding for ad
+            const SizedBox(height: 60),
           ],
         ),
+      ),
+      // Banner ad at bottom
+      bottomNavigationBar: BannerAdWidget(
+        adUnitId: AdConfig.bannerAdQrDisplayScreen,
       ),
     );
   }

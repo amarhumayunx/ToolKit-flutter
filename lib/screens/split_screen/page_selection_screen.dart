@@ -10,6 +10,8 @@ import 'package:toolkit/widgets/buttons/gradient_btn.dart';
 import 'package:toolkit/widgets/custom_appbar.dart';
 
 import '../../utils/app_colors.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 import 'document_item.dart';
 
 class PageSelectionScreen extends StatefulWidget {
@@ -350,6 +352,12 @@ class _PageSelectionScreenState extends State<PageSelectionScreen> {
                   text: ('split'.tr),
                   onPressed: _onSplitPressed,
                 ),
+              ),
+              const SizedBox(height: 8),
+              BannerAdWidget(
+                adUnitId: AdConfig.bannerAdPageSelectionScreen,
+                alignment: Alignment.bottomCenter,
+                padding: const EdgeInsets.only(bottom: 8),
               ),
             ],
           ),

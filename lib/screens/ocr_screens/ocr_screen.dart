@@ -11,6 +11,9 @@ import '../../widgets/tools/dotted_file_drop.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/ocr_file_selection.dart';
 import '../../widgets/tools/tools_app_bar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 import 'extracted_text_screen.dart';
 import 'ocr_camera_screen.dart';
 
@@ -137,14 +140,16 @@ class _OcrScreenState extends State<OcrScreen> {
 
   // Clean up extracted text
   String _cleanExtractedText(String text) {
+    // Normalize whitespace
     text = text.replaceAll(RegExp(r'\s+'), ' ');
     text = text.replaceAll(RegExp(r'\n\s*\n'), '\n\n');
 
-    // Fix common OCR errors
-    text = text.replaceAll(RegExp(r'\b0(?=\w)'), 'O'); // 0 -> O in words
-    text = text.replaceAll(RegExp(r'\b1(?=\w)'), 'I'); // 1 -> I in words
-    text = text.replaceAll(RegExp(r'rn'), 'm'); // Common rn -> m error
-    text = text.replaceAll(RegExp(r'\|'), 'I'); // | -> I
+    // Fix common OCR errors - more conservative approach
+    // Only replace | -> I (vertical bar is commonly misread as I)
+    text = text.replaceAll(RegExp(r'\|'), 'I');
+
+    // Note: Removed aggressive replacements like 0->O, 1->I, rn->m
+    // as they can cause incorrect replacements (e.g., "2024" -> "2O24", "morning" -> "moming")
 
     return text.trim();
   }
@@ -214,6 +219,9 @@ class _OcrScreenState extends State<OcrScreen> {
       });
 
       if (textFound) {
+        // Show interstitial ad after text extraction
+        AdManager.showOcrTextExtractedInterstitial();
+
         final shouldClear = await Navigator.push(
           context,
           MaterialPageRoute(
@@ -320,6 +328,11 @@ class _OcrScreenState extends State<OcrScreen> {
               text: _isProcessing ? 'processing'.tr : 'extract_text'.tr,
               onPressed: _isProcessing ? null : _extractTextFromImages,
             ),
+          ),
+          BannerAdWidget(
+            adUnitId: AdConfig.bannerAdOcrScreen,
+            alignment: Alignment.bottomCenter,
+            padding: const EdgeInsets.only(bottom: 8),
           ),
         ],
       ),

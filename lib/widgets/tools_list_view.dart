@@ -7,6 +7,8 @@ import '../screens/edit_files_screen/edit_file_screen.dart';
 import '../screens/merge_files_screens/merge_file_main_screen.dart';
 import '../screens/ocr_screens/ocr_screen.dart';
 import '../screens/split_screen/split_screen.dart';
+import '../utils/page_transitions.dart';
+import '../utils/haptic_feedback.dart';
 import 'tool_item.dart';
 
 class ToolsListView extends StatefulWidget {
@@ -55,40 +57,42 @@ class _ToolsListViewState extends State<ToolsListView> {
 
   // Navigate to the appropriate page based on tool id
   void _navigateToToolPage(BuildContext context, String toolId) {
+    HapticFeedbackUtil.mediumImpact();
+    
     switch (toolId) {
       case 'ocr':
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const OcrScreen(),
+        Navigator.of(context).push(SlidePageRoute(
+          child: const OcrScreen(),
         ));
         break;
       case 'compress_files':
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const CompressFileScreen(),
+        Navigator.of(context).push(SlidePageRoute(
+          child: const CompressFileScreen(),
         ));
         break;
       case 'merge_files':
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const MergeFileMainScreen(),
+        Navigator.of(context).push(SlidePageRoute(
+          child: const MergeFileMainScreen(),
         ));
         break;
       case 'edit_file':
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const EditFileScreen(),
+        Navigator.of(context).push(SlidePageRoute(
+          child: const EditFileScreen(),
         ));
         break;
       case 'split_file':
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const SplitScreen(),
+        Navigator.of(context).push(SlidePageRoute(
+          child: const SplitScreen(),
         ));
         break;
       case 'rearrange_file':
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const RearrangeFileScreen(),
+        Navigator.of(context).push(SlidePageRoute(
+          child: const RearrangeFileScreen(),
         ));
         break;
       case 'file_transfer':
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const FileTransferScreen(),
+        Navigator.of(context).push(SlidePageRoute(
+          child: const FileTransferScreen(),
         ));
         break;
       default:
@@ -151,6 +155,8 @@ class _ToolsListViewState extends State<ToolsListView> {
             controller: _scrollController,
             scrollDirection: Axis.horizontal,
             itemCount: tools.length,
+            cacheExtent: 200, // Cache more items for smoother scrolling
+            physics: const BouncingScrollPhysics(), // Better scroll physics
             itemBuilder: (context, index) {
               return Padding(
                 padding: const EdgeInsets.only(right: 6),

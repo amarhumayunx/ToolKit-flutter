@@ -16,6 +16,8 @@ import '../../widgets/batch_app_bar.dart';
 import '../../widgets/scanner_widgets/document_preview.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/scanner_widgets/filter_selector.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 
 class FilterProvider extends ChangeNotifier {
   String _selectedFilter = 'original'.tr;
@@ -508,153 +510,168 @@ class _DocumentEditScreenState extends State<DocumentEditScreen>
             },
             actionText: 'done'.tr,
           ),
-          body: Column(
+          body: Stack(
             children: [
-              Expanded(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    if (_processedImage != null)
-                      Center(
-                        child: DocumentPreview(
-                          image: _processedImage!,
-                        ),
-                      ),
-                    Positioned(
-                      bottom: 38,
-                      child: Container(
-                        height: 32,
-                        width: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
+              Column(
+                children: [
+                  Expanded(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        if (_processedImage != null)
+                          Center(
+                            child: DocumentPreview(
+                              image: _processedImage!,
                             ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            GestureDetector(
-                              onTap: _currentHistoryIndex > 0 ? _undo : null,
-                              child: SvgPicture.asset(
-                                'assets/icons/undo_icon.svg',
-                                width: 16,
-                                height: 16,
-                                color: _currentHistoryIndex > 0
-                                    ? AppColors.primary
-                                    : Colors.grey.shade400,
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap:
-                                  _currentHistoryIndex < _editHistory.length - 1
-                                      ? _redo
-                                      : null,
-                              child: SvgPicture.asset(
-                                'assets/icons/redo_icon.svg',
-                                width: 16,
-                                height: 16,
-                                color: _currentHistoryIndex <
-                                        _editHistory.length - 1
-                                    ? AppColors.primary
-                                    : Colors.grey.shade400,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (_isApplyingFilter)
-                      Positioned.fill(
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            return AnimatedContainer(
-                              duration: const Duration(milliseconds: 100),
-                              height: constraints.maxHeight * 0.03,
-                              width: constraints.maxWidth,
-                              margin: EdgeInsets.only(
-                                top: constraints.maxHeight * (_animation.value),
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    AppColors.primary.withOpacity(0.8),
-                                    AppColors.primary.withOpacity(0.0),
-                                  ],
+                          ),
+                        Positioned(
+                          bottom: 38,
+                          child: Container(
+                            height: 32,
+                            width: 100,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
                                 ),
-                              ),
-                            );
-                          },
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                GestureDetector(
+                                  onTap: _currentHistoryIndex > 0 ? _undo : null,
+                                  child: SvgPicture.asset(
+                                    'assets/icons/undo_icon.svg',
+                                    width: 16,
+                                    height: 16,
+                                    color: _currentHistoryIndex > 0
+                                        ? AppColors.primary
+                                        : Colors.grey.shade400,
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap:
+                                      _currentHistoryIndex < _editHistory.length - 1
+                                          ? _redo
+                                          : null,
+                                  child: SvgPicture.asset(
+                                    'assets/icons/redo_icon.svg',
+                                    width: 16,
+                                    height: 16,
+                                    color: _currentHistoryIndex <
+                                            _editHistory.length - 1
+                                        ? AppColors.primary
+                                        : Colors.grey.shade400,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                  ],
-                ),
-              ),
-              Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 6,
-                      offset: const Offset(0, -4),
+                        if (_isApplyingFilter)
+                          Positioned.fill(
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                return AnimatedContainer(
+                                  duration: const Duration(milliseconds: 100),
+                                  height: constraints.maxHeight * 0.03,
+                                  width: constraints.maxWidth,
+                                  margin: EdgeInsets.only(
+                                    top: constraints.maxHeight * (_animation.value),
+                                  ),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        AppColors.primary.withOpacity(0.8),
+                                        AppColors.primary.withOpacity(0.0),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    if (_isFiltering)
-                      Expanded(
-                        child: FilterSelector(
-                          filterOptions: _filterOptions,
-                          onFilterSelected: _applyFilter,
-                          filterPreviews: _filterPreviews,
-                          previewsReady: _previewsReady,
-                        ),
-                      )
-                    else
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildEditToolButton(
-                              assetPath: 'assets/icons/retake_icon.svg',
-                              label: 'retake'.tr,
-                              onTap: _retakePhoto,
-                            ),
-                            _buildEditToolButton(
-                              assetPath: 'assets/icons/filters_icon.svg',
-                              label: 'filters'.tr,
-                              isActive: _isFiltering,
-                              onTap: _toggleFilterView,
-                            ),
-                            _buildEditToolButton(
-                              assetPath: 'assets/icons/crop_icon.svg',
-                              label: 'crop'.tr,
-                              onTap: _cropImage,
-                            ),
-                            _buildEditToolButton(
-                              assetPath: 'assets/icons/rotate_icon.svg',
-                              label: 'rotate'.tr,
-                              onTap: _rotateImage,
-                            ),
-                          ],
-                        ),
+                  ),
+                  Container(
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
                       ),
-                  ],
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 6,
+                          offset: const Offset(0, -4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        if (_isFiltering)
+                          Expanded(
+                            child: FilterSelector(
+                              filterOptions: _filterOptions,
+                              onFilterSelected: _applyFilter,
+                              filterPreviews: _filterPreviews,
+                              previewsReady: _previewsReady,
+                            ),
+                          )
+                        else
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                _buildEditToolButton(
+                                  assetPath: 'assets/icons/retake_icon.svg',
+                                  label: 'retake'.tr,
+                                  onTap: _retakePhoto,
+                                ),
+                                _buildEditToolButton(
+                                  assetPath: 'assets/icons/filters_icon.svg',
+                                  label: 'filters'.tr,
+                                  isActive: _isFiltering,
+                                  onTap: _toggleFilterView,
+                                ),
+                                _buildEditToolButton(
+                                  assetPath: 'assets/icons/crop_icon.svg',
+                                  label: 'crop'.tr,
+                                  onTap: _cropImage,
+                                ),
+                                _buildEditToolButton(
+                                  assetPath: 'assets/icons/rotate_icon.svg',
+                                  label: 'rotate'.tr,
+                                  onTap: _rotateImage,
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  // Add bottom padding for ad
+                  const SizedBox(height: 60),
+                ],
+              ),
+              // Banner ad at bottom
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: BannerAdWidget(
+                  adUnitId: AdConfig.bannerAdDocumentEditScreen,
                 ),
               ),
             ],

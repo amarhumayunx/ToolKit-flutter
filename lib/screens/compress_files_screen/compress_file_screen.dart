@@ -9,6 +9,9 @@ import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 import 'compress_file_result_screen.dart';
 import 'compression_result_class.dart';
 import 'file_compression_service.dart';
@@ -29,15 +32,11 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
 
   String _formatFileSize(int bytes) {
     if (bytes < 1024) {
-      return 'file_size_format'.trParams({
-        'size': bytes.toString(),
-        'unit': 'bytes'.tr
-      });
+      return 'file_size_format'
+          .trParams({'size': bytes.toString(), 'unit': 'bytes'.tr});
     } else if (bytes < 1024 * 1024) {
-      return 'file_size_format'.trParams({
-        'size': (bytes / 1024).toStringAsFixed(1),
-        'unit': 'kilobytes'.tr
-      });
+      return 'file_size_format'.trParams(
+          {'size': (bytes / 1024).toStringAsFixed(1), 'unit': 'kilobytes'.tr});
     } else {
       return 'file_size_format'.trParams({
         'size': (bytes / (1024 * 1024)).toStringAsFixed(1),
@@ -51,11 +50,29 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         allowMultiple: true,
         type: FileType.custom,
-        allowedExtensions: ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png'],
+        allowedExtensions: [
+          'pdf',
+          'doc',
+          'docx',
+          'ppt',
+          'pptx',
+          'jpg',
+          'jpeg',
+          'png'
+        ],
       );
 
       if (result != null && result.paths.isNotEmpty) {
-        final validExtensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png'];
+        final validExtensions = [
+          'pdf',
+          'doc',
+          'docx',
+          'ppt',
+          'pptx',
+          'jpg',
+          'jpeg',
+          'png'
+        ];
         const int minFileSizeMB = 1;
         const int minFileSizeBytes = minFileSizeMB * 1024 * 1024;
 
@@ -69,7 +86,8 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
         List<String> invalidExtensionFiles = [];
         List<String> duplicateFiles = [];
 
-        final existingFileNames = _selectedFiles.map((f) => f.path.split('/').last).toSet();
+        final existingFileNames =
+            _selectedFiles.map((f) => f.path.split('/').last).toSet();
 
         for (File file in pickedFiles) {
           final fileName = file.path.split('/').last;
@@ -91,7 +109,8 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
             final fileSize = await file.length();
 
             if (fileSize < minFileSizeBytes) {
-              rejectedFiles.add('$fileName (${'too_small'.tr}: ${_formatFileSize(fileSize)})');
+              rejectedFiles.add(
+                  '$fileName (${'too_small'.tr}: ${_formatFileSize(fileSize)})');
             } else {
               validFiles.add(file);
             }
@@ -108,21 +127,26 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
               if (invalidExtensionFiles.isNotEmpty) 'invalid_file_formats'.tr,
               if (rejectedFiles.isNotEmpty) 'files_must_be_at_least_mb'.tr,
               if (duplicateFiles.isNotEmpty) 'duplicate_files_skipped'.tr,
-              if (validFiles.isEmpty && pickedFiles.isNotEmpty) 'no_valid_files_selected'.tr,
+              if (validFiles.isEmpty && pickedFiles.isNotEmpty)
+                'no_valid_files_selected'.tr,
             ].join(' | ');
           });
 
           // Show warning message if any file is rejected
           final warnings = [
-            if (duplicateFiles.isNotEmpty) '${duplicateFiles.length} ${'duplicates'.tr}',
-            if (rejectedFiles.isNotEmpty) '${rejectedFiles.length} ${'rejected_too_small'.tr}',
-            if (invalidExtensionFiles.isNotEmpty) '${invalidExtensionFiles.length} ${'invalid_formats'.tr}',
+            if (duplicateFiles.isNotEmpty)
+              '${duplicateFiles.length} ${'duplicates'.tr}',
+            if (rejectedFiles.isNotEmpty)
+              '${rejectedFiles.length} ${'rejected_too_small'.tr}',
+            if (invalidExtensionFiles.isNotEmpty)
+              '${invalidExtensionFiles.length} ${'invalid_formats'.tr}',
           ];
 
           if (warnings.isNotEmpty) {
             AppSnackBar.show(
               context,
-              message: '${'some_files_were_skipped'.tr}: ${warnings.join(', ')}',
+              message:
+                  '${'some_files_were_skipped'.tr}: ${warnings.join(', ')}',
             );
           }
         }
@@ -139,11 +163,45 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
   Future<void> _compressFiles() async {
     if (_selectedFiles.isEmpty) {
       if (mounted) {
-        AppSnackBar.show(context, message: 'please_select_at_least_one_file'.tr);
+        AppSnackBar.show(context,
+            message: 'please_select_at_least_one_file'.tr);
       }
       return;
     }
 
+    // Check if any file is large (>10MB) and show rewarded ad
+    bool hasLargeFile = false;
+    for (var file in _selectedFiles) {
+      try {
+        final fileSize = await file.length();
+        if (fileSize > 10 * 1024 * 1024) {
+          // 10MB
+          hasLargeFile = true;
+          break;
+        }
+      } catch (e) {
+        // Continue if file size check fails
+      }
+    }
+
+    if (hasLargeFile) {
+      final adShown = await AdManager.showCompressLargeFileRewarded(
+        onRewardEarned: () {
+          // User watched ad, proceed with compression
+          _performCompression();
+        },
+      );
+
+      if (!adShown) {
+        // If ad not available, proceed anyway
+        _performCompression();
+      }
+    } else {
+      _performCompression();
+    }
+  }
+
+  Future<void> _performCompression() async {
     if (!mounted) return;
 
     setState(() {
@@ -151,11 +209,13 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
     });
 
     try {
-      List<CompressionResult> compressionResults = await FileCompressor.compressBatchWithStatus(
+      List<CompressionResult> compressionResults =
+          await FileCompressor.compressBatchWithStatus(
         _selectedFiles,
         quality: _compressionQuality.round(),
       );
-      List<File> compressedFiles = compressionResults.map((result) => result.file).toList();
+      List<File> compressedFiles =
+          compressionResults.map((result) => result.file).toList();
 
       if (!mounted) return;
 
@@ -163,7 +223,11 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
         _isCompressing = false;
       });
 
-      Navigator.of(context).push(
+      // Show interstitial ad after successful compression
+      AdManager.showCompressSuccessInterstitial();
+
+      Navigator.of(context)
+          .push(
         MaterialPageRoute(
           builder: (context) => CompressedFileResultScreen(
             originalFiles: _selectedFiles,
@@ -171,7 +235,8 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
             compressionResults: compressionResults,
           ),
         ),
-      ).then((deletedIndices) {
+      )
+          .then((deletedIndices) {
         // Handle returned deleted file indices
         if (deletedIndices != null && deletedIndices is List<int>) {
           setState(() {
@@ -185,7 +250,6 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
           });
         }
       });
-
     } catch (e) {
       if (!mounted) return;
 
@@ -228,7 +292,6 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                     description: ('reduce_file_size_description'.tr),
                   ),
                   const SizedBox(height: 24),
-
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -244,7 +307,8 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                     child: Column(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(top: 10, left: 16, bottom: 10),
+                          padding: const EdgeInsets.only(
+                              top: 10, left: 16, bottom: 10),
                           child: Align(
                             alignment: Alignment.topLeft,
                             child: Text(
@@ -258,7 +322,8 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                          padding: const EdgeInsets.only(
+                              left: 16, right: 16, bottom: 16),
                           child: DottedFileDropZoneCompress(
                             selectedFiles: _selectedFiles,
                             onTap: _pickFiles,
@@ -268,7 +333,6 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                       ],
                     ),
                   ),
-
                   if (_fileErrorText != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 12.0),
@@ -283,7 +347,6 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
                         ),
                       ),
                     ),
-
                   if (_selectedFiles.isNotEmpty) ...[
                     const SizedBox(height: 24),
                     Container(
@@ -342,11 +405,17 @@ class _CompressFileScreenState extends State<CompressFileScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 26.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 30.0, vertical: 26.0),
             child: CustomGradientButton(
               text: _isCompressing ? 'compressing'.tr : 'compress'.tr,
               onPressed: _isCompressing ? null : _compressFiles,
             ),
+          ),
+          BannerAdWidget(
+            adUnitId: AdConfig.bannerAdCompressFileScreen,
+            alignment: Alignment.bottomCenter,
+            padding: const EdgeInsets.only(bottom: 8),
           ),
         ],
       ),

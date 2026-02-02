@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:get/get.dart'; // Add this import for localization
+import '../../utils/page_transitions.dart';
 import 'package:toolkit/screens/cv_maker_screens/personal_info_screen.dart';
 import 'package:toolkit/screens/cv_maker_screens/skills_screen.dart';
 import 'package:toolkit/screens/cv_maker_screens/website_screen.dart';
@@ -21,6 +22,8 @@ import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/cv_progress_indicator.dart';
 import '../../widgets/custom_appbar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 import '../../provider/template_provider.dart';
 import '../../widgets/cv_templates/template_1.dart';
 import '../../widgets/cv_templates/template_2.dart';
@@ -501,7 +504,7 @@ class _MainCVScreenState extends State<MainCVScreen> {
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => templateScreen),
+      SlidePageRoute(child: templateScreen),
     );
   }
 
@@ -575,17 +578,25 @@ class _MainCVScreenState extends State<MainCVScreen> {
               ),
             ],
           ),
-          bottomNavigationBar: Padding(
-            padding: const EdgeInsets.only(
-              bottom: 28.0,
-              left: 28.0,
-              right: 28.0,
-              top: 10.0,
-            ),
-            child: CustomGradientButton(
-              text: widget.isEditing
-                  ? 'update'.tr
-                  : (currentStep == stepTitles.length ? 'add'.tr : 'next'.tr),
+          bottomNavigationBar: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Banner ad
+              BannerAdWidget(
+                adUnitId: AdConfig.bannerAdMainCvScreen,
+              ),
+              // Button
+              Padding(
+                padding: const EdgeInsets.only(
+                  bottom: 28.0,
+                  left: 28.0,
+                  right: 28.0,
+                  top: 10.0,
+                ),
+                child: CustomGradientButton(
+                  text: widget.isEditing
+                      ? 'update'.tr
+                      : (currentStep == stepTitles.length ? 'add'.tr : 'next'.tr),
               onPressed: () {
                 // Validation for each step
                 bool isValid = false;
@@ -668,7 +679,9 @@ class _MainCVScreenState extends State<MainCVScreen> {
                   }
                 }
               },
-            ),
+                ),
+              ),
+            ],
           ),
         ));
   }

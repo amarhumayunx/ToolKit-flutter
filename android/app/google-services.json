@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "436581964692",
+    "project_id": "toolkitappx",
+    "storage_bucket": "toolkitappx.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:436581964692:android:c2e3de2f7f43c14343cd81",
+        "android_client_info": {
+          "package_name": "com.scanmaster.toolkit.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "436581964692-oefaqu7fap9771ais6jmfgvmnsad4ik8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqkogr30rMX-Buou43kFJxGKIM_Zixc7w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "436581964692-oefaqu7fap9771ais6jmfgvmnsad4ik8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

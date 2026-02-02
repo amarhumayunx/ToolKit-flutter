@@ -5,6 +5,9 @@ import 'package:get/get.dart'; // Add this import for .tr extension
 import '../../provider/saved_cv_provider.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/tools/tools_app_bar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../widgets/ads/native_ad_widget.dart';
+import '../../config/ad_config.dart';
 import '../home_screen.dart';
 import 'cv_maker_screen.dart';
 import 'main_cv_screen.dart';
@@ -63,26 +66,28 @@ class _CreateCvScreenState extends State<CreateCvScreen> {
           );
         },
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Consumer<SavedCVProvider>(
-        builder: (context, savedCVProvider, child) {
-          final savedCVs = savedCVProvider.savedCVs;
+      body: Stack(
+        children: [
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Consumer<SavedCVProvider>(
+            builder: (context, savedCVProvider, child) {
+              final savedCVs = savedCVProvider.savedCVs;
 
-          // Debug print to see current state
-          debugPrint(
-              'Building CreateCvScreen with ${savedCVs.length} CVs');
+              // Debug print to see current state
+              debugPrint(
+                  'Building CreateCvScreen with ${savedCVs.length} CVs');
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              await savedCVProvider.loadSavedCVs();
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(30.0),
-              child: SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              return RefreshIndicator(
+                onRefresh: () async {
+                  await savedCVProvider.loadSavedCVs();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(30.0),
+                  child: SafeArea(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -211,9 +216,22 @@ class _CreateCvScreenState extends State<CreateCvScreen> {
                                     crossAxisSpacing: 12,
                                     mainAxisSpacing: 12,
                                   ),
-                                  itemCount: savedCVs.length,
+                                  itemCount: savedCVs.length + (savedCVs.length ~/ 4), // Add space for native ads
                                   itemBuilder: (context, index) {
-                                    final cv = savedCVs[index];
+                                    // Show native ad after every 4th CV item
+                                    if ((index + 1) % 5 == 0) {
+                                      return NativeAdWidget(
+                                        adUnitId: AdConfig.nativeAdCvListItem,
+                                      );
+                                    }
+                                    
+                                    // Adjust index to skip native ad positions
+                                    final cvIndex = index - (index ~/ 5);
+                                    if (cvIndex >= savedCVs.length) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    
+                                    final cv = savedCVs[cvIndex];
                                     return Stack(
                                       children: [
                                         Column(
@@ -412,13 +430,26 @@ class _CreateCvScreenState extends State<CreateCvScreen> {
                           ],
                         ),
                       ),
-                    )
-                  ],
+                    ),
+                        // Add bottom padding for ad
+                        const SizedBox(height: 60),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              );
+            },
+          ),
+          // Banner ad at bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: BannerAdWidget(
+              adUnitId: AdConfig.bannerAdCreateCvScreen,
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }

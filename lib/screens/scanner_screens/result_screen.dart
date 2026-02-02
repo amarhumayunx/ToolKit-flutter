@@ -12,6 +12,9 @@ import '../../widgets/buttons/save_document_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import '../../widgets/tools/document_container.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 
 class ResultScreen extends StatefulWidget {
   final File wordDocument;
@@ -155,6 +158,12 @@ class _ResultScreenState extends State<ResultScreen>
               child: Column(
                 children: [
                   const SizedBox(height: 20),
+                  // Banner ad at top
+                  BannerAdWidget(
+                    adUnitId: AdConfig.bannerAdScannerResultScreen,
+                    isTop: true,
+                  ),
+                  const SizedBox(height: 20),
                   // Always show the loading container (it will show completed state)
                   _buildLoadingContainer(),
                   // Show document content only after animation completes
@@ -193,12 +202,15 @@ class _ResultScreenState extends State<ResultScreen>
               bottom: MediaQuery
                   .of(context)
                   .padding
-                  .bottom,
+                  .bottom + 60, // Add padding for ad
               child: SaveDocumentButton(
                 documentFile: File(_currentFilePath),
                 padding: const EdgeInsets.symmetric(
                     horizontal: 20.0, vertical: 20),
-                onSaveCompleted: _handleSaveCompleted,
+                onSaveCompleted: () {
+                  AdManager.showScannerSaveActionInterstitial();
+                  _handleSaveCompleted();
+                },
               ),
             ),
         ],

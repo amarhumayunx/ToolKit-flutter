@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:toolkit/utils/app_colors.dart';
+import 'package:toolkit/utils/haptic_feedback.dart';
 
 class ToolItem extends StatelessWidget {
   final String icon;
@@ -18,7 +19,10 @@ class ToolItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        HapticFeedbackUtil.lightImpact();
+        onTap();
+      },
       child: Padding(
         padding: const EdgeInsets.all(4.0),
         child: SizedBox(

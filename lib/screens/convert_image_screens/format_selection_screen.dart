@@ -7,6 +7,8 @@ import 'dart:io';
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 import 'save_screen.dart';
 
 class SelectFormatScreen extends StatefulWidget {
@@ -111,6 +113,12 @@ class _SelectFormatScreenState extends State<SelectFormatScreen> {
             CustomGradientButton(
               text: 'convert'.tr,
               onPressed: _convertImages,
+            ),
+            const SizedBox(height: 8),
+            BannerAdWidget(
+              adUnitId: AdConfig.bannerAdImgFormatSelectionScreen,
+              alignment: Alignment.bottomCenter,
+              padding: const EdgeInsets.only(bottom: 8),
             ),
           ],
         ),

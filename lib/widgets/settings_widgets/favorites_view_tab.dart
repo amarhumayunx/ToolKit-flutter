@@ -8,6 +8,9 @@ import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as path;
 import 'package:toolkit/widgets/settings_widgets/sort_btn.dart';
 import 'package:toolkit/widgets/settings_widgets/result_document_container.dart';
+import '../../widgets/ads/native_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 import '../../models/file_model.dart';
 import '../../services/save_document_service.dart';
 import '../../utils/app_snackbar.dart';
@@ -129,7 +132,6 @@ class _FavoritesViewState extends State<FavoritesView> {
       if (file == null) return;
 
       final oldFile = File(file.path);
-      final newFile = File(newPath);
 
       // Rename the actual file
       if (await oldFile.exists()) {
@@ -161,6 +163,10 @@ class _FavoritesViewState extends State<FavoritesView> {
     setState(() {
       filesBox.deleteAt(index);
     });
+
+    // Show interstitial ad after file deletion
+    AdManager.showFilesDeleteInterstitial();
+
     AppSnackBar.show(context, message: 'file_deleted'.tr);
   }
 
@@ -218,38 +224,59 @@ class _FavoritesViewState extends State<FavoritesView> {
                   ),
                 )
               else
-                ...filteredFiles.map((entry) {
+                ...filteredFiles.asMap().entries.expand((mapEntry) {
+                  final listIndex = mapEntry.key;
+                  final entry = mapEntry.value;
                   final index = entry.key;
                   final file = entry.value;
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 5),
-                    child: Column(
-                      children: [
-                        Padding(
-                            padding:
-                            const EdgeInsets.only(left: 6, right: 6),
-                            child:ResultDocumentContainer(
-                              documentName: file.name,
-                              date: DateFormat('yy/MM/dd').format(file.date),
-                              time: DateFormat('h:mma').format(file.date),
 
-                              isFavorite: file.isFavorite,
-                              isLocked: file.isLocked,
-                              filePath: file.path,
-                              isSelectable: widget.isSelectingFiles, // Add this
-                              onFavoriteToggle: () => _toggleFavorite(index),
-                              onDelete: () => _deleteFile(index),
-                              onFileRenamed: (newPath) => _renameFile(index, newPath),
-                              onLockToggle: () => _toggleLock(index),
-                              onTap: widget.isSelectingFiles
-                                  ? () => widget.onFileSelected?.call(file, index)
-                                  : () => _openFile(file.path),
-                            )
-                        ),
-                        const SizedBox(height: 12),
-                      ],
+                  final widgets = <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 5),
+                      child: Column(
+                        children: [
+                          Padding(
+                              padding:
+                              const EdgeInsets.only(left: 6, right: 6),
+                              child:ResultDocumentContainer(
+                                documentName: file.name,
+                                date: DateFormat('yy/MM/dd').format(file.date),
+                                time: DateFormat('h:mma').format(file.date),
+
+                                isFavorite: file.isFavorite,
+                                isLocked: file.isLocked,
+                                filePath: file.path,
+                                isSelectable: widget.isSelectingFiles, // Add this
+                                onFavoriteToggle: () => _toggleFavorite(index),
+                                onDelete: () => _deleteFile(index),
+                                onFileRenamed: (newPath) => _renameFile(index, newPath),
+                                onLockToggle: () => _toggleLock(index),
+                                onTap: widget.isSelectingFiles
+                                    ? () => widget.onFileSelected?.call(file, index)
+                                    : () => _openFile(file.path),
+                              )
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
                     ),
-                  );
+                  ];
+
+                  // Add native ad after every 5th file item (index 4, 9, 14, etc.)
+                  if ((listIndex + 1) % 5 == 0) {
+                    widgets.add(
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                        child: NativeAdWidget(
+                          adUnitId: AdConfig.nativeAdFilesListItem,
+                          height: 100,
+                        ),
+                      ),
+                    );
+                    widgets.add(const SizedBox(height: 12));
+                  }
+
+                  return widgets;
                 }),
               const SizedBox(height: 100),
             ],

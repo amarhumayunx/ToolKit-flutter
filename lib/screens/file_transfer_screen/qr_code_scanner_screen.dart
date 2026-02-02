@@ -13,6 +13,8 @@ import 'package:hive_ce/hive.dart';
 import '../../models/file_model.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/custom_appbar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 import '../../utils/app_colors.dart';
 import 'qr_result_screen.dart';
 
@@ -306,8 +308,19 @@ class _QRCodeScannerScreenState extends State<QRCodeScannerScreen> {
         ),
         body: Stack(
           children: [
+            // Banner ad at top
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: BannerAdWidget(
+                adUnitId: AdConfig.bannerAdQrScannerScreen,
+                isTop: true,
+              ),
+            ),
             // Camera View
             Positioned.fill(
+              top: 60, // Add top padding for ad
               child: QRView(
                 key: qrKey,
                 onQRViewCreated: _onQRViewCreated,

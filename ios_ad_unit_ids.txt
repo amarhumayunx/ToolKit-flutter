@@ -1,0 +1,451 @@
+# iOS Ad Unit IDs Configuration
+# Yahan sabhi iOS ad unit IDs paste karein
+# Format: AdName = AdUnitID
+# Example: bannerAdHomeScreenIOS = ca-app-pub-3425673808153409/1234567890
+
+# ============================================
+# iOS Ad Unit IDs - AdMob se copy karke yahan paste karein
+# ============================================
+
+# Home Screen
+(bannerAdHomeScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdHomeScreenIOSca-app-pub-3425673808153409/5001872514
+Review the AdMob policies to ensure your implementation complies.)
+
+(nativeAdHomeToolsSectionIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the native advanced implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+nativeAdHomeToolsSectionIOSca-app-pub-3425673808153409/5424721956
+Review the AdMob policies to ensure your implementation complies.)
+
+(interstitialAdHomeNavigationIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+interstitialAdHomeNavigationIOSca-app-pub-3425673808153409/2072456841
+Review the AdMob policies to ensure your implementation complies.)
+
+# Files Main Screen
+(bannerAdFilesMainScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdFilesMainScreenIOSca-app-pub-3425673808153409/9759375170
+Review the AdMob policies to ensure your implementation complies.)
+
+(nativeAdFilesListItemIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the native advanced implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+nativeAdFilesListItemIOSca-app-pub-3425673808153409/7133211837
+Review the AdMob policies to ensure your implementation complies.)
+
+(interstitialAdFilesDeleteActionIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+interstitialAdFilesDeleteActionIOSca-app-pub-3425673808153409/1912674743
+Review the AdMob policies to ensure your implementation complies.)
+
+# Compress File Screen
+(bannerAdCompressFileScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdCompressFileScreenIOSca-app-pub-3425673808153409/4199270195
+Review the AdMob policies to ensure your implementation complies.)
+
+(interstitialAdCompressFileSuccessIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+interstitialAdCompressFileSuccessIOSca-app-pub-3425673808153409/1086678234
+Review the AdMob policies to ensure your implementation complies)
+
+(rewardedAdCompressLargeFileIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the rewarded implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+rewardedAdCompressLargeFileIOSca-app-pub-3425673808153409/2375709171
+Review the AdMob policies to ensure your implementation complies)
+
+# Compress Result Screen
+(bannerAdCompressResultScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdCompressResultScreenIOSca-app-pub-3425673808153409/4507048495
+Review the AdMob policies to ensure your implementation complies.)
+
+(interstitialAdCompressSaveActionIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+interstitialAdCompressSaveActionIOSca-app-pub-3425673808153409/1880885159
+Review the AdMob policies to ensure your implementation complies)
+
+# Convert PDF Main Screen
+(bannerAdConvertPdfMainScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdConvertPdfMainScreenIOSca-app-pub-3425673808153409/6147433228
+Review the AdMob policies to ensure your implementation complies)
+
+(interstitialAdConvertPdfFileSelectedIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+interstitialAdConvertPdfFileSelectedIOSca-app-pub-3425673808153409/8604924227
+Review the AdMob policies to ensure your implementation complies.)
+
+# PDF Format Selection Screen
+(bannerAdPdfFormatSelectionScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdPdfFormatSelectionScreenIOSca-app-pub-3425673808153409/3325172224
+Review the AdMob policies to ensure your implementation complies)
+
+# PDF Save Screen
+(interstitialAdPdfSaveSuccessIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+interstitialAdPdfSaveSuccessIOSca-app-pub-3425673808153409/2012090551
+Review the AdMob policies to ensure your implementation complies.)
+
+(rewardedAdPdfBatchConvertIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the rewarded implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+rewardedAdPdfBatchConvertIOSca-app-pub-3425673808153409/2208188212
+Review the AdMob policies to ensure your implementation complies.)
+
+# Convert Word Main Screen
+(bannerAdConvertWordMainScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdConvertWordMainScreenIOSca-app-pub-3425673808153409/5041578574
+Review the AdMob policies to ensure your implementation complies.)
+
+(interstitialAdConvertWordFileSelectedIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+interstitialAdConvertWordFileSelectedIOSca-app-pub-3425673808153409/8385927211
+Review the AdMob policies to ensure your implementation complies.)
+
+# Word Format Selection Screen
+(bannerAdWordFormatSelectionScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdWordFormatSelectionScreenIOSca-app-pub-3425673808153409/5978760883
+Review the AdMob policies to ensure your implementation complies.)
+
+# Word Save Screen
+(interstitialAdWordSaveSuccessIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+interstitialAdWordSaveSuccessIOSca-app-pub-3425673808153409/4665679215
+Review the AdMob policies to ensure your implementation complies.)
+
+# Convert Image Main Screen
+(bannerAdConvertImgMainScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdConvertImgMainScreenIOSca-app-pub-3425673808153409/3352597548
+Review the AdMob policies to ensure your implementation complies)
+
+(interstitialAdConvertImgSelectedIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+interstitialAdConvertImgSelectedIOSca-app-pub-3425673808153409/1102333561
+Review the AdMob policies to ensure your implementation complies.)
+
+# Image Format Selection Screen
+(bannerAdImgFormatSelectionScreenIOS = Ad unit name 
+
+bannerAdImgFormatSelectionScreenIOS
+Ad format
+
+Banner
+Ad unit ID
+
+ca-app-pub-3425673808153409/3149503289)
+
+# Image Save Screen
+(interstitialAdImgSaveSuccessIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+interstitialAdImgSaveSuccessIOSca-app-pub-3425673808153409/9331768250
+Review the AdMob policies to ensure your implementation complies.)
+
+# Merge File Main Screen
+(bannerAdMergeFileMainScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdMergeFileMainScreenIOSca-app-pub-3425673808153409/5370851250
+Review the AdMob policies to ensure your implementation complies.)
+
+(interstitialAdMergeFileSuccessIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+interstitialAdMergeFileSuccessIOSca-app-pub-3425673808153409/9202285055
+Review the AdMob policies to ensure your implementation complies.)
+
+(rewardedAdMergeMultipleFilesIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the rewarded implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+rewardedAdMergeMultipleFilesIOSca-app-pub-3425673808153409/2069405656
+Review the AdMob policies to ensure your implementation complies.)
+
+# Merge Result Screen
+(bannerAdMergeResultScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdMergeResultScreenIOSca-app-pub-3425673808153409/9724534392
+Review the AdMob policies to ensure your implementation complies.)
+
+(interstitialAdMergeSaveActionIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+interstitialAdMergeSaveActionIOSca-app-pub-3425673808153409/5179279567
+Review the AdMob policies to ensure your implementation complies.)
+
+# Split Screen
+(bannerAdSplitScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdSplitScreenIOSca-app-pub-3425673808153409/7098371052
+Review the AdMob policies to ensure your implementation complies.)
+
+(interstitialAdSplitFileSuccessIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+interstitialAdSplitFileSuccessIOSca-app-pub-3425673808153409/8729133025
+Review the AdMob policies to ensure your implementation complies.)
+
+(rewardedAdSplitMultiplePartsIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the rewarded implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+rewardedAdSplitMultiplePartsIOSca-app-pub-3425673808153409/5263040049
+Review the AdMob policies to ensure your implementation complies.)
+
+# Split Result Screen
+(bannerAdSplitResultScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdSplitResultScreenIOSca-app-pub-3425673808153409/4503997305
+Review the AdMob policies to ensure your implementation complies.)
+
+# Page Selection Screen
+(bannerAdPageSelectionScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdPageSelectionScreenIOSca-app-pub-3425673808153409/1877833969
+Review the AdMob policies to ensure your implementation complies.)
+
+# Rearrange File Screen
+(bannerAdRearrangeFileScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdRearrangeFileScreenIOSca-app-pub-3425673808153409/2574788214
+Review the AdMob policies to ensure your implementation complies.)
+
+(interstitialAdRearrangeFileSuccessIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+interstitialAdRearrangeFileSuccessIOSca-app-pub-3425673808153409/2361544536
+Review the AdMob policies to ensure your implementation complies.)
+
+# Rearrange Result Screen
+(bannerAdRearrangeResultScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdRearrangeResultScreenIOSca-app-pub-3425673808153409/1595257777
+Review the AdMob policies to ensure your implementation complies.)
+
+# Rearrange Page Selection Screen
+(bannerAdRearrangePageSelectionScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdRearrangePageSelectionScreenIOSca-app-pub-3425673808153409/7422299527
+Review the AdMob policies to ensure your implementation complies.)
+
+# Edit File Screen
+(bannerAdEditFileScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdEditFileScreenIOSca-app-pub-3425673808153409/2169972849
+Review the AdMob policies to ensure your implementation complies.)
+
+(interstitialAdEditFileSaveActionIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+interstitialAdEditFileSaveActionIOSca-app-pub-3425673808153409/5342931093
+Review the AdMob policies to ensure your implementation complies.)
+
+# OCR Screen
+(bannerAdOcrScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdOcrScreenIOSca-app-pub-3425673808153409/8219881031
+Review the AdMob policies to ensure your implementation complies.)
+
+(interstitialAdOcrTextExtractedIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+interstitialAdOcrTextExtractedIOSca-app-pub-3425673808153409/6130889841
+Review the AdMob policies to ensure your implementation complies.)
+
+(rewardedAdOcrBatchScanIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the rewarded implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+rewardedAdOcrBatchScanIOSca-app-pub-3425673808153409/1985645171
+Review the AdMob policies to ensure your implementation complies.)
+
+# OCR Camera Screen
+(bannerAdOcrCameraScreenIOS = Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit-Appca-app-pub-3425673808153409~9918005898
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+bannerAdOcrCameraScreenIOSca-app-pub-3425673808153409/1675148829
+Review the AdMob policies to ensure your implementation complies.)
+
+# Extracted Text Screen
+(bannerAdExtractedTextScreenIOS = )
+
+# Scanner Screens
+bannerAdScannerScreenIOS = 
+interstitialAdScannerDocumentScannedIOS = 
+rewardedAdScannerBatchScanIOS = 
+bannerAdDocumentPreviewScreenIOS = 
+bannerAdDocumentEditScreenIOS = 
+bannerAdScannerResultScreenIOS = 
+interstitialAdScannerSaveActionIOS = 
+bannerAdBatchResultScreenIOS = 
+interstitialAdBatchSaveAllActionIOS = 
+
+# CV Maker Screens
+bannerAdCvMakerScreenIOS = 
+interstitialAdCvMakerCreateNewIOS = 
+bannerAdMainCvScreenIOS = 
+nativeAdCvListItemIOS = 
+bannerAdCreateCvScreenIOS =
+bannerAdPersonalInfoScreenIOS = 
+bannerAdWorkExperienceScreenIOS = 
+bannerAdEducationDetailsScreenIOS = 
+bannerAdSkillsScreenIOS = 
+bannerAdCertificationsScreenIOS = 
+bannerAdLanguageScreenIOS = 
+bannerAdCareerObjectivesScreenIOS = 
+bannerAdWebsiteScreenIOS = 
+bannerAdBaseCvTemplateScreenIOS = 
+interstitialAdCvTemplateSelectedIOS = 
+rewardedAdCvPremiumTemplatesIOS = 
+
+# File Transfer Screens
+bannerAdFileTransferScreenIOS = 
+interstitialAdFileTransferSuccessIOS = 
+bannerAdQrScannerScreenIOS = 
+bannerAdQrDisplayScreenIOS = 
+bannerAdQrResultScreenIOS = 
+
+# Settings Screens
+bannerAdSettingsScreenIOS = 
+nativeAdSettingsListItemIOS = 
+bannerAdProfileScreenIOS = 
+bannerAdPhoneRecoveryScreenIOS = 
+bannerAdSetPasswordScreenIOS = 
+bannerAdSetPasswordProperScreenIOS = 
+bannerAdPasswordVerificationScreenIOS = 
+bannerAdPhoneNumberScreenIOS = 
+bannerAdLockedFilesScreenIOS = 
+interstitialAdUnlockFileActionIOS = 
+bannerAdContinueWithGoogleScreenIOS = 
+
+# Other Screens
+appOpenAdSplashScreenIOS = 
+bannerAdOnboardingScreenIOS = 
+bannerAdWebviewScreenIOS = 
+
+# ============================================
+# Instructions:
+# 1. AdMob console se iOS ad unit IDs copy karein
+# 2. Upar wale format mein paste karein
+# 3. File save karein
+# 4. Mujhe bata dena, main automatically ad_config.dart update kar dunga
+# ============================================

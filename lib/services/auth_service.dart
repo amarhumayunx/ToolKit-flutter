@@ -1,9 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crypto/crypto.dart';
-import 'dart:convert';
+import 'package:bcrypt/bcrypt.dart';
+import 'dart:async';
 import '../models/user_model.dart';
+import '../utils/app_exceptions.dart';
+import '../utils/app_logger.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -23,10 +25,21 @@ class AuthService {
   Future<UserCredential?> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null;
+      if (googleUser == null) {
+        AppLogger.debug('Google sign in cancelled by user', 'AuthService');
+        return null;
+      }
 
       final GoogleSignInAuthentication googleAuth =
       await googleUser.authentication;
+      
+      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
+        throw AuthenticationException(
+          'Failed to get Google authentication tokens',
+          code: 'google-auth-tokens-missing',
+        );
+      }
+
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -36,32 +49,96 @@ class AuthService {
       await _auth.signInWithCredential(credential);
 
       if (userCredential.user != null) {
-        await _saveUserToFirestore(userCredential.user!);
+        try {
+          await _saveUserToFirestore(userCredential.user!);
+        } catch (e, stackTrace) {
+          AppLogger.error(
+            'Failed to save user to Firestore after Google sign in',
+            tag: 'AuthService',
+            error: e,
+            stackTrace: stackTrace,
+          );
+          // Don't fail the sign-in if Firestore save fails
+        }
       }
 
       return userCredential;
-    } catch (e) {
-      print('Error signing in with Google: $e');
-      rethrow;
+    } on FirebaseAuthException catch (e, stackTrace) {
+      AppLogger.error(
+        'Firebase authentication error during Google sign in',
+        tag: 'AuthService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      throw AuthenticationException(
+        'Failed to sign in with Google: ${e.message ?? e.code}',
+        code: e.code,
+        originalError: e,
+        stackTrace: stackTrace,
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Unexpected error during Google sign in',
+        tag: 'AuthService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      throw AuthenticationException(
+        'An unexpected error occurred during sign in',
+        originalError: e,
+        stackTrace: stackTrace,
+      );
     }
   }
   Future<bool> verifyPassword(String password) async {
     try {
+      if (password.isEmpty) {
+        AppLogger.warning('Empty password provided for verification', 'AuthService');
+        return false;
+      }
+
       final user = currentUser;
-      if (user == null) return false;
+      if (user == null) {
+        AppLogger.warning('No current user for password verification', 'AuthService');
+        return false;
+      }
 
       final doc = await _firestore.collection('users').doc(user.uid).get();
-      if (doc.exists) {
-        final data = doc.data();
-        final storedPassword = data?['password'];
-        if (storedPassword != null) {
-          final hashedInputPassword = _hashPassword(password);
-          return hashedInputPassword == storedPassword;
-        }
+      if (!doc.exists) {
+        AppLogger.warning('User document not found for password verification', 'AuthService');
+        return false;
       }
+
+      final data = doc.data();
+      final storedPassword = data?['password'];
+      if (storedPassword == null) {
+        AppLogger.debug('No password set for user', 'AuthService');
+        return false;
+      }
+
+      // Use bcrypt to verify password (handles salt automatically)
+      final isValid = BCrypt.checkpw(password, storedPassword);
+      
+      if (!isValid) {
+        AppLogger.warning('Password verification failed for user: ${user.uid}', 'AuthService');
+      }
+
+      return isValid;
+    } on FirebaseException catch (e, stackTrace) {
+      AppLogger.error(
+        'Firestore error during password verification',
+        tag: 'AuthService',
+        error: e,
+        stackTrace: stackTrace,
+      );
       return false;
-    } catch (e) {
-      print('Error verifying password: $e');
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Unexpected error during password verification',
+        tag: 'AuthService',
+        error: e,
+        stackTrace: stackTrace,
+      );
       return false;
     }
   }
@@ -69,8 +146,18 @@ class AuthService {
 // 1. Fix the verifyOTPForPasswordReset method
   Future<String?> verifyOTPForPasswordReset(String otp) async {
     try {
+      if (otp.isEmpty || otp.length < 6) {
+        throw AuthenticationException(
+          'Invalid OTP format',
+          code: 'invalid-otp-format',
+        );
+      }
+
       if (_verificationId == null) {
-        throw Exception('Verification ID not found. Please request OTP again.');
+        throw AuthenticationException(
+          'Verification ID not found. Please request OTP again.',
+          code: 'verification-id-missing',
+        );
       }
 
       PhoneAuthCredential credential = PhoneAuthProvider.credential(
@@ -83,22 +170,63 @@ class AuthService {
       final phoneNumber = userCredential.user?.phoneNumber;
       final currentAuthUser = userCredential.user;
 
+      if (currentAuthUser == null) {
+        throw AuthenticationException(
+          'Failed to authenticate with provided OTP',
+          code: 'user-credential-null',
+        );
+      }
+
       // Find the user ID by phone number
       String? userId;
       if (phoneNumber != null) {
-        userId = await findUserByPhoneNumber(phoneNumber);
+        try {
+          userId = await findUserByPhoneNumber(phoneNumber);
 
-        // If we found a user document, merge the accounts properly
-        if (userId != null && currentAuthUser != null) {
-          await _mergeAccountsAfterPhoneAuth(userId, currentAuthUser);
+          // If we found a user document, merge the accounts properly
+          if (userId != null) {
+            await _mergeAccountsAfterPhoneAuth(userId, currentAuthUser);
+          }
+        } catch (e, stackTrace) {
+          AppLogger.error(
+            'Error finding user by phone number during OTP verification',
+            tag: 'AuthService',
+            error: e,
+            stackTrace: stackTrace,
+          );
+          // Continue with current auth user even if lookup fails
         }
       }
 
       // Return the userId (could be the original userId or current auth user's uid)
-      return userId ?? currentAuthUser?.uid;
-    } catch (e) {
-      print('Error verifying OTP for password reset: $e');
-      return null;
+      return userId ?? currentAuthUser.uid;
+    } on FirebaseAuthException catch (e, stackTrace) {
+      AppLogger.error(
+        'Firebase authentication error during OTP verification for password reset',
+        tag: 'AuthService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      throw AuthenticationException(
+        _getFirebaseAuthErrorMessage(e),
+        code: e.code,
+        originalError: e,
+        stackTrace: stackTrace,
+      );
+    } on AuthenticationException {
+      rethrow;
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Unexpected error verifying OTP for password reset',
+        tag: 'AuthService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      throw AuthenticationException(
+        'An unexpected error occurred during OTP verification',
+        originalError: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -108,35 +236,106 @@ class AuthService {
       // Get the original user document
       final originalUserDoc = await _firestore.collection('users').doc(originalUserId).get();
 
-      if (originalUserDoc.exists) {
-        final originalData = originalUserDoc.data()!;
+      if (!originalUserDoc.exists) {
+        AppLogger.debug('Original user document not found for merging', 'AuthService');
+        return;
+      }
 
-        // Update the current authenticated user's document with merged data
-        await _firestore.collection('users').doc(currentAuthUser.uid).set({
-          ...originalData, // Copy all original data
-          'uid': currentAuthUser.uid, // Update with new auth uid
-          'lastSignIn': DateTime.now().toIso8601String(),
-          'phoneNumber': currentAuthUser.phoneNumber,
-          'mergedFromAccount': originalUserId, // Track the merge
-          'accountMergedAt': DateTime.now().toIso8601String(),
-        }, SetOptions(merge: true));
+      final originalData = originalUserDoc.data();
+      if (originalData == null) {
+        AppLogger.warning('Original user document has no data', 'AuthService');
+        return;
+      }
 
-        // If the accounts are different, clean up the old document
-        if (originalUserId != currentAuthUser.uid) {
-          // Optionally: Keep a backup or delete the old document
+      // Update the current authenticated user's document with merged data
+      await _firestore.collection('users').doc(currentAuthUser.uid).set({
+        ...originalData, // Copy all original data
+        'uid': currentAuthUser.uid, // Update with new auth uid
+        'lastSignIn': DateTime.now().toIso8601String(),
+        'phoneNumber': currentAuthUser.phoneNumber,
+        'mergedFromAccount': originalUserId, // Track the merge
+        'accountMergedAt': DateTime.now().toIso8601String(),
+      }, SetOptions(merge: true));
+
+      // If the accounts are different, clean up the old document
+      if (originalUserId != currentAuthUser.uid) {
+        try {
           await _firestore.collection('users').doc(originalUserId).update({
             'accountMergedTo': currentAuthUser.uid,
             'mergedAt': DateTime.now().toIso8601String(),
           });
-        }
-
-        // Update the display name if it exists
-        if (originalData['displayName'] != null) {
-          await currentAuthUser.updateDisplayName(originalData['displayName']);
+        } catch (e, stackTrace) {
+          AppLogger.warning(
+            'Failed to update original user document during merge',
+            'AuthService',
+            e,
+            stackTrace,
+          );
+          // Non-critical error, continue
         }
       }
-    } catch (e) {
-      print('Error merging accounts after phone auth: $e');
+
+      // Update the display name if it exists
+      if (originalData['displayName'] != null) {
+        try {
+          await currentAuthUser.updateDisplayName(originalData['displayName']);
+        } catch (e, stackTrace) {
+          AppLogger.warning(
+            'Failed to update display name during account merge',
+            'AuthService',
+            e,
+            stackTrace,
+          );
+          // Non-critical error, continue
+        }
+      }
+
+      AppLogger.info('Successfully merged accounts: $originalUserId -> ${currentAuthUser.uid}', 'AuthService');
+    } on FirebaseException catch (e, stackTrace) {
+      AppLogger.error(
+        'Firestore error merging accounts after phone auth',
+        tag: 'AuthService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      throw AuthenticationException(
+        'Failed to merge accounts: ${e.message}',
+        code: e.code,
+        originalError: e,
+        stackTrace: stackTrace,
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Unexpected error merging accounts after phone auth',
+        tag: 'AuthService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      throw AuthenticationException(
+        'An unexpected error occurred during account merge',
+        originalError: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  /// Helper method to get user-friendly error messages from Firebase Auth exceptions
+  String _getFirebaseAuthErrorMessage(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'invalid-verification-code':
+        return 'Invalid verification code. Please try again.';
+      case 'invalid-verification-id':
+        return 'Invalid verification session. Please request a new code.';
+      case 'session-expired':
+        return 'Verification session expired. Please request a new code.';
+      case 'too-many-requests':
+        return 'Too many requests. Please try again later.';
+      case 'invalid-phone-number':
+        return 'Invalid phone number format.';
+      case 'quota-exceeded':
+        return 'SMS quota exceeded. Please try again later.';
+      default:
+        return e.message ?? 'Authentication failed. Please try again.';
     }
   }
 
@@ -169,15 +368,42 @@ class AuthService {
             'lastPasswordUpdate': DateTime.now().toIso8601String(),
             'passwordResetForMergedAccount': currentUser.uid,
           });
-        } catch (e) {
-          print('Could not update original document (this is okay): $e');
+        } catch (e, stackTrace) {
+          AppLogger.debug(
+            'Could not update original document during password reset (non-critical)',
+            'AuthService',
+            e,
+            stackTrace,
+          );
         }
       }
 
       return true;
-    } catch (e) {
-      print('Error resetting password: $e');
-      return false;
+    } on FirebaseException catch (e, stackTrace) {
+      AppLogger.error(
+        'Firestore error resetting password',
+        tag: 'AuthService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      throw AuthenticationException(
+        'Failed to reset password: ${e.message}',
+        code: e.code,
+        originalError: e,
+        stackTrace: stackTrace,
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Unexpected error resetting password',
+        tag: 'AuthService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      throw AuthenticationException(
+        'An unexpected error occurred while resetting password',
+        originalError: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -360,37 +586,72 @@ class AuthService {
   // Phone Authentication Methods
   Future<bool> sendOTP(String phoneNumber, {bool isResend = false}) async {
     try {
+      final completer = Completer<bool>();
+      
       await _auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
         verificationCompleted: (PhoneAuthCredential credential) async {
-          // Auto-verification on some devices
-          print('Auto verification completed');
+          // Auto-verification on some devices - DO NOT auto-sign in for password recovery
+          // Store the credential but don't sign in automatically
+          AppLogger.debug('Phone auth auto-verification completed', 'AuthService');
+          // Don't sign in automatically - let user enter OTP manually
+          // This prevents bypassing the OTP screen
         },
         verificationFailed: (FirebaseAuthException e) {
-          print('Verification failed: ${e.message}');
+          AppLogger.error(
+            'Phone verification failed: ${e.message}',
+            tag: 'AuthService',
+            error: e,
+          );
           if (e.code == 'invalid-phone-number') {
-            print('The provided phone number is not valid.');
+            AppLogger.warning('Invalid phone number provided', 'AuthService');
           }
-          throw e;
+          if (!completer.isCompleted) {
+            completer.complete(false);
+          }
         },
         codeSent: (String verificationId, int? resendToken) {
-          print('OTP sent to $phoneNumber');
+          AppLogger.info('OTP sent successfully to $phoneNumber', 'AuthService');
           _verificationId = verificationId;
           _resendToken = resendToken;
+          if (!completer.isCompleted) {
+            completer.complete(true);
+          }
         },
         codeAutoRetrievalTimeout: (String verificationId) {
-          print('Auto retrieval timeout');
+          AppLogger.debug('Phone auth auto-retrieval timeout', 'AuthService');
           _verificationId = verificationId;
+          // Even if auto-retrieval times out, we still got the verification ID
+          // So OTP screen should be shown
+          if (!completer.isCompleted) {
+            completer.complete(true);
+          }
         },
         timeout: const Duration(seconds: 60),
         forceResendingToken: isResend ? _resendToken : null,
       );
-      return true;
+      
+      // Wait for codeSent callback before returning
+      return await completer.future.timeout(
+        const Duration(seconds: 65),
+        onTimeout: () {
+          AppLogger.warning('OTP send timeout', 'AuthService');
+          return false;
+        },
+      );
     } on FirebaseAuthException catch (e) {
-      print('Firebase Auth Error: ${e.code} - ${e.message}');
+      AppLogger.error(
+        'Firebase Auth Error: ${e.code} - ${e.message}',
+        tag: 'AuthService',
+        error: e,
+      );
       rethrow;
     } catch (e) {
-      print('Error sending OTP: $e');
+      AppLogger.error(
+        'Error sending OTP',
+        tag: 'AuthService',
+        error: e,
+      );
       return false;
     }
   }
@@ -552,11 +813,11 @@ class AuthService {
     }
   }
 
-  // Hash password for security
+  // Hash password for security using bcrypt (proper password hashing)
   String _hashPassword(String password) {
-    final bytes = utf8.encode(password);
-    final digest = sha256.convert(bytes);
-    return digest.toString();
+    // bcrypt automatically generates salt and uses proper key stretching
+    final salt = BCrypt.gensalt();
+    return BCrypt.hashpw(password, salt);
   }
 
   // Save password to Firebase

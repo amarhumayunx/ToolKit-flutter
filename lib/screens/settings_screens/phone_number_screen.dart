@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import '../../provider/profile_provider.dart';
 import '../../services/auth_service.dart';
 import '../../utils/app_colors.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 import 'profile_screen.dart';
 
 class PhoneNumberScreen extends StatefulWidget {
@@ -111,20 +113,22 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.primary.withOpacity(0.3),
-              AppColors.primary,
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primary.withOpacity(0.3),
+                  AppColors.primary,
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
               // Back arrow button at the top left
               Align(
                 alignment: Alignment.topLeft,
@@ -334,14 +338,25 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
 
                       const Spacer(flex: 2),
 
-                      const SizedBox(height: 60),
+                      const SizedBox(height: 120), // Add bottom padding for ad
                     ],
                   ),
                 ),
               ),
             ],
+            ),
           ),
-        ),
+          ),
+          // Banner ad at bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: BannerAdWidget(
+              adUnitId: AdConfig.bannerAdPhoneNumberScreen,
+            ),
+          ),
+        ],
       ),
     );
   }

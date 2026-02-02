@@ -13,6 +13,7 @@ import '../../utils/app_snackbar.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import '../../widgets/tools/document_container.dart';
+import '../../utils/ad_manager.dart';
 
 class SaveScreen extends StatefulWidget {
   final List<File> selectedImages;
@@ -66,6 +67,11 @@ class _SaveScreenState extends State<SaveScreen>
   Future<void> _handleLoadingComplete() async {
     setState(() {
       _animationCompleted = true;
+    });
+    
+    // Show interstitial ad after successful conversion
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AdManager.showImgSaveSuccessInterstitial();
     });
   }
 

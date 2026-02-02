@@ -10,6 +10,9 @@ import 'package:toolkit/models/file_model.dart';
 import 'package:toolkit/services/save_document_service.dart';
 import 'package:toolkit/widgets/settings_widgets/result_document_container.dart';
 import 'package:toolkit/widgets/settings_widgets/sort_btn.dart';
+import '../../widgets/ads/native_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 import '../../utils/app_snackbar.dart';
 
 class AllFilesView extends StatefulWidget {
@@ -123,6 +126,9 @@ class _AllFilesViewState extends State<AllFilesView> {
         await filesBox.deleteAt(index);
         setState(() {});
 
+        // Show interstitial ad after file deletion
+        AdManager.showFilesDeleteInterstitial();
+
         AppSnackBar.show(
           context,
           message: 'file_deleted_successfully'.tr,
@@ -194,18 +200,6 @@ class _AllFilesViewState extends State<AllFilesView> {
     }
   }
 
-  void _handleFileSelection(FileModel file, int actualIndex) {
-    if (!_isFileSizeValid(file.size)) {
-      AppSnackBar.show(
-        context,
-        message: 'file_size_exceeds_limit'.tr,
-      );
-      return;
-    }
-
-    widget.onFileSelected?.call(file, actualIndex);
-  }
-
   @override
   Widget build(BuildContext context) {
     final allFiles = _isLoading
@@ -261,7 +255,7 @@ class _AllFilesViewState extends State<AllFilesView> {
                         ),
                       )
                     else
-                      ...allFiles.asMap().entries.map((entry) {
+                      ...allFiles.asMap().entries.expand((entry) {
                         final index = entry.key;
                         final file = entry.value;
 
@@ -274,34 +268,52 @@ class _AllFilesViewState extends State<AllFilesView> {
                           }
                         }
 
-                        return Padding(
-                          padding: const EdgeInsets.only(left: 6, right: 6),
-                          child: Column(
-                            children: [
-                              ResultDocumentContainer(
-                                documentName: file.name,
-                                date: DateFormat('yy/MM/dd').format(file.date),
-                                time: DateFormat('h:mma').format(file.date),
-                                isFavorite: file.isFavorite,
-                                isLocked: file.isLocked,
-                                filePath: file.displayPath,
-                                isSelectable: widget.isSelectingFiles,
-                                isSelected: _isFileSelected(file),
-                                onFavoriteToggle: () =>
-                                    _toggleFavorite(actualIndex),
-                                onLockToggle: () => _toggleLock(actualIndex),
-                                onDelete: () => _deleteFile(actualIndex),
-                                onFileRenamed: (newPath) =>
-                                    _renameFile(actualIndex, newPath),
-                                onTap: widget.isSelectingFiles
-                                    ? () =>
-                                        widget.onFileSelected?.call(file, index)
-                                    : () => _openFile(file.path),
-                              ),
-                              const SizedBox(height: 12),
-                            ],
+                        final widgets = <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(left: 6, right: 6),
+                            child: Column(
+                              children: [
+                                ResultDocumentContainer(
+                                  documentName: file.name,
+                                  date: DateFormat('yy/MM/dd').format(file.date),
+                                  time: DateFormat('h:mma').format(file.date),
+                                  isFavorite: file.isFavorite,
+                                  isLocked: file.isLocked,
+                                  filePath: file.displayPath,
+                                  isSelectable: widget.isSelectingFiles,
+                                  isSelected: _isFileSelected(file),
+                                  onFavoriteToggle: () =>
+                                      _toggleFavorite(actualIndex),
+                                  onLockToggle: () => _toggleLock(actualIndex),
+                                  onDelete: () => _deleteFile(actualIndex),
+                                  onFileRenamed: (newPath) =>
+                                      _renameFile(actualIndex, newPath),
+                                  onTap: widget.isSelectingFiles
+                                      ? () =>
+                                          widget.onFileSelected?.call(file, index)
+                                      : () => _openFile(file.path),
+                                ),
+                                const SizedBox(height: 12),
+                              ],
+                            ),
                           ),
-                        );
+                        ];
+
+                        // Add native ad after every 5th file item (index 4, 9, 14, etc.)
+                        if ((index + 1) % 5 == 0) {
+                          widgets.add(
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                              child: NativeAdWidget(
+                                adUnitId: AdConfig.nativeAdFilesListItem,
+                                height: 100,
+                              ),
+                            ),
+                          );
+                          widgets.add(const SizedBox(height: 12));
+                        }
+
+                        return widgets;
                       }),
                     const SizedBox(height: 100),
                   ],

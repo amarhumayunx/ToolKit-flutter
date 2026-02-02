@@ -8,6 +8,8 @@ import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 import '../../services/pdf_to_word_service.dart';
 import './pdf_save_screen.dart';
 
@@ -131,6 +133,12 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
+            // Banner ad at top of format selection screen
+            BannerAdWidget(
+              adUnitId: AdConfig.bannerAdPdfFormatSelectionScreen,
+              alignment: Alignment.topCenter,
+            ),
+            const SizedBox(height: 12),
             Text(
               'selected_file'.tr,
               style: GoogleFonts.inter(
@@ -231,7 +239,7 @@ class _PdfFormatSelectionScreenState extends State<PdfFormatSelectionScreen> {
             const Spacer(),
             CustomGradientButton(
               text: _isConverting ? 'converting'.tr : 'convert'.tr,
-              onPressed: _isConverting ? null : _convertFile,
+              onPressed: (_isConverting || selectedFormat == null) ? null : _convertFile,
             ),
           ],
         ),

@@ -8,6 +8,8 @@ import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 import 'rearrange_file_page_selection.dart';
 
 class RearrangeFileScreen extends StatefulWidget {
@@ -48,7 +50,7 @@ class _RearrangeFileScreenState extends State<RearrangeFileScreen> {
       }
     } catch (e) {
       setState(() {
-        AppSnackBar.show(context, message: 'Error selecting documents: ${e.toString()}');
+        AppSnackBar.show(context, message: '${'error_selecting_documents'.tr}: ${e.toString()}');
       });
       print('Error in file picker: $e');
     }
@@ -149,6 +151,11 @@ class _RearrangeFileScreenState extends State<RearrangeFileScreen> {
               }
                   : null,
             ),
+          ),
+          BannerAdWidget(
+            adUnitId: AdConfig.bannerAdRearrangeFileScreen,
+            alignment: Alignment.bottomCenter,
+            padding: const EdgeInsets.only(bottom: 8),
           ),
         ],
       ),

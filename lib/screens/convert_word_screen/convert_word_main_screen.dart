@@ -12,6 +12,9 @@ import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 
 class ConvertWordToPdfMainScreen extends StatefulWidget {
   const ConvertWordToPdfMainScreen({super.key});
@@ -83,6 +86,9 @@ class _ConvertWordToPdfMainScreenState extends State<ConvertWordToPdfMainScreen>
       return;
     }
 
+    // Show interstitial ad when file is selected
+    AdManager.showConvertWordFileSelectedInterstitial();
+
     // Navigate to format selection screen instead of directly to save screen
     final shouldClearFile = await Navigator.push(
       context,
@@ -144,6 +150,11 @@ class _ConvertWordToPdfMainScreenState extends State<ConvertWordToPdfMainScreen>
               text: 'convert_to_pdf'.tr,
               onPressed: _convertWordFile,
             ),
+          ),
+          BannerAdWidget(
+            adUnitId: AdConfig.bannerAdConvertWordMainScreen,
+            alignment: Alignment.bottomCenter,
+            padding: const EdgeInsets.only(bottom: 8),
           ),
         ],
       ),

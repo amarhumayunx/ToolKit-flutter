@@ -13,6 +13,9 @@ import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 import 'merge_result_screen.dart';
 
 class MergeFileMainScreen extends StatefulWidget {
@@ -93,6 +96,17 @@ class _MergeFileMainScreenState extends State<MergeFileMainScreen> {
       return;
     }
 
+    // Show rewarded ad if merging more than 3 files
+    if (_selectedPdfs.length > 3) {
+      final shouldContinue = await AdManager.showMergeMultipleFilesRewarded(
+        onRewardEarned: () {},
+      );
+      if (!shouldContinue) {
+        // User didn't watch ad, still allow merge but show message
+        AppSnackBar.show(context, message: 'merging_files'.tr);
+      }
+    }
+
     setState(() {
       _isProcessing = true;
     });
@@ -128,6 +142,9 @@ class _MergeFileMainScreenState extends State<MergeFileMainScreen> {
       // Show success message
       AppSnackBar.show(context, message: 'merge_successful'.tr);
 
+      // Show interstitial ad after successful merge
+      AdManager.showMergeFileSuccessInterstitial();
+
       // Navigate to MergeResultScreen with callback
       Navigator.push(
         context,
@@ -160,7 +177,6 @@ class _MergeFileMainScreenState extends State<MergeFileMainScreen> {
     return "${(bytes / (1 << (i * 10))).toStringAsFixed(1)} ${suffixes[i]}";
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -202,9 +218,14 @@ class _MergeFileMainScreenState extends State<MergeFileMainScreen> {
             padding:
             const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
             child: CustomGradientButton(
-              text: 'merge_files'.tr,
-              onPressed: _mergePdfs,
+              text: _isProcessing ? 'merging'.tr : 'merge_files'.tr,
+              onPressed: (_isProcessing || _selectedPdfs.length < 2) ? null : _mergePdfs,
             ),
+          ),
+          BannerAdWidget(
+            adUnitId: AdConfig.bannerAdMergeFileMainScreen,
+            alignment: Alignment.bottomCenter,
+            padding: const EdgeInsets.only(bottom: 8),
           ),
         ],
       ),

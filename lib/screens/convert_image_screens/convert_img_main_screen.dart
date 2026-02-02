@@ -8,6 +8,9 @@ import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/file_selection_container.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 import 'format_selection_screen.dart';
 
 class ConvertImgMainScreen extends StatefulWidget {
@@ -56,6 +59,9 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
       await Future.delayed(const Duration(milliseconds: 500));
 
       setState(() {});
+
+      // Show interstitial ad when images are selected
+      AdManager.showConvertImgSelectedInterstitial();
 
       // Pass all selected images to SelectFormatScreen and wait for result
       final result = await Navigator.push(
@@ -120,6 +126,11 @@ class _ConvertImgMainScreenState extends State<ConvertImgMainScreen> {
               text: 'next'.tr,
               onPressed: _convertImages,
             ),
+          ),
+          BannerAdWidget(
+            adUnitId: AdConfig.bannerAdConvertImgMainScreen,
+            alignment: Alignment.bottomCenter,
+            padding: const EdgeInsets.only(bottom: 8),
           ),
         ],
       ),

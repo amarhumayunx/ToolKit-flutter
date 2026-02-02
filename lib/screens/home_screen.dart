@@ -20,6 +20,12 @@ import '../widgets/home_app_bar.dart';
 import '../widgets/home_section_heading.dart';
 import '../widgets/tools_list_view.dart';
 import '../widgets/settings_widgets/result_document_container.dart';
+import '../widgets/skeleton_loader.dart';
+import '../widgets/ads/banner_ad_widget.dart';
+import '../widgets/ads/native_ad_widget.dart';
+import '../config/ad_config.dart';
+import '../utils/ad_manager.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'files_screens/files_main_screen.dart';
 import 'package:flutter/services.dart';
 
@@ -32,27 +38,54 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   late int _currentIndex;
-  final TextEditingController _searchController = TextEditingController();
-  DateTime? _lastPressedAt;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+    _screens = [
+      const HomeContentView(),
+      const Placeholder(),
+      FilesMainScreen(onBackToHome: () => _handleNavigation(0)),
+    ];
+    _animationController.forward();
   }
 
-  final List<Widget> _screens = [
-    const HomeContentView(),
-    const Placeholder(),
-    const FilesMainScreen(),
-  ];
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   void _handleNavigation(int index) {
+    if (index == _currentIndex) return;
+
     setState(() {
       _currentIndex = index;
     });
+
+    // Show interstitial ad when navigating away from home
+    if (_currentIndex != 0) {
+      AdManager.showHomeNavigationInterstitial();
+    }
+
+    // Animate screen transition
+    _animationController.reset();
+    _animationController.forward();
   }
 
   // Public method to allow child widgets to change tabs
@@ -60,28 +93,65 @@ class _HomeScreenState extends State<HomeScreen> {
     _handleNavigation(index);
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
   Future<bool> _onWillPop() async {
-    final now = DateTime.now();
-    const maxDuration = Duration(seconds: 2);
-
-    if (_lastPressedAt == null ||
-        now.difference(_lastPressedAt!) > maxDuration) {
-      _lastPressedAt = now;
-
-      AppSnackBar.show(
-        context,
-        message: 'press_again_to_exit'.tr,
-      );
+    // If not on home tab, navigate to home tab
+    if (_currentIndex != 0) {
+      _handleNavigation(0);
       return false;
     }
-    SystemNavigator.pop();
-    return true;
+
+    // Show exit dialog when on home tab
+    final shouldExit = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            'Exit App',
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to exit the app?',
+            style: GoogleFonts.inter(
+              fontSize: 16,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                'cancel'.tr,
+                style: GoogleFonts.inter(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(
+                'Exit',
+                style: GoogleFonts.inter(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldExit == true) {
+      SystemNavigator.pop();
+      return true;
+    }
+    return false;
   }
 
   @override
@@ -90,7 +160,10 @@ class _HomeScreenState extends State<HomeScreen> {
       onWillPop: _onWillPop,
       child: Scaffold(
         extendBody: true,
-        body: _screens[_currentIndex],
+        body: FadeTransition(
+          opacity: _fadeAnimation,
+          child: _screens[_currentIndex],
+        ),
         bottomNavigationBar: HomeBottomNavBar(
           currentIndex: _currentIndex,
           onTap: _handleNavigation,
@@ -200,7 +273,7 @@ class _HomeContentViewState extends State<HomeContentView>
       await filesBox!.putAt(index, updatedFile);
 
       final success =
-      await SaveDocumentService.toggleFileLock(updatedFile, index);
+          await SaveDocumentService.toggleFileLock(updatedFile, index);
 
       if (success) {
         setState(() {});
@@ -232,7 +305,7 @@ class _HomeContentViewState extends State<HomeContentView>
       // Handle the result
       switch (result.type) {
         case ResultType.done:
-        // File opened successfully
+          // File opened successfully
           break;
         case ResultType.noAppToOpen:
           AppSnackBar.show(context, message: 'no_app_to_open_file'.tr);
@@ -244,7 +317,8 @@ class _HomeContentViewState extends State<HomeContentView>
           AppSnackBar.show(context, message: 'permission_denied_open_file'.tr);
           break;
         case ResultType.error:
-          AppSnackBar.show(context, message: '${'error_opening_file'.tr}: ${result.message}');
+          AppSnackBar.show(context,
+              message: '${'error_opening_file'.tr}: ${result.message}');
           break;
       }
     } catch (e) {
@@ -258,7 +332,6 @@ class _HomeContentViewState extends State<HomeContentView>
       if (file == null) return;
 
       final oldFile = File(file.path);
-      final newFile = File(newPath);
 
       if (await oldFile.exists()) {
         await oldFile.rename(newPath);
@@ -319,117 +392,142 @@ class _HomeContentViewState extends State<HomeContentView>
                   topRight: Radius.circular(30),
                 ),
               ),
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 40),
-                      CreateCVButton(
-                        onTap: () {},
-                      ),
-                      const SizedBox(height: 28),
-                      SectionHeading(title: 'explore_tools'.tr),
-                      const SizedBox(height: 14),
-                      const ToolsListView(),
-                      SectionHeading(title: 'convert_options'.tr),
-                      const SizedBox(height: 14),
-                      const ConvertOptionsView(),
-                      const SizedBox(height: 28),
-
-                      // Recent documents section with See All
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SectionHeading(title: 'recents'.tr),
-                          ValueListenableBuilder(
-                            valueListenable:
-                            filesBox?.listenable() ?? ValueNotifier(null),
-                            builder: (context, box, widget) {
-                              final recentFilesWithIndex = _getRecentFiles();
-                              return recentFilesWithIndex.isNotEmpty
-                                  ? GestureDetector(
-                                onTap: _navigateToRecentTab,
-                                child: Text(
-                                  'see_all'.tr,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              )
-                                  : const SizedBox.shrink();
-                            },
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  await _refreshData();
+                },
+                color: AppColors.primary,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 40),
+                        CreateCVButton(
+                          onTap: () {},
+                        ),
+                        const SizedBox(height: 28),
+                        SectionHeading(title: 'explore_tools'.tr),
+                        const SizedBox(height: 14),
+                        const ToolsListView(),
+                        const SizedBox(height: 2),
+                        // Native ad between tools and convert options (using medium template)
+                        Center(
+                          child: NativeAdWidget(
+                            adUnitId: AdConfig.nativeAdHomeToolsSection,
+                            height: 250,
+                            templateType: TemplateType.medium,
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
+                        ),
+                        const SizedBox(height: 5),
+                        SectionHeading(title: 'convert_options'.tr),
+                        const SizedBox(height: 14),
+                        const ConvertOptionsView(),
 
-                      // Recent documents list with ValueListenableBuilder
-                      ValueListenableBuilder(
-                        valueListenable:
-                        filesBox?.listenable() ?? ValueNotifier(null),
-                        builder: (context, box, widget) {
-                          final recentFilesWithIndex = _getRecentFiles();
+                        // Recent documents section with See All
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SectionHeading(title: 'recents'.tr),
+                            ValueListenableBuilder(
+                              valueListenable:
+                                  filesBox?.listenable() ?? ValueNotifier(null),
+                              builder: (context, box, widget) {
+                                final recentFilesWithIndex = _getRecentFiles();
+                                return recentFilesWithIndex.isNotEmpty
+                                    ? GestureDetector(
+                                        onTap: _navigateToRecentTab,
+                                        child: Text(
+                                          'see_all'.tr,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 14,
+                                            color: AppColors.primary,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      )
+                                    : const SizedBox.shrink();
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
 
-                          if (_isLoading) {
-                            return const Center(
-                              child: CircularProgressIndicator(
-                                color: AppColors.primary,
-                              ),
-                            );
-                          }
+                        // Recent documents list with ValueListenableBuilder
+                        ValueListenableBuilder(
+                          valueListenable:
+                              filesBox?.listenable() ?? ValueNotifier(null),
+                          builder: (context, box, widget) {
+                            final recentFilesWithIndex = _getRecentFiles();
 
-                          if (recentFilesWithIndex.isEmpty) {
-                            return Center(
-                              child: Padding(
-                                padding:
-                                const EdgeInsets.symmetric(vertical: 20),
-                                child: Text(
-                                  'no_recent_documents_found'.tr,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ),
-                            );
-                          }
-
-                          return Column(
-                            children: recentFilesWithIndex.map((entry) {
-                              final index = entry.key;
-                              final file = entry.value;
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: ResultDocumentContainer(
-                                  documentName: file.name,
-                                  date:
-                                  DateFormat('yy/MM/dd').format(file.date),
-                                  time: DateFormat('h:mma').format(file.date),
-
-                                  isFavorite: file.isFavorite,
-                                  isLocked: file.isLocked,
-                                  filePath: file.path,
-                                  onFavoriteToggle: () =>
-                                      _toggleFavorite(index),
-                                  onDelete: () => _deleteFile(index),
-                                  onFileRenamed: (newPath) =>
-                                      _renameFile(index, newPath),
-                                  onLockToggle: () => _toggleLock(index),
-                                  // Add the onTap callback to open files
-                                  onTap: () => _openFile(file.path),
+                            if (_isLoading) {
+                              return Column(
+                                children: List.generate(
+                                  2,
+                                  (index) => const DocumentSkeletonLoader(),
                                 ),
                               );
-                            }).toList(),
-                          );
-                        },
-                      ),
+                            }
 
-                      const SizedBox(height: 100),
-                    ],
+                            if (recentFilesWithIndex.isEmpty) {
+                              return Center(
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 20),
+                                  child: Text(
+                                    'no_recent_documents_found'.tr,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+
+                            return Column(
+                              children: recentFilesWithIndex.map((entry) {
+                                final index = entry.key;
+                                final file = entry.value;
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: ResultDocumentContainer(
+                                    documentName: file.name,
+                                    date: DateFormat('yy/MM/dd')
+                                        .format(file.date),
+                                    time: DateFormat('h:mma').format(file.date),
+
+                                    isFavorite: file.isFavorite,
+                                    isLocked: file.isLocked,
+                                    filePath: file.path,
+                                    onFavoriteToggle: () =>
+                                        _toggleFavorite(index),
+                                    onDelete: () => _deleteFile(index),
+                                    onFileRenamed: (newPath) =>
+                                        _renameFile(index, newPath),
+                                    onLockToggle: () => _toggleLock(index),
+                                    // Add the onTap callback to open files
+                                    onTap: () => _openFile(file.path),
+                                  ),
+                                );
+                              }).toList(),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 2),
+                        // Banner ad at bottom of scroll view content
+                        Center(
+                          child: BannerAdWidget(
+                            adUnitId: AdConfig.bannerAdHomeScreen,
+                            alignment: Alignment.bottomCenter,
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+                      ],
+                    ),
                   ),
                 ),
               ),

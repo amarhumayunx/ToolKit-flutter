@@ -12,6 +12,8 @@ import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/save_document_btn.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import '../../widgets/tools/document_container.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 
 class ExtractedTextScreen extends StatefulWidget {
   final String extractedText;
@@ -237,7 +239,12 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
         child: Stack(
           children: [
             SingleChildScrollView(
-              padding: const EdgeInsets.all(20.0),
+              padding: EdgeInsets.only(
+                left: 20.0,
+                right: 20.0,
+                top: 20.0,
+                bottom: MediaQuery.of(context).padding.bottom + 60, // Space for banner ad
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(14.0),
                 child: Column(
@@ -247,6 +254,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
                       _buildLoadingContainer(),
                     const SizedBox(height: 36),
                     if (!_isLoading) ...[
+                      const SizedBox(height: 20),
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -310,8 +318,6 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
                         ),
                       ),
                     ],
-                    SizedBox(
-                        height: MediaQuery.of(context).padding.bottom + 20),
                   ],
                 ),
               ),
@@ -320,7 +326,7 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
               Positioned(
                 left: 20,
                 right: 20,
-                bottom: MediaQuery.of(context).padding.bottom + 20,
+                bottom: MediaQuery.of(context).padding.bottom + 60, // Above banner ad
                 child: SaveDocumentButton(
                   documentFile: File(_savedFilePath!),
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -330,6 +336,16 @@ class _ExtractedTextScreenState extends State<ExtractedTextScreen>
                   },
                 ),
               ),
+            // Banner ad properly anchored at bottom - not in scroll view, not in bottomNavigationBar
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: BannerAdWidget(
+                adUnitId: AdConfig.bannerAdExtractedTextScreen,
+                alignment: Alignment.bottomCenter,
+              ),
+            ),
           ],
         ),
       ),

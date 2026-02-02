@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:archive/archive.dart';
+import 'package:path/path.dart' as path;
 import 'package:toolkit/screens/compress_files_screen/compression_result_class.dart';
 import 'package:toolkit/widgets/tools/document_container.dart';
 import '../../provider/file_provider.dart';
@@ -13,6 +15,9 @@ import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 import 'file_compression_service.dart';
 
 class CompressedFileResultScreen extends StatefulWidget {
@@ -81,6 +86,9 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
   Future<void> _handleSaveFile() async {
     if (convertedFile != null) {
       try {
+        // Show interstitial ad before saving
+        AdManager.showCompressSaveInterstitial();
+        
         await SaveFileService.saveFile(
           context,
           File(_currentFilePath),
@@ -236,17 +244,44 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
   }
   Future<File?> _createZipFile() async {
     try {
+      if (_compressedFiles.isEmpty) {
+        return null;
+      }
+
       final zipDir = await getTemporaryDirectory();
       final zipName = 'compressed_files_${DateTime.now().millisecondsSinceEpoch}';
       final zipPath = '${zipDir.path}/$zipName.zip';
 
+      // Create archive and add all compressed files
+      final archive = Archive();
+      
+      for (final file in _compressedFiles) {
+        if (await file.exists()) {
+          final fileBytes = await file.readAsBytes();
+          final fileName = path.basename(file.path);
+          archive.addFile(ArchiveFile(fileName, fileBytes.length, fileBytes));
+        }
+      }
+
+      // Encode archive to zip
+      final zipEncoder = ZipEncoder();
+      final zipData = zipEncoder.encode(archive, level: 9);
+      
+      if (zipData == null) {
+        if (mounted) {
+          AppSnackBar.show(context, message: 'error_creating_zip_file'.tr);
+        }
+        return null;
+      }
+
+      // Write zip file
       final zipFile = File(zipPath);
-      await zipFile.writeAsBytes([]);
+      await zipFile.writeAsBytes(zipData);
 
       return zipFile;
     } catch (e) {
       if (mounted) {
-        AppSnackBar.show(context, message: 'error_creating_zip_file'.tr);
+        AppSnackBar.show(context, message: '${'error_creating_zip_file'.tr}: ${e.toString()}');
       }
       return null;
     }
@@ -288,16 +323,42 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
         return;
       }
 
+      // Show interstitial ad before saving
+      AdManager.showCompressSaveInterstitial();
+
       if (_compressedFiles.length == 1) {
-        await _saveSingleFile(_compressedFiles.first);
+        // Save single file using SaveFileService
+        await SaveFileService.saveFile(
+          context,
+          _compressedFiles.first,
+          _getFormatExtension(),
+        );
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
       } else {
+        // Create zip file with all compressed files
         final zipFile = await _createZipFile();
         if (zipFile != null && mounted) {
-          await _saveSingleFile(zipFile);
+          // Save zip file using SaveFileService
+          await SaveFileService.saveFile(
+            context,
+            zipFile,
+            'zip',
+          );
           if (mounted) {
             AppSnackBar.show(context, message: 'all_files_saved_as_zip'.tr);
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          }
+        } else {
+          if (mounted) {
+            AppSnackBar.show(context, message: 'error_creating_zip_file'.tr);
           }
         }
+      }
+    } catch (e) {
+      if (mounted) {
+        AppSnackBar.show(context, message: '${'failed_to_save_file'.tr}: ${e.toString()}');
       }
     } finally {
       if (mounted) {
@@ -386,95 +447,107 @@ class _CompressedFileResultScreenState extends State<CompressedFileResultScreen>
       appBar: CustomAppBar(title: 'compress_results'.tr),
       resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 100.0),
-                child: Column(
-                  children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 100.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 16),
+                  _buildLoadingContainer(),
+                  if (_animationCompleted) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.10),
+                            blurRadius: 10,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("total_reduction".tr,
+                                  style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500)),
+                              Text("${totalSizeReduction.toStringAsFixed(1)}%",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.blue[700],
+                                  )),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("space_saved".tr,
+                                  style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500)),
+                              Text(totalSpaceSaved,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.green[700],
+                                  )),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildCompressionStatus(),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'compressed'.tr,
+                        style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                    ),
                     const SizedBox(height: 16),
-                    _buildLoadingContainer(),
-                    if (_animationCompleted) ...[
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.10),
-                              blurRadius: 10,
-                              offset: const Offset(0, 1),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("total_reduction".tr,
-                                    style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500)),
-                                Text("${totalSizeReduction.toStringAsFixed(1)}%",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.blue[700],
-                                    )),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("space_saved".tr,
-                                    style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500)),
-                                Text(totalSpaceSaved,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.green[700],
-                                    )),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildCompressionStatus(),
-                      const SizedBox(height: 12),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'compressed'.tr,
-                          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      if (_compressedFiles.isNotEmpty)
-                        ...(_compressedFiles.asMap().entries.map((entry) {
-                          int index = entry.key;
-                          File compressedFile = entry.value;
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: DocumentContainer(
-                              filePath: compressedFile.path,
-                              onTap: () => _openFile(compressedFile),
-                              onDelete: () => _handleFileDeleted(index),
-                              onFileRenamed: (newPath) => _handleFileRenamed(newPath, index),
-                            ),
-                          );
-                        }).toList()),
-                    ],
+                    if (_compressedFiles.isNotEmpty)
+                      ...(_compressedFiles.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        File compressedFile = entry.value;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: DocumentContainer(
+                            filePath: compressedFile.path,
+                            onTap: () => _openFile(compressedFile),
+                            onDelete: () => _handleFileDeleted(index),
+                            onFileRenamed: (newPath) => _handleFileRenamed(newPath, index),
+                          ),
+                        );
+                      }).toList()),
                   ],
-                ),
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 320),
+                ],
               ),
             ),
-
+            // Banner ad at the very bottom
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: BannerAdWidget(
+                adUnitId: AdConfig.bannerAdCompressResultScreen,
+                alignment: Alignment.bottomCenter,
+              ),
+            ),
+            // Save button above banner ad
             if (_animationCompleted && hasValidFiles)
-              SafeArea(
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: MediaQuery.of(context).padding.bottom + 60,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   child: CustomGradientButton(

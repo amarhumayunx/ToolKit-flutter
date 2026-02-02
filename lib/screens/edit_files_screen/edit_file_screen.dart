@@ -11,6 +11,9 @@ import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
 import '../../widgets/tools/dotted_file_drop.dart';
 import '../../widgets/tools/ocr_file_selection.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 import '../scanner_screens/batch_result_screen.dart';
 import '../ocr_screens/ocr_camera_screen.dart';
 
@@ -87,6 +90,9 @@ class _EditFileScreenState extends State<EditFileScreen> {
     }
 
     try {
+      // Show interstitial ad when saving edited file
+      AdManager.showEditFileSaveActionInterstitial();
+      
       // Navigate to BatchResultScreen with the selected file
       Navigator.push(
         context,
@@ -163,7 +169,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
                                 onTap: _pickImage, // Changed method name
                                 onRemoveImage: _removeFile,
                                 emptyStateText:
-                                    'Click to choose image'.tr, // Changed text
+                                    'click_to_choose_image'.tr, // Changed text
                               );
                             },
                           ),
@@ -178,10 +184,19 @@ class _EditFileScreenState extends State<EditFileScreen> {
           Padding(
             padding:
                 const EdgeInsets.symmetric(horizontal: 30.0, vertical: 26.0),
-            child: CustomGradientButton(
-              text: 'next'.tr,
-              onPressed: _editFile, // Changed method name
+            child: Consumer<FileProvider>(
+              builder: (context, fileProvider, child) {
+                return CustomGradientButton(
+                  text: 'next'.tr,
+                  onPressed: fileProvider.hasFiles ? _editFile : null,
+                );
+              },
             ),
+          ),
+          BannerAdWidget(
+            adUnitId: AdConfig.bannerAdEditFileScreen,
+            alignment: Alignment.bottomCenter,
+            padding: const EdgeInsets.only(bottom: 8),
           ),
         ],
       ),

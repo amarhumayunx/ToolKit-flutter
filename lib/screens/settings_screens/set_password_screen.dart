@@ -6,6 +6,8 @@ import '../../services/auth_service.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/custom_appbar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 
 class SetPasswordScreen extends StatefulWidget {
   final bool isChanging;
@@ -349,6 +351,8 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
                   ],
                 ),
                 const Spacer(),
+                // Add bottom padding for ad
+                const SizedBox(height: 60),
               ],
             ),
           ),
@@ -359,6 +363,15 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
                 child: CircularProgressIndicator(color: AppColors.primary),
               ),
             ),
+          // Banner ad at bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: BannerAdWidget(
+              adUnitId: AdConfig.bannerAdSetPasswordScreen,
+            ),
+          ),
         ],
       ),
     );

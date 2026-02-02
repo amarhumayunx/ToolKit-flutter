@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../screens/cv_maker_screens/create_cv_screen.dart';
 import '../../utils/app_colors.dart';
+import '../../utils/page_transitions.dart';
+import '../../utils/haptic_feedback.dart';
 
 class CreateCVButton extends StatelessWidget {
   final VoidCallback onTap;
@@ -14,9 +16,10 @@ class CreateCVButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        HapticFeedbackUtil.mediumImpact();
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const CreateCvScreen()),
+          SlidePageRoute(child: const CreateCvScreen()),
         );
       },
       child: Container(

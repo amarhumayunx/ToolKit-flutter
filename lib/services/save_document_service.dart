@@ -34,7 +34,7 @@ class SaveDocumentService {
       if (fileModel.isLocked && !fileModel.isEncrypted) {
         // Lock file: encrypt it
         final encryptedPath =
-        await FileEncryptionService.encryptAndMoveFile(fileModel.path);
+            await FileEncryptionService.encryptAndMoveFile(fileModel.path);
 
         if (encryptedPath != null) {
           // Update file model to reflect encryption
@@ -74,7 +74,7 @@ class SaveDocumentService {
           // Generate unique filename with timestamp
           final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
           final nameWithoutExt =
-          path.basenameWithoutExtension(originalFileName);
+              path.basenameWithoutExtension(originalFileName);
           final extension = path.extension(originalFileName);
           final uniqueFileName = '${nameWithoutExt}_$timestamp$extension';
           finalPath = '${toolkitDir.path}/$uniqueFileName';
@@ -279,7 +279,7 @@ class SaveDocumentService {
       } else {
         final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
         uniqueFileName =
-        '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
+            '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
       }
 
       final params = SaveFileDialogParams(
@@ -298,8 +298,7 @@ class SaveDocumentService {
       }
     } catch (e) {
       debugPrint('error_save_file_dialog'.tr);
-      AppSnackBar.show(context,
-          message: 'failed_to_save_document'.tr);
+      AppSnackBar.show(context, message: 'failed_to_save_document'.tr);
       return null;
     }
   }
@@ -321,10 +320,10 @@ class SaveDocumentService {
 
   /// Main method to save a document file to Toolkit folder
   static Future<bool?> saveDocument(
-      BuildContext context,
-      File documentFile, {
-        bool skipTimestamp = false,
-      }) async {
+    BuildContext context,
+    File documentFile, {
+    bool skipTimestamp = false,
+  }) async {
     try {
       bool canAccessStorage = await checkAndRequestStoragePermission(context);
 
@@ -343,22 +342,20 @@ class SaveDocumentService {
             uniqueFileName = baseFileName;
 
             if (await _fileExistsInToolkitFolder(uniqueFileName)) {
-              AppSnackBar.show(context,
-                  message: 'file_name_already_exists'.tr);
+              AppSnackBar.show(context, message: 'file_name_already_exists'.tr);
               return false;
             }
           } else {
             final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
             uniqueFileName =
-            '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
+                '${path.basenameWithoutExtension(baseFileName)}_$timestamp${path.extension(baseFileName)}';
           }
 
           final destinationPath = '${toolkitDir.path}/$uniqueFileName';
           await documentFile.copy(destinationPath);
           savedFilePath = destinationPath;
 
-          AppSnackBar.show(context,
-              message: 'document_saved_to_location'.tr);
+          AppSnackBar.show(context, message: 'document_saved_to_location'.tr);
         } else {
           savedFilePath = await _saveFileWithDialog(context, documentFile,
               skipTimestamp: skipTimestamp);
@@ -386,8 +383,7 @@ class SaveDocumentService {
         return null;
       }
     } on PlatformException {
-      AppSnackBar.show(context,
-          message: 'failed_to_save_document'.tr);
+      AppSnackBar.show(context, message: 'failed_to_save_document'.tr);
       return null;
     } catch (e) {
       AppSnackBar.show(context, message: 'failed_to_save_document'.tr);

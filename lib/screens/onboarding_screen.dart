@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/app_colors.dart';
 import '../utils/constants.dart';
 import '../widgets/onboarding_page.dart';
+import '../widgets/ads/banner_ad_widget.dart';
+import '../config/ad_config.dart';
 import 'home_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -61,7 +63,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     await _completeOnboarding();
     if (mounted) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const HomeScreen(),
+          transitionDuration: const Duration(milliseconds: 400),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeInOut,
+              ),
+              child: child,
+            );
+          },
+        ),
       );
     }
   }
@@ -72,101 +87,112 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       backgroundColor: AppColors.appBar,
       body: Column(
         children: [
-          SizedBox(
-            height: MediaQuery.of(context).padding.top + 80,
-          ),
           Expanded(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).padding.top + 80,
                 ),
-              ),
-              child: Column(
-                children: [
-                  // PageView in its own Expanded widget
-                  Expanded(
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: _contents.length,
-                      onPageChanged: (index) {
-                        setState(() {
-                          _currentPage = index;
-                        });
-                      },
-                      itemBuilder: (context, index) {
-                        return OnboardingPage(content: _contents[index]);
-                      },
+                Expanded(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30),
+                      ),
                     ),
-                  ),
-
-                  // Dots indicator outside PageView
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      _contents.length,
-                          (index) => buildDot(index),
-                    ),
-                  ),
-                  const SizedBox(height: 80),
-
-                  // Bottom navigation buttons
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 30),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: TextButton(
-                            onPressed: _navigateToHome,
-                            child: Text(
-                              'skip'.tr,
-                              style: GoogleFonts.inter(
-                                color: Colors.black,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
+                        // PageView in its own Expanded widget
+                        Expanded(
+                          child: PageView.builder(
+                            controller: _pageController,
+                            itemCount: _contents.length,
+                            onPageChanged: (index) {
+                              setState(() {
+                                _currentPage = index;
+                              });
+                            },
+                            itemBuilder: (context, index) {
+                              return OnboardingPage(content: _contents[index]);
+                            },
                           ),
                         ),
+                        // Dots indicator outside PageView
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(
+                            _contents.length,
+                            (index) => buildDot(index),
+                          ),
+                        ),
+                        const SizedBox(height: 80),
+                        // Bottom navigation buttons (hamesha ad ke upar)
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 36),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (_currentPage == _contents.length - 1) {
-                                _navigateToHome();
-                              } else {
-                                _pageController.nextPage(
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeIn,
-                                );
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                          padding: const EdgeInsets.symmetric(vertical: 30),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 24),
+                                child: TextButton(
+                                  onPressed: _navigateToHome,
+                                  child: Text(
+                                    'skip'.tr,
+                                    style: GoogleFonts.inter(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ),
                               ),
-                              padding: const EdgeInsets.all(20),
-                              fixedSize: const Size(64, 64),
-                            ),
-                            child: SvgPicture.asset(
-                              'assets/icons/next_page_icon.svg',
-                              width: 20,
-                              height: 20,
-                              color: Colors.white,
-                            ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 36),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    if (_currentPage == _contents.length - 1) {
+                                      _navigateToHome();
+                                    } else {
+                                      _pageController.nextPage(
+                                        duration:
+                                            const Duration(milliseconds: 300),
+                                        curve: Curves.easeIn,
+                                      );
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    padding: const EdgeInsets.all(20),
+                                    fixedSize: const Size(64, 64),
+                                  ),
+                                  child: SvgPicture.asset(
+                                    'assets/icons/next_page_icon.svg',
+                                    width: 20,
+                                    height: 20,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
+          // Banner ad neeche – jab load ho toh content upar reh jata hai, buttons nazar aate hain
+          BannerAdWidget(
+            adUnitId: AdConfig.bannerAdOnboardingScreen,
           ),
         ],
       ),
@@ -181,7 +207,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(4),
         color:
-        _currentPage == index ? AppColors.dotActive : AppColors.dotInactive,
+            _currentPage == index ? AppColors.dotActive : AppColors.dotInactive,
       ),
     );
   }

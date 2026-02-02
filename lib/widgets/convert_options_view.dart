@@ -47,6 +47,7 @@ class ConvertOptionsView extends StatelessWidget {
             MaterialPageRoute(builder: (_) => const ConvertWordToPdfMainScreen(),
             )
         );
+        break;
       default:
       // Handle unknown conversion option
         ScaffoldMessenger.of(context).showSnackBar(

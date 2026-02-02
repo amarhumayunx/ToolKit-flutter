@@ -6,10 +6,16 @@ import '../../utils/app_colors.dart';
 import '../../widgets/settings_widgets/all_files_tab.dart';
 import '../../widgets/settings_widgets/favorites_view_tab.dart';
 import '../../widgets/settings_widgets/recent_view_tab.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
+import '../home_screen.dart';
 
 class FilesMainScreen extends StatefulWidget {
   final bool isSelectingFiles;
-  const FilesMainScreen({super.key, this.isSelectingFiles = false});
+  final VoidCallback? onBackToHome;
+  const FilesMainScreen(
+      {super.key, this.isSelectingFiles = false, this.onBackToHome});
 
   @override
   State<FilesMainScreen> createState() => _FilesMainScreenState();
@@ -76,9 +82,31 @@ class _FilesMainScreenState extends State<FilesMainScreen>
     }
   }
 
+  void _handleFileDelete() {
+    // Show interstitial ad after file deletion
+    AdManager.showFilesDeleteInterstitial();
+  }
+
+  Future<bool> _onWillPop() async {
+    // If onBackToHome callback exists (used as tab in HomeScreen)
+    if (widget.onBackToHome != null) {
+      // Always go to Home tab
+      widget.onBackToHome!();
+      return false; // Prevent default back behavior - let HomeScreen handle navigation
+    }
+
+    // If standalone (pushed from another screen), always navigate to Home
+    // Navigate to Home screen and remove all previous routes
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
+      (route) => false, // Remove all previous routes
+    );
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    Widget scaffold = Scaffold(
       backgroundColor: Colors.grey[50],
       body: SafeArea(
         child: Column(
@@ -91,38 +119,39 @@ class _FilesMainScreenState extends State<FilesMainScreen>
                   Expanded(
                     child: _isSearching
                         ? TextField(
-                      controller: _searchController,
-                      autofocus: true,
-                      cursorColor: AppColors.primary,
-                      decoration: InputDecoration(
-                        hintText: 'search_files_hint'.tr, // Localized hint text
-                        hintStyle: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: Colors.grey[500],
-                        ),
-                        border: InputBorder.none,
-                      ),
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      onChanged: (value) {
-                        setState(() {});
-                      },
-                    )
+                            controller: _searchController,
+                            autofocus: true,
+                            cursorColor: AppColors.primary,
+                            decoration: InputDecoration(
+                              hintText:
+                                  'search_files_hint'.tr, // Localized hint text
+                              hintStyle: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: Colors.grey[500],
+                              ),
+                              border: InputBorder.none,
+                            ),
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            onChanged: (value) {
+                              setState(() {});
+                            },
+                          )
                         : Row(
-                      children: [
-                        const SizedBox(width: 8),
-                        Text(
-                          'files_title'.tr, // Localized title
-                          style: GoogleFonts.inter(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
+                            children: [
+                              const SizedBox(width: 8),
+                              Text(
+                                'files_title'.tr, // Localized title
+                                style: GoogleFonts.inter(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
                   ),
                   IconButton(
                     icon: Icon(
@@ -158,7 +187,7 @@ class _FilesMainScreenState extends State<FilesMainScreen>
               ),
               splashFactory: InkRipple.splashFactory,
               overlayColor: WidgetStateProperty.resolveWith<Color?>(
-                    (Set<WidgetState> states) {
+                (Set<WidgetState> states) {
                   if (states.contains(WidgetState.pressed)) {
                     return AppColors.primary.withOpacity(0.12);
                   }
@@ -178,6 +207,15 @@ class _FilesMainScreenState extends State<FilesMainScreen>
               ],
             ),
             const SizedBox(height: 20),
+            // Banner ad at top of file list
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: BannerAdWidget(
+                adUnitId: AdConfig.bannerAdFilesMainScreen,
+                alignment: Alignment.topCenter,
+              ),
+            ),
+            const SizedBox(height: 10),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(top: 10),
@@ -215,6 +253,14 @@ class _FilesMainScreenState extends State<FilesMainScreen>
           ],
         ),
       ),
+    );
+
+    // Always wrap with WillPopScope to handle back button properly
+    // When used as tab, it will call onBackToHome and return false
+    // When used standalone, it will return true to allow back navigation
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: scaffold,
     );
   }
 }

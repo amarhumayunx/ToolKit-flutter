@@ -2,9 +2,12 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        // Fallback repositories for network issues
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.4'
+        classpath 'com.android.tools.build:gradle:8.7.3'
         // Do not add implementation dependencies here
     }
 }
@@ -17,6 +20,9 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        // Fallback repositories for network issues
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
     }
 }
 

@@ -4,6 +4,8 @@ import 'dart:io';
 import '../../widgets/batch_app_bar.dart';
 import '../../widgets/scanner_widgets/document_preview.dart';
 import '../../widgets/scanner_widgets/gallery_thumbnail.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 import 'document_edit_screen.dart';
 
 class BatchResultScreen extends StatefulWidget {
@@ -159,26 +161,36 @@ class _BatchResultScreenState extends State<BatchResultScreen> {
         onBackPressed: () => Navigator.pop(context),
         actionText: 'next'.tr,
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // Main document preview
-          Expanded(
-            child: DocumentPreview(
-              image: _processedImages[_selectedImageIndex],
-              onClose: () => _deleteImage(_selectedImageIndex), // NEW: Delete on close
-            ),
-          ),
-          // Thumbnail gallery
-          ThumbnailGallery(
-            images: _processedImages,
-            selectedIndex: _selectedImageIndex,
-            onImageSelected: _selectImage,
-            onImageDeleted: _deleteImage, // NEW: Pass delete callback
-            scrollController: _scrollController,
-            onScrollLeft: _scrollLeft,
-            onScrollRight: _scrollRight,
-            canScrollLeft: _canScrollLeft,
-            canScrollRight: _canScrollRight,
+          Column(
+            children: [
+              // Banner ad at top
+              BannerAdWidget(
+                adUnitId: AdConfig.bannerAdBatchResultScreen,
+                isTop: true,
+              ),
+              // Main document preview
+              Expanded(
+                child: DocumentPreview(
+                  image: _processedImages[_selectedImageIndex],
+                  onClose: () =>
+                      _deleteImage(_selectedImageIndex), // NEW: Delete on close
+                ),
+              ),
+              // Thumbnail gallery
+              ThumbnailGallery(
+                images: _processedImages,
+                selectedIndex: _selectedImageIndex,
+                onImageSelected: _selectImage,
+                onImageDeleted: _deleteImage, // NEW: Pass delete callback
+                scrollController: _scrollController,
+                onScrollLeft: _scrollLeft,
+                onScrollRight: _scrollRight,
+                canScrollLeft: _canScrollLeft,
+                canScrollRight: _canScrollRight,
+              ),
+            ],
           ),
         ],
       ),

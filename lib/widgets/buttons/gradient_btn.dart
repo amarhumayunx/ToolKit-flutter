@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../utils/app_colors.dart';
+import '../../utils/haptic_feedback.dart';
 
 
 class CustomGradientButton extends StatelessWidget {
@@ -33,7 +34,12 @@ class CustomGradientButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
         ),
         child: ElevatedButton(
-          onPressed: onPressed,
+          onPressed: onPressed == null
+              ? null
+              : () {
+                  HapticFeedbackUtil.mediumImpact();
+                  onPressed!();
+                },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,

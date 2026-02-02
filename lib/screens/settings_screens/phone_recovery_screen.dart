@@ -3,12 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:toolkit/screens/settings_screens/set_password_screen.dart';
+import 'package:toolkit/screens/settings_screens/set_password_proper_screen.dart';
 import '../../services/auth_service.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 
 class PhoneRecoveryScreen extends StatefulWidget {
   const PhoneRecoveryScreen({super.key});
@@ -160,11 +162,20 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
       final success = await _authService.sendOTP(fullPhoneNumber);
 
       if (success) {
-        setState(() {
-          _isOtpSent = true;
-          _isLoading = false;
-        });
-        AppSnackBar.show(context, message: 'otp_sent'.tr);
+        if (mounted) {
+          setState(() {
+            _isOtpSent = true;
+            _isLoading = false;
+          });
+          AppSnackBar.show(context, message: 'otp_sent'.tr);
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = 'Failed to send OTP. Please try again.';
+          });
+        }
       }
     } on FirebaseAuthException catch (e) {
       setState(() {
@@ -226,7 +237,7 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
         final result = await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => SetPasswordScreen(
+            builder: (context) => SetPasswordProperScreen(
               isRecovery: true,
               email: null,
               userId: userId,
@@ -585,30 +596,43 @@ class _PhoneRecoveryScreenState extends State<PhoneRecoveryScreen> {
       ),
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (!_isOtpSent) _buildPhoneVerifySection(),
-                    if (_isOtpSent) _buildOtpVerifySection(),
-                  ],
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                // Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (!_isOtpSent) _buildPhoneVerifySection(),
+                        if (_isOtpSent) _buildOtpVerifySection(),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
 
-            // Bottom Button Container
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-              child: _buildBottomButton(),
+                // Bottom Button Container - moved up when ad is shown
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 80), // Add bottom padding for ad
+                  child: _buildBottomButton(),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          // Banner ad at bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: BannerAdWidget(
+              adUnitId: AdConfig.bannerAdPhoneRecoveryScreen,
+            ),
+          ),
+        ],
       ),
     );
   }

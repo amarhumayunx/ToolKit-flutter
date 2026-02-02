@@ -11,6 +11,9 @@ import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/custom_svg_image.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 import 'pdf_format_selection_screen.dart';
 
 class ConvertPdfMainScreen extends StatefulWidget {
@@ -72,6 +75,9 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
       return;
     }
 
+    // Show interstitial ad after file selection
+    AdManager.showConvertPdfFileSelectedInterstitial();
+
     final shouldClearFile = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -127,8 +133,14 @@ class _ConvertPdfMainScreenState extends State<ConvertPdfMainScreen> {
             const EdgeInsets.symmetric(horizontal: 30.0, vertical: 26.0),
             child: CustomGradientButton(
               text: 'next'.tr,
-              onPressed: _convertPdf,
+              onPressed: _selectedPdf == null ? null : _convertPdf,
             ),
+          ),
+          // Banner ad at bottom of convert PDF screen
+          BannerAdWidget(
+            adUnitId: AdConfig.bannerAdConvertPdfMainScreen,
+            alignment: Alignment.bottomCenter,
+            padding: const EdgeInsets.only(bottom: 80),
           ),
         ],
       ),

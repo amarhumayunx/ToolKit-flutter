@@ -1,0 +1,734 @@
+Toolkit app 
+ads unit ids
+------
+banner_ad_extracted_text_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+extracted-text-screen-ad-bannerca-app-pub-3425673808153409/6114025665
+Review the AdMob policies to ensure your implementation complies.
+-----
+banner_ad_scanner_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+scanner-screen-ad-bannerca-app-pub-3425673808153409/6577060099
+Review the AdMob policies to ensure your implementation complies.
+------
+interstitial_ad_scanner_document_scanned
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+scanner-document-sacnned-ad-interstitialca-app-pub-3425673808153409/1452919447
+Review the AdMob policies to ensure your implementation complies.
+-------
+rewarded_ad_scanner_batch_scan
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the rewarded implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+scanner-batch-sacn-ad-rewardedca-app-pub-3425673808153409/7099804271
+Review the AdMob policies to ensure your implementation complies.
+--------
+banner_ad_document_preview_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+document-preview-screen-ad-bannerca-app-pub-3425673808153409/1328602844
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_document_edit_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+document-edit-screen-ad-bannerca-app-pub-3425673808153409/2574429425
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_scanner_result_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+scanner-result-screen-ad-bannerca-app-pub-3425673808153409/2446243396
+Review the AdMob policies to ensure your implementation complies.
+-------
+interstitial_ad_scanner_save_action
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+scanner-save-action-ad-interstitialca-app-pub-3425673808153409/2450112823
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_batch_result_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+batch-result-screen-ad-bannerca-app-pub-3425673808153409/8221314250
+Review the AdMob policies to ensure your implementation
+-------
+interstitial_ad_batch_save_all_action
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+batch-save-all-action-ad-interstitialca-app-pub-3425673808153409/3567753371
+Review the AdMob policies to ensure your implementation complies.
+--------
+banner_ad_cv_maker_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+cv-maker-screen-ad-bannerca-app-pub-3425673808153409/9941590033
+Review the AdMob policies to ensure your implementation complies.
+-------
+interstitial_ad_cv_maker_create_new
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+cv-maker-create-new-ad-interstitialca-app-pub-3425673808153409/8628508362
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_main_cv_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+main-cv-screen-ad-bannerca-app-pub-3425673808153409/9982146151
+Review the AdMob policies to ensure your implementation complies.
+-------
+native_ad_cv_list_item_{index}
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the native advanced implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+cv-list-item-index-ad-nativeca-app-pub-3425673808153409/2382857730
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_create_cv_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+create-cv-screen-ad-bannerca-app-pub-3425673808153409/9374613823
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_personal_info_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+personal-info-screen-ad-bannerca-app-pub-3425673808153409/8756694395
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_work_experience_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+work-experience-screen-ad-bannerca-app-pub-3425673808153409/6273807767
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_education_details_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+education-details-screen-ad-bannerca-app-pub-3425673808153409/6785793712
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_skills_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+skills-screen-ad-bannerca-app-pub-3425673808153409/2191286043
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_certifications_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+certifications-screen-ad-bannerca-app-pub-3425673808153409/9366874961
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_language_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+language-screen-ad-bannerca-app-pub-3425673808153409/2801466618
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_career_objectives_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+career-objectives-screen-ad-bannerca-app-pub-3425673808153409/8562376405
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_website_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+website-screen-ad-bannerca-app-pub-3425673808153409/4139259121
+Review the AdMob policies to ensure your implementation complies.
+--------
+banner_ad_base_cv_template_screen
+
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+base-cv-template-screen-ad-bannerca-app-pub-3425673808153409/2191257792
+Review the AdMob policies to ensure your implementation complies.
+-------
+interstitial_ad_cv_template_selected
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+cv-template-selected-ad-interstitalca-app-pub-3425673808153409/3089901331
+Review the AdMob policies to ensure your implementation complies.
+-------
+rewarded_ad_cv_premium_templates
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the rewarded implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+cv-permium-template-ad-rewardca-app-pub-3425673808153409/1446303716
+Review the AdMob policies to ensure your implementation complies.
+--------
+banner_ad_file_transfer_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+file-transfer-screen-ad-bannerca-app-pub-3425673808153409/7252012783
+Review the AdMob policies to ensure your implementation complies.
+-------
+interstitial_ad_file_transfer_success
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+file-transfer-success-ad-interstitialca-app-pub-3425673808153409/4184147694
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_qr_scanner_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+qr-scanner-screen-ad-bannerca-app-pub-3425673808153409/7959084639
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_qr_display_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+qr-display-scan-ad-bannerca-app-pub-3425673808153409/7931821018
+Review the AdMob policies to ensure your implementation complies.
+------
+banner_ad_qr_result_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+qr-result-screen-ad-bannerca-app-pub-3425673808153409/5532231844
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_settings_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+settings-screen-ad-bannerca-app-pub-3425673808153409/4219150172
+Review the AdMob policies to ensure your implementation complies.
+-------
+native_ad_settings_list_item_{index}
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the native advanced implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+settings-list-item-index-ad-nativeca-app-pub-3425673808153409/2706757958
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_profile_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+profile-screen-ad-bannerca-app-pub-3425673808153409/1592986839
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_phone_recovery_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+phone-recovery-screen-ad-bannerca-app-pub-3425673808153409/2650917632
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_set_password_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+set-password-screen-ad-bannerca-app-pub-3425673808153409/6427167655
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_set_password_proper_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+set-password-proper-screen-ad-bannerca-app-pub-3425673808153409/3262782410
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_password_verification_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+password-verification-screen-ad-bannerca-app-pub-3425673808153409/1949700747
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_phone_number_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+phone-number-screen-ad-bannerca-app-pub-3425673808153409/9887583285
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_locked_files_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+locked-files-screen-ad-bannerca-app-pub-3425673808153409/8574501612
+Review the AdMob policies to ensure your implementation complies.
+-------
+interstitial_ad_unlock_file_action
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+unlock-file-action-ad-interstitialca-app-pub-3425673808153409/7406041550
+Review the AdMob policies to ensure your implementation complies.
+-------
+banner_ad_continue_with_google_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+contiune-with-google-screen-ad-bannerca-app-pub-3425673808153409/7010455731
+Review the AdMob policies to ensure your implementation complies.
+-------
+app_open_ad_splash_screen
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+Toolkit Appca-app-pub-3425673808153409~4673401193
+Follow the app open implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+splash-screen-ad-app-openca-app-pub-3425673808153409/3466796542
+Review the AdMob policies to ensure your implementation complies.
+--------
+banner_ad_onboarding_screen
+
+--------
+Set up banner ads
+•	
+•	
+•	
+•	
+o	
+•	
+•	
+ 
+Page Summary
+Select platform: Android (beta)  Android iOS Unity Flutter
+Banner ads occupy a spot within an app's layout, either at the top or bottom of the device screen. They stay on screen while users are interacting with the app, and can refresh automatically after a certain period of time.
+This guide gets you started with anchored adaptive banner ads. Anchored adaptive banners optimizes the ad size for each device using an ad width you specify.
+Anchored adaptive banner ads are fixed aspect ratio ads rather than fixed size ads. The aspect ratio is similar to 320x50. Once you specify the full width available, Google Mobile Ads SDK returns an ad with optimal height for that width. The optimal height for the ad remains constant across different ad requests, and the content surrounding the ad stays in place when the ad refreshes.
+Always test with test ads
+When building and testing your apps, make sure you use test ads rather than live, production ads. Failure to do so can lead to suspension of your account.
+The easiest way to load test ads is to use our dedicated test ad unit ID for banners:
+AndroidiOS
+ca-app-pub-3940256099942544/9214589741
+The test ad units are configured to return test ads for every request, and you're free to use them in your own apps while coding, testing, and debugging. Just make sure you replace them with your own ad unit IDs before publishing your app.
+Get the ad size
+To request a banner ad with the correct ad size, follow these steps:
+1.	Get the width of the device's screen in density-independent pixels (dp) using MediaQuery.of(context). If you don't want to use the full screen width, you can set your own width.
+2.	Use the appropriate static method on the AdSize class to get an AdSize object. For example, use AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(int width) to get the ad size for the current orientation.
+// Get an AnchoredAdaptiveBannerAdSize before loading the ad.
+final size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+  MediaQuery.sizeOf(context).width.truncate(),
+);
+Code Tutor
+expand_more
+Load an ad
+The following example loads a banner ad:
+void _loadAd() async {
+  // Get an AnchoredAdaptiveBannerAdSize before loading the ad.
+  final size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+    MediaQuery.sizeOf(context).width.truncate(),
+  );
+
+  if (size == null) {
+    // Unable to get width of anchored banner.
+    return;
+  }
+
+  BannerAd(
+    adUnitId: "_adUnitId",
+    request: const AdRequest(),
+    size: size,
+    listener: BannerAdListener(
+      onAdLoaded: (ad) {
+        // Called when an ad is successfully received.
+        debugPrint("Ad was loaded.");
+        setState(() {
+          _bannerAd = ad as BannerAd;
+        });
+      },
+      onAdFailedToLoad: (ad, err) {
+        // Called when an ad request failed.
+        debugPrint("Ad failed to load with error: $err");
+        ad.dispose();
+      },
+    ),
+  ).load();
+}
+Code Tutor
+expand_more
+Replace _adUnitId with your own ad unit ID.
+Banner ad events
+Through the use of BannerAdListener, you can listen for lifecycle events, such as when an ad is loaded. This example implements each method and logs a message to the console:
+onAdOpened: (Ad ad) {
+  // Called when an ad opens an overlay that covers the screen.
+  debugPrint("Ad was opened.");
+},
+onAdClosed: (Ad ad) {
+  // Called when an ad removes an overlay that covers the screen.
+  debugPrint("Ad was closed.");
+},
+onAdImpression: (Ad ad) {
+  // Called when an impression occurs on the ad.
+  debugPrint("Ad recorded an impression.");
+},
+onAdClicked: (Ad ad) {
+  // Called when an a click event occurs on the ad.
+  debugPrint("Ad was clicked.");
+},
+onAdWillDismissScreen: (Ad ad) {
+  // iOS only. Called before dismissing a full screen view.
+  debugPrint("Ad will be dismissed.");
+},
+Code Tutor
+expand_more
+Refresh an ad
+If you configured your ad unit to refresh, you don't need to request another ad when the ad fails to load. Google Mobile Ads SDK respects any refresh rate you specified in the AdMob UI. If you haven't enabled refresh, issue a new request. For more details on ad unit refresh, such as setting a refresh rate, see Use automatic refresh for Banner ads.
+Note: When setting a refresh rate in the AdMob UI, the automatic refresh occurs only if the banner is visible on screen.
+Display a banner ad
+To display a BannerAd as a widget, you must instantiate an AdWidget with a supported ad after calling load(). You can create the widget before calling load(), but load() must be called before adding it to the widget tree.
+AdWidget inherits from Flutter's Widget class and can be used like any other widget. On iOS, make sure you place the widget in a widget with a specified width and height. Otherwise, your ad may not be displayed. A BannerAd can be placed in a container with a size that matches the ad:
+if (_bannerAd != null)
+  Align(
+    alignment: Alignment.bottomCenter,
+    child: SafeArea(
+      child: SizedBox(
+        width: _bannerAd!.size.width.toDouble(),
+        height: _bannerAd!.size.height.toDouble(),
+        child: AdWidget(ad: _bannerAd!),
+      ),
+    ),
+  ),
+Code Tutor
+expand_more
+An ad must be disposed when access to it is no longer needed. The best practice for when to call dispose() is either after the AdWidget is removed from the widget tree or in the BannerAdListener.onAdFailedToLoad() callback.
+That's it! Your app is now ready to display banner ads.
+Scrolling limitation on Android 9 and below
+We are aware that some older or less powerful devices running Android 9 or earlier may have suboptimal performance when displaying inline banner ads within scrolling views. We recommend only using these types of banners on Android 10 or later. Fixed position banners such as anchored banners are not affected and can be used with optimal performance on all Android API levels.
+Complete example on GitHub
+See a full example of the banner integration covered in this page in banner_example.
+Learn about other banner types
+Familiarize yourself with other types of banners defined in this section for your Flutter application.
+Inline adaptive banners
+Inline adaptive banners have variable height and are larger, taller banners compared to anchored adaptive banners. Inline adaptive banners are recommended over anchored adaptive banner ads for apps that place banner ads in scrollable content. For more details, see inline adaptive banners.
+Collapsible banners
+Collapsible banner ads are banner ads that are initially presented as a larger overlay, with a button to collapse the ad to a smaller size. Consider using this banner to further optimize your performance. For more details, see collapsible banner ads.
+-----------
+Interstitial ads
+•	
+•	
+o	
+o	
+•	
+•	
+•	
+•	
+ 
+Page Summary
+Select platform: Android (beta)  Android iOS Unity Flutter
+Interstitial ads are full-screen ads that cover the interface of their host app. They're typically displayed at natural transition points in the flow of an app, such as between activities or during the pause between levels in a game. When an app shows an interstitial ad, the user has the choice to either tap on the ad and continue to its destination or close it and return to the app.
+This guide explains how to integrate interstitial ads into a Flutter app.
+Always test with test ads
+When building and testing your apps, make sure you use test ads rather than live, production ads. Failure to do so can lead to suspension of your account.
+The easiest way to load test ads is to use our dedicated test ad unit ID for interstitials:
+AndroidiOS
+ca-app-pub-3940256099942544/1033173712
+The test ad units are configured to return test ads for every request, and you're free to use them in your own apps while coding, testing, and debugging. Just make sure you replace them with your own ad unit IDs before publishing your app.
+Load an ad
+The following example loads an interstitial ad:
+InterstitialAd.load(
+  adUnitId: "_adUnitId",
+  request: const AdRequest(),
+  adLoadCallback: InterstitialAdLoadCallback(
+    onAdLoaded: (InterstitialAd ad) {
+      // Called when an ad is successfully received.
+      debugPrint('Ad was loaded.');
+      // Keep a reference to the ad so you can show it later.
+      _interstitialAd = ad;
+    },
+    onAdFailedToLoad: (LoadAdError error) {
+      // Called when an ad request failed.
+      debugPrint('Ad failed to load with error: $error');
+    },
+  ),
+);
+Code Tutor
+expand_more
+Replace _adUnitId with your own ad unit ID.
+Interstitial ad events
+Through the use of FullScreenContentCallback, you can listen for lifecycle events, such as when the ad is shown or dismissed. Set InterstitialAd.fullScreenContentCallback before showing the ad to receive notifications for these events. This example implements each method:
+ad.fullScreenContentCallback = FullScreenContentCallback(
+  onAdShowedFullScreenContent: (ad) {
+    // Called when the ad showed the full screen content.
+    debugPrint('Ad showed full screen content.');
+  },
+  onAdFailedToShowFullScreenContent: (ad, err) {
+    // Called when the ad failed to show full screen content.
+    debugPrint('Ad failed to show full screen content with error: $err');
+    // Dispose the ad here to free resources.
+    ad.dispose();
+  },
+  onAdDismissedFullScreenContent: (ad) {
+    // Called when the ad dismissed full screen content.
+    debugPrint('Ad was dismissed.');
+    // Dispose the ad here to free resources.
+    ad.dispose();
+  },
+  onAdImpression: (ad) {
+    // Called when an impression occurs on the ad.
+    debugPrint('Ad recorded an impression.');
+  },
+  onAdClicked: (ad) {
+    // Called when a click is recorded for an ad.
+    debugPrint('Ad was clicked.');
+  },
+);
+Code Tutor
+expand_more
+Display an interstitial ad
+An InterstitialAd is displayed as an Overlay on top of all app content and is statically placed; thus, it can't be added to the Flutter widget tree. You can choose when to show the ad by calling show().
+_interstitialAd?.show();
+Code Tutor
+expand_more
+Once show() is called, an Ad displayed this way can't be dismissed programmatically and requires user input. An InterstitialAd can only be shown once. Subsequent calls to show will trigger onAdFailedToShowFullScreenContent.
+An ad must be disposed when access to it is no longer needed. The best practice for when to call dispose() is in the FullScreenContentCallback.onAdDismissedFullScreenContent and FullScreenContentCallback.onAdFailedToShowFullScreenContent callbacks.
+That's it! Your app is now ready to display interstitial ads.
+---------
+Rewarded ads
+•	
+•	
+•	
+o	
+•	
+•	
+•	
+•	
+ 
+Page Summary
+Select platform: Android (beta)  Android iOS Unity Flutter
+Rewarded ads are ads that users have the option of interacting with in exchange for in-app rewards. This guide shows how to integrate rewarded ads from AdMob into a Flutter app.
+Always test with test ads
+When building and testing your apps, make sure you use test ads rather than live, production ads. Failure to do so can lead to suspension of your account.
+The easiest way to load test ads is to use our dedicated test ad unit ID for rewarded ads:
+AndroidiOS
+ca-app-pub-3940256099942544/5224354917
+The test ad units are configured to return test ads for every request, and you're free to use them in your own apps while coding, testing, and debugging. Just make sure you replace them with your own ad unit IDs before publishing your app.
+Load an ad
+The following example loads a rewarded ad:
+RewardedAd.load(
+  adUnitId: "_adUnitId",
+  request: const AdRequest(),
+  rewardedAdLoadCallback: RewardedAdLoadCallback(
+    onAdLoaded: (RewardedAd ad) {
+      // Called when an ad is successfully received.
+      debugPrint('Ad was loaded.');
+      // Keep a reference to the ad so you can show it later.
+      _rewardedAd = ad;
+    },
+    onAdFailedToLoad: (LoadAdError error) {
+      // Called when an ad request failed.
+      debugPrint('Ad failed to load with error: $error');
+    },
+  ),
+);
+Code Tutor
+expand_more
+Replace _adUnitId with your own ad unit ID.
+Rewarded ad events
+Through the use of FullScreenContentCallback, you can listen for lifecycle events, such as when the ad is shown or dismissed. Set RewardedAd.fullScreenContentCallback before showing the ad to receive notifications for these events. This example implements each method and logs a message to the console:
+ad.fullScreenContentCallback = FullScreenContentCallback(
+  onAdShowedFullScreenContent: (ad) {
+    // Called when the ad showed the full screen content.
+    debugPrint('Ad showed full screen content.');
+  },
+  onAdFailedToShowFullScreenContent: (ad, err) {
+    // Called when the ad failed to show full screen content.
+    debugPrint('Ad failed to show full screen content with error: $err');
+    // Dispose the ad here to free resources.
+    ad.dispose();
+  },
+  onAdDismissedFullScreenContent: (ad) {
+    // Called when the ad dismissed full screen content.
+    debugPrint('Ad was dismissed.');
+    // Dispose the ad here to free resources.
+    ad.dispose();
+  },
+  onAdImpression: (ad) {
+    // Called when an impression occurs on the ad.
+    debugPrint('Ad recorded an impression.');
+  },
+  onAdClicked: (ad) {
+    // Called when a click is recorded for an ad.
+    debugPrint('Ad was clicked.');
+  },
+);
+Code Tutor
+expand_more
+Key Point: Make sure to implement the onRewardedAdUserEarnedReward event to reward the user for watching an ad.
+A RewardedAd is displayed as an Overlay on top of all app content and is statically placed; thus, it can't be added to the Flutter widget tree. You can choose when to show the ad by calling show(). RewardedAd.show() takes an OnUserEarnedRewardCallback, which is invoked when the user earns a reward. Be sure to implement this and reward the user for watching an ad.
+_rewardedAd?.show(
+  onUserEarnedReward:
+      (AdWithoutView ad, RewardItem rewardItem) {
+        debugPrint(
+          'Reward amount: ${rewardItem.amount}',
+        );
+      },
+);
+Code Tutor
+expand_more
+Once show() is called, an Ad displayed this way can't be removed programmatically and requires user input. A RewardedAd can only be shown once. Subsequent calls to show will trigger onAdFailedToShowFullScreenContent.
+An ad must be disposed when access to it is no longer needed. The best practice for when to call dispose() is in the FullScreenContentCallback.onAdDismissedFullScreenContent and FullScreenContentCallback.onAdFailedToShowFullScreenContent callbacks.
+[Optional] Validate server-side verification (SSV) callbacks
+Apps that require extra data in server-side verification callbacks should use the custom data feature of rewarded ads. Any string value set on a rewarded ad object is passed to the custom_data query parameter of the SSV callback. If no custom data value is set, the custom_data query parameter value won't be present in the SSV callback.
+The following code sample demonstrates how to set the SSV options after the rewarded ad is loaded:
+RewardedAd.load(
+  adUnitId: "_adUnitId",
+  request: AdRequest(),
+  rewardedAdLoadCallback: RewardedAdLoadCallback(
+    onAdLoaded: (ad) {
+      ServerSideVerificationOptions _options =
+          ServerSideVerificationOptions(
+            customData: 'SAMPLE_CUSTOM_DATA_STRING',
+          );
+      ad.setServerSideOptions(_options);
+      _rewardedAd = ad;
+    },
+    onAdFailedToLoad: (error) {},
+  ),
+);
+Code Tutor
+expand_more
+Replace SAMPLE_CUSTOM_DATA_STRING with your custom data.
+
+
+--------------
+Set up native ads
+
+Spark icon
+Page Summary
+Select platform: Android (beta)New Android iOS Flutter Unity
+Native ads are ad assets presented to users with UI components native to the platform. In coding terms, this means that when a native ad loads, your app receives a NativeAd object that contains its assets, and your app—rather than Google Mobile Ads SDK—is then responsible for displaying them.
+
+This ad format is for when you want more control to style the look of your ads. If you don’t need these features, use one of our other ad formats.
+
+There are two ways to display native ads in your Flutter app:
+
+Native templates: Pre-defined native templates styled with a Dart API.
+Platform setup: Custom platform-specific layouts defined using Android and iOS layout tools.
+Native templates
+There are two template types to choose from: small or medium. Each template comes with UI styling options; however, they offer less customization than the platform setup implementation.
+
+Small
+
+Android	
+iOS
+Medium
+
+Android	
+iOS
+For native templates implementation details in Dart, see Native templates.
+
+Platform setup
+Platform setup is better when you need complete control of the look and feel for your ads on both Android and iOS platforms, but you'll need to write code for both.
+
+For platform-specific setup instructions, see Platform setup.

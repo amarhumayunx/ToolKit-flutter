@@ -16,6 +16,9 @@ import '../../widgets/tools/file_transfer_dropzone.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
 import '../../widgets/tools/file_transfer_selection.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 import '../files_screens/files_main_screen.dart';
 import '../settings_screens/continue_with_google_screen.dart';
 import '../../services/auth_service.dart';
@@ -157,7 +160,7 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
 
     // Check if no file is selected and show snackbar
     if (_selectedFile == null) {
-      AppSnackBar.show(context, message: 'Please select a file first'.tr);
+      AppSnackBar.show(context, message: 'please_select_file_first'.tr);
       return;
     }
 
@@ -180,6 +183,9 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
           'lastAccessed': FieldValue.serverTimestamp(),
           'accessCount': FieldValue.increment(1),
         });
+
+        // Show interstitial ad on successful file transfer
+        AdManager.showFileTransferSuccessInterstitial();
 
         // Navigate to QR display with existing data
         Navigator.push(
@@ -242,6 +248,9 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
       final finalQrDataString = jsonEncode(qrCodeData);
       await qrDocRef.update({'qrData': finalQrDataString});
 
+      // Show interstitial ad on successful file transfer
+      AdManager.showFileTransferSuccessInterstitial();
+
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -260,7 +269,7 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
       // Optional: Show error snackbar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error generating QR code: $e'),
+          content: Text('${'error_generating_qr_code'.tr}: $e'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
@@ -292,7 +301,7 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                  child: Text('Sign in Required'.tr,
+                  child: Text('sign_in_required'.tr,
                       style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -300,7 +309,7 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
             ],
           ),
           content: Text(
-              'Please sign in to generate QR codes for your files.'.tr,
+              'please_sign_in_to_generate_qr'.tr,
               style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
@@ -308,7 +317,7 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'.tr,
+              child: Text('cancel'.tr,
                   style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -332,7 +341,7 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
-              child: Text('Sign in'.tr,
+              child: Text('sign_in'.tr,
                   style: const TextStyle(
                       fontSize: 14, fontWeight: FontWeight.w500)),
             ),
@@ -426,7 +435,7 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
                             onTap: _navigateToFileSelection,
                             onRemoveFile: _removeFile,
                             isEmpty: _shouldClearFile || _selectedFile == null,
-                            emptyStateText: 'Generate QR Code'.tr,
+                            emptyStateText: 'generate_qr_code'.tr,
                           ),
                         ),
                       ],
@@ -441,12 +450,18 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
                 const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
             child: CustomGradientButton(
               text: _isGeneratingQR
-                  ? 'Generating QR Code...'.tr
-                  : 'Generate QR Code'.tr,
+                  ? 'generating_qr_code'.tr
+                  : 'generate_qr_code'.tr,
               onPressed: _isGeneratingQR ? null : _generateQRCode,
             ),
           ),
+          // Add bottom padding for ad
+          const SizedBox(height: 60),
         ],
+      ),
+      // Banner ad at bottom
+      bottomNavigationBar: BannerAdWidget(
+        adUnitId: AdConfig.bannerAdFileTransferScreen,
       ),
     );
   }

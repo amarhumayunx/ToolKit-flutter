@@ -1,22 +1,18 @@
-import 'dart:io';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/material.dart';
+import '../screens/webview_screen.dart';
 
 class PrivacyPolicyService {
-  static const String _iosUrl = 'https://sites.google.com/view/emojimixmergemojiprivacypolicy/home';
-  static const String _androidUrl = 'https://sites.google.com/view/emojimix-app-privacy-policy/home';
+  static const String privacyPolicyUrl = 'https://v0-toolkitx.vercel.app/';
 
-  static Future<void> openPrivacyPolicy() async {
-    final String url = Platform.isIOS ? _iosUrl : _androidUrl;
-    final Uri uri = Uri.parse(url);
-
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication, // Ensures compatibility for Android 12+
-      );
-    } else {
-      print('Could not launch: $url');
-      throw 'Could not launch $url';
-    }
+  static Future<void> openPrivacyPolicy(BuildContext context) async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const WebViewScreen(
+          url: privacyPolicyUrl,
+          title: 'Privacy Policy',
+        ),
+      ),
+    );
   }
 }

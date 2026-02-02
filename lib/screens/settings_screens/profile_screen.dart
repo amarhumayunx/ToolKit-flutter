@@ -8,6 +8,8 @@ import '../../services/auth_service.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/logout_button.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -64,60 +66,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context, profileProvider, child) {
         return Scaffold(
           backgroundColor: AppColors.appBar,
-          body: Column(
+          body: Stack(
             children: [
-              SizedBox(height: MediaQuery.of(context).padding.top + 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    Expanded(
-                      child: Text(
-                        "profile".tr,
-                        style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
+              Column(
+                children: [
+                  SizedBox(height: MediaQuery.of(context).padding.top + 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                          onPressed: () => Navigator.pop(context),
                         ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        isEditing ? Icons.check : Icons.edit,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          if (isEditing) {
-                            _saveProfileChanges(profileProvider);
-                          }
-                          isEditing = !isEditing;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
+                        Expanded(
+                          child: Text(
+                            "profile".tr,
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            isEditing ? Icons.check : Icons.edit,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              if (isEditing) {
+                                _saveProfileChanges(profileProvider);
+                              }
+                              isEditing = !isEditing;
+                            });
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                  child: Stack(
-                    children: [
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(24),
-                        child: Column(
-                          children: [
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          topRight: Radius.circular(30),
+                        ),
+                      ),
+                      child: Stack(
+                        children: [
+                          SingleChildScrollView(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              children: [
                             _buildProfilePictureSection(profileProvider),
                             const SizedBox(height: 30),
                             _buildProfileField(
@@ -179,12 +183,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                     ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
+          // Banner ad at bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: BannerAdWidget(
+              adUnitId: AdConfig.bannerAdProfileScreen,
+            ),
           ),
-        );
+        ],
+      ),
+    );
       },
     );
   }
@@ -550,66 +565,176 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _showLogoutDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          "logout".tr,
-          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+      barrierColor: Colors.black.withOpacity(0.5),
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 15,
+              spreadRadius: 5,
+              offset: const Offset(0, 5),
+            )
+          ],
         ),
-        content: Text(
-          "are_you_sure_logout".tr,
-          style: GoogleFonts.inter(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              "cancel".tr,
-              style: GoogleFonts.inter(color: Colors.grey[600]),
-            ),
+        child: AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context); // Close dialog first
-
-              try {
-                // Clear profile provider data before logout
-                final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
-                profileProvider.loadProfileData(
-                  avatar: '6',
-                  username: 'not_set'.tr,
-                  email: 'not_set'.tr,
-                  gender: 'not_set'.tr,
-                  dateOfBirth: 'not_set'.tr,
-                );
-
-                // Sign out from auth service
-                await _authService.signOut();
-
-                // Navigate to login screen and clear navigation stack
-                if (mounted) {
-                  Navigator.pop(context);
-                }
-              } catch (e) {
-                // Handle logout error
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${"error_during_logout".tr}: $e'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
-            },
+          contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.logout_rounded,
+                  color: Colors.red[600],
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  "logout".tr,
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF1F2937),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 4),
             child: Text(
-              "logout".tr,
+              "are_you_sure_logout".tr,
               style: GoogleFonts.inter(
-                color: Colors.red,
-                fontWeight: FontWeight.w600,
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF6B7280),
+                height: 1.5,
               ),
             ),
           ),
-        ],
+          actions: [
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: const Color(0xFFE5E7EB),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: Text(
+                        "cancel".tr,
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF6B7280),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          AppColors.gradientStart,
+                          AppColors.gradientEnd,
+                        ],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: TextButton(
+                      onPressed: () async {
+                        Navigator.pop(context); // Close dialog first
+
+                        try {
+                          // Clear profile provider data before logout
+                          final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+                          profileProvider.loadProfileData(
+                            avatar: '6',
+                            username: 'not_set'.tr,
+                            email: 'not_set'.tr,
+                            gender: 'not_set'.tr,
+                            dateOfBirth: 'not_set'.tr,
+                          );
+
+                          // Sign out from auth service
+                          await _authService.signOut();
+
+                          // Navigate to login screen and clear navigation stack
+                          if (mounted) {
+                            Navigator.pop(context);
+                          }
+                        } catch (e) {
+                          // Handle logout error
+                          if (mounted) {
+                            AppSnackBar.show(
+                              context,
+                              message: '${"error_during_logout".tr}: $e',
+                            );
+                          }
+                        }
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: Text(
+                        "logout".tr,
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -13,6 +13,9 @@ import '../../utils/app_snackbar.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 import 'document_item.dart';
 import 'docxService.dart';
 
@@ -85,6 +88,9 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
   Future<void> _handleSaveFile() async {
     if (convertedFile != null) {
       try {
+        // Show interstitial ad after successful split
+        AdManager.showSplitFileSuccessInterstitial();
+        
         await SaveFileService.saveFile(
           context,
           File(_currentFilePath),
@@ -376,43 +382,56 @@ class _SplitProgressScreenState extends State<SplitProgressScreen> with SingleTi
       appBar: CustomAppBar(title: ('split_document'.tr)),
       resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 100.0),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    _buildLoadingContainer(),
-                    if (_animationCompleted) ...[
-                      const SizedBox(height: 36),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          ('split_file_progress_screen'.tr),
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
+            SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 100.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  _buildLoadingContainer(),
+                  if (_animationCompleted) ...[
+                    const SizedBox(height: 36),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        ('split_file_progress_screen'.tr),
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      if (_outputFile != null)
-                        DocumentContainer(
-                          filePath: _outputFile!.path,
-                          onTap: _openFile,
-                          onDelete: _handleFileDeleted,
-                          onFileRenamed: _handleFileRenamed,
-                        ),
-                    ],
+                    ),
+                    const SizedBox(height: 10),
+                    if (_outputFile != null)
+                      DocumentContainer(
+                        filePath: _outputFile!.path,
+                        onTap: _openFile,
+                        onDelete: _handleFileDeleted,
+                        onFileRenamed: _handleFileRenamed,
+                      ),
                   ],
-                ),
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 320),
+                ],
               ),
             ),
-
+            // Banner ad at the very bottom
+            if (_animationCompleted)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: BannerAdWidget(
+                  adUnitId: AdConfig.bannerAdSplitResultScreen,
+                  alignment: Alignment.bottomCenter,
+                ),
+              ),
+            // Save button above banner ad
             if (_animationCompleted && hasValidFile)
-              SafeArea(
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: MediaQuery.of(context).padding.bottom + 60,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   child: CustomGradientButton(

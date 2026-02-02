@@ -11,6 +11,7 @@ import '../../widgets/buttons/save_zip_png_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import '../../widgets/tools/document_container.dart';
+import '../../utils/ad_manager.dart';
 
 class PdfSaveScreen extends StatefulWidget {
   final File selectedPdf;
@@ -71,6 +72,13 @@ class _PdfSaveScreenState extends State<PdfSaveScreen>
         widget.selectedPdf.path.split('/').last.split('.').first;
     currentFileName = originalName;
     _animationController.forward();
+    
+    // Show interstitial ad after successful conversion
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_animationCompleted) {
+        AdManager.showPdfSaveSuccessInterstitial();
+      }
+    });
   }
 
   void _determineFileType() {

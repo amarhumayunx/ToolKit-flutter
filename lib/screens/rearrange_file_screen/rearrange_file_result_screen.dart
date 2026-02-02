@@ -11,6 +11,9 @@ import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import '../../widgets/tools/document_container.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 import '../../services/save_zip_png_service.dart';
 import '../split_screen/docxService.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -81,6 +84,9 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
   Future<void> _handleSaveFile() async {
     if (convertedFile != null) {
       try {
+        // Show interstitial ad after successful rearrange
+        AdManager.showRearrangeFileSuccessInterstitial();
+        
         await SaveFileService.saveFile(
           context,
           File(_currentFilePath),
@@ -407,99 +413,112 @@ class _RearrangeFileResultScreenState extends State<RearrangeFileResultScreen>
       appBar: CustomAppBar(title: 'rearrange_results'.tr),
       resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 100.0),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    _buildLoadingContainer(),
-                    if (_animationCompleted) ...[
-                      const SizedBox(height: 36),
-                      if (_errorOccurred) ...[
-                        const Icon(
-                          Icons.error_outline,
-                          color: Colors.red,
-                          size: 64,
+            SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 100.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  _buildLoadingContainer(),
+                  if (_animationCompleted) ...[
+                    const SizedBox(height: 36),
+                    if (_errorOccurred) ...[
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 64,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'error_occurred'.tr,
+                        style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _statusMessage,
+                        style: GoogleFonts.inter(fontSize: 16),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _errorOccurred = false;
+                            _processingComplete = false;
+                            _progress = 0.0;
+                            _statusMessage = 'processing_document'.tr;
+                            _rearrangedFiles.clear();
+                            _outputFile = null;
+                            convertedFile = null;
+                            _currentFilePath = '';
+                            _fileRenamed = false;
+                            _saveButtonKey = 'retry_${DateTime.now().millisecondsSinceEpoch}';
+                          });
+                          _rearrangeDocument();
+                        },
+                        child: Text('try_again'.tr),
+                      ),
+                    ] else ...[
+                      const SizedBox(height: 24),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'rearranged_files'.tr,
+                          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500),
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'error_occurred'.tr,
-                          style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _statusMessage,
-                          style: GoogleFonts.inter(fontSize: 16),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _errorOccurred = false;
-                              _processingComplete = false;
-                              _progress = 0.0;
-                              _statusMessage = 'processing_document'.tr;
-                              _rearrangedFiles.clear();
-                              _outputFile = null;
-                              convertedFile = null;
-                              _currentFilePath = '';
-                              _fileRenamed = false;
-                              _saveButtonKey = 'retry_${DateTime.now().millisecondsSinceEpoch}';
-                            });
-                            _rearrangeDocument();
+                      ),
+                      const SizedBox(height: 16),
+                      if (_rearrangedFiles.isNotEmpty)
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _rearrangedFiles.length,
+                          itemBuilder: (context, index) {
+                            final file = _rearrangedFiles[index];
+                            if (file == null) return const SizedBox.shrink();
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: DocumentContainer(
+                                filePath: file.path,
+                                onTap: () => _openFile(file),
+                                onDelete: _handleFileDeleted,
+                                onFileRenamed: _handleFileRenamed,
+                              ),
+                            );
                           },
-                          child: Text('try_again'.tr),
-                        ),
-                      ] else ...[
-                        const SizedBox(height: 24),
-                        Align(
-                          alignment: Alignment.centerLeft,
+                        )
+                      else if (!_processingComplete)
+                        Center(
                           child: Text(
-                            'rearranged_files'.tr,
-                            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500),
+                            'processing_document'.tr,
+                            style: GoogleFonts.inter(fontSize: 16),
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        if (_rearrangedFiles.isNotEmpty)
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: _rearrangedFiles.length,
-                            itemBuilder: (context, index) {
-                              final file = _rearrangedFiles[index];
-                              if (file == null) return const SizedBox.shrink();
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: DocumentContainer(
-                                  filePath: file.path,
-                                  onTap: () => _openFile(file),
-                                  onDelete: _handleFileDeleted,
-                                  onFileRenamed: _handleFileRenamed,
-                                ),
-                              );
-                            },
-                          )
-                        else if (!_processingComplete)
-                          Center(
-                            child: Text(
-                              'processing_document'.tr,
-                              style: GoogleFonts.inter(fontSize: 16),
-                            ),
-                          ),
-                      ],
                     ],
                   ],
-                ),
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 320),
+                ],
               ),
             ),
-
+            // Banner ad at the very bottom
+            if (_animationCompleted && !_errorOccurred && _processingComplete)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: BannerAdWidget(
+                  adUnitId: AdConfig.bannerAdRearrangeResultScreen,
+                  alignment: Alignment.bottomCenter,
+                ),
+              ),
+            // Save button above banner ad
             if (_animationCompleted && hasValidFiles && !_errorOccurred && _processingComplete)
-              SafeArea(
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: MediaQuery.of(context).padding.bottom + 60,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   child: CustomGradientButton(

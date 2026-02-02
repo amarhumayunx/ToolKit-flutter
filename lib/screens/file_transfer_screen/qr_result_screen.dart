@@ -10,6 +10,8 @@ import '../../utils/app_colors.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import '../../widgets/tools/document_container.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 import 'file_transfer_screen.dart';
 
 class QRResultScreen extends StatefulWidget {
@@ -170,49 +172,62 @@ class _QRResultScreenState extends State<QRResultScreen>
           Navigator.of(context).pop();
           return false;
         },
-        child: Column(
+        child: Stack(
           children: [
-            // Scrollable content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 20),
-                      if (_isLoading || _animationCompleted)
-                        AnimatedLoadingContainer(
-                          animationController: _animationController,
-                          animationCompleted: _animationCompleted,
-                        ),
-                      const SizedBox(height: 36),
-                      if (!_isLoading) ...[
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'scanned_file'.tr,
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+            Column(
+              children: [
+                // Banner ad at top
+                BannerAdWidget(
+                  adUnitId: AdConfig.bannerAdQrResultScreen,
+                  isTop: true,
+                ),
+                // Scrollable content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 20),
+                          if (_isLoading || _animationCompleted)
+                            AnimatedLoadingContainer(
+                              animationController: _animationController,
+                              animationCompleted: _animationCompleted,
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        DocumentContainer(
-                          filePath: widget.fileModel.path,
-                          onTap: _openDocument,
-                        ),
-                      ],
-                    ],
+                          const SizedBox(height: 36),
+                          if (!_isLoading) ...[
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'scanned_file'.tr,
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            DocumentContainer(
+                              filePath: widget.fileModel.path,
+                              onTap: _openDocument,
+                            ),
+                          ],
+                        ],
                   ),
                 ),
               ),
+                ),
+              ],
             ),
-            // Button fixed at bottom
-            if (!_isLoading)
-              Container(
-                padding: const EdgeInsets.all(20),
+          // Button positioned at bottom using Stack
+          if (!_isLoading)
+            Positioned(
+              left: 20,
+              right: 20,
+              bottom: 0,
+              child: Container(
+                padding: const EdgeInsets.only(bottom: 20),
                 child: SizedBox(
                   width: double.infinity,
                   height: 48,
@@ -275,6 +290,7 @@ class _QRResultScreenState extends State<QRResultScreen>
                   ),
                 ),
               ),
+            ),
           ],
         ),
       ),

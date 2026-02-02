@@ -14,6 +14,8 @@ import '../../widgets/scanner_widgets/batch_scan.dart';
 import '../../widgets/scanner_widgets/camera_appbar.dart';
 import '../../widgets/scanner_widgets/document_crop_frame.dart';
 import '../../widgets/scanner_widgets/single_scan.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 import 'batch_result_screen.dart';
 import 'document_edit_screen.dart';
 
@@ -71,7 +73,7 @@ class _ScannerScreenState extends State<ScannerScreen>
   void _measureBottomContainerHeight() {
     if (_bottomContainerKey.currentContext != null) {
       final RenderBox box =
-      _bottomContainerKey.currentContext!.findRenderObject() as RenderBox;
+          _bottomContainerKey.currentContext!.findRenderObject() as RenderBox;
       setState(() {
         _bottomContainerHeight = box.size.height;
       });
@@ -145,8 +147,7 @@ class _ScannerScreenState extends State<ScannerScreen>
 
       if (status.isDenied) {
         setState(() {
-          _errorMessage =
-              'camera_permission_denied_message'.tr;
+          _errorMessage = 'camera_permission_denied_message'.tr;
           _isLoading = false;
           _isCameraPermissionGranted = false;
         });
@@ -155,8 +156,7 @@ class _ScannerScreenState extends State<ScannerScreen>
 
       if (status.isPermanentlyDenied) {
         setState(() {
-          _errorMessage =
-              'camera_permission_permanently_denied_message'.tr;
+          _errorMessage = 'camera_permission_permanently_denied_message'.tr;
           _isLoading = false;
           _isCameraPermissionGranted = false;
         });
@@ -178,7 +178,7 @@ class _ScannerScreenState extends State<ScannerScreen>
     } catch (e) {
       setState(() {
         _errorMessage =
-        '${'failed_to_request_camera_permission'.tr}: ${e.toString()}';
+            '${'failed_to_request_camera_permission'.tr}: ${e.toString()}';
         _isLoading = false;
         _isCameraPermissionGranted = false;
       });
@@ -238,8 +238,7 @@ class _ScannerScreenState extends State<ScannerScreen>
         _retryCount++;
         final delay = Duration(seconds: _retryCount * 2);
         print(
-            'Retrying camera initialization in ${delay
-                .inSeconds} seconds (attempt $_retryCount)');
+            'Retrying camera initialization in ${delay.inSeconds} seconds (attempt $_retryCount)');
 
         Future.delayed(delay, () {
           if (mounted && _isCameraPermissionGranted && !_isCameraInitialized) {
@@ -255,9 +254,11 @@ class _ScannerScreenState extends State<ScannerScreen>
 
     if (errorString.contains('permission')) {
       return 'camera_permission_check_message'.tr;
-    } else if (errorString.contains('already in use') || errorString.contains('busy')) {
+    } else if (errorString.contains('already in use') ||
+        errorString.contains('busy')) {
       return 'camera_in_use_message'.tr;
-    } else if (errorString.contains('not available') || errorString.contains('not found')) {
+    } else if (errorString.contains('not available') ||
+        errorString.contains('not found')) {
       return 'camera_not_available_message'.tr;
     } else if (errorString.contains('initialization')) {
       return 'camera_initialization_failed_message'.tr;
@@ -320,7 +321,7 @@ class _ScannerScreenState extends State<ScannerScreen>
 
         if (pickedFiles.isNotEmpty) {
           List<File> selectedImages =
-          pickedFiles.map((file) => File(file.path)).toList();
+              pickedFiles.map((file) => File(file.path)).toList();
 
           if (_isBatchModeActive) {
             setState(() {
@@ -328,7 +329,8 @@ class _ScannerScreenState extends State<ScannerScreen>
             });
 
             AppSnackBar.show(context,
-                message: '${'added_images_to_batch'.tr} ${selectedImages.length} ${'images'.tr}. ${'total'.tr}: ${_batchImages.length}');
+                message:
+                    '${'added_images_to_batch'.tr} ${selectedImages.length} ${'images'.tr}. ${'total'.tr}: ${_batchImages.length}');
           } else {
             setState(() {
               _batchImages = selectedImages;
@@ -386,7 +388,8 @@ class _ScannerScreenState extends State<ScannerScreen>
       final File originalImage = File(photo.path);
 
       final screenWidth = MediaQuery.of(context).size.width;
-      final screenHeight = MediaQuery.of(context).size.height - _bottomContainerHeight;
+      final screenHeight =
+          MediaQuery.of(context).size.height - _bottomContainerHeight;
 
       // Check for specific document types using keys directly
       if (_selectedScanType == 'business_card' ||
@@ -394,7 +397,6 @@ class _ScannerScreenState extends State<ScannerScreen>
           _selectedScanType == 'legal' ||
           _selectedScanType == 'letter' ||
           _selectedScanType == 'id_card') {
-
         double frameWidth, frameHeight;
 
         // Use switch with keys directly
@@ -436,9 +438,11 @@ class _ScannerScreenState extends State<ScannerScreen>
           throw Exception('Failed to capture within frame');
         }
 
-        final File? enhancedImage = await FrameCaptureService.enhanceDocumentImage(framedImage);
+        final File? enhancedImage =
+            await FrameCaptureService.enhanceDocumentImage(framedImage);
         final File savedImage = enhancedImage ?? framedImage;
-        final File permanentFile = await savedImage.copy('${directory.path}/$fileName');
+        final File permanentFile =
+            await savedImage.copy('${directory.path}/$fileName');
 
         setState(() {
           _recentImages.insert(0, permanentFile);
@@ -456,14 +460,16 @@ class _ScannerScreenState extends State<ScannerScreen>
           _navigateToPreviewScreen(permanentFile);
         }
       } else if (_selectedScanType == 'batch') {
-        final File savedImage = await originalImage.copy('${directory.path}/$fileName');
+        final File savedImage =
+            await originalImage.copy('${directory.path}/$fileName');
         setState(() {
           _batchImages.add(savedImage);
           _isBatchModeActive = true;
           _recentImages.insert(0, savedImage);
         });
       } else {
-        final File savedImage = await originalImage.copy('${directory.path}/$fileName');
+        final File savedImage =
+            await originalImage.copy('${directory.path}/$fileName');
         setState(() {
           _imageFile = savedImage;
           _recentImages.insert(0, savedImage);
@@ -472,7 +478,8 @@ class _ScannerScreenState extends State<ScannerScreen>
       }
     } catch (e) {
       print('Error capturing image: $e');
-      AppSnackBar.show(context, message: 'failed_to_capture_image_try_again'.tr);
+      AppSnackBar.show(context,
+          message: 'failed_to_capture_image_try_again'.tr);
     }
   }
 
@@ -480,17 +487,16 @@ class _ScannerScreenState extends State<ScannerScreen>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            DocumentEditScreen(
-              imageFile: imageFile,
-              isBatchMode: false,
-              isBusinessCard: _selectedScanType == 'business_card',
-              isPassport: _selectedScanType == 'passport',
-              isLegal: _selectedScanType == 'legal',
-              isLetter: _selectedScanType == 'letter',
-              isIdCard: _selectedScanType == 'id_card',
-              cropRect: null,
-            ),
+        builder: (context) => DocumentEditScreen(
+          imageFile: imageFile,
+          isBatchMode: false,
+          isBusinessCard: _selectedScanType == 'business_card',
+          isPassport: _selectedScanType == 'passport',
+          isLegal: _selectedScanType == 'legal',
+          isLetter: _selectedScanType == 'letter',
+          isIdCard: _selectedScanType == 'id_card',
+          cropRect: null,
+        ),
       ),
     );
   }
@@ -501,13 +507,12 @@ class _ScannerScreenState extends State<ScannerScreen>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            DocumentEditScreen(
-              imageFile: _idCardImages[0],
-              isBatchMode: false,
-              isIdCard: true,
-              cropRect: null,
-            ),
+        builder: (context) => DocumentEditScreen(
+          imageFile: _idCardImages[0],
+          isBatchMode: false,
+          isIdCard: true,
+          cropRect: null,
+        ),
       ),
     );
   }
@@ -518,13 +523,12 @@ class _ScannerScreenState extends State<ScannerScreen>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            DocumentEditScreen(
-              imageFile: _batchImages[0],
-              isBatchMode: true,
-              batchImages: _batchImages,
-              currentIndex: 0,
-            ),
+        builder: (context) => DocumentEditScreen(
+          imageFile: _batchImages[0],
+          isBatchMode: true,
+          batchImages: _batchImages,
+          currentIndex: 0,
+        ),
       ),
     );
   }
@@ -544,10 +548,9 @@ class _ScannerScreenState extends State<ScannerScreen>
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              BatchResultScreen(
-                batchImages: _batchImages,
-              ),
+          builder: (context) => BatchResultScreen(
+            batchImages: _batchImages,
+          ),
         ),
       );
     }
@@ -559,34 +562,32 @@ class _ScannerScreenState extends State<ScannerScreen>
         _batchImages.isNotEmpty) {
       showDialog(
         context: context,
-        builder: (context) =>
-            AlertDialog(
-              title: Text('discard_batch_title'.tr),
-              content: Text(
-                  'discard_batch_message'.tr),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('cancel'.tr,
-                      style: GoogleFonts.inter(color: AppColors.primary)),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    setState(() {
-                      _selectedScanType = scanType;
-                      _batchImages = [];
-                      _isBatchModeActive = false;
-                      _idCardImages = [];
-                    });
-                  },
-                  child: Text('discard'.tr,
-                      style: GoogleFonts.inter(color: AppColors.primary)),
-                ),
-              ],
+        builder: (context) => AlertDialog(
+          title: Text('discard_batch_title'.tr),
+          content: Text('discard_batch_message'.tr),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('cancel'.tr,
+                  style: GoogleFonts.inter(color: AppColors.primary)),
             ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {
+                  _selectedScanType = scanType;
+                  _batchImages = [];
+                  _isBatchModeActive = false;
+                  _idCardImages = [];
+                });
+              },
+              child: Text('discard'.tr,
+                  style: GoogleFonts.inter(color: AppColors.primary)),
+            ),
+          ],
+        ),
       );
     } else {
       setState(() {
@@ -785,255 +786,276 @@ class _ScannerScreenState extends State<ScannerScreen>
         isFlashOn: _isFlashOn,
         isGridVisible: _isGridVisible,
         showGridIcon:
-        _selectedScanType == 'single' || _selectedScanType == 'batch',
+            _selectedScanType == 'single' || _selectedScanType == 'batch',
         onClosePressed: () => Navigator.pop(context),
         onFlashPressed: _toggleFlash,
         onGridPressed: _toggleGrid,
       ),
       extendBodyBehindAppBar: true,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final screenWidth = constraints.maxWidth;
-            final screenHeight = constraints.maxHeight - _bottomContainerHeight;
+      body: Stack(
+        children: [
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final screenWidth = constraints.maxWidth;
+                final screenHeight =
+                    constraints.maxHeight - _bottomContainerHeight;
 
-            double cropWidth;
-            double cropHeight;
-            String documentType = 'single';
+                double cropWidth;
+                double cropHeight;
+                String documentType = 'single';
 
-            // Use switch with keys directly
-            switch (_selectedScanType) {
-              case 'business_card':
-                cropWidth = businessCardCropWidth;
-                cropHeight = businessCardCropHeight;
-                documentType = 'business_card';
-                break;
-              case 'passport':
-                cropWidth = passportCropWidth;
-                cropHeight = passportCropHeight;
-                documentType = 'passport';
-                break;
-              case 'legal':
-                cropWidth = legalCropWidth;
-                cropHeight = legalCropHeight;
-                documentType = 'legal';
-                break;
-              case 'letter':
-                cropWidth = letterCropWidth;
-                cropHeight = letterCropHeight;
-                documentType = 'letter';
-                break;
-              case 'id_card':
-                cropWidth = idCardCropWidth;
-                cropHeight = idCardCropHeight;
-                documentType = 'id_card';
-                break;
-              default:
-                cropWidth = 0;
-                cropHeight = 0;
-            }
+                // Use switch with keys directly
+                switch (_selectedScanType) {
+                  case 'business_card':
+                    cropWidth = businessCardCropWidth;
+                    cropHeight = businessCardCropHeight;
+                    documentType = 'business_card';
+                    break;
+                  case 'passport':
+                    cropWidth = passportCropWidth;
+                    cropHeight = passportCropHeight;
+                    documentType = 'passport';
+                    break;
+                  case 'legal':
+                    cropWidth = legalCropWidth;
+                    cropHeight = legalCropHeight;
+                    documentType = 'legal';
+                    break;
+                  case 'letter':
+                    cropWidth = letterCropWidth;
+                    cropHeight = letterCropHeight;
+                    documentType = 'letter';
+                    break;
+                  case 'id_card':
+                    cropWidth = idCardCropWidth;
+                    cropHeight = idCardCropHeight;
+                    documentType = 'id_card';
+                    break;
+                  default:
+                    cropWidth = 0;
+                    cropHeight = 0;
+                }
 
-            final left = (screenWidth - cropWidth) / 2;
-            final top = (screenHeight - cropHeight) / 2;
+                final left = (screenWidth - cropWidth) / 2;
+                final top = (screenHeight - cropHeight) / 2;
 
-            return Stack(
-              children: [
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: _bottomContainerHeight - 20,
-                  child: CameraPreview(_controller!),
-                ),
-                if (_selectedScanType == 'business_card' ||
-                    _selectedScanType == 'passport' ||
-                    _selectedScanType == 'legal' ||
-                    _selectedScanType == 'letter' ||
-                    _selectedScanType == 'id_card')
-                  DocumentCropFrame(
-                    width: cropWidth,
-                    height: cropHeight,
-                    left: left,
-                    top: top,
-                    documentType: documentType,
-                  )
-                else if (_selectedScanType == 'batch')
-                  BatchScan(
-                    isGridVisible: _isGridVisible,
-                    bottomPadding: _bottomContainerHeight,
-                  )
-                else if (_selectedScanType == 'single')
-                    SingleScan(
-                      isGridVisible: _isGridVisible,
-                      bottomPadding: _bottomContainerHeight,
+                return Stack(
+                  children: [
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: _bottomContainerHeight - 20,
+                      child: CameraPreview(_controller!),
                     ),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    key: _bottomContainerKey,
-                    height: 150,
-                    padding:
-                    const EdgeInsets.only(top: 16, left: 16, right: 16),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20),
+                    if (_selectedScanType == 'business_card' ||
+                        _selectedScanType == 'passport' ||
+                        _selectedScanType == 'legal' ||
+                        _selectedScanType == 'letter' ||
+                        _selectedScanType == 'id_card')
+                      DocumentCropFrame(
+                        width: cropWidth,
+                        height: cropHeight,
+                        left: left,
+                        top: top,
+                        documentType: documentType,
+                      )
+                    else if (_selectedScanType == 'batch')
+                      BatchScan(
+                        isGridVisible: _isGridVisible,
+                        bottomPadding: _bottomContainerHeight,
+                      )
+                    else if (_selectedScanType == 'single')
+                      SingleScan(
+                        isGridVisible: _isGridVisible,
+                        bottomPadding: _bottomContainerHeight,
                       ),
-                      border: Border(
-                        top: BorderSide(
-                          color: AppColors.primary,
-                          width: 1,
-                        ),
-                      ),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 40,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: [
-                              _buildScanTypeButton('business_card',
-                                  _selectedScanType == 'business_card'),
-                              const SizedBox(width: 18),
-                              _buildScanTypeButton(
-                                  'single', _selectedScanType == 'single'),
-                              const SizedBox(width: 18),
-                              _buildScanTypeButton(
-                                  'batch', _selectedScanType == 'batch'),
-                              const SizedBox(width: 18),
-                              _buildScanTypeButton(
-                                  'id_card', _selectedScanType == 'id_card'),
-                              const SizedBox(width: 18),
-                              _buildScanTypeButton('passport',
-                                  _selectedScanType == 'passport'),
-                              const SizedBox(width: 18),
-                              _buildScanTypeButton(
-                                  'legal', _selectedScanType == 'legal'),
-                              const SizedBox(width: 18),
-                              _buildScanTypeButton(
-                                  'letter', _selectedScanType == 'letter'),
-                            ],
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        key: _bottomContainerKey,
+                        height: 150,
+                        padding:
+                            const EdgeInsets.only(top: 16, left: 16, right: 16),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            topRight: Radius.circular(20),
+                          ),
+                          border: Border(
+                            top: BorderSide(
+                              color: AppColors.primary,
+                              width: 1,
+                            ),
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              top: 4, left: 22, right: 22),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              IconButton(
-                                icon: SvgPicture.asset(
-                                  'assets/icons/gallery_option_icon.svg',
-                                  height: 26,
-                                  width: 26,
-                                ),
-                                onPressed: _pickImageFromGallery,
+                        clipBehavior: Clip.antiAlias,
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 40,
+                              child: ListView(
+                                scrollDirection: Axis.horizontal,
+                                children: [
+                                  _buildScanTypeButton('business_card',
+                                      _selectedScanType == 'business_card'),
+                                  const SizedBox(width: 18),
+                                  _buildScanTypeButton(
+                                      'single', _selectedScanType == 'single'),
+                                  const SizedBox(width: 18),
+                                  _buildScanTypeButton(
+                                      'batch', _selectedScanType == 'batch'),
+                                  const SizedBox(width: 18),
+                                  _buildScanTypeButton('id_card',
+                                      _selectedScanType == 'id_card'),
+                                  const SizedBox(width: 18),
+                                  _buildScanTypeButton('passport',
+                                      _selectedScanType == 'passport'),
+                                  const SizedBox(width: 18),
+                                  _buildScanTypeButton(
+                                      'legal', _selectedScanType == 'legal'),
+                                  const SizedBox(width: 18),
+                                  _buildScanTypeButton(
+                                      'letter', _selectedScanType == 'letter'),
+                                ],
                               ),
-                              GestureDetector(
-                                onTap: _captureImage,
-                                child: Container(
-                                  width: 64,
-                                  height: 64,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                        color: AppColors.primary, width: 3),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 4, left: 22, right: 22),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  IconButton(
+                                    icon: SvgPicture.asset(
+                                      'assets/icons/gallery_option_icon.svg',
+                                      height: 26,
+                                      width: 26,
+                                    ),
+                                    onPressed: _pickImageFromGallery,
                                   ),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(3.0),
-                                    child: DecoratedBox(
+                                  GestureDetector(
+                                    onTap: _captureImage,
+                                    child: Container(
+                                      width: 64,
+                                      height: 64,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: AppColors.primary,
+                                        border: Border.all(
+                                            color: AppColors.primary, width: 3),
                                       ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              (_isBatchModeActive && _batchImages.isNotEmpty) ||
-                                  _recentImages.isNotEmpty
-                                  ? GestureDetector(
-                                onTap: _isBatchModeActive
-                                    ? _completeBatchCapture
-                                    : _viewRecentImage,
-                                child: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    borderRadius:
-                                    BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: AppColors.primary
-                                          .withOpacity(0.3),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: _isBatchModeActive
-                                      ? Stack(
-                                    fit: StackFit.expand,
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius:
-                                        BorderRadius.circular(
-                                            7),
-                                        child: Image.file(
-                                          _batchImages.last,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: 0,
-                                        right: 0,
-                                        child: Container(
-                                          padding:
-                                          const EdgeInsets.all(
-                                              2),
-                                          decoration:
-                                          const BoxDecoration(
-                                            color:
-                                            AppColors.primary,
+                                      child: const Padding(
+                                        padding: EdgeInsets.all(3.0),
+                                        child: DecoratedBox(
+                                          decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                          ),
-                                          child: Text(
-                                            '${_batchImages.length}',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 10,
-                                              fontWeight:
-                                              FontWeight.bold,
-                                            ),
+                                            color: AppColors.primary,
                                           ),
                                         ),
                                       ),
-                                    ],
-                                  )
-                                      : ClipRRect(
-                                    borderRadius:
-                                    BorderRadius.circular(7),
-                                    child: Image.file(
-                                      _recentImages[0],
-                                      fit: BoxFit.cover,
                                     ),
                                   ),
-                                ),
-                              )
-                                  : const SizedBox(width: 40, height: 40),
-                            ],
-                          ),
+                                  (_isBatchModeActive &&
+                                              _batchImages.isNotEmpty) ||
+                                          _recentImages.isNotEmpty
+                                      ? GestureDetector(
+                                          onTap: _isBatchModeActive
+                                              ? _completeBatchCapture
+                                              : _viewRecentImage,
+                                          child: Container(
+                                            width: 40,
+                                            height: 40,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: AppColors.primary
+                                                    .withOpacity(0.3),
+                                                width: 1,
+                                              ),
+                                            ),
+                                            child: _isBatchModeActive
+                                                ? Stack(
+                                                    fit: StackFit.expand,
+                                                    children: [
+                                                      ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(7),
+                                                        child: Image.file(
+                                                          _batchImages.last,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
+                                                      Positioned(
+                                                        top: 0,
+                                                        right: 0,
+                                                        child: Container(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(2),
+                                                          decoration:
+                                                              const BoxDecoration(
+                                                            color: AppColors
+                                                                .primary,
+                                                            shape:
+                                                                BoxShape.circle,
+                                                          ),
+                                                          child: Text(
+                                                            '${_batchImages.length}',
+                                                            style:
+                                                                const TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontSize: 10,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  )
+                                                : ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            7),
+                                                    child: Image.file(
+                                                      _recentImages[0],
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                          ),
+                                        )
+                                      : const SizedBox(width: 40, height: 40),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+                  ],
+                );
+              },
+            ),
+          ),
+          // Banner ad at bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: BannerAdWidget(
+              adUnitId: AdConfig.bannerAdScannerScreen,
+            ),
+          ),
+        ],
       ),
     );
   }

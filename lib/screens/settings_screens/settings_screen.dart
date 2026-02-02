@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:toolkit/screens/settings_screens/password_verification_screen.dart';
 import 'package:toolkit/screens/settings_screens/phone_recovery_screen.dart';
-import 'package:toolkit/screens/settings_screens/set_password_screen.dart';
+import 'package:toolkit/screens/settings_screens/set_password_proper_screen.dart';
 import 'package:toolkit/utils/app_colors.dart';
 import '../../controllers/language_controller.dart';
 import '../../provider/profile_provider.dart';
@@ -22,6 +22,9 @@ import '../../widgets/gradient_background.dart';
 import '../../widgets/settings_widgets/settings_appbar.dart';
 import '../../widgets/settings_widgets/settings_tile.dart';
 import '../../widgets/settings_widgets/settings_toggle_tile.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../widgets/ads/native_ad_widget.dart';
+import '../../config/ad_config.dart';
 import 'continue_with_google_screen.dart';
 import 'locked_files_Screen.dart';
 
@@ -294,7 +297,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SetPasswordScreen(
+        builder: (context) => SetPasswordProperScreen(
           isChanging: isPasswordSet,
         ),
       ),
@@ -557,27 +560,29 @@ class _SettingsScreenState extends State<SettingsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GradientBackgroundWidget(
-        child: Column(
-          children: [
-            SizedBox(height: MediaQuery.of(context).padding.top + 0),
-            SettingsAppBar(
-              title: 'settings'.tr,
-              onBackPressed: () => Navigator.pop(context),
-            ),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
-                  ),
+      body: Stack(
+        children: [
+          GradientBackgroundWidget(
+            child: Column(
+              children: [
+                SizedBox(height: MediaQuery.of(context).padding.top + 0),
+                SettingsAppBar(
+                  title: 'settings'.tr,
+                  onBackPressed: () => Navigator.pop(context),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 10, left: 26, right: 26),
-                  child: ListView(
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 10, left: 26, right: 26),
+                      child: ListView(
                     physics: const BouncingScrollPhysics(),
                     children: [
                       _buildGeneralSection(),
@@ -587,6 +592,11 @@ class _SettingsScreenState extends State<SettingsScreen>
                       SettingTile(
                         title: 'locked_files'.tr,
                         onTap: _navigateToLockedFiles,
+                      ),
+                      const SizedBox(height: 4),
+                      // Native ad after 4th item
+                      NativeAdWidget(
+                        adUnitId: AdConfig.nativeAdSettingsListItem,
                       ),
                       const SizedBox(height: 4),
                       SettingToggleTile(
@@ -604,7 +614,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                         title: 'privacy_policy'.tr,
                         onTap: () async {
                           try {
-                            await PrivacyPolicyService.openPrivacyPolicy();
+                            await PrivacyPolicyService.openPrivacyPolicy(context);
                           } catch (e) {
                             if (mounted) {
                               AppSnackBar.show(context,
@@ -651,13 +661,26 @@ class _SettingsScreenState extends State<SettingsScreen>
                           }
                         },
                       ),
+                      // Add bottom padding for banner ad
+                      const SizedBox(height: 60),
                     ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          // Banner ad at bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: BannerAdWidget(
+              adUnitId: AdConfig.bannerAdSettingsScreen,
+            ),
+          ),
+        ],
       ),
     );
   }

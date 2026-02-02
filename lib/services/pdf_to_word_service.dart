@@ -107,18 +107,14 @@ class PdfToWordService {
     final modified =
         '${modifiedDate.day}/${modifiedDate.month}/${modifiedDate.year}';
 
-    // Escape XML special characters in the PDF content
-    String escapedContent = pdfContent
+    // Escape filename and other dynamic content
+    String escapedFilename = filename
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&apos;');
-
-    // Convert content into paragraphs
-    List<String> paragraphs = escapedContent.split('\n\n');
-    String formattedContent = '';
-
+    
     // Create a title section
     String titleSection = '''
     <w:p>
@@ -127,7 +123,7 @@ class PdfToWordService {
     </w:p>
     <w:p>
       <w:pPr><w:pStyle w:val="Subtitle"/></w:pPr>
-      <w:r><w:t>Original: $filename</w:t></w:r>
+      <w:r><w:t>Original: $escapedFilename</w:t></w:r>
     </w:p>
     <w:p>
       <w:pPr><w:pStyle w:val="Subtitle"/></w:pPr>
@@ -136,32 +132,54 @@ class PdfToWordService {
     <w:p/>
     ''';
 
-    // Process each paragraph
-    for (String paragraph in paragraphs) {
-      if (paragraph.trim().isEmpty) continue;
+    // Convert content into paragraphs (don't escape here, will escape per line)
+    List<String> paragraphs = pdfContent.split('\n\n');
+    String formattedContent = '';
+    
+    // If no content, add a default message
+    if (pdfContent.trim().isEmpty) {
+      formattedContent = '<w:p><w:r><w:t>No text content could be extracted from this PDF.</w:t></w:r></w:p>';
+    } else {
+      // Process each paragraph
+      for (String paragraph in paragraphs) {
+        if (paragraph.trim().isEmpty) continue;
 
-      // Split paragraph into lines for better formatting
-      List<String> lines = paragraph.split('\n');
-      String formattedParagraph = '';
+        // Split paragraph into lines for better formatting
+        List<String> lines = paragraph.split('\n');
+        String formattedParagraph = '';
 
-      for (String line in lines) {
-        if (line.trim().isEmpty) continue;
-        formattedParagraph += '<w:r><w:t>${line.trim()}</w:t></w:r><w:r><w:br/></w:r>';
+        for (String line in lines) {
+          if (line.trim().isEmpty) continue;
+          // Properly escape XML characters in each line
+          String escapedLine = line.trim()
+              .replaceAll('&', '&amp;')
+              .replaceAll('<', '&lt;')
+              .replaceAll('>', '&gt;')
+              .replaceAll('"', '&quot;')
+              .replaceAll("'", '&apos;');
+          formattedParagraph += '<w:r><w:t xml:space="preserve">$escapedLine</w:t></w:r><w:r><w:br/></w:r>';
+        }
+
+        // Remove last line break
+        if (formattedParagraph.endsWith('<w:r><w:br/></w:r>')) {
+          formattedParagraph = formattedParagraph.substring(0, formattedParagraph.length - 18);
+        }
+
+        formattedContent += '<w:p>$formattedParagraph</w:p>';
       }
-
-      // Remove last line break
-      if (formattedParagraph.endsWith('<w:r><w:br/></w:r>')) {
-        formattedParagraph = formattedParagraph.substring(0, formattedParagraph.length - 18);
-      }
-
-      formattedContent += '<w:p>$formattedParagraph</w:p>';
     }
 
     return '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:xml="http://www.w3.org/XML/1998/namespace">
   <w:body>
     $titleSection
     $formattedContent
+    <w:sectPr>
+      <w:pgSz w:w="12240" w:h="15840"/>
+      <w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="708" w:footer="708" w:gutter="0"/>
+      <w:cols w:space="708"/>
+      <w:docGrid w:linePitch="360"/>
+    </w:sectPr>
   </w:body>
 </w:document>''';
   }

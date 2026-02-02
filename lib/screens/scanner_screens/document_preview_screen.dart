@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 
 class DocumentPreviewScreen extends StatelessWidget {
   final File imageFile;
@@ -22,23 +24,39 @@ class DocumentPreviewScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: Image.file(
-              imageFile,
-              fit: BoxFit.contain,
-            ),
+          Column(
+            children: [
+              Expanded(
+                child: Image.file(
+                  imageFile,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildActionButton(Icons.crop, 'Crop'),
+                    _buildActionButton(Icons.filter, 'Filter'),
+                    _buildActionButton(Icons.edit, 'Edit'),
+                  ],
+                ),
+              ),
+              // Add bottom padding for ad
+              const SizedBox(height: 60),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildActionButton(Icons.crop, 'Crop'),
-                _buildActionButton(Icons.filter, 'Filter'),
-                _buildActionButton(Icons.edit, 'Edit'),
-              ],
+          // Banner ad at top
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: BannerAdWidget(
+              adUnitId: AdConfig.bannerAdDocumentPreviewScreen,
+              isTop: true,
             ),
           ),
         ],

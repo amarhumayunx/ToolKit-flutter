@@ -10,6 +10,9 @@ import '../../widgets/buttons/save_zip_png_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import '../../widgets/tools/document_container.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 
 class MergeResultScreen extends StatefulWidget {
   final String mergedFilePath;
@@ -171,6 +174,9 @@ class _MergeResultScreenState extends State<MergeResultScreen>
   }
 
   void _handleSaveCompleted() {
+    // Show interstitial ad when saving merged file
+    AdManager.showMergeSaveActionInterstitial();
+    
     if (widget.onSaveAndReturn != null) {
       widget.onSaveAndReturn!();
     }
@@ -233,11 +239,23 @@ class _MergeResultScreenState extends State<MergeResultScreen>
               ),
             ),
           ),
+          // Banner ad at the very bottom
           if (_animationCompleted)
             Positioned(
               left: 0,
               right: 0,
-              bottom: MediaQuery.of(context).padding.bottom,
+              bottom: 0,
+              child: BannerAdWidget(
+                adUnitId: AdConfig.bannerAdMergeResultScreen,
+                alignment: Alignment.bottomCenter,
+              ),
+            ),
+          // Save button above banner ad
+          if (_animationCompleted)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: MediaQuery.of(context).padding.bottom + 60,
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),

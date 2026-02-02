@@ -7,6 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../utils/app_colors.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 
 class OcrCameraScreen extends StatefulWidget {
   const OcrCameraScreen({super.key});
@@ -280,6 +282,60 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
             height: double.infinity,
             child: CameraPreview(_controller!),
           ),
+          // Grid overlay
+          if (_isGridVisible)
+            Positioned.fill(
+              child: CustomPaint(
+                painter: GridPainter(),
+              ),
+            ),
+          // Top controls (Grid and Flash toggle)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 60,
+            right: 16,
+            child: Column(
+              children: [
+                // Grid toggle button
+                IconButton(
+                  icon: Icon(
+                    _isGridVisible ? Icons.grid_on : Icons.grid_off,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                  onPressed: _toggleGrid,
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.black.withOpacity(0.5),
+                    padding: const EdgeInsets.all(12),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Flash toggle button
+                IconButton(
+                  icon: Icon(
+                    _isFlashOn ? Icons.flash_on : Icons.flash_off,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                  onPressed: _toggleFlash,
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.black.withOpacity(0.5),
+                    padding: const EdgeInsets.all(12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Banner ad at top
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 60,
+            left: 0,
+            right: 0,
+            child: BannerAdWidget(
+              adUnitId: AdConfig.bannerAdOcrCameraScreen,
+              alignment: Alignment.topCenter,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+            ),
+          ),
           Positioned(
             bottom: 0,
             left: 0,
@@ -414,4 +470,39 @@ class _OcrCameraScreenState extends State<OcrCameraScreen>
       ),
     );
   }
+}
+
+// Grid overlay painter for camera preview
+class GridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.5)
+      ..strokeWidth = 1.0;
+
+    // Draw 3x3 grid
+    final thirdWidth = size.width / 3;
+    final thirdHeight = size.height / 3;
+
+    // Vertical lines
+    for (int i = 1; i < 3; i++) {
+      canvas.drawLine(
+        Offset(thirdWidth * i, 0),
+        Offset(thirdWidth * i, size.height),
+        paint,
+      );
+    }
+
+    // Horizontal lines
+    for (int i = 1; i < 3; i++) {
+      canvas.drawLine(
+        Offset(0, thirdHeight * i),
+        Offset(size.width, thirdHeight * i),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

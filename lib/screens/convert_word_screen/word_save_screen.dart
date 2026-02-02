@@ -11,6 +11,9 @@ import '../../widgets/buttons/save_zip_png_btn.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/tools/animated_loaded_container.dart';
 import '../../widgets/tools/document_container.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 
 class WordSaveScreen extends StatefulWidget {
   final File selectedWordFile;
@@ -71,6 +74,11 @@ class _WordSaveScreenState extends State<WordSaveScreen>
 
     // Start the animation (conversion is already done)
     _startAnimation();
+    
+    // Show interstitial ad after successful conversion
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AdManager.showWordSaveSuccessInterstitial();
+    });
   }
 
   Future<void> _startAnimation() async {
@@ -290,6 +298,17 @@ class _WordSaveScreenState extends State<WordSaveScreen>
               ),
             ),
           ),
+          if (_animationCompleted && _convertedFile != null)
+            Positioned(
+              bottom: MediaQuery.of(context).padding.bottom + 80,
+              left: 0,
+              right: 0,
+              child: BannerAdWidget(
+                adUnitId: AdConfig.bannerAdExtractedTextScreen,
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+              ),
+            ),
           if (_animationCompleted && _convertedFile != null)
             Positioned(
               left: 20,

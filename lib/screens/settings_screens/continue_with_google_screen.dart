@@ -7,6 +7,8 @@ import '../../provider/profile_provider.dart';
 import '../../services/auth_service.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_snackbar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 import 'profile_screen.dart';
 import 'phone_number_screen.dart';
 
@@ -224,10 +226,14 @@ class _ContinueWithGoogleScreenState extends State<ContinueWithGoogleScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 80), // Add bottom padding for ad
             ],
           ),
         ),
+      ),
+      // Banner ad at bottom
+      bottomNavigationBar: BannerAdWidget(
+        adUnitId: AdConfig.bannerAdContinueWithGoogleScreen,
       ),
     );
   }

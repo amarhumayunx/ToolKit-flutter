@@ -13,6 +13,9 @@ import 'package:toolkit/utils/app_snackbar.dart';
 import 'package:toolkit/widgets/buttons/gradient_btn.dart';
 import '../../widgets/tools/info_card.dart';
 import '../../widgets/tools/tools_app_bar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 import 'document_item.dart';
 import 'docxService.dart';
 import 'file_drop_split.dart';
@@ -26,8 +29,8 @@ class SplitScreen extends StatefulWidget {
 
 class _SplitScreenState extends State<SplitScreen> {
   final List<File> _selectedDocuments = [];
-  final String _processedResult = '';
-  final bool _isProcessing = false;
+  String _processedResult = '';
+  bool _isProcessing = false;
   String _documentErrorText = '';
   final DocxSplitterService _docxService = DocxSplitterService();
 
@@ -66,17 +69,39 @@ class _SplitScreenState extends State<SplitScreen> {
       }
     } catch (e) {
       setState(() {
-        AppSnackBar.show(context, message: '${'error_processing_files'.tr}: ${e.toString()}');
+        _documentErrorText = '${'error_processing_files'.tr}: ${e.toString()}';
       });
+      if (mounted) {
+        AppSnackBar.show(context, message: '${'error_processing_files'.tr}: ${e.toString()}');
+      }
       print('Error in file picker: $e');
     }
   }
 
   Future<bool> _processAndSplitDocuments() async {
     if (_selectedDocuments.isEmpty) {
-      AppSnackBar.show(context, message: 'please_select_document'.tr);
+      if (mounted) {
+        AppSnackBar.show(context, message: 'please_select_document'.tr);
+      }
       return false;
     }
+
+    // Show rewarded ad if splitting into multiple parts
+    final selectedPagesCount = _selectedDocuments.length;
+    if (selectedPagesCount > 1) {
+      final shouldContinue = await AdManager.showSplitMultiplePartsRewarded(
+        onRewardEarned: () {},
+      );
+      if (!shouldContinue) {
+        // User didn't watch ad, still allow split
+        AppSnackBar.show(context, message: 'processing_document'.tr);
+      }
+    }
+
+    setState(() {
+      _isProcessing = true;
+      _documentErrorText = '';
+    });
 
     try {
       final firstFile = _selectedDocuments.first;
@@ -88,7 +113,12 @@ class _SplitScreenState extends State<SplitScreen> {
         );
 
         if (!allSameType) {
-          AppSnackBar.show(context, message: 'select_same_type_files'.tr);
+          setState(() {
+            _isProcessing = false;
+          });
+          if (mounted) {
+            AppSnackBar.show(context, message: 'select_same_type_files'.tr);
+          }
           return false;
         }
 
@@ -112,7 +142,9 @@ class _SplitScreenState extends State<SplitScreen> {
             file: firstFile,
           );
 
-          
+          setState(() {
+            _isProcessing = false;
+          });
 
           await Navigator.push(
             context,
@@ -151,6 +183,10 @@ class _SplitScreenState extends State<SplitScreen> {
             file: mergedFile,
           );
 
+          setState(() {
+            _isProcessing = false;
+          });
+
           await Navigator.push(
             context,
             MaterialPageRoute(
@@ -178,6 +214,10 @@ class _SplitScreenState extends State<SplitScreen> {
         if (extension == '.pdf') {
           final pageCount = await _getPdfPageCount(firstFile);
 
+          setState(() {
+            _isProcessing = false;
+          });
+
           await Navigator.push(
             context,
             MaterialPageRoute(
@@ -193,10 +233,18 @@ class _SplitScreenState extends State<SplitScreen> {
           final pages = await _docxService.extractPages(firstFile);
 
           if (pages.isEmpty) {
-
-            AppSnackBar.show(context, message: 'No_pages_found'.tr);
+            setState(() {
+              _isProcessing = false;
+            });
+            if (mounted) {
+              AppSnackBar.show(context, message: 'no_pages_found'.tr);
+            }
             return false;
           }
+
+          setState(() {
+            _isProcessing = false;
+          });
 
           await Navigator.push(
             context,
@@ -210,13 +258,23 @@ class _SplitScreenState extends State<SplitScreen> {
           );
           return true;
         } else {
-          AppSnackBar.show(context, message: 'unsupported_file_type'.tr);
+          setState(() {
+            _isProcessing = false;
+          });
+          if (mounted) {
+            AppSnackBar.show(context, message: 'unsupported_file_type'.tr);
+          }
           return false;
         }
       }
     } catch (e) {
       print('Error processing documents: $e');
-      AppSnackBar.show(context, message: '${'error_processing_files'.tr}: ${e.toString()}');
+      setState(() {
+        _isProcessing = false;
+      });
+      if (mounted) {
+        AppSnackBar.show(context, message: '${'error_processing_files'.tr}: ${e.toString()}');
+      }
       return false;
     }
   }
@@ -360,7 +418,7 @@ class _SplitScreenState extends State<SplitScreen> {
                     ? const CircularProgressIndicator()
                     : CustomGradientButton(
                   text: ('split_document'.tr),
-                  onPressed: _processAndSplitDocuments,
+                  onPressed: (_selectedDocuments.isEmpty || _isProcessing) ? null : _processAndSplitDocuments,
                 ),
                 if (_processedResult.isNotEmpty)
                   Padding(
@@ -375,6 +433,11 @@ class _SplitScreenState extends State<SplitScreen> {
                   ),
               ],
             ),
+          ),
+          BannerAdWidget(
+            adUnitId: AdConfig.bannerAdSplitScreen,
+            alignment: Alignment.bottomCenter,
+            padding: const EdgeInsets.only(bottom: 8),
           ),
         ],
       ),

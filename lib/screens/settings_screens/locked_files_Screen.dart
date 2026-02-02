@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:toolkit/widgets/settings_widgets/locked_files_tab.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/custom_appbar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 
 class LockedFilesScreen extends StatelessWidget {
   const LockedFilesScreen({super.key});
@@ -17,7 +19,20 @@ class LockedFilesScreen extends StatelessWidget {
           Navigator.of(context).pop(false);
         },
       ),
-      body: const LockedFilesView(searchQuery: ''),
+      body: Stack(
+        children: [
+          const LockedFilesView(searchQuery: ''),
+          // Banner ad at bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: BannerAdWidget(
+              adUnitId: AdConfig.bannerAdLockedFilesScreen,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

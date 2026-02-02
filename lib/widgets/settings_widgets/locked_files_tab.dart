@@ -7,6 +7,7 @@ import 'package:toolkit/services/save_document_service.dart';
 import 'package:toolkit/widgets/settings_widgets/sort_btn.dart';
 
 import '../../utils/app_snackbar.dart';
+import '../../utils/ad_manager.dart';
 
 class LockedFilesView extends StatefulWidget {
   final String searchQuery;
@@ -74,6 +75,11 @@ class _LockedFilesViewState extends State<LockedFilesView> {
 
       if (success) {
         setState(() {});
+
+        // Show interstitial ad when unlocking file
+        if (!updatedFile.isLocked) {
+          AdManager.showUnlockFileActionInterstitial();
+        }
 
         AppSnackBar.show(
           context,

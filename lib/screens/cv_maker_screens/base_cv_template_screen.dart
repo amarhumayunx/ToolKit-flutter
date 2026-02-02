@@ -26,6 +26,9 @@ import '../../widgets/cv_templates/template_1.dart';
 import '../../widgets/cv_templates/template_2.dart';
 import '../../widgets/cv_templates/template_3.dart';
 import '../../widgets/cv_widgets/template_selection_dialog.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
+import '../../utils/ad_manager.dart';
 import '../../services/notification_service.dart';
 import 'create_cv_screen.dart';
 
@@ -345,6 +348,9 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
   }
 
   void _changeTemplate(int templateId) {
+    // Show interstitial ad when template is selected
+    AdManager.showCvTemplateSelectedInterstitial();
+
     final templateProvider =
     Provider.of<TemplateProvider>(context, listen: false);
     templateProvider.setTemplate(templateId, '${'template'.tr} $templateId');
@@ -376,21 +382,36 @@ class _BaseCVTemplateScreenState extends State<BaseCVTemplateScreen> {
           MaterialPageRoute(builder: (context) => const CreateCvScreen()),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(children: [
-                  const SizedBox(height: 80),
-                  widget.cvContent,
-                ]),
-              ),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(children: [
+                      const SizedBox(height: 80),
+                      widget.cvContent,
+                    ]),
+                  ),
+                ),
+                _buildTemplateButtons(),
+                // Add bottom padding for ad
+                const SizedBox(height: 60),
+              ],
             ),
-            _buildTemplateButtons(),
-          ],
-        ),
+          ),
+          // Banner ad at bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: BannerAdWidget(
+              adUnitId: AdConfig.bannerAdBaseCvTemplateScreen,
+            ),
+          ),
+        ],
       ),
     );
   }

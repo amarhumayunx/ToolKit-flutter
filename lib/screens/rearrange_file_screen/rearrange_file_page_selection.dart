@@ -10,6 +10,8 @@ import 'package:toolkit/utils/app_snackbar.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/buttons/gradient_btn.dart';
 import '../../widgets/custom_appbar.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../config/ad_config.dart';
 import '../split_screen/docxService.dart';
 import 'rearrange_file_result_screen.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -415,6 +417,12 @@ class _RearrangeFilePageSelectionState extends State<RearrangeFilePageSelection>
                   text: 'rearrange'.tr,
                   onPressed: _navigateToResults,
                 ),
+              ),
+              const SizedBox(height: 8),
+              BannerAdWidget(
+                adUnitId: AdConfig.bannerAdRearrangePageSelectionScreen,
+                alignment: Alignment.bottomCenter,
+                padding: const EdgeInsets.only(bottom: 8),
               ),
             ],
           ),
